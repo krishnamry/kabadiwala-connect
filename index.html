@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>♻️ Kabadiwala Connect — Web Application Viewer & Showcase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .device-screen::-webkit-scrollbar { width: 6px; height: 6px; }
+    .device-screen::-webkit-scrollbar-track { background: #f1f5f9; }
+    .device-screen::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+  <!-- TOP APP HEADER -->
+  <header class="bg-slate-800/90 backdrop-blur-md border-b border-slate-700/80 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & SIH Badge -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-900/40 text-2xl">
+          ♻️
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-lg font-extrabold tracking-tight text-white">Kabadiwala Connect</h1>
+            <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">SIH 2026</span>
+          </div>
+          <p class="text-xs text-slate-400">Digital Informal Waste & Extended Producer Responsibility (EPR) Platform</p>
+        </div>
+      </div>
+
+      <!-- Live Service Health Indicators -->
+      <div class="flex items-center space-x-2 text-xs">
+        <div id="frontend-badge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-950/60 border border-slate-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-slate-300 font-medium">Frontend :3000</span>
+        </div>
+        <div id="backend-badge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-950/60 border border-slate-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-slate-300 font-medium">API :5000</span>
+        </div>
+        <div id="ml-badge" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-950/60 border border-slate-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-slate-300 font-medium">ML :8000</span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex items-center space-x-3">
+        <a href="http://localhost:3000" target="_blank" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-900/30 transition-colors">
+          <span>Open Web App Tab</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTROL NAVIGATION BAR -->
+  <nav class="bg-slate-950 border-b border-slate-800 px-4 sm:px-6 py-2">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+      <!-- Mode Tabs -->
+      <div class="flex items-center space-x-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+        <button onclick="setMode('live')" id="tab-live" class="tab-btn px-3 py-1.5 rounded-lg font-semibold transition-all bg-emerald-600 text-white shadow">
+          🖥️ Live App Viewer (Embedded)
+        </button>
+        <button onclick="setMode('standalone')" id="tab-standalone" class="tab-btn px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-white">
+          ✨ Standalone Interactive Demo (Offline Ready)
+        </button>
+        <button onclick="setMode('ai')" id="tab-ai" class="tab-btn px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-white">
+          🤖 AI Scrap Scanner
+        </button>
+        <button onclick="setMode('script')" id="tab-script" class="tab-btn px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-white">
+          📜 SIH Demo Script & Storyline
+        </button>
+      </div>
+
+      <!-- Viewport Device Switcher (for live mode) -->
+      <div id="device-controls" class="flex items-center space-x-2 text-slate-400">
+        <span class="text-[11px] font-medium uppercase tracking-wider text-slate-500">View:</span>
+        <button onclick="setDevice('full')" id="dev-full" class="p-1.5 rounded bg-slate-800 text-emerald-400" title="Full Width">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" stroke-width="2"/><line x1="2" y1="10" x2="22" y2="10" stroke-width="2"/></svg>
+        </button>
+        <button onclick="setDevice('tablet')" id="dev-tablet" class="p-1.5 rounded hover:bg-slate-800" title="Tablet (768px)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2" stroke-width="2"/><circle cx="12" cy="18" r="1" stroke-width="2"/></svg>
+        </button>
+        <button onclick="setDevice('mobile')" id="dev-mobile" class="p-1.5 rounded hover:bg-slate-800" title="Mobile (390px)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="12" height="20" x="6" y="2" rx="2" stroke-width="2"/><line x1="10" y1="19" x2="14" y2="19" stroke-width="2"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-1 flex flex-col p-3 sm:p-4 bg-slate-950 overflow-auto">
+
+    <!-- TAB 1: LIVE APP EMBED -->
+    <div id="view-live" class="flex-1 flex flex-col items-center justify-start w-full">
+      <div id="frame-wrapper" class="w-full h-[82vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800 transition-all duration-300 flex flex-col">
+        
+        <!-- Browser Bar mockup -->
+        <div class="bg-slate-800/80 px-4 py-2 flex items-center justify-between border-b border-slate-700/60 text-xs text-slate-400">
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+            <span class="ml-2 px-3 py-0.5 rounded-md bg-slate-950 text-slate-300 font-mono text-[11px] border border-slate-700/50 flex items-center space-x-1">
+              <svg class="w-3 h-3 text-emerald-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span>http://localhost:3000</span>
+            </span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="reloadIframe()" class="hover:text-white p-1 rounded" title="Reload Frame">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+            <a href="http://localhost:3000" target="_blank" class="hover:text-white p-1 rounded" title="Pop out">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- The Live App Iframe -->
+        <iframe 
+          id="app-iframe" 
+          src="http://localhost:3000" 
+          class="w-full flex-1 border-none bg-white"
+          title="Kabadiwala Connect Web Application">
+        </iframe>
+      </div>
+
+      <!-- Quick helper under frame -->
+      <div class="mt-3 text-center text-xs text-slate-500">
+        💡 <span class="text-slate-400">If the frame shows connection refused:</span> Ensure the development servers are running with <code class="px-1.5 py-0.5 rounded bg-slate-900 text-emerald-400 font-mono">./start-demo.sh</code>, or click the <strong class="text-emerald-400 cursor-pointer" onclick="setMode('standalone')">Standalone Interactive Demo</strong> tab above to preview without servers.
+      </div>
+    </div>
+
+    <!-- TAB 2: STANDALONE INTERACTIVE DEMO (OFFLINE CAPABLE) -->
+    <div id="view-standalone" class="hidden flex-1 max-w-7xl mx-auto w-full space-y-8 pb-12">
+      
+      <!-- Role Switcher Banner -->
+      <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 rounded-2xl p-6 border border-emerald-800/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold mb-2 border border-emerald-500/30">
+            <span>Role Switcher (1-Click Persona Demo)</span>
+          </div>
+          <h2 class="text-2xl font-black text-white">Experience All 3 Portals Live</h2>
+          <p class="text-sm text-slate-400 mt-1 max-w-xl">Switch seamlessly between Ramesh (Citizen selling scrap), Suresh (Collector with low-literacy Hindi UI), and NDMC (Admin verifying EPR metrics).</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 w-full md:w-auto">
+          <button onclick="showPortal('citizen')" id="btn-portal-citizen" class="portal-select-btn px-4 py-3 rounded-xl font-bold text-xs flex flex-col items-center gap-1.5 bg-emerald-600 text-white shadow-lg border border-emerald-400">
+            <span class="text-lg">👤</span>
+            <span>Citizen (Ramesh)</span>
+          </button>
+          <button onclick="showPortal('kabadiwala')" id="btn-portal-kabadiwala" class="portal-select-btn px-4 py-3 rounded-xl font-bold text-xs flex flex-col items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+            <span class="text-lg">🚚</span>
+            <span>कबाड़ीवाला (Suresh)</span>
+          </button>
+          <button onclick="showPortal('admin')" id="btn-portal-admin" class="portal-select-btn px-4 py-3 rounded-xl font-bold text-xs flex flex-col items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+            <span class="text-lg">🏛️</span>
+            <span>Admin / ULB</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PORTAL 1: CITIZEN VIEW -->
+      <div id="portal-citizen" class="portal-view space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Scrap Rate Card -->
+          <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-lg flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                  <span>💰</span> Today's Verified Scrap Rates
+                </h3>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono">Live Mandi</span>
+              </div>
+              <div class="space-y-2.5 text-xs">
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
+                  <span class="text-slate-300 font-medium">🧴 PET Plastic & Bottles</span>
+                  <span class="font-extrabold text-emerald-400">₹18.00 / kg</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
+                  <span class="text-slate-300 font-medium">📦 Cardboard & Newspaper</span>
+                  <span class="font-extrabold text-emerald-400">₹14.00 / kg</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
+                  <span class="text-slate-300 font-medium">🔩 Iron & Metal Scrap</span>
+                  <span class="font-extrabold text-emerald-400">₹36.00 / kg</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
+                  <span class="text-slate-300 font-medium">💻 E-waste & Electronics</span>
+                  <span class="font-extrabold text-emerald-400">₹55.00 / kg</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+              <span>Updated: Delhi-NCR Zone</span>
+              <span class="text-emerald-400 font-semibold">Zero Middlemen</span>
+            </div>
+          </div>
+
+          <!-- Schedule Pickup Interactive Form -->
+          <div class="lg:col-span-2 bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-lg space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                  <span>📦</span> Request Doorstep Scrap Pickup
+                </h3>
+                <p class="text-xs text-slate-400">Pin your location and schedule a verified local collector</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-semibold">Ramesh Kumar (Citizen)</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Pickup Address</label>
+                <input type="text" value="Flat 402, Block B, Lajpat Nagar III, New Delhi" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 focus:outline-none focus:border-emerald-500">
+              </div>
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Preferred Time Window</label>
+                <select class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 focus:outline-none focus:border-emerald-500">
+                  <option>Tomorrow Morning (09:00 AM - 12:00 PM)</option>
+                  <option>Tomorrow Afternoon (02:00 PM - 05:00 PM)</option>
+                  <option>Instant (Nearest Available Collector)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Items to Recycle Selection -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-2">Select Scrap Categories & Est. Weight</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div class="p-3 rounded-xl bg-slate-950 border border-emerald-500/50 flex flex-col items-center text-center">
+                  <span class="text-xl mb-1">🧴</span>
+                  <span class="text-xs font-bold text-white">Plastic</span>
+                  <span class="text-[11px] text-emerald-400 mt-1">~10 kg (₹180)</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950 border border-emerald-500/50 flex flex-col items-center text-center">
+                  <span class="text-xl mb-1">📦</span>
+                  <span class="text-xs font-bold text-white">Paper / Box</span>
+                  <span class="text-[11px] text-emerald-400 mt-1">~15 kg (₹210)</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 opacity-60 hover:opacity-100 flex flex-col items-center text-center cursor-pointer">
+                  <span class="text-xl mb-1">🔩</span>
+                  <span class="text-xs font-bold text-white">Metal</span>
+                  <span class="text-[11px] text-slate-400 mt-1">+ Add</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 opacity-60 hover:opacity-100 flex flex-col items-center text-center cursor-pointer">
+                  <span class="text-xl mb-1">💻</span>
+                  <span class="text-xs font-bold text-white">E-waste</span>
+                  <span class="text-[11px] text-slate-400 mt-1">+ Add</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-between">
+              <div class="text-xs text-slate-400">
+                Estimated Payout: <strong class="text-emerald-400 text-sm font-extrabold">₹390.00</strong>
+              </div>
+              <button onclick="triggerSimulatedBooking()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/40 transition-all flex items-center gap-2">
+                <span>Confirm & Broadcast to Suresh</span>
+                <span>➔</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORTAL 2: KABADIWALA VIEW (LOW-LITERACY + HINDI VOICE TTS) -->
+      <div id="portal-kabadiwala" class="portal-view hidden space-y-6">
+        
+        <!-- Low Literacy Hindi Banner with Voice Button -->
+        <div class="bg-amber-950/40 border-2 border-amber-500/40 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center text-3xl font-black shadow-lg">
+              🚚
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="text-lg font-black text-amber-300">सुरेश कबाड़ी (लाजपत नगर)</h3>
+                <span class="px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-extrabold text-[10px]">सत्यापित (KYC OK)</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-0.5">नया काम स्वीकारें और डिजिटल कांटा से वजन दर्ज करें</p>
+            </div>
+          </div>
+
+          <!-- Web Speech API Hindi Voice Assist -->
+          <button onclick="speakHindiInstructions()" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-900/50 transition-all">
+            <span class="text-lg">🔊</span>
+            <span>बोलकर सुनें (Voice Assist)</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Active Job & Scale -->
+          <div class="lg:col-span-2 bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <span class="text-[10px] font-bold tracking-wider uppercase text-amber-400">चालू काम (Active Job)</span>
+                <h4 class="text-base font-black text-white">रमेश कुमार — फ्लैट 402, लाजपत नगर</h4>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-extrabold">IN PROGRESS</span>
+            </div>
+
+            <!-- Digital Scale Weighing Steppers -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-xs text-slate-300 font-semibold">
+                <span>सामान का वजन दर्ज करें (Digital Scale)</span>
+                <span class="text-amber-400">दर सूची अनुसार भुगतान</span>
+              </div>
+
+              <!-- Item 1: Plastic -->
+              <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-white text-sm">प्लास्टिक (Plastic)</div>
+                  <div class="text-xs text-slate-400">₹18 प्रति किलो</div>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <button onclick="adjustWeight('plastic', -0.5)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center">-</button>
+                  <span id="weight-plastic" class="font-mono text-base font-black text-emerald-400 w-16 text-center">12.5 kg</span>
+                  <button onclick="adjustWeight('plastic', 0.5)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center">+</button>
+                </div>
+              </div>
+
+              <!-- Item 2: Paper -->
+              <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-white text-sm">रद्दी / गत्ता (Paper)</div>
+                  <div class="text-xs text-slate-400">₹14 प्रति किलो</div>
+                </div>
+                <div class="flex items-center space-x-3">
+                  <button onclick="adjustWeight('paper', -0.5)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center">-</button>
+                  <span id="weight-paper" class="font-mono text-base font-black text-emerald-400 w-16 text-center">16.0 kg</span>
+                  <button onclick="adjustWeight('paper', 0.5)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-base flex items-center justify-center">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Payout & Complete Button -->
+            <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div class="text-xs text-slate-400">कुल भुगतान (Total Citizen Payout)</div>
+                <div id="scale-total-payout" class="text-2xl font-black text-emerald-400">₹449.00</div>
+              </div>
+              <button onclick="completeJobSimulated()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm shadow-xl shadow-emerald-900/50 flex items-center gap-2">
+                <span>काम पूरा करें (Complete Pickup)</span>
+                <span>✓</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Suresh's Wallet -->
+          <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">डिजिटल बटुआ (Digital Wallet)</span>
+              <div class="mt-2 text-3xl font-black text-white" id="suresh-wallet-bal">₹1,869.00</div>
+              <p class="text-xs text-emerald-400 mt-1">✓ बैंक खाता से जुड़ा हुआ (Direct UPI / DBT)</p>
+
+              <div class="mt-6 space-y-2.5">
+                <span class="text-xs font-bold text-slate-300">हाल के लेनदेन (Recent Ledger)</span>
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs flex justify-between">
+                  <span class="text-slate-300">पिकअप #2aac (रमेश)</span>
+                  <span class="font-bold text-emerald-400">+₹449.00</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs flex justify-between">
+                  <span class="text-slate-300">दैनिक प्रोत्साहन बोनस</span>
+                  <span class="font-bold text-emerald-400">+₹150.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-800">
+              <button class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">
+                खाते में निकालें (Withdraw to Bank)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORTAL 3: ADMIN / ULB VIEW (EPR COMPLIANCE & 30-DAY CHARTS) -->
+      <div id="portal-admin" class="portal-view hidden space-y-6">
+        
+        <!-- Admin KPI Metric Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
+            <span class="text-xs text-slate-400 font-semibold">Total Scrap Diverted</span>
+            <div class="text-2xl sm:text-3xl font-black text-white mt-1">478.0 <span class="text-base font-normal text-emerald-400">kg</span></div>
+            <span class="text-[11px] text-emerald-400 font-medium">↑ +14.2% this week</span>
+          </div>
+          <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
+            <span class="text-xs text-slate-400 font-semibold">CO₂ Emissions Abated</span>
+            <div class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">870.0 <span class="text-base font-normal text-slate-400">kg</span></div>
+            <span class="text-[11px] text-slate-400 font-medium">Based on CPCB Formula</span>
+          </div>
+          <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
+            <span class="text-xs text-slate-400 font-semibold">Verified Collectors</span>
+            <div class="text-2xl sm:text-3xl font-black text-teal-400 mt-1">83 <span class="text-base font-normal text-slate-400">%</span></div>
+            <span class="text-[11px] text-teal-400 font-medium">5 Active in NDMC Ward</span>
+          </div>
+          <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
+            <span class="text-xs text-slate-400 font-semibold">Total Platform Payout</span>
+            <div class="text-2xl sm:text-3xl font-black text-amber-400 mt-1">₹9,662</div>
+            <span class="text-[11px] text-amber-400 font-medium">Direct DBT to Informal Sector</span>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- 30-Day SVG Pickups & Diverted Mass Trend -->
+          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h4 class="font-bold text-white text-sm">30-Day Scrap Diversion Trend</h4>
+                <p class="text-xs text-slate-400">Daily collections across Delhi-NCR Municipal Wards</p>
+              </div>
+              <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">Daily Avg: 15.9 kg</span>
+            </div>
+
+            <!-- Interactive SVG Area Chart -->
+            <div class="h-44 w-full relative flex items-end justify-between pt-6 px-2 border-b border-slate-800">
+              <svg class="w-full h-full overflow-visible" viewBox="0 0 400 120" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="grad-emerald" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Area fill -->
+                <path d="M 0,110 Q 50,80 100,90 T 200,60 T 300,40 T 400,20 L 400,120 L 0,120 Z" fill="url(#grad-emerald)"/>
+                <!-- Line -->
+                <path d="M 0,110 Q 50,80 100,90 T 200,60 T 300,40 T 400,20" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linecap="round"/>
+                <!-- Highlight dots -->
+                <circle cx="100" cy="90" r="4" fill="#34d399"/>
+                <circle cx="200" cy="60" r="4" fill="#34d399"/>
+                <circle cx="300" cy="40" r="4" fill="#34d399"/>
+                <circle cx="400" cy="20" r="6" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-500 mt-2 font-mono">
+              <span>Day 1 (Aug 8)</span>
+              <span>Day 15 (Aug 23)</span>
+              <span>Today (Sep 7)</span>
+            </div>
+          </div>
+
+          <!-- Material Category Breakdown Bar Chart -->
+          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h4 class="font-bold text-white text-sm">Material Breakdown by Category</h4>
+                <p class="text-xs text-slate-400">Total certified mass collected to date</p>
+              </div>
+              <span class="text-xs font-bold text-teal-400 bg-teal-500/10 px-2 py-1 rounded">5 Streams</span>
+            </div>
+
+            <div class="space-y-3 pt-2">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">Plastic (PET / HDPE)</span>
+                  <span class="font-mono text-emerald-400 font-bold">185.5 kg (38.8%)</span>
+                </div>
+                <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 38.8%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">Paper & Cartons</span>
+                  <span class="font-mono text-teal-400 font-bold">142.0 kg (29.7%)</span>
+                </div>
+                <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden">
+                  <div class="bg-teal-500 h-full rounded-full" style="width: 29.7%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">Metals (Iron & Non-ferrous)</span>
+                  <span class="font-mono text-amber-400 font-bold">98.5 kg (20.6%)</span>
+                </div>
+                <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full" style="width: 20.6%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">E-Waste & Batteries</span>
+                  <span class="font-mono text-purple-400 font-bold">52.0 kg (10.9%)</span>
+                </div>
+                <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden">
+                  <div class="bg-purple-500 h-full rounded-full" style="width: 10.9%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CPCB EPR Statutory Audit Certificate Banner -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-teal-950 via-slate-900 to-emerald-950 border border-teal-700/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] font-bold uppercase">CPCB Portal Compliant</span>
+              <span class="text-xs text-slate-400">EPR Certificate #EPR-CPCB-737773</span>
+            </div>
+            <h3 class="text-xl font-black text-white mt-1">Official Statutory Extended Producer Responsibility Export</h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-xl">Certified ledger verifying 478.0 kg informal waste diversion under Ministry of Environment, Forest and Climate Change (MoEFCC) EPR regulations.</p>
+          </div>
+          <button onclick="downloadCPCBCertificate()" class="px-5 py-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-lg shadow-teal-900/40 flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Download EPR Audit JSON / Report</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: AI SCRAP SCANNER STUDIO -->
+    <div id="view-ai" class="hidden flex-1 max-w-4xl mx-auto w-full space-y-6">
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+              <span>🤖</span> AI Scrap Image Classifier Studio
+            </h3>
+            <p class="text-xs text-slate-400">Powered by Python FastAPI (`POST /classify`) on port 8000</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-xs">FastAPI + Pillow</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          
+          <!-- Drop Area -->
+          <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-950/50 min-h-[260px]">
+            <input type="file" id="ai-file-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+            <div class="w-16 h-16 rounded-2xl bg-slate-800 text-emerald-400 flex items-center justify-center text-3xl mb-3">
+              📷
+            </div>
+            <div class="text-sm font-bold text-white">Click to Upload Scrap Photo</div>
+            <div class="text-xs text-slate-400 mt-1">Supports JPG, PNG, WEBP (Plastic, Paper, Metal, E-waste, Glass)</div>
+            <button onclick="document.getElementById('ai-file-input').click()" class="mt-4 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
+              Browse Files
+            </button>
+          </div>
+
+          <!-- Live Result Card -->
+          <div id="ai-result" class="bg-slate-950 rounded-2xl p-6 border border-slate-800 space-y-4">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Scan Output</span>
+            <div class="flex items-center space-x-4">
+              <div id="ai-icon" class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl">
+                🧴
+              </div>
+              <div>
+                <div id="ai-category" class="text-2xl font-black text-white">Plastic (PET)</div>
+                <div id="ai-confidence" class="text-xs text-emerald-400 font-semibold">95.0% Confidence Score</div>
+              </div>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-slate-800 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Estimated Scrap Rate:</span>
+                <span id="ai-rate" class="font-extrabold text-emerald-400">₹18.00 / kg</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Segregation Advice:</span>
+                <span id="ai-advice" class="text-slate-300 font-medium">Rinse containers and remove caps</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: SIH DEMO SCRIPT & STORYLINE -->
+    <div id="view-script" class="hidden flex-1 max-w-4xl mx-auto w-full space-y-6">
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl space-y-6">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase">SIH 2026 Presentation Flow</span>
+          <h3 class="text-2xl font-black text-white mt-1">2:50 Min Live Judge Presentation Storyline</h3>
+          <p class="text-xs text-slate-400 mt-1">A step-by-step walkthrough covering citizen booking, collector digital weighing, and ULB compliance.</p>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <div class="p-4 rounded-xl bg-slate-950 border-l-4 border-emerald-500 space-y-1">
+            <div class="flex items-center justify-between font-bold text-white text-sm">
+              <span>Scene 1: Ramesh (Citizen) — Doorstep Request & AI Scan</span>
+              <span class="text-emerald-400 font-mono">0:00 - 0:45</span>
+            </div>
+            <p class="text-slate-400">Ramesh uploads an image of plastic bottles and cardboard. The FastAPI AI model auto-detects categories, looks up guaranteed minimum rates, and broadcasts a pickup to nearby collectors.</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border-l-4 border-amber-500 space-y-1">
+            <div class="flex items-center justify-between font-bold text-white text-sm">
+              <span>Scene 2: Suresh (Collector) — Voice Navigation & Digital Scale</span>
+              <span class="text-amber-300 font-mono">0:45 - 1:40</span>
+            </div>
+            <p class="text-slate-400">Suresh taps "बोलकर सुनें" to hear spoken Hindi instructions. He accepts the job, inputs certified weights with large +/- buttons, and receives immediate wallet credit (₹449).</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border-l-4 border-teal-500 space-y-1">
+            <div class="flex items-center justify-between font-bold text-white text-sm">
+              <span>Scene 3: Municipal ULB (NDMC) — EPR Compliance & CPCB Export</span>
+              <span class="text-teal-300 font-mono">1:40 - 2:30</span>
+            </div>
+            <p class="text-slate-400">Admin inspects aggregated daily tonnages, approves pending informal collectors for official ID cards, and exports an audit-ready CPCB EPR certificate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Tab Mode Management
+    function setMode(mode) {
+      const views = ['live', 'standalone', 'ai', 'script'];
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+        document.getElementById(`tab-${v}`).classList.remove('bg-emerald-600', 'text-white', 'shadow');
+        document.getElementById(`tab-${v}`).classList.add('text-slate-400');
+      });
+
+      document.getElementById(`view-${mode}`).classList.remove('hidden');
+      document.getElementById(`tab-${mode}`).classList.add('bg-emerald-600', 'text-white', 'shadow');
+      document.getElementById(`tab-${mode}`).classList.remove('text-slate-400');
+
+      document.getElementById('device-controls').style.display = (mode === 'live') ? 'flex' : 'none';
+    }
+
+    // Device Viewport Toggle
+    function setDevice(device) {
+      const wrapper = document.getElementById('frame-wrapper');
+      ['dev-full', 'dev-tablet', 'dev-mobile'].forEach(id => {
+        document.getElementById(id).classList.remove('bg-slate-800', 'text-emerald-400');
+      });
+
+      if (device === 'full') {
+        wrapper.style.maxWidth = '100%';
+        wrapper.style.height = '82vh';
+        document.getElementById('dev-full').classList.add('bg-slate-800', 'text-emerald-400');
+      } else if (device === 'tablet') {
+        wrapper.style.maxWidth = '768px';
+        wrapper.style.height = '80vh';
+        document.getElementById('dev-tablet').classList.add('bg-slate-800', 'text-emerald-400');
+      } else if (device === 'mobile') {
+        wrapper.style.maxWidth = '390px';
+        wrapper.style.height = '78vh';
+        document.getElementById('dev-mobile').classList.add('bg-slate-800', 'text-emerald-400');
+      }
+    }
+
+    function reloadIframe() {
+      const iframe = document.getElementById('app-iframe');
+      iframe.src = iframe.src;
+    }
+
+    // Portal Switcher for Standalone View
+    function showPortal(portal) {
+      const portals = ['citizen', 'kabadiwala', 'admin'];
+      portals.forEach(p => {
+        document.getElementById(`portal-${p}`).classList.add('hidden');
+        const btn = document.getElementById(`btn-portal-${p}`);
+        btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-400', 'shadow-lg');
+        btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+      });
+
+      document.getElementById(`portal-${portal}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`btn-portal-${portal}`);
+      activeBtn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-400', 'shadow-lg');
+      activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+    }
+
+    // Digital Scale Stepper Calculation
+    let plasticKg = 12.5;
+    let paperKg = 16.0;
+
+    function adjustWeight(item, delta) {
+      if (item === 'plastic') {
+        plasticKg = Math.max(0, plasticKg + delta);
+        document.getElementById('weight-plastic').innerText = `${plasticKg.toFixed(1)} kg`;
+      } else if (item === 'paper') {
+        paperKg = Math.max(0, paperKg + delta);
+        document.getElementById('weight-paper').innerText = `${paperKg.toFixed(1)} kg`;
+      }
+      const total = (plasticKg * 18.0) + (paperKg * 14.0);
+      document.getElementById('scale-total-payout').innerText = `₹${total.toFixed(2)}`;
+    }
+
+    // Web Speech API for Hindi Voice
+    function speakHindiInstructions() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const text = "नमस्ते सुरेश भाई! लाजपत नगर से रमेश जी का नया काम है। १२ किलो प्लास्टिक और १६ किलो रद्दी का वजन डिजिटल तराजू पर दर्ज करें।";
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'hi-IN';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert("Audio Voice: 'नमस्ते सुरेश भाई! नया काम मिला है।' (Web Speech API not available)");
+      }
+    }
+
+    function completeJobSimulated() {
+      const total = (plasticKg * 18.0) + (paperKg * 14.0);
+      let cur = parseFloat(document.getElementById('suresh-wallet-bal').innerText.replace(/[₹,]/g, '')) || 1869;
+      cur += total;
+      document.getElementById('suresh-wallet-bal').innerText = `₹${cur.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+      alert(`🎉 काम सफलतापूर्वक पूरा हुआ!\nसुरेश के डिजिटल बटुए में ₹${total.toFixed(2)} जोड़ दिए गए हैं।`);
+    }
+
+    function triggerSimulatedBooking() {
+      alert("✅ नया पिकअप ब्रॉडकास्ट सफल!\nलाजपत नगर के निकटतम कबाड़ीवाले (सुरेश) को सूचना भेज दी गई है।");
+      showPortal('kabadiwala');
+    }
+
+    function downloadCPCBCertificate() {
+      const cert = {
+        certificateNumber: "EPR-CPCB-737773",
+        authority: "Central Pollution Control Board (CPCB), MoEFCC",
+        platform: "Kabadiwala Connect (SIH 2026)",
+        auditPeriod: "Aug 2026 - Sep 2026",
+        totalDivertedMassKg: 478.0,
+        co2AbatedKg: 870.0,
+        breakdown: {
+          plastic: 185.5,
+          paper: 142.0,
+          metals: 98.5,
+          eWaste: 52.0
+        },
+        hashProof: "sha256:4f8e819b93cd038a8e1008f87da6a0d28"
+      };
+      const blob = new Blob([JSON.stringify(cert, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "CPCB_EPR_Certificate_737773.json";
+      a.click();
+    }
+
+    // AI File Scan Simulation & Live API check
+    async function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const resultBox = document.getElementById('ai-result');
+      const catEl = document.getElementById('ai-category');
+      const confEl = document.getElementById('ai-confidence');
+      const rateEl = document.getElementById('ai-rate');
+      const adviceEl = document.getElementById('ai-advice');
+      const iconEl = document.getElementById('ai-icon');
+
+      catEl.innerText = "Analyzing scrap image...";
+      confEl.innerText = "Running classifier...";
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('http://localhost:8000/classify', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          catEl.innerText = data.category;
+          confEl.innerText = `${(data.confidence * 100).toFixed(1)}% Confidence Score`;
+          rateEl.innerText = `₹${data.estRate.toFixed(2)} / kg`;
+          adviceEl.innerText = data.advice;
+          iconEl.innerText = data.category === 'Metal' ? '🔩' : data.category === 'Paper' ? '📦' : data.category === 'E-waste' ? '💻' : '🧴';
+          return;
+        }
+      } catch (err) {
+        // Fallback to client-side heuristic
+      }
+
+      const name = file.name.toLowerCase();
+      let cat = 'Plastic';
+      let icon = '🧴';
+      let rate = 18.0;
+      let advice = 'Rinse containers and separate caps';
+
+      if (name.includes('metal') || name.includes('can') || name.includes('tin')) {
+        cat = 'Metal'; icon = '🔩'; rate = 36.0; advice = 'Separate iron from copper and brass';
+      } else if (name.includes('paper') || name.includes('cardboard') || name.includes('box')) {
+        cat = 'Paper'; icon = '📦'; rate = 14.0; advice = 'Keep dry and bundled';
+      } else if (name.includes('phone') || name.includes('pcb') || name.includes('waste')) {
+        cat = 'E-waste'; icon = '💻'; rate = 55.0; advice = 'Handle toxic batteries carefully';
+      }
+
+      catEl.innerText = cat;
+      confEl.innerText = "94.5% Confidence (Client Heuristic)";
+      rateEl.innerText = `₹${rate.toFixed(2)} / kg`;
+      adviceEl.innerText = advice;
+      iconEl.innerText = icon;
+    }
+  </script>
+</body>
+</html>
