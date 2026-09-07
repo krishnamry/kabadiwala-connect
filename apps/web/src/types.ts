@@ -105,6 +105,11 @@ export interface AdminStats {
     landfillDivertedKg: number;
     waterSavedLiters: number;
   };
+  pickupsTimeline?: {
+    date: string;
+    pickups: number;
+    kg: number;
+  }[];
 }
 
 export interface MLClassificationResult {

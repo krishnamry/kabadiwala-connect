@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.log
+apps/ml-service/venv/
+apps/api/prisma/*.db*
+.env
+.env.local

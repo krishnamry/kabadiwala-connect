@@ -22,7 +22,8 @@ const createPickupSchema = z.object({
 const completePickupSchema = z.object({
   items: z.array(z.object({
     category: z.string(),
-    actualWeightKg: z.number().positive()
+    actualWeightKg: z.number().positive().optional(),
+    weightKg: z.number().positive().optional()
   })).min(1, 'Actual weights for items required')
 });
 
@@ -267,14 +268,15 @@ router.post('/:id/complete', authenticateToken, requireRole(['KABADIWALA', 'ADMI
     // Calculate total amount from validated actual weights and ratePerKg
     let calculatedTotal = 0;
     for (const weightedItem of validated.items) {
+      const weight = weightedItem.actualWeightKg ?? weightedItem.weightKg ?? 1.0;
       const existingItem = pickup.items.find(i => i.category.toLowerCase() === weightedItem.category.toLowerCase()) || pickup.items[0];
       const rate = existingItem ? existingItem.ratePerKg : 15.0;
-      calculatedTotal += weightedItem.actualWeightKg * rate;
+      calculatedTotal += weight * rate;
 
       if (existingItem) {
         await prisma.scrapItem.update({
           where: { id: existingItem.id },
-          data: { actualWeightKg: weightedItem.actualWeightKg }
+          data: { actualWeightKg: weight }
         });
       }
     }

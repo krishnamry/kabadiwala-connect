@@ -21,7 +21,8 @@ const createPickupSchema = zod_1.z.object({
 const completePickupSchema = zod_1.z.object({
     items: zod_1.z.array(zod_1.z.object({
         category: zod_1.z.string(),
-        actualWeightKg: zod_1.z.number().positive()
+        actualWeightKg: zod_1.z.number().positive().optional(),
+        weightKg: zod_1.z.number().positive().optional()
     })).min(1, 'Actual weights for items required')
 });
 // Haversine formula for distance in km
@@ -244,13 +245,14 @@ router.post('/:id/complete', auth_1.authenticateToken, (0, auth_1.requireRole)([
         // Calculate total amount from validated actual weights and ratePerKg
         let calculatedTotal = 0;
         for (const weightedItem of validated.items) {
+            const weight = weightedItem.actualWeightKg ?? weightedItem.weightKg ?? 1.0;
             const existingItem = pickup.items.find(i => i.category.toLowerCase() === weightedItem.category.toLowerCase()) || pickup.items[0];
             const rate = existingItem ? existingItem.ratePerKg : 15.0;
-            calculatedTotal += weightedItem.actualWeightKg * rate;
+            calculatedTotal += weight * rate;
             if (existingItem) {
                 await prisma_1.prisma.scrapItem.update({
                     where: { id: existingItem.id },
-                    data: { actualWeightKg: weightedItem.actualWeightKg }
+                    data: { actualWeightKg: weight }
                 });
             }
         }

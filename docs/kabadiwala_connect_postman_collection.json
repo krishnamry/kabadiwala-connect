@@ -1,0 +1,393 @@
+{
+  "info": {
+    "name": "Kabadiwala Connect — SIH 2026 API Collection",
+    "_postman_id": "8fa248d2-1c09-4081-9b19-f538a74ec491",
+    "description": "Comprehensive Postman collection for testing the Kabadiwala Connect unified waste management & EPR compliance platform APIs across all roles (Citizen, Kabadiwala, Admin, and AI/ML Service).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "mlUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "citizenToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kabadiwalaToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login - Citizen (Ramesh)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9811100001\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Kabadiwala (Suresh)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9876543210\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Admin (NDMC)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"9999900000\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register New Citizen",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aarav Mehta\",\n  \"phone\": \"9811109999\",\n  \"password\": \"password123\",\n  \"role\": \"CITIZEN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register New Kabadiwala",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chhotu Ram\",\n  \"phone\": \"9876549999\",\n  \"password\": \"password123\",\n  \"role\": \"KABADIWALA\",\n  \"vehicleType\": \"Electric Loader (E-Rickshaw)\",\n  \"serviceRadiusKm\": 8.0,\n  \"aadhaarNumber\": \"8823-1123-9999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Scrap Rates & ML Classification",
+      "item": [
+        {
+          "name": "Get Live Scrap Rates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rates"]
+            }
+          }
+        },
+        {
+          "name": "AI Image Classification (Direct FastAPI)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{mlUrl}}/classify",
+              "host": ["{{mlUrl}}"],
+              "path": ["classify"]
+            }
+          }
+        },
+        {
+          "name": "AI Image Classification (Express Proxy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{citizenToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ml/classify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ml", "classify"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Citizen Portal Workflows",
+      "item": [
+        {
+          "name": "Create Pickup Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{citizenToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"A-42, Defence Colony, New Delhi\",\n  \"latitude\": 28.5720,\n  \"longitude\": 77.2310,\n  \"scheduledAt\": \"2026-09-08T10:00:00.000Z\",\n  \"notes\": \"Old newspaper stacks and cardboard delivery cartons\",\n  \"items\": [\n    {\n      \"category\": \"Paper\",\n      \"estWeightKg\": 25.0,\n      \"ratePerKg\": 14.0\n    },\n    {\n      \"category\": \"Plastic\",\n      \"estWeightKg\": 6.0,\n      \"ratePerKg\": 18.0\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pickups",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pickups"]
+            }
+          }
+        },
+        {
+          "name": "Get Citizen's Pickups",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{citizenToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pickups/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pickups", "my"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Kabadiwala Portal Workflows",
+      "item": [
+        {
+          "name": "Get Nearby Open Requests (Haversine Geo Filter)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{kabadiwalaToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pickups/nearby?lat=28.5700&lng=77.2400&radius=15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pickups", "nearby"],
+              "query": [
+                { "key": "lat", "value": "28.5700" },
+                { "key": "lng", "value": "77.2400" },
+                { "key": "radius", "value": "15" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Accept Pickup Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{kabadiwalaToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pickups/:pickupId/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pickups", ":pickupId", "accept"],
+              "variable": [
+                { "key": "pickupId", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Complete Pickup with Verified Scale Weights",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{kabadiwalaToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"category\": \"Plastic\", \"weightKg\": 14.5 },\n    { \"category\": \"Paper\", \"weightKg\": 8.0 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pickups/:pickupId/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pickups", ":pickupId", "complete"],
+              "variable": [
+                { "key": "pickupId", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Collector Wallet Balance & Ledger",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{kabadiwalaToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kabadiwala/wallet",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kabadiwala", "wallet"]
+            }
+          }
+        },
+        {
+          "name": "Get Collector Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{kabadiwalaToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kabadiwala/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kabadiwala", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Admin & ULB / EPR Workflows",
+      "item": [
+        {
+          "name": "Get Citywide Scrap & Impact Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "stats"]
+            }
+          }
+        },
+        {
+          "name": "List Collectors for KYC Verification",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/kabadiwalas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "kabadiwalas"]
+            }
+          }
+        },
+        {
+          "name": "Approve / Reject Collector KYC",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verified\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/kabadiwalas/:profileId/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "kabadiwalas", ":profileId", "verify"],
+              "variable": [
+                { "key": "profileId", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export CPCB EPR Audit Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports/epr",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports", "epr"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

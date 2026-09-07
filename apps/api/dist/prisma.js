@@ -16,7 +16,7 @@ try {
 catch (e) {
     console.error('Node:sqlite not found, falling back to in-memory store');
 }
-const DB_PATH = path_1.default.resolve(__dirname, '../prisma/dev.db');
+const DB_PATH = process.env.DATABASE_PATH || (fs_1.default.existsSync(path_1.default.resolve(process.cwd(), 'prisma/dev.db')) ? path_1.default.resolve(process.cwd(), 'prisma/dev.db') : path_1.default.resolve(__dirname, '../prisma/dev.db'));
 class SQLitePrismaClient {
     db;
     constructor() {
