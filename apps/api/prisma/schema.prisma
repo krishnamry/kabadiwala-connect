@@ -1,0 +1,86 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  phone         String   @unique
+  role          String   @default("CITIZEN") // CITIZEN | KABADIWALA | ADMIN
+  password      String
+  createdAt     DateTime @default(now())
+  kabadiwala    KabadiwalaProfile?
+  pickupsSent   Pickup[] @relation("citizenPickups")
+  pickupsTaken  Pickup[] @relation("kabadiwalaPickups")
+}
+
+model KabadiwalaProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified        Boolean  @default(false)
+  reputationScore Float    @default(4.5)
+  walletBalance   Float    @default(0)
+  latitude        Float?
+  longitude       Float?
+  vehicleType     String?  @default("Cargo Tricycle")
+  aadhaarNumber   String?  @default("XXXX-XXXX-8921")
+  serviceRadiusKm Float    @default(5.0)
+}
+
+model Pickup {
+  id            String      @id @default(uuid())
+  citizenId     String
+  citizen       User        @relation("citizenPickups", fields: [citizenId], references: [id])
+  kabadiwalaId  String?
+  kabadiwala    User?       @relation("kabadiwalaPickups", fields: [kabadiwalaId], references: [id])
+  status        String      @default("REQUESTED") // REQUESTED | ACCEPTED | IN_PROGRESS | COMPLETED | CANCELLED
+  address       String
+  latitude      Float
+  longitude     Float
+  scheduledAt   DateTime
+  items         ScrapItem[]
+  totalAmount   Float?
+  notes         String?
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  transactions  Transaction[]
+}
+
+model ScrapItem {
+  id             String  @id @default(uuid())
+  pickupId       String
+  pickup         Pickup  @relation(fields: [pickupId], references: [id], onDelete: Cascade)
+  category       String  // Plastic, Paper, E-waste, Metal, Glass, Organic
+  estWeightKg    Float
+  actualWeightKg Float?
+  ratePerKg      Float
+  imageUrl       String?
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  pickupId      String
+  pickup        Pickup   @relation(fields: [pickupId], references: [id])
+  amount        Float
+  kabadiwalaId  String
+  status        String   @default("PAID") // PENDING | PAID
+  paymentMethod String   @default("WALLET_ESCROW")
+  createdAt     DateTime @default(now())
+}
+
+model ScrapRate {
+  id          String   @id @default(uuid())
+  category    String   @unique
+  ratePerKg   Float
+  unit        String   @default("kg")
+  description String
+  badge       String?
+  icon        String?
+  updatedAt   DateTime @default(now())
+}

@@ -1,0 +1,27 @@
+{
+  "name": "kabadiwala-connect",
+  "version": "1.0.0",
+  "description": "Smart Informal Waste & EPR Integration Platform — SIH 2026",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "cd apps/api && npm run dev",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:ml": "cd apps/ml-service && ./venv/bin/python3 main.py",
+    "seed": "cd apps/api && npm run seed",
+    "prisma:push": "cd apps/api && npm run prisma:push",
+    "build": "cd apps/web && npm run build"
+  },
+  "keywords": [
+    "kabadiwala",
+    "recycling",
+    "epr",
+    "waste-management",
+    "sih2026"
+  ],
+  "author": "Kabadiwala Connect Team",
+  "license": "MIT"
+}
