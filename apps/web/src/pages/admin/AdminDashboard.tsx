@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import { storage, STORAGE_KEYS } from '../../lib/storage';
 import { AdminStats } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
@@ -85,81 +86,12 @@ export const AdminDashboard: React.FC = () => {
     setLoading(true);
     try {
       const [statsData, collectorsData] = await Promise.all([
-        api.getAdminStats().catch(() => null),
-        api.getAdminKabadiwalas().catch(() => [])
+        api.getAdminStats().catch(() => storage.getAdminStats()),
+        api.getAdminKabadiwalas().catch(() => storage.getCollectors())
       ]);
 
-      setStats(
-        statsData || {
-          totalKg: 28450.5,
-          activeKabadiwalas: 64,
-          verifiedPercent: 88,
-          totalRevenue: 3420500,
-          totalPickups: 1248,
-          requestedCount: 14,
-          inProgressCount: 22,
-          completedCount: 1212,
-          categoryBreakdown: [
-            { category: 'PCBs & Logic Boards', kg: 9420, revenue: 6028800 },
-            { category: 'Copper Cables & Winding', kg: 8150, revenue: 3912000 },
-            { category: 'Li-ion Batteries', kg: 4680, revenue: 678600 },
-            { category: 'CRT Monitor Glass', kg: 3800, revenue: 45600 },
-            { category: 'Engineering E-Plastics', kg: 2400.5, revenue: 91219 }
-          ],
-          environmentalImpact: {
-            co2SavedKg: 58240,
-            treesSaved: 3840,
-            landfillDivertedKg: 28450.5,
-            waterSavedLiters: 194000
-          },
-          pickupsTimeline: [
-            { date: '01 Sep', pickups: 38, kg: 820 },
-            { date: '03 Sep', pickups: 44, kg: 1040 },
-            { date: '05 Sep', pickups: 52, kg: 1320 },
-            { date: '07 Sep', pickups: 68, kg: 1850 }
-          ]
-        }
-      );
-
-      setCollectors(
-        collectorsData.length > 0
-          ? collectorsData
-          : [
-              {
-                id: 'prof-1',
-                userId: 'user-1',
-                verified: true,
-                reputationScore: 4.9,
-                walletBalance: 14680,
-                vehicleType: 'Solar Cargo Trike',
-                aadhaarNumber: 'XXXX-XXXX-8921',
-                user: { name: 'Suresh Kumar', phone: '9876543210' },
-                completedJobsCount: 142
-              },
-              {
-                id: 'prof-2',
-                userId: 'user-2',
-                verified: false,
-                reputationScore: 4.4,
-                walletBalance: 3200,
-                vehicleType: 'Cargo Tricycle',
-                aadhaarNumber: 'XXXX-XXXX-4412',
-                user: { name: 'Raju Pandit', phone: '9812345678' },
-                completedJobsCount: 38
-              },
-              {
-                id: 'prof-3',
-                userId: 'user-3',
-                verified: true,
-                reputationScore: 4.8,
-                walletBalance: 8940,
-                vehicleType: 'Electric Auto',
-                aadhaarNumber: 'XXXX-XXXX-9901',
-                user: { name: 'Mohan Lal', phone: '9898989898' },
-                completedJobsCount: 109
-              }
-            ]
-      );
+      setStats(statsData || storage.getAdminStats());
+      setCollectors(collectorsData && collectorsData.length > 0 ? collectorsData : storage.getCollectors());
     } finally {
       setLoading(false);
     }
@@ -167,15 +99,25 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
+
+    const handleStorageChange = (e: any) => {
+      const key = e.detail?.key;
+      if (key === STORAGE_KEYS.COLLECTORS || key === STORAGE_KEYS.PICKUPS || key === STORAGE_KEYS.LOTS || key === '*') {
+        setCollectors(storage.getCollectors());
+        setStats(storage.getAdminStats());
+      }
+    };
+
+    window.addEventListener('dhatu-storage-change', handleStorageChange);
+    return () => window.removeEventListener('dhatu-storage-change', handleStorageChange);
   }, []);
 
   const handleVerify = async (profileId: string, verified: boolean) => {
     setActionLoading(profileId);
     try {
-      await api.verifyKabadiwala(profileId, verified).catch(() => {});
-      setCollectors(prev =>
-        prev.map(c => (c.id === profileId ? { ...c, verified } : c))
-      );
+      await api.verifyKabadiwala(profileId, verified);
+      setCollectors(storage.getCollectors());
+      setStats(storage.getAdminStats());
     } finally {
       setActionLoading(null);
     }

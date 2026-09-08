@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
+import { storage, STORAGE_KEYS } from '../../lib/storage';
 import { Pickup, ScrapRate, MLClassificationResult } from '../../types';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
@@ -33,9 +34,12 @@ export const CitizenDashboard: React.FC = () => {
   const { user } = useAuth();
   const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   const [activeTab, setActiveTab] = useState<'pickups' | 'new' | 'impact' | 'dropoff'>('pickups');
-  const [pickups, setPickups] = useState<Pickup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPickup, setSelectedPickup] = useState<Pickup | null>(null);
+  const [pickups, setPickups] = useState<Pickup[]>(() => storage.getMyPickups(user?.id, 'CITIZEN'));
+  const [loading, setLoading] = useState(false);
+  const [selectedPickup, setSelectedPickup] = useState<Pickup | null>(() => {
+    const initial = storage.getMyPickups(user?.id, 'CITIZEN');
+    return initial.length > 0 ? initial[0] : null;
+  });
 
   // CSR Donation Toggle
   const [donateToCsr, setDonateToCsr] = useState(false);
@@ -46,26 +50,23 @@ export const CitizenDashboard: React.FC = () => {
   const [address, setAddress] = useState('Block D, Flat 402, Lajpat Nagar II, New Delhi');
   const [latitude, setLatitude] = useState(28.5700);
   const [longitude, setLongitude] = useState(77.2400);
-  const [scheduledAt, setScheduledAt] = useState(() => {
-    const d = new Date();
-    d.setHours(d.getHours() + 3);
-    return d.toISOString().slice(0, 16);
-  });
-  const [notes, setNotes] = useState('Discarded old PC motherboard, CRT monitor and power cables in carton.');
+  const [scheduledAt, setScheduledAt] = useState('');
+  const [notes, setNotes] = useState('');
   
   // E-waste items list
   const [items, setItems] = useState<Array<{ category: string; estWeightKg: number; ratePerKg: number; imageUrl?: string }>>([
-    { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.5, ratePerKg: 640 },
-    { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 },
-    { category: 'CRT Monitor Glass Unit', estWeightKg: 12.0, ratePerKg: 12 }
+    { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.0, ratePerKg: 640 },
+    { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 }
   ]);
 
   // E-waste Category Rates Benchmark
   const eWasteRates: { [c: string]: number } = {
     'Printed Circuit Boards (PCBs)': 640,
+    'High-grade Printed Circuit Boards (PCBs)': 640,
+    'Low-grade Printed Circuit Boards (PCBs)': 180,
     'Copper Cables & Insulated Wires': 480,
     'Lithium-ion Batteries': 145,
-    'Electric Motors & Transformer Coils': 95,
+    'Electric Motors & Compressors': 95,
     'LCD/LED Display Panels': 85,
     'Engineering E-Plastics (ABS/HIPS)': 38,
     'CRT Monitor Glass Unit': 12
@@ -82,86 +83,34 @@ export const CitizenDashboard: React.FC = () => {
   const indicativeMax = items.reduce((sum, i) => sum + i.estWeightKg * (eWasteRates[i.category] || 100) * 1.15, 0);
 
   const loadData = async () => {
-    setLoading(true);
     try {
-      const pickupsData = await api.getMyPickups().catch(() => []);
-      
-      const finalPickups: Pickup[] = pickupsData.length > 0 ? pickupsData : [
-        {
-          id: 'p-active-01',
-          citizenId: 'mock-citizen-1',
-          citizen: { id: 'mock-citizen-1', name: 'Ramesh Sharma', phone: '9811100001' },
-          kabadiwalaId: 'mock-kaba-1',
-          kabadiwala: {
-            id: 'mock-kaba-1',
-            name: 'Suresh Kumar',
-            phone: '9876543210',
-            kabadiwala: {
-              id: 'k-prof-1',
-              userId: 'mock-kaba-1',
-              vehicleType: 'Solar Cargo Trike',
-              verified: true,
-              reputationScore: 4.9,
-              walletBalance: 12000
-            }
-          },
-          status: 'IN_PROGRESS',
-          address: 'Block D, Flat 402, Lajpat Nagar II, New Delhi',
-          latitude: 28.5700,
-          longitude: 77.2400,
-          scheduledAt: '2026-09-08 11:30 AM',
-          items: [
-            { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.5, ratePerKg: 640 },
-            { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 },
-            { category: 'CRT Monitor Glass Unit', estWeightKg: 12.0, ratePerKg: 12 }
-          ],
-          totalAmount: 4304,
-          notes: 'Doorstep pickup requested with live tracking.',
-          traceabilityHash: '0x8f4a9b2c7e103984fa55',
-          createdAt: '2026-09-08 09:15 AM'
-        },
-        {
-          id: 'p-comp-02',
-          citizenId: 'mock-citizen-1',
-          citizen: { id: 'mock-citizen-1', name: 'Ramesh Sharma', phone: '9811100001' },
-          kabadiwalaId: 'mock-kaba-1',
-          kabadiwala: {
-            id: 'mock-kaba-1',
-            name: 'Suresh Kumar',
-            phone: '9876543210',
-            kabadiwala: {
-              id: 'k-prof-1',
-              userId: 'mock-kaba-1',
-              vehicleType: 'Solar Cargo Trike',
-              verified: true,
-              reputationScore: 4.9,
-              walletBalance: 12000
-            }
-          },
-          status: 'COMPLETED',
-          address: 'Block D, Flat 402, Lajpat Nagar II, New Delhi',
-          latitude: 28.5700,
-          longitude: 77.2400,
-          scheduledAt: '2026-09-01 10:00 AM',
-          items: [
-            { category: 'Lithium-ion Batteries', estWeightKg: 5.0, ratePerKg: 145 },
-            { category: 'LCD/LED Display Panels', estWeightKg: 8.5, ratePerKg: 85 }
-          ],
-          totalAmount: 1447,
-          notes: 'Safe recycling completed. Handover certificate generated.',
-          traceabilityHash: '0x3c7e9184a298bf0182dd',
-          createdAt: '2026-09-01 10:00 AM'
-        }
-      ];
-
-      setPickups(finalPickups);
-      if (finalPickups.length > 0 && !selectedPickup) {
-        setSelectedPickup(finalPickups[0]);
+      const pickupsData = await api.getMyPickups().catch(() => storage.getMyPickups(user?.id, 'CITIZEN'));
+      setPickups(pickupsData);
+      if (pickupsData.length > 0 && !selectedPickup) {
+        setSelectedPickup(pickupsData[0]);
       }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+
+    // Listen for storage events across tabs or local mutations
+    const handleStorageUpdate = (e: any) => {
+      if (e.detail?.key === STORAGE_KEYS.PICKUPS || e.detail?.key === '*') {
+        const updated = storage.getMyPickups(user?.id, 'CITIZEN');
+        setPickups(updated);
+        setSelectedPickup(prev => {
+          if (!prev) return updated[0] || null;
+          return updated.find(p => p.id === prev.id) || updated[0] || null;
+        });
+      }
+    };
+    window.addEventListener('dhatu-storage-change', handleStorageUpdate);
+    return () => window.removeEventListener('dhatu-storage-change', handleStorageUpdate);
+  }, [user?.id]);
 
   // Drop-off centers data (Section 1.A.8)
   const dropoffCenters = [
@@ -254,6 +203,11 @@ export const CitizenDashboard: React.FC = () => {
       const newPickup: Pickup = {
         id: `p-${Date.now()}`,
         citizenId: user?.id || 'mock-citizen-1',
+        citizen: {
+          id: user?.id || 'mock-citizen-1',
+          name: user?.name || 'Ramesh Sharma',
+          phone: user?.phone || '9811100001'
+        },
         status: 'REQUESTED',
         address,
         latitude,
@@ -266,9 +220,11 @@ export const CitizenDashboard: React.FC = () => {
         traceabilityHash: `0x${Math.random().toString(16).substr(2, 20)}`
       };
 
-      setPickups([newPickup, ...pickups]);
+      await api.createPickup(newPickup);
+      const updatedList = storage.getMyPickups(user?.id, 'CITIZEN');
+      setPickups(updatedList);
       setSelectedPickup(newPickup);
-      setSuccessMessage('Pickup request successfully submitted! Nearest formalized collector has been alerted.');
+      setSuccessMessage('Pickup request successfully submitted and saved locally! Nearest formalized collector has been alerted.');
       setActiveTab('pickups');
     } finally {
       setSubmitting(false);

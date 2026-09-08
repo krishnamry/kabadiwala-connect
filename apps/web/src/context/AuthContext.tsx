@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Role } from '../types';
 import { api, setAuthToken, clearAuthToken, getAuthToken } from '../lib/api';
+import { storage, STORAGE_KEYS } from '../lib/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -16,21 +17,33 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(getAuthToken());
+  const [user, setUser] = useState<User | null>(() => storage.getCurrentUser());
+  const [token, setToken] = useState<string | null>(() => getAuthToken() || (storage.getCurrentUser() ? 'local-auth-token' : null));
   const [loading, setLoading] = useState<boolean>(true);
 
   const refreshUser = async () => {
     try {
+      const storedUser = storage.getCurrentUser();
+      if (storedUser) {
+        setUser(storedUser);
+        setToken(getAuthToken() || 'local-auth-token');
+      }
       if (getAuthToken()) {
         const me = await api.getMe();
-        setUser(me);
+        if (me) {
+          setUser(me);
+          storage.setCurrentUser(me);
+        }
       }
     } catch (e) {
-      console.warn('Failed to fetch user profile, clearing session');
-      clearAuthToken();
-      setUser(null);
-      setToken(null);
+      const storedUser = storage.getCurrentUser();
+      if (storedUser) {
+        setUser(storedUser);
+      } else {
+        clearAuthToken();
+        setUser(null);
+        setToken(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -38,6 +51,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     refreshUser();
+
+    // Listen for storage events across tabs or local mutations
+    const handleStorageUpdate = (e: any) => {
+      if (e.detail?.key === STORAGE_KEYS.CURRENT_USER || e.detail?.key === '*') {
+        const updated = storage.getCurrentUser();
+        setUser(updated);
+      }
+    };
+    window.addEventListener('dhatu-storage-change', handleStorageUpdate);
+    return () => window.removeEventListener('dhatu-storage-change', handleStorageUpdate);
   }, []);
 
   const login = async (phone: string, password = 'password123') => {
@@ -47,6 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setAuthToken(res.token);
       setToken(res.token);
       setUser(res.user);
+      storage.setCurrentUser(res.user);
     } finally {
       setLoading(false);
     }
@@ -59,6 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setAuthToken(res.token);
       setToken(res.token);
       setUser(res.user);
+      storage.setCurrentUser(res.user);
     } finally {
       setLoading(false);
     }
@@ -66,6 +91,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     clearAuthToken();
+    storage.setCurrentUser(null);
     setToken(null);
     setUser(null);
   };
@@ -80,72 +106,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setLoading(true);
     try {
-      await login(demoPhones[role], 'password123');
+      const res = await api.login({ phone: demoPhones[role], password: 'password123' });
+      setAuthToken(res.token);
+      setToken(res.token);
+      setUser(res.user);
+      storage.setCurrentUser(res.user);
     } catch (err) {
-      console.warn('API login failed, using local demo user for role:', role);
-      // Seamless mock session fallback for demo
-      const mockUsers: Record<Role, User> = {
-        CITIZEN: {
-          id: 'mock-citizen-1',
-          name: 'Ramesh Sharma',
-          phone: '9811100001',
-          role: 'CITIZEN'
-        },
-        KABADIWALA: {
-          id: 'mock-kaba-1',
-          name: 'Suresh Kumar',
-          phone: '9876543210',
-          role: 'KABADIWALA',
-          kabadiwala: {
-            id: 'prof-kaba-1',
-            userId: 'mock-kaba-1',
-            verified: true,
-            reputationScore: 4.9,
-            walletBalance: 2840,
-            vehicleType: 'Solar Cargo Trike',
-            aadhaarNumber: 'XXXX-XXXX-8921',
-            serviceRadiusKm: 6.5,
-            completedJobsCount: 142
-          }
-        },
-        RECYCLER: {
-          id: 'mock-recycler-1',
-          name: 'EcoRecycle Aggregators Ltd',
-          phone: '9822200002',
-          role: 'RECYCLER',
-          recycler: {
-            id: 'rec-fac-01',
-            facilityName: 'EcoRecycle Aggregators Ltd (Unit-II)',
-            cpcbRegNumber: 'CPCB-EW-2023-DL-0881',
-            statePcb: 'Delhi Pollution Control Committee (DPCC)',
-            latitude: 28.5355,
-            longitude: 77.2690,
-            address: 'Plot 42, Okhla Phase-II Industrial Area, New Delhi - 110020',
-            materialsAccepted: ['PCBs', 'Batteries', 'Copper Wiring', 'CRT Glass', 'LCD Panels', 'E-Plastics'],
-            offeredRates: {
-              'High-grade PCB': 640,
-              'Copper Wire (Clean)': 480,
-              'Li-ion Batteries': 145,
-              'Electric Motors': 95,
-              'Low-grade PCB': 180,
-              'LCD Displays': 85
-            },
-            dailyCapacityKg: 5000,
-            pickupAvailable: true,
-            verified: true,
-            rating: 4.9
-          }
-        },
-        ADMIN: {
-          id: 'mock-admin-1',
-          name: 'NDMC Waste & Mines Cell',
-          phone: '9999900000',
-          role: 'ADMIN'
-        }
-      };
-
-      setUser(mockUsers[role]);
-      setToken('mock-demo-jwt-token');
+      console.warn('API login fallback, using storage user for role:', role);
+      const storedUser = storage.getUserByPhone(demoPhones[role]);
+      if (storedUser) {
+        setUser(storedUser);
+        setAuthToken('mock-demo-jwt-token');
+        setToken('mock-demo-jwt-token');
+        storage.setCurrentUser(storedUser);
+      }
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
+import { storage, STORAGE_KEYS, PassbookTxn } from '../../lib/storage';
 import { Pickup, EWasteLot, SafetyGuidanceCard } from '../../types';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
@@ -251,57 +252,9 @@ export const KabadiwalaDashboard: React.FC = () => {
     }
   ];
 
-  // Passbook Running Ledger State
-  const [passbookTransactions, setPassbookTransactions] = useState([
-    {
-      id: 'TXN-089',
-      date: '2026-09-08 09:45',
-      ref: 'KC-LOT-9821',
-      desc: 'Handover Lot: High-grade PCB (18.5 kg)',
-      party: 'EcoRecycle Aggregators (Okhla)',
-      type: 'CREDIT',
-      amount: 11840,
-      paymentMode: 'CASH',
-      balance: 14680,
-      status: 'VERIFIED'
-    },
-    {
-      id: 'TXN-088',
-      date: '2026-09-07 14:15',
-      ref: 'KC-PICKUP-331',
-      desc: 'Household Scrap: 8kg E-Plastics + Cables',
-      party: 'Ramesh Sharma (Lajpat Nagar)',
-      type: 'DEBIT',
-      amount: 620,
-      paymentMode: 'CASH',
-      balance: 2840,
-      status: 'VERIFIED'
-    },
-    {
-      id: 'TXN-087',
-      date: '2026-09-06 17:30',
-      ref: 'KC-LOT-9812',
-      desc: 'Handover Lot: Copper Wiring (15.0 kg)',
-      party: 'GreenEarth Refiners',
-      type: 'CREDIT',
-      amount: 7200,
-      paymentMode: 'UPI Escrow',
-      balance: 3460,
-      status: 'VERIFIED'
-    },
-    {
-      id: 'TXN-086',
-      date: '2026-09-05 11:20',
-      ref: 'KC-BONUS-04',
-      desc: 'CPCB Formalization Loyalty Bonus',
-      party: 'Ministry of Mines Platform Subsidy',
-      type: 'CREDIT',
-      amount: 500,
-      paymentMode: 'Direct Bank Transfer',
-      balance: 2260,
-      status: 'VERIFIED'
-    }
-  ]);
+  // Passbook Running Ledger & Wallet State
+  const [passbookTransactions, setPassbookTransactions] = useState<PassbookTxn[]>(() => storage.getPassbookTransactions());
+  const [walletBalance, setWalletBalance] = useState<number>(() => storage.getWalletBalance());
 
   // Citizen Pickups State
   const [nearbyPickups, setNearbyPickups] = useState<Pickup[]>([]);
@@ -316,9 +269,9 @@ export const KabadiwalaDashboard: React.FC = () => {
   // Load Pickups
   const loadPickups = async () => {
     try {
-      const nearby = await api.getNearbyPickups(28.5685, 77.2412, 15).catch(() => []);
+      const nearby = await api.getNearbyPickups(28.5685, 77.2412, 15).catch(() => storage.getNearbyPickups(28.5685, 77.2412, 15));
       setNearbyPickups(nearby);
-      const my = await api.getMyPickups().catch(() => []);
+      const my = await api.getMyPickups().catch(() => storage.getMyPickups(user?.id, 'KABADIWALA'));
       const current = my.find(p => p.status === 'IN_PROGRESS' || p.status === 'ACCEPTED');
       if (current) {
         setActiveJob(current);
@@ -335,7 +288,22 @@ export const KabadiwalaDashboard: React.FC = () => {
 
   useEffect(() => {
     loadPickups();
-  }, []);
+
+    // Listen for storage events across tabs or local mutations
+    const handleStorageChange = (e: any) => {
+      const key = e.detail?.key;
+      if (key === STORAGE_KEYS.PICKUPS || key === '*') {
+        loadPickups();
+      }
+      if (key === STORAGE_KEYS.PASSBOOK_TXNS || key === STORAGE_KEYS.WALLET_BALANCE || key === '*') {
+        setPassbookTransactions(storage.getPassbookTransactions());
+        setWalletBalance(storage.getWalletBalance());
+      }
+    };
+
+    window.addEventListener('dhatu-storage-change', handleStorageChange);
+    return () => window.removeEventListener('dhatu-storage-change', handleStorageChange);
+  }, [user?.id]);
 
   // Update AI Valuation when lot weight or category changes
   useEffect(() => {
@@ -357,7 +325,8 @@ export const KabadiwalaDashboard: React.FC = () => {
     setSyncing(true);
     setTimeout(() => {
       setSyncing(false);
-      alert(`Synchronized ${offlineQueue.length} offline lots to the CPCB server! Ledger updated.`);
+      offlineQueue.forEach(lot => storage.saveLot(lot));
+      alert(`Synchronized ${offlineQueue.length} offline lots to the Dhatu central ledger!`);
       setOfflineQueue([]);
       localStorage.removeItem('dhatu_offline_lots');
     }, 1500);
@@ -385,13 +354,16 @@ export const KabadiwalaDashboard: React.FC = () => {
       isOfflineQueued: isOffline
     };
 
+    // Save lot to localStorage
+    storage.saveLot(newLot);
+
     if (isOffline) {
       const updatedQueue = [newLot, ...offlineQueue];
       setOfflineQueue(updatedQueue);
       localStorage.setItem('dhatu_offline_lots', JSON.stringify(updatedQueue));
       setLotCreatedSuccess(`Offline Lot #${newLot.lotCode} saved locally! It will sync once reconnecting.`);
     } else {
-      setLotCreatedSuccess(`Lot #${newLot.lotCode} created and broadcasted to 3 nearby authorized recyclers! Instant indicative value: ₹${newLot.estimatedValue}`);
+      setLotCreatedSuccess(`Lot #${newLot.lotCode} created and stored in local storage! Broadcasted to nearby authorized recyclers.`);
     }
 
     setHandoverLotCode(newLot.lotCode);
@@ -403,11 +375,21 @@ export const KabadiwalaDashboard: React.FC = () => {
       const accepted = await api.acceptPickup(pickup.id);
       setActiveJob(accepted);
       setActiveTab('pickups');
+      await loadPickups();
       speak(language === 'hi' ? 'पिकअप स्वीकार कर लिया गया है।' : language === 'mr' ? 'संकलन स्वीकारले आहे.' : 'Pickup accepted');
     } catch (e: any) {
       alert('Accepted: ' + pickup.address);
-      setActiveJob({ ...pickup, status: 'ACCEPTED' });
+      const accepted = storage.updatePickupStatus(pickup.id, 'ACCEPTED', {
+        kabadiwalaId: user?.id || 'mock-kaba-1',
+        kabadiwala: {
+          id: user?.id || 'mock-kaba-1',
+          name: user?.name || 'Suresh Kumar',
+          phone: user?.phone || '9876543210'
+        }
+      });
+      setActiveJob(accepted || { ...pickup, status: 'ACCEPTED' });
       setActiveTab('pickups');
+      await loadPickups();
     }
   };
 
@@ -420,12 +402,15 @@ export const KabadiwalaDashboard: React.FC = () => {
         category,
         actualWeightKg
       }));
-      await api.completePickup(activeJob.id, itemsPayload).catch(() => ({
-        ...activeJob,
-        status: 'COMPLETED' as const
+      const res = await api.completePickup(activeJob.id, itemsPayload).catch(() => ({
+        pickup: storage.updatePickupStatus(activeJob.id, 'COMPLETED'),
+        transaction: null,
+        totalAmount: activeJob.totalAmount || 620
       }));
-      setJobSuccess(`Pickup completed! Handover receipt stamped. Cash payment of ₹${activeJob.totalAmount || 620} recorded in Passbook.`);
+      setJobSuccess(`Pickup completed! Handover receipt stamped. Cash payment of ₹${res.totalAmount || activeJob.totalAmount || 620} recorded in Passbook.`);
       setActiveJob(null);
+      setWalletBalance(storage.getWalletBalance());
+      setPassbookTransactions(storage.getPassbookTransactions());
       await loadPickups();
     } finally {
       setCompletingJob(false);
@@ -478,7 +463,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 {t('passbookBalance', 'Passbook Balance')}
               </div>
               <div className="text-xl sm:text-2xl font-mono-num font-bold text-brass-400">
-                ₹14,680
+                {formatCurrency(walletBalance)}
               </div>
               <div className="text-[10px] text-forest-400 font-medium flex items-center justify-end gap-1">
                 <span>{t('cashFirst', '💵 Cash-First Support')}</span>
@@ -1181,7 +1166,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
             <div className="bg-steel-900 text-paper-50 px-4 py-2.5 rounded-lg border border-steel-700 font-mono text-right">
               <span className="text-[10px] text-paper-400 block uppercase">TOTAL RUNNING BALANCE</span>
-              <span className="text-xl font-bold text-brass-400">₹14,680</span>
+              <span className="text-xl font-bold text-brass-400">{formatCurrency(walletBalance)}</span>
             </div>
           </div>
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { EWasteLot, TransactionAnomaly } from '../../types';
+import { storage, STORAGE_KEYS } from '../../lib/storage';
 import {
   Factory,
   CheckCircle2,
@@ -45,149 +46,92 @@ export const RecyclerDashboard: React.FC = () => {
 
   const [rateUpdateSuccess, setRateUpdateSuccess] = useState(false);
 
-  // Incoming Lots from collectors
-  const [incomingLots, setIncomingLots] = useState<EWasteLot[]>([
-    {
-      id: 'lot-101',
-      lotCode: 'KC-LOT-9821',
-      collectorId: 'kaba-1',
-      collectorName: 'Suresh Kumar',
-      category: 'High-grade PCB (Motherboards/Servers)',
-      approxWeightKg: 18.5,
-      estimatedValue: 11840,
-      recyclerOfferedRate: 640,
-      status: 'REQUESTED',
-      gpsLat: 28.5685,
-      gpsLng: 77.2412,
-      createdAt: '2026-09-08 09:30 AM',
-      qrCode: 'KBD-EWASTE-9821-DELHI'
-    },
-    {
-      id: 'lot-102',
-      lotCode: 'KC-LOT-9824',
-      collectorId: 'kaba-2',
-      collectorName: 'Mohan Lal',
-      category: 'Copper Wiring (Clean Bright)',
-      approxWeightKg: 24.0,
-      estimatedValue: 11520,
-      recyclerOfferedRate: 480,
-      status: 'REQUESTED',
-      gpsLat: 28.5420,
-      gpsLng: 77.2580,
-      createdAt: '2026-09-08 10:15 AM',
-      qrCode: 'KBD-EWASTE-9824-DELHI'
-    },
-    {
-      id: 'lot-103',
-      lotCode: 'KC-LOT-9830',
-      collectorId: 'kaba-3',
-      collectorName: 'Radhe Shyam',
-      category: 'Li-ion Batteries (Laptops/EV)',
-      approxWeightKg: 32.0,
-      estimatedValue: 4640,
-      recyclerOfferedRate: 145,
-      status: 'AVAILABLE',
-      gpsLat: 28.5210,
-      gpsLng: 77.2740,
-      createdAt: '2026-09-08 11:00 AM',
-      qrCode: 'KBD-EWASTE-9830-DELHI'
-    }
-  ]);
+  // Incoming Lots from collectors (backed by local storage)
+  const [incomingLots, setIncomingLots] = useState<EWasteLot[]>(() => storage.getLots());
 
   // Handover confirmation state
   const [handoverCode, setHandoverCode] = useState('');
   const [actualWeight, setActualWeight] = useState(18.5);
   const [handoverSuccess, setHandoverSuccess] = useState<string | null>(null);
 
-  // Anomalies state (Satisfying Section 1.C.6 & 1.D.3)
-  const [anomalies, setAnomalies] = useState<TransactionAnomaly[]>([
-    {
-      id: 'anom-1',
-      lotCode: 'KC-LOT-9780',
-      collectorName: 'Deepak Verma',
-      category: 'High-grade PCB',
-      weightKg: 14.5,
-      declaredValue: 14500,
-      benchmarkValue: 9280,
-      divergencePercent: 56.2,
-      reason: 'Unit valuation ₹1,000/kg exceeds regional CPCB cap (₹640/kg) by 56%. Suspected price arbitrage anomaly.',
-      severity: 'HIGH',
-      status: 'FLAGGED',
-      flaggedAt: '2026-09-07 16:45'
-    },
-    {
-      id: 'anom-2',
-      lotCode: 'KC-LOT-9762',
-      collectorName: 'Raju Pandit',
-      category: 'Li-ion Batteries',
-      weightKg: 85.0,
-      declaredValue: 12325,
-      benchmarkValue: 12325,
-      divergencePercent: 120.0,
-      reason: 'Weight 85kg logged for single tricycle payload exceeds certified safe carrying capacity (50kg).',
-      severity: 'MEDIUM',
-      status: 'FLAGGED',
-      flaggedAt: '2026-09-07 14:10'
-    },
-    {
-      id: 'anom-3',
-      lotCode: 'KC-LOT-9755',
-      collectorName: 'Mukesh Yadav',
-      category: 'CRT Glass',
-      weightKg: 40.0,
-      declaredValue: 3800,
-      benchmarkValue: 480,
-      divergencePercent: 691.0,
-      reason: 'Unit rate entered as ₹95/kg instead of benchmark ₹12/kg (Data entry typo flagged by Z-score filter).',
-      severity: 'HIGH',
-      status: 'FLAGGED',
-      flaggedAt: '2026-09-06 18:20'
-    }
-  ]);
+  // Anomalies state (backed by local storage)
+  const [anomalies, setAnomalies] = useState<TransactionAnomaly[]>(() => storage.getAnomalies());
+
+  useEffect(() => {
+    const handleStorageChange = (e: any) => {
+      const key = e.detail?.key;
+      if (key === STORAGE_KEYS.LOTS || key === '*') {
+        setIncomingLots(storage.getLots());
+      }
+      if (key === STORAGE_KEYS.ANOMALIES || key === '*') {
+        setAnomalies(storage.getAnomalies());
+      }
+    };
+
+    window.addEventListener('dhatu-storage-change', handleStorageChange);
+    return () => window.removeEventListener('dhatu-storage-change', handleStorageChange);
+  }, []);
 
   // Handle lot accept / reject
   const handleLotDecision = (lotId: string, decision: 'ACCEPT' | 'REJECT') => {
-    setIncomingLots(prev =>
-      prev.map(l => {
-        if (l.id === lotId) {
-          return {
-            ...l,
-            status: decision === 'ACCEPT' ? 'HANDOVER_PENDING' : 'REJECTED'
-          };
-        }
-        return l;
-      })
-    );
+    const nextStatus = decision === 'ACCEPT' ? 'HANDOVER_PENDING' : 'REJECTED';
+    storage.updateLotStatus(lotId, nextStatus);
+    setIncomingLots(storage.getLots());
   };
 
-  // Handle Handover confirmation (closes traceability loop)
+  // Handle Handover confirmation (closes traceability loop & settles payment in Passbook)
   const handleConfirmHandover = (e: React.FormEvent) => {
     e.preventDefault();
     if (!handoverCode.trim()) return;
 
-    const matchedLot = incomingLots.find(
+    const allLots = storage.getLots();
+    const matchedLot = allLots.find(
       l => l.lotCode.toLowerCase() === handoverCode.trim().toLowerCase() || l.qrCode.toLowerCase() === handoverCode.trim().toLowerCase()
     );
 
     const finalCode = matchedLot ? matchedLot.lotCode : handoverCode.toUpperCase();
+    
+    // Update lot status to CONFIRMED
+    storage.updateLotStatus(finalCode, 'CONFIRMED', {
+      approxWeightKg: actualWeight,
+      confirmedAt: new Date().toISOString()
+    });
+
+    // Record credit settlement in the collector's passbook
+    const offeredRate = matchedLot ? matchedLot.recyclerOfferedRate : 640;
+    const payoutAmount = Math.round(actualWeight * offeredRate);
+    storage.addPassbookTransaction({
+      date: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      ref: finalCode,
+      desc: `Handover Lot: ${matchedLot?.category || 'E-Waste Lot'} (${actualWeight} kg)`,
+      party: 'EcoRecycle Aggregators (Unit-II)',
+      type: 'CREDIT',
+      amount: payoutAmount,
+      paymentMode: 'CASH / Direct Settlement',
+      status: 'VERIFIED'
+    });
+
+    setIncomingLots(storage.getLots());
     setHandoverSuccess(
-      `Handover verified & registered! Lot #${finalCode} confirmed at ${actualWeight} kg. CPCB EPR Form-2 audit hash: 0x${Math.random().toString(16).substr(2, 8)}... Traceability loop successfully closed.`
+      `Handover verified & registered! Lot #${finalCode} confirmed at ${actualWeight} kg. Payout of ₹${payoutAmount} credited to collector passbook. CPCB EPR Form-2 audit hash: 0x${Math.random().toString(16).substr(2, 8)}... Traceability loop successfully closed.`
     );
     setHandoverCode('');
   };
 
-  // Save updated buying rates
+  // Save updated buying rates to storage
   const handleSaveRates = (e: React.FormEvent) => {
     e.preventDefault();
+    Object.entries(rates).forEach(([cat, val]) => {
+      storage.updateRate(cat, val);
+    });
     setRateUpdateSuccess(true);
     setTimeout(() => setRateUpdateSuccess(false), 3000);
   };
 
   // Handle anomaly review
   const handleResolveAnomaly = (id: string, action: 'REVIEWED' | 'DISMISSED') => {
-    setAnomalies(prev =>
-      prev.map(a => (a.id === id ? { ...a, status: action } : a))
-    );
+    storage.updateAnomalyStatus(id, action);
+    setAnomalies(storage.getAnomalies());
   };
 
   // Export CPCB EPR Report
