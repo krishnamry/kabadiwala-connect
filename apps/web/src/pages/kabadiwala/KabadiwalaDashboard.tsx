@@ -3,7 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
 import { storage, STORAGE_KEYS, PassbookTxn } from '../../lib/storage';
-import { Pickup, EWasteLot, SafetyGuidanceCard } from '../../types';
+import { Pickup, EWasteLot, LotBid, SafetyGuidanceCard } from '../../types';
+import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
 import {
@@ -36,7 +37,11 @@ import {
   Check,
   ExternalLink,
   Flame,
-  FileText
+  FileText,
+  X,
+  Tag,
+  Eye,
+  CheckCircle
 } from 'lucide-react';
 
 export const KabadiwalaDashboard: React.FC = () => {
@@ -45,6 +50,12 @@ export const KabadiwalaDashboard: React.FC = () => {
   
   // Active Tab: lots | priceboard | recyclers | handover | passbook | safety | pickups
   const [activeTab, setActiveTab] = useState<'lots' | 'priceboard' | 'recyclers' | 'handover' | 'passbook' | 'safety' | 'pickups'>('lots');
+
+  // Sub-view inside 'lots' tab: 'create' or 'mylots'
+  const [lotsSubView, setLotsSubView] = useState<'create' | 'mylots'>('create');
+  const [myLots, setMyLots] = useState<EWasteLot[]>(() => storage.getMyLots(user?.id));
+  const [createdLotModal, setCreatedLotModal] = useState<EWasteLot | null>(null);
+  const [lotFilter, setLotFilter] = useState<'ALL' | 'AVAILABLE' | 'BIDDING' | 'HANDOVER_PENDING' | 'CONFIRMED'>('ALL');
 
   // Offline Mode State
   const [isOffline, setIsOffline] = useState<boolean>(() => {
@@ -295,6 +306,9 @@ export const KabadiwalaDashboard: React.FC = () => {
       if (key === STORAGE_KEYS.PICKUPS || key === '*') {
         loadPickups();
       }
+      if (key === STORAGE_KEYS.LOTS || key === '*') {
+        setMyLots(storage.getMyLots(user?.id));
+      }
       if (key === STORAGE_KEYS.PASSBOOK_TXNS || key === STORAGE_KEYS.WALLET_BALANCE || key === '*') {
         setPassbookTransactions(storage.getPassbookTransactions());
         setWalletBalance(storage.getWalletBalance());
@@ -337,6 +351,7 @@ export const KabadiwalaDashboard: React.FC = () => {
     e.preventDefault();
     const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
     const rate = rateItem ? rateItem.ratePerKg : 400;
+    const estVal = Math.round(rate * lotWeight);
     const newLot: EWasteLot = {
       id: `lot-local-${Date.now()}`,
       lotCode: `KC-LOT-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -344,18 +359,22 @@ export const KabadiwalaDashboard: React.FC = () => {
       collectorName: user?.name || 'Suresh Kumar',
       category: lotCategory,
       approxWeightKg: lotWeight,
-      estimatedValue: Math.round(rate * lotWeight),
+      estimatedValue: estVal,
+      askingPrice: estVal,
+      minBidAmount: Math.round(estVal * 0.5),
       recyclerOfferedRate: rate,
       status: 'AVAILABLE',
       gpsLat: 28.5685,
       gpsLng: 77.2412,
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       qrCode: `KBD-EWASTE-${Math.floor(1000 + Math.random() * 9000)}-DELHI`,
-      isOfflineQueued: isOffline
+      isOfflineQueued: isOffline,
+      bids: []
     };
 
     // Save lot to localStorage
     storage.saveLot(newLot);
+    setMyLots(storage.getMyLots(user?.id));
 
     if (isOffline) {
       const updatedQueue = [newLot, ...offlineQueue];
@@ -367,6 +386,36 @@ export const KabadiwalaDashboard: React.FC = () => {
     }
 
     setHandoverLotCode(newLot.lotCode);
+    hapticSuccess();
+    setCreatedLotModal(newLot); // Trigger confirmation popup
+  };
+
+  // Handle Collector Accepting a Recycler Bid
+  const handleAcceptBid = (lotId: string, bidId: string) => {
+    const updated = storage.acceptLotBid(lotId, bidId);
+    setMyLots(storage.getMyLots(user?.id));
+    hapticSuccess();
+    setJobSuccess(`Bid of ₹${updated.estimatedValue} accepted for Lot #${updated.lotCode}! Delivery handover is now pending.`);
+  };
+
+  // Handle Collector Rejecting a Recycler Bid
+  const handleRejectBid = (lotId: string, bidId: string) => {
+    storage.rejectLotBid(lotId, bidId);
+    setMyLots(storage.getMyLots(user?.id));
+    triggerHaptic(30);
+  };
+
+  // Simulate Recycler Bid for demo/testing (must be above 50% of ask)
+  const handleSimulateBid = (lot: EWasteLot) => {
+    const ask = lot.askingPrice || lot.estimatedValue;
+    const simAmount = Math.round(ask * 0.88); // 88% of ask (well above 50% min)
+    storage.addBidToLot(lot.id, {
+      recyclerId: 'rec-sim-01',
+      recyclerName: 'Bharat Smelters & Aggregators Ltd',
+      bidAmount: simAmount
+    });
+    setMyLots(storage.getMyLots(user?.id));
+    hapticSuccess();
   };
 
   // Accept Pickup
@@ -604,220 +653,497 @@ export const KabadiwalaDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* TAB 1: LOT CREATION & INSTANT AI ESTIMATION */}
+      {/* TAB 1: DIGITAL LOTS (CREATOR & MY CREATED LOTS) */}
       {activeTab === 'lots' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          <div className="lg:col-span-7 bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-5">
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="stamp-seal stamp-verified text-xs">{t('lotCreationBadge', 'Lot Creation')}</span>
-                <VoiceAssistButton
-                  text="Create lot. Photograph item, enter approx weight, get instant AI valuation estimate."
-                  hindiText="लॉट बनाएं। कबाड़ की फोटो लें, वजन डालें और तुरंत अनुमानित दाम देखें।"
-                  marathiText="नवीन लॉट तयार करा. फोटो घ्या, वजन टाका आणि अंदाजे किंमत पहा."
-                  size="sm"
-                />
-              </div>
-              <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-                {t('digitalLotCreatorTitle', 'Digital E-Waste Lot Creator')}
-              </h2>
-              <p className="text-xs text-steel-600 font-medium">
-                Photograph material, select e-waste category, specify weight, and generate a verified digital lot.
-              </p>
-            </div>
-
-            {lotCreatedSuccess && (
-              <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-lg text-xs text-forest-800 space-y-1">
-                <div className="font-bold flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-forest-600" />
-                  <span>{t('lotCreatedSuccessTitle', 'Lot Registered Successfully!')}</span>
-                </div>
-                <p>{lotCreatedSuccess}</p>
-              </div>
-            )}
-
-            <form onSubmit={handleCreateLot} className="space-y-4">
-              
-              {/* Photo Upload / Capture Simulator */}
-              <div>
-                <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
-                  {t('uploadPhotoLabel', '1. Upload or Capture Photograph')}
-                </label>
-                <div
-                  onClick={() => setLotPhotoTaken(true)}
-                  className="cursor-pointer border-2 border-dashed border-steel-400 hover:border-copper-600 rounded-lg p-6 bg-paper-100 flex flex-col items-center justify-center space-y-2 text-center transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-full bg-copper-100 text-copper-700 flex items-center justify-center">
-                    <Camera className="w-6 h-6" />
-                  </div>
-                  {lotPhotoTaken ? (
-                    <div className="text-forest-700 font-bold text-xs flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> {t('photoCapturedMsg', 'Photo Captured & Verified (1080p)')}
-                    </div>
-                  ) : (
-                    <div>
-                      <span className="text-xs font-bold text-steel-800 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
-                      <span className="text-[11px] text-steel-500">AI automatically detects CRTs, LCDs, PCBs, Cables, Batteries</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Category Selector */}
-              <div>
-                <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
-                  2. {t('selectScrapCategory', 'Select Item Category')}
-                </label>
-                <select
-                  value={lotCategory}
-                  onChange={e => setLotCategory(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs font-bold bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
-                >
-                  {priceBoardData.map(p => (
-                    <option key={p.category} value={p.category}>
-                      {p.category} — ₹{p.ratePerKg}/{t('perKg', 'kg')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Weight Stepper (Low-Literacy Friendly +/- Buttons) */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
-                    {t('approxWeightLabel', '3. Enter Approx Weight (Kilograms)')}
-                  </label>
-                  <span className="text-xs font-mono text-steel-500 font-medium">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setLotWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
-                    className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
-                  >
-                    <Minus className="w-6 h-6" />
-                  </button>
-
-                  <div className="flex-1 bg-white border-2 border-steel-400 rounded-lg p-3 text-center">
-                    <span className="text-3xl font-mono-num font-black text-steel-900">
-                      {lotWeight}
-                    </span>
-                    <span className="text-sm font-bold text-steel-500 ml-1">kg</span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setLotWeight(w => Math.round((w + 0.5) * 10) / 10)}
-                    className="w-14 h-14 rounded-lg bg-copper-600 hover:bg-copper-700 text-white flex items-center justify-center shadow-tactile active:scale-95 transition-transform"
-                  >
-                    <Plus className="w-6 h-6" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Instant Valuation Card */}
-              <div className="bg-brass-100/90 border-2 border-brass-400 rounded-lg p-4 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-brass-800 tracking-wider block">
-                    {language === 'hi' ? 'तुरंत अनुमानित मूल्य' : language === 'mr' ? 'थेट अंदाजे किंमत' : 'INSTANT AI ESTIMATE'}
-                  </span>
-                  <span className="text-2xl sm:text-3xl font-mono-num font-black text-steel-900">
-                    {formatCurrency(aiValuation)}
-                  </span>
-                  <span className="text-[11px] text-steel-600 block">
-                    CPCB Benchmark Rate: ₹{Math.round(aiValuation / lotWeight)}/kg
-                  </span>
-                </div>
-                <VoiceAssistButton
-                  text={`Instant value estimate: ${formatCurrency(aiValuation)} for ${lotWeight} kilograms.`}
-                  hindiText={`अनुमानित मूल्य: ${lotWeight} किलो के लिए ${formatCurrency(aiValuation)}.`}
-                  marathiText={`अंदाजे किंमत: ${lotWeight} किलोसाठी ${formatCurrency(aiValuation)}.`}
-                  size="md"
-                />
-              </div>
-
+        <div className="space-y-6">
+          {/* Sub-view Switcher: Create Lot vs My Created Lots */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-paper-50 p-3 rounded-xl border-2 border-steel-300 shadow-sm">
+            <div className="flex items-center gap-2">
               <button
-                type="submit"
-                className="w-full btn-dhatu-primary py-3.5 rounded-lg text-sm font-bold flex items-center justify-center space-x-2 shadow-tactile"
+                type="button"
+                onClick={() => setLotsSubView('create')}
+                className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-all ${
+                  lotsSubView === 'create'
+                    ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
+                    : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
+                }`}
               >
-                <Sparkles className="w-4 h-4" />
-                <span>{language === 'hi' ? 'लॉट बनाएं और रीसायकलर को भेजें' : language === 'mr' ? 'लॉट तयार करा आणि पाठवा' : 'Generate Digital Lot & Broadcast'}</span>
+                <Plus className="w-4 h-4" />
+                <span>{t('createDigitalLot', 'Create Digital Lot')}</span>
               </button>
-            </form>
-          </div>
-
-          {/* Right Column: Active Digital Lot Voucher Preview */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 shadow-sm space-y-4">
-              <div className="flex justify-between items-start border-b border-steel-300 pb-3">
-                <div>
-                  <span className="stamp-seal stamp-verified text-[11px]">CPCB LOT VOUCHER</span>
-                  <div className="font-display font-black text-xl text-steel-900 mt-1">
-                    {handoverLotCode}
-                  </div>
-                  <span className="text-[11px] text-steel-500 font-mono">Collector: Suresh Kumar</span>
-                </div>
-                <div className="w-16 h-16 bg-white border border-steel-300 p-1 rounded flex items-center justify-center">
-                  <QrCode className="w-14 h-14 text-steel-900" />
-                </div>
-              </div>
-
-              <div className="space-y-2 text-xs font-mono text-steel-800 bg-paper-100 p-3 rounded border border-paper-300">
-                <div className="flex justify-between">
-                  <span className="text-steel-500">Material Category:</span>
-                  <span className="font-bold">{lotCategory.slice(0, 22)}...</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-steel-500">Approx Weight:</span>
-                  <span className="font-bold">{lotWeight} kg</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-steel-500">Benchmark Rate:</span>
-                  <span className="font-bold text-copper-600">₹{Math.round(aiValuation / lotWeight)}/kg</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-steel-500">Estimated Value:</span>
-                  <span className="font-bold text-forest-700">{formatCurrency(aiValuation)}</span>
-                </div>
-                <div className="flex justify-between pt-1 border-t border-paper-300 text-[10px] text-steel-500">
-                  <span>GPS Lat/Lng:</span>
-                  <span>28.5685, 77.2412</span>
-                </div>
-              </div>
-
-              <div className="text-[11px] text-steel-600 p-2.5 bg-paper-200 rounded border border-steel-300 space-y-1">
-                <div className="font-bold text-steel-800 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-forest-600" />
-                  <span>Traceability Record Sealed</span>
-                </div>
-                <p>
-                  This lot is broadcasted to verified recyclers. Present the QR code upon vehicle delivery to claim instant cash or wallet credit.
-                </p>
-              </div>
 
               <button
                 type="button"
-                onClick={() => setActiveTab('handover')}
-                className="w-full bg-paper-200 hover:bg-paper-300 text-steel-900 border-2 border-steel-400 py-2 rounded text-xs font-bold flex items-center justify-center space-x-1.5"
+                onClick={() => setLotsSubView('mylots')}
+                className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-all ${
+                  lotsSubView === 'mylots'
+                    ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
+                    : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
+                }`}
               >
-                <span>{language === 'hi' ? 'हैंडओवर रसीद खोलें' : language === 'mr' ? 'हस्तांतरण पावती उघडा' : 'Open Handover QR'}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <FileText className="w-4 h-4" />
+                <span>{t('myCreatedLots', 'My Created Lots')} ({myLots.length})</span>
+                {myLots.some(l => (l.bids && l.bids.length > 0)) && (
+                  <span className="bg-brass-400 text-steel-950 text-[10px] font-mono font-black px-1.5 py-0.5 rounded-full animate-pulse">
+                    {myLots.reduce((sum, l) => sum + (l.bids?.length || 0), 0)} Bids
+                  </span>
+                )}
               </button>
             </div>
 
-            {/* Quick Segregation Tip */}
-            <div className="p-4 bg-paper-100 rounded-xl border border-steel-300 space-y-1 text-xs">
-              <span className="font-bold text-copper-700 flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" /> {language === 'hi' ? 'कमाई बढ़ाने का सुझाव:' : language === 'mr' ? 'कमाई वाढवण्यासाठी टीप:' : 'High-Value Separation Tip:'}
+            <div className="text-xs font-mono text-steel-600 flex items-center gap-2">
+              <span className="hidden sm:inline">Recycler Bidding Rule:</span>
+              <span className="bg-paper-200 px-2.5 py-1 rounded border border-steel-300 font-bold text-copper-700">
+                Min 50% of Ask Value
               </span>
-              <p className="text-steel-600">
-                {language === 'hi' ? 'सर्किट बोर्ड से एल्यूमीनियम हीट सिंक को हाथ से अलग करके बेचें। इससे बोर्ड को ग्रेड-ए (₹640/kg) दाम मिलता है।' : language === 'mr' ? 'सर्किट बोर्डमधून अ‍ॅल्युमिनियम हीट सिंक हाताने वेगळे करून विका. यामुळे बोर्डाला ग्रेड-ए (₹६४०/कि.ग्रा.) भाव मिळतो.' : 'Detach aluminium heat sinks from circuit boards by hand before selling. Intact Grade-A boards command premium ₹640/kg.'}
-              </p>
             </div>
           </div>
 
+          {lotsSubView === 'create' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              <div className="lg:col-span-7 bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-5">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="stamp-seal stamp-verified text-xs">{t('lotCreationBadge', 'Lot Creation')}</span>
+                    <VoiceAssistButton
+                      text="Create lot. Photograph item, enter approx weight, get instant AI valuation estimate."
+                      hindiText="लॉट बनाएं। कबाड़ की फोटो लें, वजन डालें और तुरंत अनुमानित दाम देखें।"
+                      marathiText="नवीन लॉट तयार करा. फोटो घ्या, वजन टाका आणि अंदाजे किंमत पहा."
+                      size="sm"
+                    />
+                  </div>
+                  <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+                    {t('digitalLotCreatorTitle', 'Digital E-Waste Lot Creator')}
+                  </h2>
+                  <p className="text-xs text-steel-600 font-medium">
+                    Photograph material, select e-waste category, specify weight, and generate a verified digital lot.
+                  </p>
+                </div>
+
+                {lotCreatedSuccess && (
+                  <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-lg text-xs text-forest-800 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-forest-600" />
+                      <span>{t('lotCreatedSuccessTitle', 'Lot Registered Successfully!')}</span>
+                    </div>
+                    <p>{lotCreatedSuccess}</p>
+                  </div>
+                )}
+
+                <form onSubmit={handleCreateLot} className="space-y-4">
+                  
+                  {/* Photo Upload / Capture Simulator */}
+                  <div>
+                    <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
+                      {t('uploadPhotoLabel', '1. Upload or Capture Photograph')}
+                    </label>
+                    <div
+                      onClick={() => setLotPhotoTaken(true)}
+                      className="cursor-pointer border-2 border-dashed border-steel-400 hover:border-copper-600 rounded-lg p-6 bg-paper-100 flex flex-col items-center justify-center space-y-2 text-center transition-colors"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-copper-100 text-copper-700 flex items-center justify-center">
+                        <Camera className="w-6 h-6" />
+                      </div>
+                      {lotPhotoTaken ? (
+                        <div className="text-forest-700 font-bold text-xs flex items-center gap-1">
+                          <CheckCircle2 className="w-4 h-4" /> {t('photoCapturedMsg', 'Photo Captured & Verified (1080p)')}
+                        </div>
+                      ) : (
+                        <div>
+                          <span className="text-xs font-bold text-steel-800 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
+                          <span className="text-[11px] text-steel-500">AI automatically detects CRTs, LCDs, PCBs, Cables, Batteries</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Category Selector */}
+                  <div>
+                    <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
+                      2. {t('selectScrapCategory', 'Select Item Category')}
+                    </label>
+                    <select
+                      value={lotCategory}
+                      onChange={e => setLotCategory(e.target.value)}
+                      className="w-full px-3 py-2.5 text-xs font-bold bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                    >
+                      {priceBoardData.map(p => (
+                        <option key={p.category} value={p.category}>
+                          {p.category} — ₹{p.ratePerKg}/{t('perKg', 'kg')}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Weight Stepper (Low-Literacy Friendly +/- Buttons) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
+                        {t('approxWeightLabel', '3. Enter Approx Weight (Kilograms)')}
+                      </label>
+                      <span className="text-xs font-mono text-steel-500 font-medium">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setLotWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
+                        className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
+                      >
+                        <Minus className="w-6 h-6" />
+                      </button>
+
+                      <div className="flex-1 bg-white border-2 border-steel-400 rounded-lg p-3 text-center">
+                        <span className="text-3xl font-mono-num font-black text-steel-900">
+                          {lotWeight}
+                        </span>
+                        <span className="text-xs font-bold text-steel-500 ml-1.5 uppercase">kg</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setLotWeight(w => Math.round((w + 0.5) * 10) / 10)}
+                        className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
+                      >
+                        <Plus className="w-6 h-6" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Real-time AI Valuation Card */}
+                  <div className="bg-forest-500/10 border-2 border-forest-600 rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] uppercase font-mono font-bold text-forest-800 tracking-wider block">
+                        {t('instantAiValue', 'Instant AI Value Estimate')}
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-mono-num font-black text-forest-700">
+                        {formatCurrency(aiValuation)}
+                      </span>
+                      <span className="text-[11px] text-steel-600 block">
+                        Ask Price: ₹{Math.round(aiValuation / lotWeight)}/kg • Min Bid: ₹{Math.round(aiValuation * 0.5)} (50%)
+                      </span>
+                    </div>
+                    <VoiceAssistButton
+                      text={`Indicative value: ${formatCurrency(aiValuation)} for ${lotWeight} kilograms.`}
+                      hindiText={`अनुमानित मूल्य: ${lotWeight} किलो के लिए ${formatCurrency(aiValuation)}.`}
+                      marathiText={`अंदाजे किंमत: ${lotWeight} किलोसाठी ${formatCurrency(aiValuation)}.`}
+                      size="md"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full btn-dhatu-primary py-3.5 rounded-lg text-sm font-bold flex items-center justify-center space-x-2 shadow-tactile"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>{language === 'hi' ? 'लॉट बनाएं और रीसायकलर को भेजें' : language === 'mr' ? 'लॉट तयार करा आणि पाठवा' : 'Generate Digital Lot & Broadcast'}</span>
+                  </button>
+                </form>
+              </div>
+
+              {/* Right Column: Active Digital Lot Voucher Preview */}
+              <div className="lg:col-span-5 space-y-4">
+                <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 shadow-sm space-y-4">
+                  <div className="flex justify-between items-start border-b border-steel-300 pb-3">
+                    <div>
+                      <span className="stamp-seal stamp-verified text-[11px]">CPCB LOT VOUCHER</span>
+                      <div className="font-display font-black text-xl text-steel-900 mt-1">
+                        {handoverLotCode}
+                      </div>
+                      <span className="text-[11px] text-steel-500 font-mono">Collector: Suresh Kumar</span>
+                    </div>
+                    <div className="w-16 h-16 bg-white border border-steel-300 p-1 rounded flex items-center justify-center">
+                      <QrCode className="w-14 h-14 text-steel-900" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-xs font-mono text-steel-800 bg-paper-100 p-3 rounded border border-paper-300">
+                    <div className="flex justify-between">
+                      <span className="text-steel-500">Material Category:</span>
+                      <span className="font-bold">{lotCategory.slice(0, 22)}...</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-steel-500">Approx Weight:</span>
+                      <span className="font-bold">{lotWeight} kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-steel-500">Benchmark Rate:</span>
+                      <span className="font-bold text-copper-600">₹{Math.round(aiValuation / lotWeight)}/kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-steel-500">Estimated Value:</span>
+                      <span className="font-bold text-forest-700">{formatCurrency(aiValuation)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-steel-500">Min Acceptable Bid (50%):</span>
+                      <span className="font-bold text-copper-700">{formatCurrency(Math.round(aiValuation * 0.5))}</span>
+                    </div>
+                    <div className="flex justify-between pt-1 border-t border-paper-300 text-[10px] text-steel-500">
+                      <span>GPS Lat/Lng:</span>
+                      <span>28.5685, 77.2412</span>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-steel-600 p-2.5 bg-paper-200 rounded border border-steel-300 space-y-1">
+                    <div className="font-bold text-steel-800 flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-forest-600" />
+                      <span>Traceability Record Sealed</span>
+                    </div>
+                    <p>
+                      This lot is broadcasted to verified recyclers. Present the QR code upon vehicle delivery to claim instant cash or wallet credit.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setLotsSubView('mylots')}
+                      className="w-full bg-copper-600 hover:bg-copper-700 text-white py-2 rounded text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View My Lots</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('handover')}
+                      className="w-full bg-paper-200 hover:bg-paper-300 text-steel-900 border-2 border-steel-400 py-2 rounded text-xs font-bold flex items-center justify-center space-x-1.5"
+                    >
+                      <span>Open QR</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Segregation Tip */}
+                <div className="p-4 bg-paper-100 rounded-xl border border-steel-300 space-y-1 text-xs">
+                  <span className="font-bold text-copper-700 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" /> {language === 'hi' ? 'कमाई बढ़ाने का सुझाव:' : language === 'mr' ? 'कमाई वाढवण्यासाठी टीप:' : 'High-Value Separation Tip:'}
+                  </span>
+                  <p className="text-steel-600">
+                    {language === 'hi' ? 'सर्किट बोर्ड से एल्यूमीनियम हीट सिंक को हाथ से अलग करके बेचें। इससे बोर्ड को ग्रेड-ए (₹640/kg) दाम मिलता है।' : language === 'mr' ? 'सर्किट बोर्डमधून अ‍ॅल्युमिनियम हीट सिंक हाताने वेगळे करून विका. यामुळे बोर्डाला ग्रेड-ए (₹६४०/कि.ग्रा.) भाव मिळतो.' : 'Detach aluminium heat sinks from circuit boards by hand before selling. Intact Grade-A boards command premium ₹640/kg.'}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          ) : (
+            /* MY CREATED LOTS VIEW WITH BIDDING & ACCEPTANCE */
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-steel-300 pb-3">
+                <div>
+                  <h3 className="text-lg font-display font-black text-steel-900">
+                    {t('myCreatedLotsTitle', 'My Registered Digital Lots & Live Bids')}
+                  </h3>
+                  <p className="text-xs text-steel-600">
+                    {t('myCreatedLotsDesc', 'All lots created by you, open recycler tenders, and price negotiation bids.')}
+                  </p>
+                </div>
+
+                {/* Status Filter Buttons */}
+                <div className="flex flex-wrap gap-1.5">
+                  {(['ALL', 'AVAILABLE', 'BIDDING', 'HANDOVER_PENDING', 'CONFIRMED'] as const).map(f => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setLotFilter(f)}
+                      className={`px-2.5 py-1 rounded text-[11px] font-bold transition-colors ${
+                        lotFilter === f
+                          ? 'bg-copper-600 text-white shadow-sm'
+                          : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
+                      }`}
+                    >
+                      {f === 'ALL' ? 'All Lots' : f.replace('_', ' ')}
+                      {f === 'ALL' && ` (${myLots.length})`}
+                      {f === 'BIDDING' && ` (${myLots.filter(l => l.status === 'BIDDING' || (l.bids && l.bids.length > 0)).length})`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {myLots
+                .filter(l => {
+                  if (lotFilter === 'ALL') return true;
+                  if (lotFilter === 'AVAILABLE') return l.status === 'AVAILABLE';
+                  if (lotFilter === 'BIDDING') return l.status === 'BIDDING' || (l.bids && l.bids.length > 0);
+                  if (lotFilter === 'HANDOVER_PENDING') return l.status === 'HANDOVER_PENDING';
+                  if (lotFilter === 'CONFIRMED') return l.status === 'CONFIRMED';
+                  return true;
+                })
+                .length === 0 ? (
+                <div className="text-center py-12 bg-paper-50 rounded-xl border-2 border-dashed border-steel-300 space-y-3">
+                  <FileText className="w-10 h-10 text-steel-400 mx-auto" />
+                  <p className="text-xs text-steel-600 font-bold">No digital lots found in this category.</p>
+                  <button
+                    type="button"
+                    onClick={() => setLotsSubView('create')}
+                    className="btn-dhatu-primary px-4 py-2 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow-sm"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Create a New Lot Now</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {myLots
+                    .filter(l => {
+                      if (lotFilter === 'ALL') return true;
+                      if (lotFilter === 'AVAILABLE') return l.status === 'AVAILABLE';
+                      if (lotFilter === 'BIDDING') return l.status === 'BIDDING' || (l.bids && l.bids.length > 0);
+                      if (lotFilter === 'HANDOVER_PENDING') return l.status === 'HANDOVER_PENDING';
+                      if (lotFilter === 'CONFIRMED') return l.status === 'CONFIRMED';
+                      return true;
+                    })
+                    .map(lot => {
+                      const ask = lot.askingPrice || lot.estimatedValue;
+                      const minBid = Math.round(ask * 0.5);
+                      const bidsCount = lot.bids?.length || 0;
+                      const hasBids = bidsCount > 0;
+
+                      return (
+                        <div
+                          key={lot.id}
+                          className="receipt-stub rounded-xl p-5 border-2 border-steel-400 shadow-sm flex flex-col justify-between space-y-4 hover:border-copper-600 transition-all bg-paper-50"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b border-steel-300 pb-2">
+                              <span className="font-mono text-xs font-bold text-copper-700">{lot.lotCode}</span>
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${
+                                  lot.status === 'CONFIRMED'
+                                    ? 'bg-forest-500/20 text-forest-700 border border-forest-500'
+                                    : lot.status === 'HANDOVER_PENDING'
+                                    ? 'bg-copper-500/10 text-copper-700 border border-copper-500'
+                                    : lot.status === 'BIDDING' || hasBids
+                                    ? 'bg-brass-100 text-brass-800 border border-brass-500 animate-pulse'
+                                    : 'bg-steel-200 text-steel-800 border border-steel-400'
+                                }`}
+                              >
+                                {lot.status === 'BIDDING' || hasBids ? `BIDDING (${bidsCount} Bids)` : lot.status}
+                              </span>
+                            </div>
+
+                            <div>
+                              <h4 className="font-display font-bold text-steel-900 text-sm leading-snug">
+                                {preserveEnglishItemName(lot.category)}
+                              </h4>
+                              <span className="text-[11px] text-steel-500 font-mono">Logged at: {lot.createdAt}</span>
+                            </div>
+
+                            {/* Specs Grid */}
+                            <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-paper-100 p-3 rounded-lg border border-paper-300">
+                              <div>
+                                <span className="text-steel-500 text-[10px] block uppercase">Weight</span>
+                                <span className="font-black text-steel-900">{lot.approxWeightKg} kg</span>
+                              </div>
+                              <div>
+                                <span className="text-steel-500 text-[10px] block uppercase">Asking Price</span>
+                                <span className="font-black text-forest-700">{formatCurrency(ask)}</span>
+                              </div>
+                              <div className="col-span-2 pt-1 border-t border-paper-300 flex items-center justify-between text-[10px]">
+                                <span className="text-steel-500">Min Valid Bid (50%):</span>
+                                <span className="font-bold text-copper-700">{formatCurrency(minBid)}</span>
+                              </div>
+                              {lot.highestBid && (
+                                <div className="col-span-2 flex items-center justify-between text-[11px] bg-forest-500/10 p-1.5 rounded border border-forest-500/30">
+                                  <span className="text-forest-800 font-bold">Highest Offer:</span>
+                                  <span className="font-black text-forest-700 font-mono-num">{formatCurrency(lot.highestBid)}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Recycler Bids Section */}
+                            <div className="space-y-2">
+                              <span className="text-[11px] font-bold text-steel-700 uppercase tracking-wider block">
+                                Recycler Bids ({bidsCount})
+                              </span>
+
+                              {hasBids ? (
+                                <div className="space-y-2">
+                                  {lot.bids!.map(bid => (
+                                    <div
+                                      key={bid.id}
+                                      className={`p-2.5 rounded-lg border text-xs font-mono flex flex-col gap-1.5 ${
+                                        bid.status === 'ACCEPTED'
+                                          ? 'bg-forest-500/15 border-forest-500 text-forest-900'
+                                          : bid.status === 'REJECTED'
+                                          ? 'bg-paper-200 border-steel-300 text-steel-400 opacity-60'
+                                          : 'bg-paper-100 border-steel-300 text-steel-800'
+                                      }`}
+                                    >
+                                      <div className="flex justify-between items-start">
+                                        <span className="font-bold">{bid.recyclerName}</span>
+                                        <span className="font-black text-forest-700 text-sm">{formatCurrency(bid.bidAmount)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center text-[10px] text-steel-500">
+                                        <span>Rate: ₹{bid.bidPerKg}/kg ({Math.round((bid.bidAmount / ask) * 100)}% of Ask)</span>
+                                        <span>{bid.createdAt}</span>
+                                      </div>
+
+                                      {bid.status === 'PENDING' && (
+                                        <div className="grid grid-cols-2 gap-1.5 pt-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleAcceptBid(lot.id, bid.id)}
+                                            className="btn-dhatu-primary py-1 text-[11px] font-bold rounded flex items-center justify-center gap-1 shadow-sm"
+                                          >
+                                            <Check className="w-3 h-3" />
+                                            <span>Accept Bid</span>
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleRejectBid(lot.id, bid.id)}
+                                            className="bg-paper-200 hover:bg-signal-500/10 text-steel-700 hover:text-signal-600 border border-steel-300 py-1 text-[11px] font-bold rounded"
+                                          >
+                                            Decline
+                                          </button>
+                                        </div>
+                                      )}
+
+                                      {bid.status === 'ACCEPTED' && (
+                                        <div className="text-forest-700 font-bold text-[10px] flex items-center gap-1">
+                                          <CheckCircle className="w-3 h-3" /> Winning Accepted Bid
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="p-2.5 bg-paper-100 rounded-lg border border-steel-300 text-[11px] text-steel-600 space-y-1.5">
+                                  <p>Awaiting bids from nearby authorized aggregators.</p>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSimulateBid(lot)}
+                                    className="text-[10px] font-bold text-copper-700 hover:text-copper-900 underline flex items-center gap-1"
+                                  >
+                                    <Sparkles className="w-3 h-3" /> Simulate Recycler Bid ({formatCurrency(Math.round(ask * 0.88))})
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Card Bottom Actions */}
+                          <div className="pt-2 border-t border-steel-200 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setHandoverLotCode(lot.lotCode);
+                                setActiveTab('handover');
+                              }}
+                              className="flex-1 btn-dhatu-brass py-2 rounded text-xs font-bold flex items-center justify-center gap-1 shadow-sm"
+                            >
+                              <QrCode className="w-3.5 h-3.5" />
+                              <span>Open QR</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -1585,6 +1911,126 @@ export const KabadiwalaDashboard: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* LOT CREATION POPUP CONFIRMATION MODAL */}
+      {createdLotModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-steel-950/80 backdrop-blur-sm animate-fade-in"
+          onClick={() => setCreatedLotModal(null)}
+        >
+          <div
+            className="bg-paper-50 rounded-2xl border-2 border-copper-600 max-w-md w-full p-6 shadow-tactile-lg space-y-5 text-steel-900 overflow-y-auto max-h-[90vh] relative"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close icon button */}
+            <button
+              onClick={() => setCreatedLotModal(null)}
+              className="absolute top-4 right-4 p-2 rounded-full text-steel-500 hover:text-steel-900 hover:bg-paper-200 transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header with success badge */}
+            <div className="text-center space-y-2 pt-2">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-forest-500/10 text-forest-600 border-2 border-forest-500 mx-auto shadow-sm">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-display font-black text-steel-950">
+                Lot Created Successfully!
+              </h3>
+              <p className="text-xs text-steel-600 font-medium max-w-xs mx-auto">
+                Your digital scrap lot has been registered in local storage and is now broadcasted for authorized recyclers to bid.
+              </p>
+            </div>
+
+            {/* Lot Details Summary Card */}
+            <div className="bg-paper-100 rounded-xl border border-steel-300 p-4 space-y-3 font-mono">
+              <div className="flex items-center justify-between pb-2 border-b border-steel-200">
+                <span className="text-[11px] uppercase text-steel-500 tracking-wider">Lot Reference</span>
+                <span className="font-bold text-copper-700 text-sm">#{createdLotModal.lotCode}</span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-[10px] uppercase text-steel-500">Category (English)</div>
+                <div className="text-xs font-bold text-steel-900 font-sans">
+                  {preserveEnglishItemName(createdLotModal.category)}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                <div className="bg-paper-50 p-2 rounded border border-steel-200">
+                  <span className="text-[10px] text-steel-500 block">EST. WEIGHT</span>
+                  <span className="font-bold text-steel-900 text-sm">{createdLotModal.approxWeightKg} kg</span>
+                </div>
+                <div className="bg-paper-50 p-2 rounded border border-steel-200">
+                  <span className="text-[10px] text-steel-500 block">BASE RATE</span>
+                  <span className="font-bold text-copper-700 text-sm">₹{createdLotModal.recyclerOfferedRate}/kg</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                <div className="bg-brass-50 border border-brass-300 p-2 rounded">
+                  <span className="text-[10px] text-brass-700 block font-bold">ASKING PRICE</span>
+                  <span className="font-bold text-steel-950 text-base">
+                    ₹{(createdLotModal.askingPrice || createdLotModal.estimatedValue).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="bg-forest-50 border border-forest-300 p-2 rounded">
+                  <span className="text-[10px] text-forest-700 block font-bold">MIN VALID BID (50%)</span>
+                  <span className="font-bold text-forest-800 text-base">
+                    ₹{(createdLotModal.minBidAmount || Math.round((createdLotModal.askingPrice || createdLotModal.estimatedValue) * 0.5)).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-[11px] text-steel-600 font-sans flex items-center gap-1.5 pt-1 text-center justify-center">
+                <span className="w-2 h-2 rounded-full bg-forest-500 animate-pulse inline-block" />
+                <span>Bidding rule: Bids below <strong>50% of asking price</strong> are rejected.</span>
+              </div>
+            </div>
+
+            {/* Quick Handover Code & QR Teaser */}
+            <div className="p-3 bg-paper-200 rounded-lg border border-steel-300 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <QrCode className="w-8 h-8 text-steel-700 shrink-0" />
+                <div>
+                  <div className="text-[11px] font-bold text-steel-800">Digital Handover Voucher</div>
+                  <div className="text-[10px] text-steel-600 font-mono">Ready for recycler scan at depot</div>
+                </div>
+              </div>
+              <span className="px-2 py-1 bg-forest-600 text-paper-50 rounded text-[10px] font-bold uppercase tracking-wider">
+                Live
+              </span>
+            </div>
+
+            {/* Action Buttons - min-h-[48px] for Android portrait usage */}
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={() => {
+                  setCreatedLotModal(null);
+                  setActiveTab('lots');
+                  setLotsSubView('mylots');
+                  triggerHaptic(25);
+                }}
+                className="w-full min-h-[48px] py-2.5 px-4 bg-copper-700 hover:bg-copper-800 text-paper-50 font-bold rounded-lg shadow-tactile text-sm flex items-center justify-center gap-2 active:translate-y-0.5 transition-all"
+              >
+                <span>📦 View in My Lots & Live Bids</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setCreatedLotModal(null)}
+                className="w-full min-h-[48px] py-2.5 px-4 bg-paper-200 hover:bg-paper-300 text-steel-800 font-semibold rounded-lg border border-steel-400 text-sm transition-colors"
+              >
+                Done / Create Another Lot
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

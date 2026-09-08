@@ -83,6 +83,16 @@ export interface Pickup {
   traceabilityHash?: string;
 }
 
+export interface LotBid {
+  id: string;
+  recyclerId: string;
+  recyclerName: string;
+  bidAmount: number;
+  bidPerKg: number;
+  createdAt: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+}
+
 export interface EWasteLot {
   id: string;
   lotCode: string;
@@ -91,8 +101,13 @@ export interface EWasteLot {
   category: string;
   approxWeightKg: number;
   estimatedValue: number;
+  askingPrice?: number;
+  minBidAmount?: number;
   recyclerOfferedRate: number;
-  status: 'DRAFT' | 'AVAILABLE' | 'REQUESTED' | 'HANDOVER_PENDING' | 'CONFIRMED' | 'REJECTED';
+  status: 'DRAFT' | 'AVAILABLE' | 'REQUESTED' | 'BIDDING' | 'HANDOVER_PENDING' | 'CONFIRMED' | 'REJECTED';
+  bids?: LotBid[];
+  highestBid?: number;
+  winningBid?: LotBid;
   imageUrl?: string;
   gpsLat: number;
   gpsLng: number;

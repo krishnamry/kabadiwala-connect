@@ -23,9 +23,13 @@ import {
   ChevronRight,
   Sparkles,
   Sliders,
-  Check
+  Check,
+  Gavel,
+  X,
+  Tag
 } from 'lucide-react';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
+import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 
 export const RecyclerDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -56,6 +60,47 @@ export const RecyclerDashboard: React.FC = () => {
 
   // Anomalies state (backed by local storage)
   const [anomalies, setAnomalies] = useState<TransactionAnomaly[]>(() => storage.getAnomalies());
+
+  // Recycler Bidding state
+  const [biddingLot, setBiddingLot] = useState<EWasteLot | null>(null);
+  const [bidAmountInput, setBidAmountInput] = useState<number>(0);
+  const [bidError, setBidError] = useState<string | null>(null);
+  const [bidSuccess, setBidSuccess] = useState<string | null>(null);
+
+  const openBidModal = (lot: EWasteLot) => {
+    setBiddingLot(lot);
+    const ask = lot.askingPrice || lot.estimatedValue;
+    const minBid = lot.minBidAmount || Math.round(ask * 0.5);
+    const defaultBid = lot.highestBid ? Math.max(lot.highestBid + 500, minBid) : Math.round(ask * 0.85);
+    setBidAmountInput(defaultBid);
+    setBidError(null);
+    triggerHaptic(20);
+  };
+
+  const handleSubmitBid = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!biddingLot) return;
+    const ask = biddingLot.askingPrice || biddingLot.estimatedValue;
+    const minBid = biddingLot.minBidAmount || Math.round(ask * 0.5);
+    if (bidAmountInput < minBid) {
+      setBidError(`Invalid bid: Must be at least ₹${minBid.toLocaleString('en-IN')} (50% of asking price ₹${ask.toLocaleString('en-IN')})`);
+      return;
+    }
+
+    try {
+      const { lot: updatedLot } = storage.addBidToLot(biddingLot.id, {
+        recyclerId: user?.id || 'rec-01',
+        recyclerName: user?.recycler?.facilityName || user?.name || 'M/s EcoRecycle Aggregators Ltd',
+        bidAmount: bidAmountInput
+      });
+      setIncomingLots(storage.getLots());
+      hapticSuccess();
+      setBidSuccess(`Bid of ₹${bidAmountInput.toLocaleString('en-IN')} successfully placed on Lot #${updatedLot.lotCode}! Waiting for collector to review.`);
+      setBiddingLot(null);
+    } catch (err: any) {
+      setBidError(err.message || 'Failed to place bid');
+    }
+  };
 
   useEffect(() => {
     const handleStorageChange = (e: any) => {
@@ -215,9 +260,9 @@ export const RecyclerDashboard: React.FC = () => {
           <div className="bg-steel-950/80 p-3 rounded-lg border border-steel-800">
             <div className="text-xs text-paper-400 uppercase font-mono">Pending Lots</div>
             <div className="text-lg font-mono-num font-bold text-copper-400">
-              {incomingLots.filter(l => l.status === 'REQUESTED').length} Lots
+              {incomingLots.filter(l => l.status === 'REQUESTED' || l.status === 'BIDDING').length} Lots
             </div>
-            <div className="text-[10px] text-paper-400">From 3 Collectors</div>
+            <div className="text-[10px] text-paper-400">From Active Collectors</div>
           </div>
           <div className="bg-steel-950/80 p-3 rounded-lg border border-steel-800 col-span-2 sm:col-span-1">
             <div className="text-xs text-paper-400 uppercase font-mono">Anomalies</div>
@@ -240,7 +285,7 @@ export const RecyclerDashboard: React.FC = () => {
           }`}
         >
           <Scale className="w-4 h-4" />
-          <span>1. {t('tabIncoming', 'Incoming Collector Lots')} ({incomingLots.filter(l => l.status === 'REQUESTED').length})</span>
+          <span>1. {t('tabIncoming', 'Incoming Collector Lots')} ({incomingLots.filter(l => l.status === 'REQUESTED' || l.status === 'BIDDING').length})</span>
         </button>
 
         <button
@@ -304,100 +349,173 @@ export const RecyclerDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* TAB 1: INCOMING LOT REQUESTS */}
+      {/* TAB 1: INCOMING LOT REQUESTS & BIDDING */}
       {activeTab === 'incoming' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-xl font-display font-black text-steel-900">
-                Incoming Collector Lots for Valuation & Intake
+                Incoming Collector Lots & Bidding Market
               </h2>
               <p className="text-xs text-steel-600 font-medium">
-                Review digital lots submitted by verified door-to-door collectors in Delhi NCR.
+                Bid for digital lots submitted by verified door-to-door collectors in Delhi NCR. Valid bids must be ≥ 50% of asking price.
               </p>
             </div>
-            <span className="text-xs font-mono text-steel-600 bg-paper-200 px-3 py-1 rounded border border-steel-300">
-              Live Feed: 3 Active Lots
+            <span className="text-xs font-mono text-copper-700 bg-copper-50 px-3 py-1.5 rounded-lg border border-copper-300 font-bold self-start sm:self-auto">
+              Live Feed: {incomingLots.filter(l => l.status === 'REQUESTED' || l.status === 'BIDDING').length} Open Lots
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {incomingLots.map(lot => (
-              <div
-                key={lot.id}
-                className="receipt-stub rounded-lg p-5 border-2 border-steel-300 shadow-sm flex flex-col justify-between space-y-4 hover:border-copper-500 transition-colors"
-              >
-                <div>
-                  <div className="flex items-center justify-between border-b border-steel-200 pb-2 mb-3">
-                    <span className="font-mono text-xs font-bold text-copper-700">{lot.lotCode}</span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        lot.status === 'HANDOVER_PENDING'
-                          ? 'bg-forest-500/10 text-forest-500 border border-forest-500/30'
-                          : lot.status === 'REJECTED'
-                          ? 'bg-signal-500/10 text-signal-500 border border-signal-500/30'
-                          : 'bg-brass-100 text-brass-800 border border-brass-400'
-                      }`}
-                    >
-                      {lot.status}
-                    </span>
-                  </div>
-
-                  <h3 className="font-display font-bold text-steel-900 text-base leading-snug">
-                    {preserveEnglishItemName(lot.category)}
-                  </h3>
-
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs bg-paper-100 p-2.5 rounded border border-paper-300 font-mono">
-                    <div>
-                      <span className="text-steel-500 text-[10px] block">COLLECTOR</span>
-                      <span className="font-bold text-steel-800">{lot.collectorName}</span>
-                    </div>
-                    <div>
-                      <span className="text-steel-500 text-[10px] block">EST. WEIGHT</span>
-                      <span className="font-bold text-steel-900">{lot.approxWeightKg} kg</span>
-                    </div>
-                    <div>
-                      <span className="text-steel-500 text-[10px] block">OFFERED RATE</span>
-                      <span className="font-bold text-copper-600">₹{lot.recyclerOfferedRate}/kg</span>
-                    </div>
-                    <div>
-                      <span className="text-steel-500 text-[10px] block">TOTAL VALUE</span>
-                      <span className="font-bold text-forest-600">{formatCurrency(lot.estimatedValue)}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 text-[11px] text-steel-500 flex items-center justify-between">
-                    <span>GPS: {lot.gpsLat}, {lot.gpsLng}</span>
-                    <span>{lot.createdAt}</span>
-                  </div>
-                </div>
-
-                {lot.status === 'REQUESTED' ? (
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-steel-200">
-                    <button
-                      onClick={() => handleLotDecision(lot.id, 'ACCEPT')}
-                      className="btn-dhatu-primary py-2 text-xs font-bold rounded flex items-center justify-center space-x-1"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Accept Lot</span>
-                    </button>
-                    <button
-                      onClick={() => handleLotDecision(lot.id, 'REJECT')}
-                      className="bg-paper-200 hover:bg-signal-500/10 text-signal-500 border border-steel-300 py-2 text-xs font-bold rounded flex items-center justify-center space-x-1 transition-colors"
-                    >
-                      <XCircle className="w-3.5 h-3.5" />
-                      <span>Reject</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="pt-2 border-t border-steel-200">
-                    <span className="text-xs font-bold text-forest-600 flex items-center gap-1.5">
-                      <Check className="w-4 h-4" /> Ready for Physical Handover & QR Scanning
-                    </span>
-                  </div>
-                )}
+          {bidSuccess && (
+            <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-xl text-forest-800 text-xs font-medium flex items-center justify-between shadow-sm animate-fade-in">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-forest-600 shrink-0" />
+                <span>{bidSuccess}</span>
               </div>
-            ))}
+              <button
+                onClick={() => setBidSuccess(null)}
+                className="p-1 text-forest-700 hover:text-forest-900 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {incomingLots.map(lot => {
+              const ask = lot.askingPrice || lot.estimatedValue;
+              const minBid = lot.minBidAmount || Math.round(ask * 0.5);
+              const myBid = lot.bids?.find(
+                b => b.recyclerId === (user?.id || 'rec-01') || b.recyclerName?.includes(user?.recycler?.facilityName || user?.name || 'EcoRecycle')
+              );
+              const isBiddable = lot.status === 'REQUESTED' || lot.status === 'BIDDING';
+
+              return (
+                <div
+                  key={lot.id}
+                  className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm flex flex-col justify-between space-y-4 hover:border-copper-500 transition-colors bg-paper-50"
+                >
+                  <div>
+                    <div className="flex items-center justify-between border-b border-steel-200 pb-2 mb-3">
+                      <span className="font-mono text-xs font-bold text-copper-700">#{lot.lotCode}</span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                          lot.status === 'HANDOVER_PENDING'
+                            ? 'bg-forest-500/10 text-forest-600 border border-forest-500/30'
+                            : lot.status === 'CONFIRMED'
+                            ? 'bg-steel-200 text-steel-700 border border-steel-400'
+                            : lot.status === 'REJECTED'
+                            ? 'bg-signal-500/10 text-signal-500 border border-signal-500/30'
+                            : 'bg-brass-100 text-brass-800 border border-brass-400'
+                        }`}
+                      >
+                        {lot.status === 'BIDDING' ? 'BIDDING OPEN' : lot.status}
+                      </span>
+                    </div>
+
+                    <h3 className="font-display font-bold text-steel-900 text-base leading-snug">
+                      {preserveEnglishItemName(lot.category)}
+                    </h3>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs bg-paper-100 p-2.5 rounded border border-paper-300 font-mono">
+                      <div>
+                        <span className="text-steel-500 text-[10px] block">COLLECTOR</span>
+                        <span className="font-bold text-steel-800 truncate block">{lot.collectorName}</span>
+                      </div>
+                      <div>
+                        <span className="text-steel-500 text-[10px] block">EST. WEIGHT</span>
+                        <span className="font-bold text-steel-900">{lot.approxWeightKg} kg</span>
+                      </div>
+                      <div>
+                        <span className="text-steel-500 text-[10px] block">ASKING PRICE</span>
+                        <span className="font-bold text-steel-900">₹{ask.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div>
+                        <span className="text-steel-500 text-[10px] block">MIN BID (50%)</span>
+                        <span className="font-bold text-copper-700">₹{minBid.toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+
+                    {/* Live bidding stats bar */}
+                    <div className="mt-2.5 p-2 bg-paper-200 rounded border border-steel-300 text-xs font-mono flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-steel-500 block">CURRENT TOP BID</span>
+                        <span className="font-bold text-forest-700">
+                          {lot.highestBid ? `₹${lot.highestBid.toLocaleString('en-IN')}` : 'No bids yet'}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-steel-500 block">BIDS RECEIVED</span>
+                        <span className="font-bold text-steel-700">{lot.bids?.length || 0}</span>
+                      </div>
+                    </div>
+
+                    {myBid && (
+                      <div className="mt-2 text-[11px] p-2 rounded bg-copper-50 border border-copper-200 text-copper-800 flex items-center justify-between">
+                        <span>Your Bid: <strong>₹{myBid.bidAmount.toLocaleString('en-IN')}</strong></span>
+                        <span className="font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-copper-200">{myBid.status}</span>
+                      </div>
+                    )}
+
+                    <div className="mt-2 text-[11px] text-steel-500 flex items-center justify-between">
+                      <span>GPS: {lot.gpsLat}, {lot.gpsLng}</span>
+                      <span>{lot.createdAt}</span>
+                    </div>
+                  </div>
+
+                  {isBiddable ? (
+                    <div className="space-y-2 pt-2 border-t border-steel-200">
+                      <button
+                        onClick={() => openBidModal(lot)}
+                        className="w-full min-h-[44px] btn-dhatu-primary py-2.5 text-xs font-bold rounded-lg flex items-center justify-center space-x-1.5 shadow-sm active:scale-98 transition-transform"
+                      >
+                        <Gavel className="w-3.5 h-3.5" />
+                        <span>Place Bid (Min ₹{minBid.toLocaleString('en-IN')})</span>
+                      </button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => handleLotDecision(lot.id, 'ACCEPT')}
+                          className="bg-paper-200 hover:bg-forest-500/10 text-forest-700 border border-steel-300 py-2 text-[11px] font-bold rounded flex items-center justify-center space-x-1 transition-colors"
+                          title="Accept immediately at full asking price"
+                        >
+                          <CheckCircle2 className="w-3 h-3 text-forest-600" />
+                          <span>Accept Ask</span>
+                        </button>
+                        <button
+                          onClick={() => handleLotDecision(lot.id, 'REJECT')}
+                          className="bg-paper-200 hover:bg-signal-500/10 text-signal-500 border border-steel-300 py-2 text-[11px] font-bold rounded flex items-center justify-center space-x-1 transition-colors"
+                        >
+                          <XCircle className="w-3 h-3" />
+                          <span>Decline</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : lot.status === 'HANDOVER_PENDING' ? (
+                    <div className="pt-2 border-t border-steel-200 space-y-2">
+                      <div className="p-2 bg-forest-50 border border-forest-300 rounded text-xs font-bold text-forest-700 flex items-center gap-1.5">
+                        <Check className="w-4 h-4 text-forest-600 shrink-0" />
+                        <span>Bid Accepted! Ready for physical QR scan.</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setHandoverCode(lot.lotCode);
+                          setActualWeight(lot.approxWeightKg);
+                          setActiveTab('handover');
+                        }}
+                        className="w-full py-1.5 bg-paper-200 hover:bg-copper-100 text-copper-800 border border-copper-300 text-xs font-bold rounded transition-colors"
+                      >
+                        Go to QR Handover Verification →
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="pt-2 border-t border-steel-200 text-xs text-steel-500 flex items-center justify-between">
+                      <span>Status: {lot.status}</span>
+                      {lot.confirmedAt && <span>Confirmed</span>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -893,6 +1011,209 @@ export const RecyclerDashboard: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* RECYCLER BIDDING MODAL (Rule: valid bid must be >= 50% of asking price) */}
+      {biddingLot && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-steel-950/80 backdrop-blur-sm animate-fade-in"
+          onClick={() => setBiddingLot(null)}
+        >
+          <div
+            className="bg-paper-50 rounded-2xl border-2 border-copper-600 max-w-md w-full p-6 shadow-tactile-lg space-y-5 text-steel-900 overflow-y-auto max-h-[90vh] relative"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setBiddingLot(null)}
+              className="absolute top-4 right-4 p-2 rounded-full text-steel-500 hover:text-steel-900 hover:bg-paper-200 transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div className="space-y-1">
+              <span className="stamp-seal stamp-verified text-[10px]">RECYCLER BIDDING</span>
+              <h3 className="text-lg font-display font-black text-steel-950 mt-1">
+                Submit Bid for Lot #{biddingLot.lotCode}
+              </h3>
+              <p className="text-xs text-steel-600 font-medium">
+                {preserveEnglishItemName(biddingLot.category)} • {biddingLot.approxWeightKg} kg
+              </p>
+            </div>
+
+            {/* Asking Price & Min 50% Threshold Summary */}
+            {(() => {
+              const ask = biddingLot.askingPrice || biddingLot.estimatedValue;
+              const minBid = biddingLot.minBidAmount || Math.round(ask * 0.5);
+              const perKg = biddingLot.approxWeightKg ? Math.round(bidAmountInput / biddingLot.approxWeightKg) : 0;
+              const isBelowMin = bidAmountInput < minBid;
+
+              return (
+                <form onSubmit={handleSubmitBid} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2 bg-paper-100 p-3 rounded-xl border border-steel-300 font-mono text-xs">
+                    <div className="bg-paper-50 p-2.5 rounded border border-steel-200">
+                      <span className="text-[10px] text-steel-500 block">COLLECTOR ASK</span>
+                      <span className="font-bold text-steel-900 text-sm">₹{ask.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="bg-forest-50 p-2.5 rounded border border-forest-300">
+                      <span className="text-[10px] text-forest-700 block font-bold">MIN VALID BID (50%)</span>
+                      <span className="font-bold text-forest-800 text-sm">₹{minBid.toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+
+                  {biddingLot.highestBid ? (
+                    <div className="p-2.5 bg-paper-200 rounded-lg border border-steel-300 text-xs font-mono flex items-center justify-between">
+                      <span className="text-steel-600">Current Highest Bid:</span>
+                      <span className="font-bold text-forest-700">₹{biddingLot.highestBid.toLocaleString('en-IN')}</span>
+                    </div>
+                  ) : null}
+
+                  {/* Quick percentage shortcuts */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-steel-700 mb-1.5">
+                      Quick Bid Presets
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5 text-xs font-mono">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBidAmountInput(minBid);
+                          setBidError(null);
+                          triggerHaptic(15);
+                        }}
+                        className={`p-2 rounded border text-center transition-all ${
+                          bidAmountInput === minBid
+                            ? 'bg-copper-700 text-paper-50 border-copper-700 font-bold'
+                            : 'bg-paper-200 hover:bg-paper-300 text-steel-800 border-steel-300'
+                        }`}
+                      >
+                        <span className="block text-[10px] opacity-80">50% MIN</span>
+                        ₹{minBid.toLocaleString('en-IN')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = Math.round(ask * 0.7);
+                          setBidAmountInput(val);
+                          setBidError(null);
+                          triggerHaptic(15);
+                        }}
+                        className={`p-2 rounded border text-center transition-all ${
+                          bidAmountInput === Math.round(ask * 0.7)
+                            ? 'bg-copper-700 text-paper-50 border-copper-700 font-bold'
+                            : 'bg-paper-200 hover:bg-paper-300 text-steel-800 border-steel-300'
+                        }`}
+                      >
+                        <span className="block text-[10px] opacity-80">70%</span>
+                        ₹{Math.round(ask * 0.7).toLocaleString('en-IN')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = Math.round(ask * 0.85);
+                          setBidAmountInput(val);
+                          setBidError(null);
+                          triggerHaptic(15);
+                        }}
+                        className={`p-2 rounded border text-center transition-all ${
+                          bidAmountInput === Math.round(ask * 0.85)
+                            ? 'bg-copper-700 text-paper-50 border-copper-700 font-bold'
+                            : 'bg-paper-200 hover:bg-paper-300 text-steel-800 border-steel-300'
+                        }`}
+                      >
+                        <span className="block text-[10px] opacity-80">85%</span>
+                        ₹{Math.round(ask * 0.85).toLocaleString('en-IN')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBidAmountInput(ask);
+                          setBidError(null);
+                          triggerHaptic(15);
+                        }}
+                        className={`p-2 rounded border text-center transition-all ${
+                          bidAmountInput === ask
+                            ? 'bg-copper-700 text-paper-50 border-copper-700 font-bold'
+                            : 'bg-paper-200 hover:bg-paper-300 text-steel-800 border-steel-300'
+                        }`}
+                      >
+                        <span className="block text-[10px] opacity-80">100% ASK</span>
+                        ₹{ask.toLocaleString('en-IN')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Custom Bid Input */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-steel-700 mb-1">
+                      Your Total Bid (₹)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-bold text-steel-600">
+                        ₹
+                      </span>
+                      <input
+                        type="number"
+                        min={minBid}
+                        step={50}
+                        value={bidAmountInput || ''}
+                        onChange={e => {
+                          const val = Number(e.target.value);
+                          setBidAmountInput(val);
+                          if (val < minBid) {
+                            setBidError(`Bid must be at least ₹${minBid.toLocaleString('en-IN')} (50% of asking price)`);
+                          } else {
+                            setBidError(null);
+                          }
+                        }}
+                        className={`w-full pl-8 pr-4 py-3 bg-paper-50 border-2 rounded-lg font-mono text-lg font-bold focus:outline-none ${
+                          isBelowMin ? 'border-signal-500 text-signal-600' : 'border-steel-400 focus:border-copper-600 text-steel-900'
+                        }`}
+                        placeholder={`Min ₹${minBid}`}
+                        required
+                      />
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-[11px] text-steel-600 font-mono">
+                      <span>Effective Rate: <strong>₹{perKg}/kg</strong></span>
+                      <span>Min valid bid: <strong>₹{minBid.toLocaleString('en-IN')}</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Error display */}
+                  {bidError && (
+                    <div className="p-3 bg-signal-500/10 border border-signal-500 rounded-lg text-signal-600 text-xs font-semibold flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>{bidError}</span>
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="pt-2 space-y-2">
+                    <button
+                      type="submit"
+                      disabled={isBelowMin || !bidAmountInput}
+                      className="w-full min-h-[48px] py-3 bg-copper-700 hover:bg-copper-800 disabled:opacity-50 disabled:cursor-not-allowed text-paper-50 font-bold rounded-lg shadow-tactile text-sm flex items-center justify-center gap-2 active:translate-y-0.5 transition-all"
+                    >
+                      <Gavel className="w-4 h-4" />
+                      <span>Submit Bid of ₹{(bidAmountInput || 0).toLocaleString('en-IN')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBiddingLot(null)}
+                      className="w-full min-h-[44px] py-2 bg-paper-200 hover:bg-paper-300 text-steel-700 font-semibold rounded-lg border border-steel-300 text-xs transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
     </div>
   );

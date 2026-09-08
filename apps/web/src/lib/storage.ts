@@ -1,4 +1,4 @@
-import { User, Pickup, EWasteLot, ScrapRate, TransactionAnomaly, AdminStats, Role } from '../types';
+import { User, Pickup, EWasteLot, LotBid, ScrapRate, TransactionAnomaly, AdminStats, Role } from '../types';
 
 // Storage Keys
 export const STORAGE_KEYS = {
@@ -228,12 +228,26 @@ const SEED_LOTS: EWasteLot[] = [
     category: 'High-grade Printed Circuit Boards (PCBs)',
     approxWeightKg: 18.5,
     estimatedValue: 11840,
+    askingPrice: 11840,
+    minBidAmount: 5920,
     recyclerOfferedRate: 640,
-    status: 'REQUESTED',
+    status: 'BIDDING',
     gpsLat: 28.5685,
     gpsLng: 77.2412,
     createdAt: '2026-09-08 09:30 AM',
-    qrCode: 'KBD-EWASTE-9821-DELHI'
+    qrCode: 'KBD-EWASTE-9821-DELHI',
+    bids: [
+      {
+        id: 'bid-01',
+        recyclerId: 'mock-recycler-1',
+        recyclerName: 'EcoRecycle Aggregators Ltd',
+        bidAmount: 11200,
+        bidPerKg: 605,
+        createdAt: '2026-09-08 10:00 AM',
+        status: 'PENDING'
+      }
+    ],
+    highestBid: 11200
   },
   {
     id: 'lot-102',
@@ -243,12 +257,15 @@ const SEED_LOTS: EWasteLot[] = [
     category: 'Copper Cables & Insulated Wires',
     approxWeightKg: 24.0,
     estimatedValue: 11520,
+    askingPrice: 11520,
+    minBidAmount: 5760,
     recyclerOfferedRate: 480,
     status: 'REQUESTED',
     gpsLat: 28.5420,
     gpsLng: 77.2580,
     createdAt: '2026-09-08 10:15 AM',
-    qrCode: 'KBD-EWASTE-9824-DELHI'
+    qrCode: 'KBD-EWASTE-9824-DELHI',
+    bids: []
   },
   {
     id: 'lot-103',
@@ -258,12 +275,15 @@ const SEED_LOTS: EWasteLot[] = [
     category: 'Lithium-ion Batteries',
     approxWeightKg: 32.0,
     estimatedValue: 4640,
+    askingPrice: 4640,
+    minBidAmount: 2320,
     recyclerOfferedRate: 145,
     status: 'AVAILABLE',
     gpsLat: 28.5210,
     gpsLng: 77.2740,
     createdAt: '2026-09-08 11:00 AM',
-    qrCode: 'KBD-EWASTE-9830-DELHI'
+    qrCode: 'KBD-EWASTE-9830-DELHI',
+    bids: []
   }
 ];
 
@@ -671,6 +691,96 @@ export const storage = {
       ...updates,
       status
     };
+    lots[idx] = updatedLot;
+    saveToStorage(STORAGE_KEYS.LOTS, lots);
+    return updatedLot;
+  },
+  getMyLots: (collectorId?: string): EWasteLot[] => {
+    const all = storage.getLots();
+    if (!collectorId) return all;
+    return all.filter(l => l.collectorId === collectorId || l.collectorName?.toLowerCase().includes('suresh') || !l.collectorId);
+  },
+  addBidToLot: (lotCodeOrId: string, bidData: { recyclerId: string; recyclerName: string; bidAmount: number }): { lot: EWasteLot; bid: LotBid } => {
+    const lots = storage.getLots();
+    const idx = lots.findIndex(l => l.id === lotCodeOrId || l.lotCode.toLowerCase() === lotCodeOrId.toLowerCase());
+    if (idx === -1) throw new Error('Lot not found');
+
+    const lot = lots[idx];
+    const ask = lot.askingPrice || lot.estimatedValue;
+    const minBid = Math.round(ask * 0.5);
+    if (bidData.bidAmount < minBid) {
+      throw new Error(`Invalid bid: Must be at least ₹${minBid} (50% of asking price ₹${ask})`);
+    }
+
+    const newBid: LotBid = {
+      id: `bid-${Date.now()}`,
+      recyclerId: bidData.recyclerId,
+      recyclerName: bidData.recyclerName,
+      bidAmount: bidData.bidAmount,
+      bidPerKg: Math.round(bidData.bidAmount / (lot.approxWeightKg || 1)),
+      createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'PENDING'
+    };
+
+    const existingBids = lot.bids || [];
+    const updatedBids = [newBid, ...existingBids];
+    const highestBid = Math.max(...updatedBids.map(b => b.bidAmount));
+
+    const updatedLot: EWasteLot = {
+      ...lot,
+      bids: updatedBids,
+      highestBid,
+      status: lot.status === 'AVAILABLE' || lot.status === 'REQUESTED' ? 'BIDDING' : lot.status
+    };
+
+    lots[idx] = updatedLot;
+    saveToStorage(STORAGE_KEYS.LOTS, lots);
+    return { lot: updatedLot, bid: newBid };
+  },
+  acceptLotBid: (lotCodeOrId: string, bidId: string): EWasteLot => {
+    const lots = storage.getLots();
+    const idx = lots.findIndex(l => l.id === lotCodeOrId || l.lotCode.toLowerCase() === lotCodeOrId.toLowerCase());
+    if (idx === -1) throw new Error('Lot not found');
+
+    const lot = lots[idx];
+    const bids = (lot.bids || []).map(b => ({
+      ...b,
+      status: (b.id === bidId ? 'ACCEPTED' : 'REJECTED') as LotBid['status']
+    }));
+    const winningBid = bids.find(b => b.id === bidId);
+
+    const updatedLot: EWasteLot = {
+      ...lot,
+      bids,
+      winningBid,
+      recyclerId: winningBid?.recyclerId,
+      recyclerName: winningBid?.recyclerName,
+      recyclerOfferedRate: winningBid?.bidPerKg || lot.recyclerOfferedRate,
+      estimatedValue: winningBid ? winningBid.bidAmount : lot.estimatedValue,
+      status: 'HANDOVER_PENDING'
+    };
+
+    lots[idx] = updatedLot;
+    saveToStorage(STORAGE_KEYS.LOTS, lots);
+    return updatedLot;
+  },
+  rejectLotBid: (lotCodeOrId: string, bidId: string): EWasteLot => {
+    const lots = storage.getLots();
+    const idx = lots.findIndex(l => l.id === lotCodeOrId || l.lotCode.toLowerCase() === lotCodeOrId.toLowerCase());
+    if (idx === -1) throw new Error('Lot not found');
+
+    const lot = lots[idx];
+    const bids = (lot.bids || []).map(b => (b.id === bidId ? { ...b, status: 'REJECTED' as const } : b));
+    const activeBids = bids.filter(b => b.status === 'PENDING');
+    const highestBid = activeBids.length > 0 ? Math.max(...activeBids.map(b => b.bidAmount)) : undefined;
+
+    const updatedLot: EWasteLot = {
+      ...lot,
+      bids,
+      highestBid,
+      status: activeBids.length > 0 ? 'BIDDING' : 'AVAILABLE'
+    };
+
     lots[idx] = updatedLot;
     saveToStorage(STORAGE_KEYS.LOTS, lots);
     return updatedLot;
