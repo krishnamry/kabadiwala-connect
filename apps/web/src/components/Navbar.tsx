@@ -12,7 +12,8 @@ import {
   Sparkles,
   Volume2,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Languages
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -37,7 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
       case 'KABADIWALA':
         return (
           <span className="stamp-seal stamp-pending text-[10px] bg-brass-100 text-brass-800 border-brass-500">
-            {t('portalCollector', 'Collector / कबाड़ीवाला')}
+            {t('portalCollector', 'Collector Portal')}
           </span>
         );
       case 'RECYCLER':
@@ -78,14 +79,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                 </span>
               </div>
               <p className="text-[11px] text-steel-600 hidden md:flex items-center gap-1 font-medium">
-                <span>धातु — e-Waste Traceability & Formalization</span>
+                <span>{t('dhatuTag', 'Dhatu — e-Waste Traceability & Formalization')}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    speak(language === 'hi' ? 'कबाड़ीवाला कनेक्ट, धातु ई-कचरा मंच' : language === 'mr' ? 'कबाडीवाला कनेक्ट, धातु ई-कचरा व्यासपीठ' : 'Kabadiwala Connect, Dhatu e-waste platform');
+                    speak(language === 'hi' ? 'कबाड़ीवाला कनेक्ट, धातु ई-कचरा मंच' : language === 'mr' ? 'कबाडीवाला कनेक्ट, धातु ई-कचरा व्यासपीठ' : 'Kabadiwala Connect, Dhatu e-waste formalization platform');
                   }}
                   className="text-copper-600 hover:text-copper-800"
-                  title="Listen aloud"
+                  title={t('listen', 'Listen aloud')}
                 >
                   <Volume2 className="w-3.5 h-3.5 inline" />
                 </button>
@@ -104,22 +105,24 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           {/* Right Section: Language Toggle & User Actions */}
           <div className="flex items-center space-x-2.5">
             
-            {/* Vernacular Language Selector ("अ / A") */}
+            {/* Smart Vernacular Language Selector */}
             <div className="relative">
               <button
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border-2 border-steel-400 bg-paper-100 hover:bg-paper-200 text-steel-900 font-display font-bold text-xs shadow-sm"
-                title="भाषा बदलें / Change Language"
+                className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border-2 border-steel-400 bg-paper-100 hover:bg-paper-200 text-steel-900 font-display font-bold text-xs shadow-sm"
+                title={t('langSelect', 'Change Language')}
               >
-                <span className="text-copper-600 font-black">अ / A</span>
-                <span className="uppercase text-[10px] text-steel-600">{language}</span>
+                <Languages className="w-3.5 h-3.5 text-copper-600" />
+                <span className="font-bold text-xs text-steel-800">
+                  {language === 'en' ? 'EN' : language === 'hi' ? 'हिन्दी' : 'मराठी'}
+                </span>
                 <ChevronDown className="w-3 h-3 text-steel-500" />
               </button>
 
               {langMenuOpen && (
                 <div className="absolute right-0 mt-2 w-44 bg-paper-50 rounded-lg shadow-tactile-lg border-2 border-steel-700 py-1.5 z-50 text-xs">
                   <div className="px-3 py-1 text-[10px] font-bold text-steel-500 uppercase border-b border-steel-200">
-                    भाषा चयन / Language
+                    {t('selectLanguage', 'Select Language')}
                   </div>
                   <button
                     onClick={() => { setLanguage('en'); setLangMenuOpen(false); }}

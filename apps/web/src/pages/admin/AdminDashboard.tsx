@@ -477,7 +477,7 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'uniteconomics' && (
         <div className="space-y-6">
           <div className="border-b border-steel-300 pb-3">
-            <span className="stamp-seal stamp-verified text-xs">यूनिट अर्थशास्त्र कैलकुलेटर</span>
+            <span className="stamp-seal stamp-verified text-xs">{t('unitEconomicsBadge', 'Unit-Economics Calculator')}</span>
             <h2 className="text-xl font-display font-black text-steel-900 mt-2">
               Unit-Economics Comparison: Informal Market vs. Kabadiwala Connect
             </h2>
@@ -491,7 +491,7 @@ export const AdminDashboard: React.FC = () => {
             {/* Interactive Control Panel */}
             <div className="lg:col-span-5 bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-5">
               <h3 className="font-display font-bold text-steel-900 text-base">
-                सिमुलेशन पैरामीटर (Simulation Controls)
+                {t('simulationControls', 'Simulation Controls')}
               </h3>
 
               <div className="space-y-4 text-xs font-mono">
@@ -549,7 +549,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="p-4 bg-paper-100 rounded-lg border border-steel-300 text-xs space-y-2">
                 <span className="font-bold text-steel-900 block">
-                  मंच आत्मनिर्भरता मॉडल (Platform Sustainability Model):
+                  {t('platformSustainability', 'Platform Sustainability Model:')}
                 </span>
                 <ul className="space-y-1 text-steel-600 list-disc list-inside">
                   <li><strong>1.5% Aggregator Transaction Fee:</strong> Billed directly to authorized recyclers (covered by EPR credits).</li>
@@ -567,7 +567,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="border-b border-steel-300 pb-2">
                   <span className="stamp-seal stamp-hazard text-[10px]">INFORMAL BASELINE</span>
                   <h4 className="font-display font-black text-lg text-steel-900 mt-1">
-                    वर्तमान अनौपचारिक बाजार
+                    {t('informalMarketLabel', 'Informal Scrap Market (Status Quo)')}
                   </h4>
                   <p className="text-[11px] text-steel-500">Traditional Predatory Scrap Chain</p>
                 </div>
@@ -603,7 +603,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="border-b border-steel-300 pb-2">
                   <span className="stamp-seal stamp-verified text-[10px]">KABADIWALA CONNECT</span>
                   <h4 className="font-display font-black text-lg text-steel-900 mt-1">
-                    कबाड़ीवाला कनेक्ट मंच
+                    {t('formalPlatformLabel', 'Kabadiwala Connect Platform (Formalized)')}
                   </h4>
                   <p className="text-[11px] text-forest-700 font-bold">Formal CPCB Smelter Chain</p>
                 </div>
@@ -644,9 +644,9 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'verifications' && (
         <div className="space-y-6">
           <div className="border-b border-steel-300 pb-3">
-            <span className="stamp-seal stamp-verified text-xs">केवाईसी सत्यापन</span>
+            <span className="stamp-seal stamp-verified text-xs">{t('collectorKycBadge', 'KYC Verification')}</span>
             <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-              कबाड़ीवाला सत्यापन एवं पहचान पत्र (Collector KYC)
+              {t('collectorKycTitle', 'Collector KYC Verification & Identity Cards')}
             </h2>
             <p className="text-xs text-steel-600">
               Verify identity and issue CPCB digital badges to formalize door-to-door scrap collectors.
@@ -658,7 +658,7 @@ export const AdminDashboard: React.FC = () => {
               <div key={c.id} className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm space-y-3">
                 <div className="flex justify-between items-start">
                   <span className={`stamp-seal ${c.verified ? 'stamp-verified' : 'stamp-pending'} text-[10px]`}>
-                    {c.verified ? 'सत्यापित (VERIFIED)' : 'सत्यापन लंबित (PENDING)'}
+                    {c.verified ? t('kycVerified', 'VERIFIED') : t('kycPending', 'VERIFICATION PENDING')}
                   </span>
                   <span className="text-xs font-bold text-forest-700">★ {c.reputationScore}</span>
                 </div>

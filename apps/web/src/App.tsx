@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LanguageProvider } from './context/LanguageContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { LandingPage } from './pages/LandingPage';
 import { CitizenDashboard } from './pages/citizen/CitizenDashboard';
@@ -12,6 +12,7 @@ import { Role } from './types';
 
 const MainContent: React.FC = () => {
   const { user, loading } = useAuth();
+  const { language, t } = useLanguage();
   const [currentView, setCurrentView] = useState<string>('home');
 
   // When user logs in or role changes, redirect to their role's dashboard
@@ -29,7 +30,7 @@ const MainContent: React.FC = () => {
       return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
           <div className="w-12 h-12 rounded-full border-4 border-copper-600 border-t-transparent animate-spin" />
-          <p className="text-steel-600 font-bold font-display text-sm">प्रारंभ हो रहा है / Initializing Dhatu Ecosystem...</p>
+          <p className="text-steel-600 font-bold font-display text-sm">{t('initializing', 'Initializing Dhatu Ecosystem...')}</p>
         </div>
       );
     }
@@ -88,8 +89,8 @@ const MainContent: React.FC = () => {
             <div className="w-7 h-7 rounded bg-copper-600 border border-copper-800 flex items-center justify-center text-white font-display font-black text-sm">
               धा
             </div>
-            <span className="font-display font-bold text-paper-50">Kabadiwala Connect (धातु)</span>
-            <span className="text-paper-400">— SIH26229 Ministry of Mines E-Waste Formalization Platform</span>
+            <span className="font-display font-bold text-paper-50">Kabadiwala Connect ({language === 'en' ? 'Dhatu' : 'धातु'})</span>
+            <span className="text-paper-400">— {t('sihSub', 'Ministry of Mines — Informal e-Waste Integration')}</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-paper-400 font-mono text-[11px]">

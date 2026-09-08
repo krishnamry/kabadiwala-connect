@@ -261,7 +261,7 @@ export const KabadiwalaDashboard: React.FC = () => {
       party: 'EcoRecycle Aggregators (Okhla)',
       type: 'CREDIT',
       amount: 11840,
-      paymentMode: 'CASH (नकद)',
+      paymentMode: 'CASH',
       balance: 14680,
       status: 'VERIFIED'
     },
@@ -273,7 +273,7 @@ export const KabadiwalaDashboard: React.FC = () => {
       party: 'Ramesh Sharma (Lajpat Nagar)',
       type: 'DEBIT',
       amount: 620,
-      paymentMode: 'CASH (नकद)',
+      paymentMode: 'CASH',
       balance: 2840,
       status: 'VERIFIED'
     },
@@ -285,7 +285,7 @@ export const KabadiwalaDashboard: React.FC = () => {
       party: 'GreenEarth Refiners',
       type: 'CREDIT',
       amount: 7200,
-      paymentMode: 'UPI Escrow (डिजिटल)',
+      paymentMode: 'UPI Escrow',
       balance: 3460,
       status: 'VERIFIED'
     },
@@ -442,7 +442,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="space-y-1.5 z-10">
             <div className="flex flex-wrap items-center gap-2">
               <span className="stamp-seal stamp-verified text-[11px] bg-forest-500/20 text-forest-500 border-forest-500">
-                सत्यापित कबाड़ीवाला (VERIFIED)
+                {t('verifiedCollector', 'VERIFIED COLLECTOR')}
               </span>
               <span className="bg-brass-500/20 text-brass-300 font-mono text-xs px-2 py-0.5 rounded border border-brass-500/40">
                 ID: KC-COL-8921
@@ -459,7 +459,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
-              सुरेश कुमार / Suresh Kumar
+              {language === 'hi' || language === 'mr' ? 'सुरेश कुमार' : 'Suresh Kumar'}
             </h1>
 
             <div className="flex items-center space-x-3 text-xs text-paper-300">
@@ -475,14 +475,13 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3 z-10">
             <div className="bg-steel-950 p-3 rounded-lg border border-steel-800 text-right">
               <div className="text-[10px] uppercase font-mono text-paper-400">
-                खातावही शेष / Passbook Balance
+                {t('passbookBalance', 'Passbook Balance')}
               </div>
               <div className="text-xl sm:text-2xl font-mono-num font-bold text-brass-400">
                 ₹14,680
               </div>
               <div className="text-[10px] text-forest-400 font-medium flex items-center justify-end gap-1">
-                <span>💵 नकद समर्थित</span>
-                <span>(Cash First)</span>
+                <span>{t('cashFirst', '💵 Cash-First Support')}</span>
               </div>
             </div>
 
@@ -498,7 +497,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 title="Toggle Offline Tolerant Mode"
               >
                 {isOffline ? <WifiOff className="w-3.5 h-3.5" /> : <Wifi className="w-3.5 h-3.5 text-forest-600" />}
-                <span>{isOffline ? '📵 ऑफलाइन मोड (Offline)' : '🌐 ऑनलाइन (Online)'}</span>
+                <span>{isOffline ? t('offlineMode', '📵 Offline Mode') : t('onlineMode', '🌐 Online')}</span>
               </button>
 
               {offlineQueue.length > 0 && (
@@ -508,7 +507,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                   className="btn-dhatu-brass px-2.5 py-1 rounded text-[11px] font-bold flex items-center space-x-1 shadow-sm"
                 >
                   <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
-                  <span>लंबित सिंक ({offlineQueue.length}) सिंक करें</span>
+                  <span>{t('syncPendingLots', 'Sync Pending Lots')} ({offlineQueue.length})</span>
                 </button>
               )}
             </div>
@@ -523,7 +522,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="flex items-center space-x-2">
             <WifiOff className="w-4 h-4 text-brass-700" />
             <span className="font-bold">
-              ऑफलाइन मोड सक्रिय (Offline Mode Active):
+              {t('offlineModeActive', 'Offline Mode Active:')}
             </span>
             <span>Lots are cached locally in your phone storage and queued for auto-sync.</span>
           </div>
@@ -627,7 +626,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="lg:col-span-7 bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-5">
             <div>
               <div className="flex items-center justify-between">
-                <span className="stamp-seal stamp-verified text-xs">लॉट निर्माण / LOT CREATION</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('lotCreationBadge', 'Lot Creation')}</span>
                 <VoiceAssistButton
                   text="Create lot. Photograph item, enter approx weight, get instant AI valuation estimate."
                   hindiText="लॉट बनाएं। कबाड़ की फोटो लें, वजन डालें और तुरंत अनुमानित दाम देखें।"
@@ -636,7 +635,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-                ई-कचरा डिजिटल लॉट बनाएं (Digital Lot Creator)
+                {t('digitalLotCreatorTitle', 'Digital E-Waste Lot Creator')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
                 Photograph material, select e-waste category, specify weight, and generate a verified digital lot.
@@ -647,7 +646,7 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-lg text-xs text-forest-800 space-y-1">
                 <div className="font-bold flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-forest-600" />
-                  <span>लॉट सफलतापूर्वक दर्ज (Lot Registered Successfully!)</span>
+                  <span>{t('lotCreatedSuccessTitle', 'Lot Registered Successfully!')}</span>
                 </div>
                 <p>{lotCreatedSuccess}</p>
               </div>
@@ -658,7 +657,7 @@ export const KabadiwalaDashboard: React.FC = () => {
               {/* Photo Upload / Capture Simulator */}
               <div>
                 <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
-                  1. कबाड़ की फोटो लें / Upload Photograph
+                  {t('uploadPhotoLabel', '1. Upload or Capture Photograph')}
                 </label>
                 <div
                   onClick={() => setLotPhotoTaken(true)}
@@ -669,11 +668,11 @@ export const KabadiwalaDashboard: React.FC = () => {
                   </div>
                   {lotPhotoTaken ? (
                     <div className="text-forest-700 font-bold text-xs flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> फोटो कैप्चर हो गई (High-Grade PCB Captured 1080p)
+                      <CheckCircle2 className="w-4 h-4" /> {t('photoCapturedMsg', 'Photo Captured & Verified (1080p)')}
                     </div>
                   ) : (
                     <div>
-                      <span className="text-xs font-bold text-steel-800 block">कैमरा खोलें या फोटो खींचें (Tap to Snap)</span>
+                      <span className="text-xs font-bold text-steel-800 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
                       <span className="text-[11px] text-steel-500">AI automatically detects CRTs, LCDs, PCBs, Cables, Batteries</span>
                     </div>
                   )}
@@ -702,9 +701,9 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
-                    3. वजन दर्ज करें / Approx Weight (Kilograms)
+                    {t('approxWeightLabel', '3. Enter Approx Weight (Kilograms)')}
                   </label>
-                  <span className="text-xs font-mono text-steel-500 font-medium">न्यूनतम 0.5 kg</span>
+                  <span className="text-xs font-mono text-steel-500 font-medium">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -737,7 +736,7 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="bg-brass-100/90 border-2 border-brass-400 rounded-lg p-4 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-brass-800 tracking-wider block">
-                    तुरंत अनुमानित मूल्य / INSTANT AI ESTIMATE
+                    {language === 'hi' ? 'तुरंत अनुमानित मूल्य' : language === 'mr' ? 'थेट अंदाजे किंमत' : 'INSTANT AI ESTIMATE'}
                   </span>
                   <span className="text-2xl sm:text-3xl font-mono-num font-black text-steel-900">
                     {formatCurrency(aiValuation)}
@@ -759,7 +758,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 className="w-full btn-dhatu-primary py-3.5 rounded-lg text-sm font-bold flex items-center justify-center space-x-2 shadow-tactile"
               >
                 <Sparkles className="w-4 h-4" />
-                <span>लॉट बनाएं और रीसायकलर को भेजें (Generate Digital Lot)</span>
+                <span>{language === 'hi' ? 'लॉट बनाएं और रीसायकलर को भेजें' : language === 'mr' ? 'लॉट तयार करा आणि पाठवा' : 'Generate Digital Lot & Broadcast'}</span>
               </button>
             </form>
           </div>
@@ -818,7 +817,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 onClick={() => setActiveTab('handover')}
                 className="w-full bg-paper-200 hover:bg-paper-300 text-steel-900 border-2 border-steel-400 py-2 rounded text-xs font-bold flex items-center justify-center space-x-1.5"
               >
-                <span>हैंडओवर रसीद खोलें (Open Handover QR)</span>
+                <span>{language === 'hi' ? 'हैंडओवर रसीद खोलें' : language === 'mr' ? 'हस्तांतरण पावती उघडा' : 'Open Handover QR'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -826,10 +825,10 @@ export const KabadiwalaDashboard: React.FC = () => {
             {/* Quick Segregation Tip */}
             <div className="p-4 bg-paper-100 rounded-xl border border-steel-300 space-y-1 text-xs">
               <span className="font-bold text-copper-700 flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" /> कमाई बढ़ाने का सुझाव (High-Value Tip):
+                <Sparkles className="w-3.5 h-3.5" /> {language === 'hi' ? 'कमाई बढ़ाने का सुझाव:' : language === 'mr' ? 'कमाई वाढवण्यासाठी टीप:' : 'High-Value Separation Tip:'}
               </span>
               <p className="text-steel-600">
-                सर्किट बोर्ड से एल्यूमीनियम हीट सिंक को हाथ से अलग करके बेचें। इससे बोर्ड को ग्रेड-ए (₹640/kg) दाम मिलता है।
+                {language === 'hi' ? 'सर्किट बोर्ड से एल्यूमीनियम हीट सिंक को हाथ से अलग करके बेचें। इससे बोर्ड को ग्रेड-ए (₹640/kg) दाम मिलता है।' : language === 'mr' ? 'सर्किट बोर्डमधून अ‍ॅल्युमिनियम हीट सिंक हाताने वेगळे करून विका. यामुळे बोर्डाला ग्रेड-ए (₹६४०/कि.ग्रा.) भाव मिळतो.' : 'Detach aluminium heat sinks from circuit boards by hand before selling. Intact Grade-A boards command premium ₹640/kg.'}
               </p>
             </div>
           </div>
@@ -843,7 +842,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel-300 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="stamp-seal stamp-verified text-xs">लाइव दाम पत्रक</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('tabPriceBoard', 'Price Board')}</span>
                 <VoiceAssistButton
                   text="Live e-waste price board. Buying rates by category and weekly trend in Delhi NCR."
                   hindiText="लाइव ई-कचरा दाम पत्रक। दिल्ली एनसीआर में आज के खरीदारी दाम और साप्ताहिक रुझान।"
@@ -852,7 +851,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-display font-black text-steel-900 mt-1">
-                दाम पत्रक एवं साप्ताहिक रुझान (Spoken Price Board)
+                {t('mandiPriceBoardTitle', 'Live Material Benchmark Price Board')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
                 Official CPCB market benchmark rates. Tap the speaker icon beside any item to hear the price aloud.
@@ -860,7 +859,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
 
             <span className="text-xs font-mono text-steel-600 bg-paper-200 px-3 py-1.5 rounded border border-steel-300 self-start sm:self-auto">
-              अंतिम अपडेट: आज सुबह 09:00 AM
+              {language === 'hi' ? 'अंतिम अपडेट: आज सुबह 09:00 AM' : language === 'mr' ? 'शेवटचे अपडेट: आज सकाळी ०९:००' : 'Last updated: Today 09:00 AM'}
             </span>
           </div>
 
@@ -908,7 +907,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                           <TrendingDown className="w-3.5 h-3.5 mr-0.5" /> ₹{item.delta}
                         </span>
                       ) : (
-                        <span className="text-steel-500">— स्थिर</span>
+                        <span className="text-steel-500">— {language === 'hi' ? 'स्थिर' : language === 'mr' ? 'स्थिर' : 'Steady'}</span>
                       )}
                     </div>
                   </div>
@@ -920,7 +919,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
           <div className="p-4 bg-paper-200 rounded-lg border border-steel-300 text-xs text-steel-700 flex items-center justify-between">
             <span className="font-medium">
-              💡 <strong>पारदर्शी दाम नीति:</strong> कोई बिचौलिया कटौती नहीं। रीसायकलर से सीधा 100% भुगतान।
+              {language === 'hi' ? '💡 पारदर्शी दाम नीति: कोई बिचौलिया कटौती नहीं। रीसायकलर से सीधा 100% भुगतान।' : language === 'mr' ? '💡 पारदर्शक दर धोरण: कोणतीही दलाली कपात नाही. थेट १००% दर.' : '💡 Transparent Pricing Policy: Zero middleman commission. Direct 100% payout from smelters.'}
             </span>
             <span className="font-mono text-steel-500 text-[11px]">CPCB Market Index 2026</span>
           </div>
@@ -933,7 +932,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel-300 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="stamp-seal stamp-verified text-xs">अधिकृत रीसायकलर</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('tabFindRecyclers', 'Recyclers')}</span>
                 <VoiceAssistButton
                   text="Nearby authorized recyclers. Ranked by distance, rate offered, and pickup availability."
                   hindiText="पास के अधिकृत रीसायकलर। दूरी, दिए जाने वाले दाम और पिकअप सुविधा के आधार पर क्रमबद्ध।"
@@ -942,7 +941,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-display font-black text-steel-900 mt-1">
-                पास के अधिकृत रीसायकलर खोजें (Authorized Recyclers)
+                {t('nearbyRecyclersTitle', 'Authorized Recyclers & Smelters')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
                 Verified CPCB registered facilities matching your operating area in Delhi NCR.
@@ -1038,7 +1037,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                       className="btn-dhatu-primary px-4 py-2 rounded text-xs font-bold flex items-center space-x-1"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>लॉट बेचें (Sell Lot Here)</span>
+                      <span>{t('sellLotHere', 'Sell Lot to this Facility')}</span>
                     </button>
                   </div>
                 </div>
@@ -1054,7 +1053,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-6 shadow-sm">
             <div>
               <div className="flex items-center justify-between">
-                <span className="stamp-seal stamp-verified text-xs">डिजिटल हैंडओवर</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('handoverVoucherBadge', 'Digital Handover')}</span>
                 <VoiceAssistButton
                   text="Digital verifiable handover record. Show this QR code to the authorized recycler to confirm weight and receive payment."
                   hindiText="डिजिटल हैंडओवर रसीद। वजन सत्यापित करने और भुगतान पाने के लिए अधिकृत रीसायकलर को यह क्यूआर कोड दिखाएं।"
@@ -1063,7 +1062,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-                हैंडओवर क्यूआर कोड (Handover QR Voucher)
+                {t('handoverVoucherTitle', 'Digital Handover QR Voucher')}
               </h2>
               <p className="text-xs text-steel-600">
                 Verifiable digital transfer record containing GPS coordinates, timestamp, weight, and unique CPCB hash.
@@ -1091,7 +1090,7 @@ export const KabadiwalaDashboard: React.FC = () => {
               </div>
               <div>
                 <span className="text-[10px] text-steel-500 block">ESTIMATED VALUE</span>
-                <span className="font-bold text-forest-700">₹8,000 (नकद / UPI)</span>
+                <span className="font-bold text-forest-700">₹8,000 ({language === 'hi' ? 'नकद / UPI' : language === 'mr' ? 'रोख / UPI' : 'Cash / UPI Escrow'})</span>
               </div>
               <div>
                 <span className="text-[10px] text-steel-500 block">TIMESTAMP</span>
@@ -1102,7 +1101,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             <div className="text-[11px] text-steel-600 flex items-center gap-1.5 p-2 bg-paper-200 rounded border border-steel-300">
               <ShieldCheck className="w-4 h-4 text-forest-600 flex-shrink-0" />
               <span>
-                रीसायकलर द्वारा स्कैन करते ही यह रसीद सीपीसीबी ईपीआर पोर्टल पर दर्ज हो जाती है।
+                {language === 'hi' ? 'रीसायकलर द्वारा स्कैन करते ही यह रसीद सीपीसीबी ईपीआर पोर्टल पर दर्ज हो जाती है।' : language === 'mr' ? 'रीसायकलरने स्कॅन करताच ही पावती सीपीसीबी पोर्टलवर नोंदवली जाते.' : 'Upon recycler QR scan, this lot is immediately sealed on the CPCB central registry.'}
               </span>
             </div>
           </div>
@@ -1110,7 +1109,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="space-y-4">
             <div className="bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-4">
               <h3 className="font-display font-bold text-steel-900 text-base">
-                हैंडओवर प्रक्रिया के 3 आसान कदम (3 Step Handover)
+                {t('handoverStepsTitle', '3 Easy Steps for Handover')}
               </h3>
 
               <div className="space-y-3 text-xs">
@@ -1119,8 +1118,8 @@ export const KabadiwalaDashboard: React.FC = () => {
                     1
                   </div>
                   <div>
-                    <span className="font-bold text-steel-800 block">रीसायकलर गेट पर वजन कराएं (Weight Check)</span>
-                    <span className="text-steel-600">धर्मकांटे या प्रमाणित वेइंग स्केल पर कुल वजन दर्ज कराएं।</span>
+                    <span className="font-bold text-steel-800 block">{t('step1Weight', 'Weight Check at Recycler Gate')}</span>
+                    <span className="text-steel-600">{t('step1Desc', 'Weigh items on calibrated electronic scale.')}</span>
                   </div>
                 </div>
 
@@ -1129,8 +1128,8 @@ export const KabadiwalaDashboard: React.FC = () => {
                     2
                   </div>
                   <div>
-                    <span className="font-bold text-steel-800 block">क्यूआर कोड स्कैन कराएं (Scan QR)</span>
-                    <span className="text-steel-600">रीसायकलर ऑपरेटर अपने फोन से यह क्यूआर स्कैन करेगा।</span>
+                    <span className="font-bold text-steel-800 block">{t('step2Scan', 'Scan Handover QR Code')}</span>
+                    <span className="text-steel-600">{t('step2Desc', 'Recycler operator scans voucher with their phone.')}</span>
                   </div>
                 </div>
 
@@ -1139,8 +1138,8 @@ export const KabadiwalaDashboard: React.FC = () => {
                     3
                   </div>
                   <div>
-                    <span className="font-bold text-steel-800 block">नकद या खाता भुगतान प्राप्त करें (Cash / Wallet)</span>
-                    <span className="text-steel-600">तुरंत नकद लें या डिजिटल वॉलेट में राशि प्राप्त करें। खाता बही में प्रविष्टि खुद जुड़ जाएगी।</span>
+                    <span className="font-bold text-steel-800 block">{t('step3Pay', 'Receive Cash or Wallet Payout')}</span>
+                    <span className="text-steel-600">{t('step3Desc', 'Receive immediate cash or wallet escrow payment. Recorded in passbook.')}</span>
                   </div>
                 </div>
               </div>
@@ -1148,10 +1147,10 @@ export const KabadiwalaDashboard: React.FC = () => {
 
             <div className="p-4 bg-brass-100 rounded-xl border border-brass-400 text-xs text-steel-800 space-y-1">
               <span className="font-bold text-brass-900 block flex items-center gap-1">
-                <Award className="w-4 h-4 text-brass-700" /> सरकारी औपचारिकीकरण लाभ (SIH26229 Benefit):
+                <Award className="w-4 h-4 text-brass-700" /> {t('formalizationBenefitTitle', 'Ministry of Mines Formalization Incentive:')}
               </span>
               <p>
-                हर सत्यापित डिजिटल हैंडओवर पर खान मंत्रालय एवं सीपीसीबी की ओर से ₹500 प्रति 100 किग्रा विशेष औपचारिकीकरण प्रोत्साहन भत्ता देय है।
+                {t('formalizationBenefitDesc', 'Earn ₹500 formalization loyalty bonus for every verified digital lot handover.')}
               </p>
             </div>
           </div>
@@ -1164,7 +1163,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-steel-300 pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="stamp-seal stamp-verified text-xs">खातावही / PASSBOOK</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('passbookBadge', 'Cash Passbook')}</span>
                 <VoiceAssistButton
                   text="Earnings Passbook Ledger. Running record of transactions, payments received in cash or UPI, and balance."
                   hindiText="कमाई खाता बही और पासबुक। नकद या यूपीआई में प्राप्त भुगतानों और कुल शेष राशि का खाता।"
@@ -1173,7 +1172,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-display font-black text-steel-900 mt-1">
-                कबाड़ीवाला खातावही (Running Passbook Ledger)
+                {t('passbookTitle', 'Collector Running Passbook Ledger')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
                 Traditional passbook-style stamped entries for maximum trust, cash reconciliation, and pending dues.
@@ -1190,13 +1189,13 @@ export const KabadiwalaDashboard: React.FC = () => {
             <table className="w-full text-left text-xs font-mono border-collapse">
               <thead>
                 <tr className="bg-paper-200 text-steel-800 border-b-2 border-steel-400 uppercase text-[11px]">
-                  <th className="p-3">दिनांक / Date</th>
-                  <th className="p-3">विवरण / Description</th>
-                  <th className="p-3">पक्ष / Party</th>
-                  <th className="p-3">भुगतान / Mode</th>
-                  <th className="p-3 text-right">राशि / Amount</th>
-                  <th className="p-3 text-right">शेष / Balance</th>
-                  <th className="p-3 text-center">मुहर / Stamp</th>
+                  <th className="p-3">{t('thDate', 'Date')}</th>
+                  <th className="p-3">{t('thDesc', 'Description')}</th>
+                  <th className="p-3">{t('thParty', 'Party')}</th>
+                  <th className="p-3">{t('thMode', 'Mode')}</th>
+                  <th className="p-3 text-right">{t('thAmount', 'Amount')}</th>
+                  <th className="p-3 text-right">{t('thBalance', 'Balance')}</th>
+                  <th className="p-3 text-center">{t('thStamp', 'Stamp')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-steel-300 bg-white">
@@ -1221,7 +1220,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                     </td>
                     <td className="p-3 text-center">
                       <span className="stamp-seal stamp-verified text-[9px]">
-                        सत्यापित
+                        {t('verified', 'VERIFIED')}
                       </span>
                     </td>
                   </tr>
@@ -1232,14 +1231,14 @@ export const KabadiwalaDashboard: React.FC = () => {
 
           <div className="p-4 bg-paper-200 rounded-lg border border-steel-300 flex flex-wrap items-center justify-between gap-3 text-xs">
             <span className="text-steel-600">
-              📌 <strong>नकद भुगतान नियम:</strong> सभी नकद भुगतानों की डिजिटल रसीद पासबुक में स्वतः दर्ज हो जाती है।
+              {t('cashPaymentRule', 'Cash Payment Rule: All cash handovers are automatically stamped and logged into the running passbook.')}
             </span>
             <button
-              onClick={() => alert('पासबुक पीडीएफ डाउनलोड हो रही है... (Downloading Passbook Statement)')}
+              onClick={() => alert(language === 'hi' ? 'पासबुक पीडीएफ डाउनलोड हो रही है...' : language === 'mr' ? 'पासबुक पीडीएफ डाउनलोड होत आहे...' : 'Downloading Passbook PDF Statement...')}
               className="bg-paper-100 hover:bg-paper-300 text-steel-800 border border-steel-400 px-3 py-1.5 rounded font-bold flex items-center space-x-1"
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>पासबुक विवरण डाउनलोड करें (Download PDF)</span>
+              <span>{t('downloadPassbookPdf', 'Download Passbook PDF')}</span>
             </button>
           </div>
         </div>
@@ -1251,7 +1250,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel-300 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="stamp-seal stamp-hazard text-xs">सुरक्षा मार्गदर्शन</span>
+                <span className="stamp-seal stamp-hazard text-xs">{t('safetyBadge', 'Safety Guidance')}</span>
                 <VoiceAssistButton
                   text="Safety guidance for hazardous e-waste. Avoid battery puncture, toxic cable burning, CRT glass implosion, and acid leaching."
                   hindiText="ई-कचरा सुरक्षा मार्गदर्शन। बैटरी फटने, तारों को जलाने, सीआरटी स्क्रीन तोड़ने और तेजाब के खतरों से बचें।"
@@ -1260,7 +1259,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-display font-black text-steel-900 mt-1">
-                सुरक्षा नियम एवं खतरनाक प्रथाओं से बचाव (Safety Cards)
+                {t('safetyCardsTitle', 'Safety Rules & Hazardous Practice Prevention')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
                 Pictorial and spoken warnings to protect collectors from fatal fires, toxic fumes, and lead poisoning.
@@ -1268,7 +1267,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
 
             <span className="text-xs font-mono text-signal-600 bg-signal-500/10 px-3 py-1.5 rounded border border-signal-500/30">
-              ⚠️ सीपीसीबी अनिवार्य सुरक्षा दिशा-निर्देश
+              ⚠️ {t('cpcbSafetyGuidelines', 'CPCB Mandatory E-Waste Safety Guidelines')}
             </span>
           </div>
 
@@ -1302,7 +1301,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div className="bg-forest-500/10 p-3 rounded border border-forest-500/30 space-y-1.5">
                     <span className="font-bold text-forest-700 flex items-center gap-1 uppercase text-[10px]">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> क्या करें / DO'S:
+                      <CheckCircle2 className="w-3.5 h-3.5" /> {t('dosTitle', "DO'S:")}
                     </span>
                     <ul className="space-y-1 text-steel-800 list-disc list-inside">
                       {(language === 'hi' ? card.dosHi : language === 'mr' ? card.dosMr : card.dosEn).map((d, i) => (
@@ -1313,7 +1312,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
                   <div className="bg-signal-500/10 p-3 rounded border border-signal-500/30 space-y-1.5">
                     <span className="font-bold text-signal-700 flex items-center gap-1 uppercase text-[10px]">
-                      <Flame className="w-3.5 h-3.5" /> कभी न करें / DON'TS:
+                      <Flame className="w-3.5 h-3.5" /> {t('dontsTitle', "DON'TS:")}
                     </span>
                     <ul className="space-y-1 text-steel-800 list-disc list-inside">
                       {(language === 'hi' ? card.dontsHi : language === 'mr' ? card.dontsMr : card.dontsEn).map((d, i) => (
@@ -1324,7 +1323,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
 
                 <div className="text-[11px] text-steel-500 italic bg-paper-100 p-2 rounded border border-paper-300">
-                  "उचित पृथक्करण से पर्यावरण की रक्षा होती है और रीसायकलर 35% अधिक मूल्य देता है।"
+                  "{t('safetyQuote', 'Proper segregation protects worker health and yields up to 35% higher buyback value from formal smelters.')}"
                 </div>
               </div>
             ))}
@@ -1332,26 +1331,26 @@ export const KabadiwalaDashboard: React.FC = () => {
 
           {/* Value-Preservation Segregation Guide Banner (Section 1.B.8) */}
           <div className="bg-paper-100 rounded-xl p-6 border-2 border-brass-400 space-y-3">
-            <span className="stamp-seal stamp-verified text-xs">मूल्य संवर्धन मार्गदर्शिका</span>
+            <span className="stamp-seal stamp-verified text-xs">{t('valueBadge', 'Value Maximization Guide')}</span>
             <h3 className="font-display font-black text-steel-900 text-lg">
-              सर्वाधिक कमाई के लिए सुरक्षित डिसमेंटलिंग के 4 नियम (Value-Preservation Disassembly)
+              {t('valuePreservationTitle', '4 Rules of Value-Preservation Disassembly for Maximum Earnings')}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
               <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">कदम 1: बाहरी प्लास्टिक खोलें</span>
-                <p className="text-steel-600 mt-1">बिना तोड़े स्क्रू खोलकर एबीएस प्लास्टिक केसिंग अलग करें (₹38/kg अलग बिकेगी)।</p>
+                <span className="font-bold text-copper-700 block">{t('step1Plastic', 'Step 1: Unscrew External Plastic')}</span>
+                <p className="text-steel-600 mt-1">{t('step1PlasticDesc', 'Remove clean ABS plastic housing without smashing screws (sells separately at ₹38/kg).')}</p>
               </div>
               <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">कदम 2: मदरबोर्ड अलग रखें</span>
-                <p className="text-steel-600 mt-1">हाई-ग्रेड मदरबोर्ड को सामान्य टीवी प्लेट से अलग रखें, यह ₹640/kg बिकता है।</p>
+                <span className="font-bold text-copper-700 block">{t('step2Pcb', 'Step 2: Keep Circuit Boards Whole')}</span>
+                <p className="text-steel-600 mt-1">{t('step2PcbDesc', 'High-grade motherboards sell at ₹640/kg when components and gold pins remain intact.')}</p>
               </div>
               <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">कदम 3: कॉपर वाइंडिंग सुरक्षित निकालें</span>
-                <p className="text-steel-600 mt-1">मोटर का तांबा बिना जलाए वायर कटर से निकालें (₹480/kg)।</p>
+                <span className="font-bold text-copper-700 block">{t('step3Copper', 'Step 3: Strip Copper Cold')}</span>
+                <p className="text-steel-600 mt-1">{t('step3CopperDesc', 'Extract copper windings using hand wire-strippers without open-flame burning (₹480/kg).')}</p>
               </div>
               <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">कदम 4: बैटरियों को अलग थैले में रखें</span>
-                <p className="text-steel-600 mt-1">धातु के संपर्क से दूर रखें ताकि शॉर्ट सर्किट या आग न लगे।</p>
+                <span className="font-bold text-copper-700 block">{t('step4Battery', 'Step 4: Bag Batteries Separately')}</span>
+                <p className="text-steel-600 mt-1">{t('step4BatteryDesc', 'Keep lithium cells insulated in a dry bag to prevent punctures, sparks, or thermal runaways.')}</p>
               </div>
             </div>
           </div>
@@ -1364,7 +1363,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel-300 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="stamp-seal stamp-verified text-xs">नागरिक पिकअप</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('citizenPickupsBadge', 'Citizen Pickups')}</span>
                 <VoiceAssistButton
                   text="Household pickups. View nearby e-waste requests from citizens, accept jobs, and update verified weights."
                   hindiText="नागरिक ई-कचरा पिकअप। पास के घरों से स्क्रैप अनुरोध देखें और स्वीकार करें।"
@@ -1373,7 +1372,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 />
               </div>
               <h2 className="text-xl font-display font-black text-steel-900 mt-1">
-                पास के घरों से पिकअप अनुरोध (Citizen Pickup Requests)
+                {t('citizenPickupRequestsTitle', 'Nearby Citizen Pickup Requests')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
                 Pick up e-waste directly from households and offices within your 5km operating radius.
@@ -1385,14 +1384,14 @@ export const KabadiwalaDashboard: React.FC = () => {
               className="px-3 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 border border-steel-400 rounded text-xs font-bold flex items-center space-x-1"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>ताज़ा करें (Refresh)</span>
+              <span>{t('refreshBtn', 'Refresh')}</span>
             </button>
           </div>
 
           {jobSuccess && (
             <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-lg text-xs text-forest-800 space-y-1">
               <div className="font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4 text-forest-600" /> कार्य पूर्ण (Job Successfully Completed!)
+                <CheckCircle2 className="w-4 h-4 text-forest-600" /> {t('jobCompletedTitle', 'Job Successfully Completed!')}
               </div>
               <p>{jobSuccess}</p>
             </div>
@@ -1403,7 +1402,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             <div className="receipt-stub rounded-xl p-6 border-2 border-copper-600 shadow-md space-y-4 bg-copper-500/5">
               <div className="flex justify-between items-start border-b border-steel-300 pb-3">
                 <div>
-                  <span className="stamp-seal stamp-pending text-xs">सक्रिय कार्य / IN PROGRESS</span>
+                  <span className="stamp-seal stamp-pending text-xs">{t('activeJobBadge', 'IN PROGRESS')}</span>
                   <h3 className="text-lg font-display font-black text-steel-900 mt-1">
                     {activeJob.address}
                   </h3>
@@ -1414,14 +1413,14 @@ export const KabadiwalaDashboard: React.FC = () => {
                   className="btn-dhatu-primary px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1"
                 >
                   <Phone className="w-3.5 h-3.5" />
-                  <span>कॉल करें (Call)</span>
+                  <span>{t('callBtn', 'Call')}</span>
                 </a>
               </div>
 
               {/* Weight Adjustment Stepper for Completion */}
               <div className="space-y-3">
                 <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
-                  वजन सत्यापन (Verify & Adjust Final Weight):
+                  {t('verifyWeightTitle', 'Verify & Adjust Final Weight:')}
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {activeJob.items.map((item, idx) => (
@@ -1468,7 +1467,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                   className="btn-dhatu-primary px-6 py-2.5 rounded text-xs font-bold flex items-center space-x-2"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>पिकअप पूरा करें और रसीद जारी करें (Complete Job)</span>
+                  <span>{t('completePickupBtn', 'Complete Pickup & Issue Digital Receipt')}</span>
                 </button>
               </div>
             </div>
@@ -1547,7 +1546,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <Camera className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabLots', 'लॉट')}</span>
+            <span className="truncate">{t('tabLots', 'Lots')}</span>
           </button>
 
           <button
@@ -1557,7 +1556,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <TrendingUp className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabPriceBoard', 'दाम')}</span>
+            <span className="truncate">{t('tabPriceBoard', 'Prices')}</span>
           </button>
 
           <button
@@ -1567,7 +1566,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <Truck className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('pickups', 'पिकअप')}</span>
+            <span className="truncate">{t('pickups', 'Pickups')}</span>
           </button>
 
           <button
@@ -1577,7 +1576,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <Factory className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabFindRecyclers', 'रीसायकल')}</span>
+            <span className="truncate">{t('tabFindRecyclers', 'Recyclers')}</span>
           </button>
 
           <button
@@ -1587,7 +1586,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <BookOpen className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabPassbook', 'खाता')}</span>
+            <span className="truncate">{t('tabPassbook', 'Passbook')}</span>
           </button>
 
           <button
@@ -1597,7 +1596,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <AlertTriangle className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabSafety', 'सुरक्षा')}</span>
+            <span className="truncate">{t('tabSafety', 'Safety')}</span>
           </button>
         </div>
       </div>

@@ -50,11 +50,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black text-steel-950 tracking-tight max-w-4xl mx-auto leading-tight">
-            {t('heroTitle', "धातु — Digital Traceability & EPR Exchange for India's e-Waste Economy")}
+            {t('heroTitle', "Dhatu — Digital Traceability & EPR Exchange for India's e-Waste Economy")}
           </h1>
 
           <p className="mt-6 text-base sm:text-xl text-steel-700 max-w-3xl mx-auto leading-relaxed font-medium">
-            {t('heroSubtitle', "Bridging the informal door-to-door collector (कबाड़ीवाला) with formal CPCB smelters. Built on a low-literacy, offline-tolerant, vernacular passbook architecture with verifiable digital handovers.")}
+            {t('heroSubtitle', "Bridging informal door-to-door waste collectors with formal CPCB smelters. Built on a low-literacy, offline-tolerant passbook architecture with verifiable digital handovers.")}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
@@ -179,7 +179,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
             <div>
               <span className="stamp-seal stamp-verified text-xs">COMMODITY BENCHMARK</span>
               <h2 className="text-2xl font-display font-black text-steel-900 mt-1">
-                ई-कचरा लाइव दाम सूची (Material Price Board)
+                {t('mandiPriceBoardTitle', 'Live Material Benchmark Price Board')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
                 Live rates backed by international secondary metals exchange (London Metal Exchange + CPCB India).

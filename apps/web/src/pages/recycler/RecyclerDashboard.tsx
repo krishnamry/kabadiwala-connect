@@ -905,7 +905,7 @@ export const RecyclerDashboard: React.FC = () => {
             }`}
           >
             <Scale className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabIncoming', 'लॉट')}</span>
+            <span className="truncate">{t('tabIncoming', 'Incoming Lots')}</span>
           </button>
 
           <button
@@ -915,7 +915,7 @@ export const RecyclerDashboard: React.FC = () => {
             }`}
           >
             <QrCode className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabVerifyQr', 'क्यूआर')}</span>
+            <span className="truncate">{t('tabVerifyQr', 'Verify QR')}</span>
           </button>
 
           <button
@@ -925,7 +925,7 @@ export const RecyclerDashboard: React.FC = () => {
             }`}
           >
             <Sliders className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabRateConsole', 'रेट')}</span>
+            <span className="truncate">{t('tabRateConsole', 'Rates')}</span>
           </button>
 
           <button
@@ -935,7 +935,7 @@ export const RecyclerDashboard: React.FC = () => {
             }`}
           >
             <AlertTriangle className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabAnomalies', 'अलर्ट')}</span>
+            <span className="truncate">{t('tabAnomalies', 'Anomalies')}</span>
           </button>
 
           <button
@@ -945,7 +945,7 @@ export const RecyclerDashboard: React.FC = () => {
             }`}
           >
             <FileSpreadsheet className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabReports', 'रिपोर्ट')}</span>
+            <span className="truncate">{t('tabReports', 'CPCB Reports')}</span>
           </button>
         </div>
       </div>

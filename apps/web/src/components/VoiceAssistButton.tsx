@@ -67,7 +67,11 @@ export const VoiceAssistButton: React.FC<VoiceAssistProps> = ({
     <button
       type="button"
       onClick={handleSpeak}
-      title={speaking ? 'Stop Speaking' : 'बोलकर सुनें / Listen Aloud'}
+      title={
+        speaking
+          ? language === 'hi' ? 'आवाज़ रोकें' : language === 'mr' ? 'आवाज थांबवा' : 'Stop Audio'
+          : language === 'hi' ? 'बोलकर सुनें' : language === 'mr' ? 'ऐका' : 'Listen Aloud'
+      }
       className={`inline-flex items-center justify-center rounded-lg border transition-all ${
         speaking
           ? 'bg-signal-500 text-white border-signal-600 animate-pulse shadow-md'

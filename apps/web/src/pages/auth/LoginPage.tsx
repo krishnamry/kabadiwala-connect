@@ -57,9 +57,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     voiceMr: string;
   }> = {
     CITIZEN: {
-      titleEn: 'Citizen / Household',
-      titleHi: 'नागरिक / घरेलू उपभोक्ता',
-      titleMr: 'नागरिक / घरगुती ग्राहक',
+      titleEn: 'Citizen & Household',
+      titleHi: 'नागरिक एवं घरेलू उपभोक्ता',
+      titleMr: 'नागरिक व घरगुती ग्राहक',
       subtitle: 'Schedule doorstep pickup for old electronics, view indicative market rates, track collector with live ETA, and earn green tree credits.',
       badge: 'SOURCING LAYER',
       demoName: 'Ramesh Sharma',
@@ -81,10 +81,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       voiceMr: 'नागरिक लॉगिन. जुन्या इलेक्ट्रॉनिक्स भंगारासाठी पिकअप बुक करा.'
     },
     KABADIWALA: {
-      titleEn: 'Collector / कबाड़ीवाला',
-      titleHi: 'कबाड़ीवाला / संग्राहक',
+      titleEn: 'Doorstep Scrap Collector',
+      titleHi: 'कबाड़ीवाला (संग्राहक)',
       titleMr: 'भंगार संग्राहक',
-      subtitle: 'Low-literacy, voice-first portal with large buttons. Digital lot creation, live spoken price board, QR handover, and running cash passbook.',
+      subtitle: 'Voice-first portal with large touch buttons. Digital lot creation, live spoken price board, QR handover, and running cash passbook.',
       badge: 'CORE SIH26229 ASK',
       demoName: 'Suresh Kumar',
       demoPhone: '9876543210',
@@ -107,9 +107,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       voiceMr: 'भंगार संग्राहक लॉगिन. बोलणारा भाव फलक आणि सोपे पासबुक.'
     },
     RECYCLER: {
-      titleEn: 'Authorized Recycler / Aggregator',
-      titleHi: 'अधिकृत रीसायकलर / एग्रीगेटर',
-      titleMr: 'अधिकृत रीसायकलर / प्रकल्प',
+      titleEn: 'Authorized Recycler',
+      titleHi: 'अधिकृत रीसायकलर',
+      titleMr: 'अधिकृत रीसायकलर',
       subtitle: 'CPCB & State PCB registered facility portal. Receive collector lots, verify scale weight, confirm QR handovers, and export EPR compliance reports.',
       badge: 'FORMAL INTERFACE',
       demoName: 'EcoRecycle Aggregators Ltd',
@@ -132,9 +132,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       voiceMr: 'अधिकृत रीसायकलर पोर्टल. ई-कचरा लॉट स्वीकारा आणि ईपीआर अहवाल मिळवा.'
     },
     ADMIN: {
-      titleEn: 'Admin / ULB & CPCB Audit',
-      titleHi: 'प्रशासन / नगर निगम एवं सीपीसीबी',
-      titleMr: 'प्रशासन / महापालिका व सीपीसीबी',
+      titleEn: 'Admin & Regulatory Audit',
+      titleHi: 'प्रशासन एवं सीपीसीबी ऑडिट',
+      titleMr: 'प्रशासन व सीपीसीबी तपासणी',
       subtitle: 'Central regulatory dashboard for Municipal Urban Local Bodies (ULBs). Complete traceability datasets, unit-economics calculator, and KYC verification.',
       badge: 'REGULATORY DATA LAYER',
       demoName: 'NDMC Waste & Mines Cell',

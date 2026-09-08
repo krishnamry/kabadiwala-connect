@@ -384,7 +384,7 @@ export const CitizenDashboard: React.FC = () => {
           {/* Pickup List Column */}
           <div className="lg:col-span-5 space-y-4">
             <h3 className="font-display font-bold text-steel-900 text-base flex items-center justify-between">
-              <span>आपके पिकअप अनुरोध (Your Requests)</span>
+              <span>{t('yourPickupRequests', 'Your Pickup Requests')}</span>
               <span className="text-xs font-mono text-steel-500">{pickups.length} total</span>
             </h3>
 
@@ -431,7 +431,7 @@ export const CitizenDashboard: React.FC = () => {
                   {p.status === 'COMPLETED' && (
                     <div className="mt-3 pt-2 border-t border-steel-200 flex justify-between items-center">
                       <span className="stamp-seal stamp-verified text-[9px]">
-                        सत्यापित हस्तांतरण
+                        {t('verifiedHandover', 'Verified Handover')}
                       </span>
                       <button
                         onClick={(e) => {
@@ -470,7 +470,7 @@ export const CitizenDashboard: React.FC = () => {
                       className="btn-dhatu-primary px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1.5 self-start sm:self-auto"
                     >
                       <Phone className="w-3.5 h-3.5" />
-                      <span>कॉल करें / Call Suresh</span>
+                      <span>{t('callCollector', 'Call Collector')}</span>
                     </a>
                   )}
                 </div>
@@ -548,9 +548,9 @@ export const CitizenDashboard: React.FC = () => {
           {/* Booking Form */}
           <div className="lg:col-span-7 bg-paper-50 rounded-xl p-6 sm:p-8 border-2 border-steel-300 shadow-sm space-y-6">
             <div>
-              <span className="stamp-seal stamp-verified text-xs">घरेलू ई-कचरा पिकअप</span>
+              <span className="stamp-seal stamp-verified text-xs">{t('householdPickupBadge', 'Doorstep Pickup')}</span>
               <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-                ई-कचरा पिकअप बुक करें (Book Doorstep E-Waste Pickup)
+                {t('bookPickupHeader', 'Book Doorstep E-Waste Pickup')}
               </h2>
               <p className="text-xs text-steel-600">
                 Upload photos of your obsolete electronics. Our AI classifies the material and provides an indicative price range before booking.
@@ -562,7 +562,7 @@ export const CitizenDashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-steel-800 uppercase tracking-wider flex items-center gap-1.5">
                   <Camera className="w-4 h-4 text-copper-600" />
-                  <span>AI फोटो स्कैनर (Upload Photo for Auto-Classification)</span>
+                  <span>{t('aiPhotoScanner', 'AI Photo Scanner (Upload Photo for Auto-Classification)')}</span>
                 </span>
                 {classifying && <span className="text-xs font-mono text-copper-600 animate-pulse">Scanning PCB...</span>}
               </div>
@@ -714,7 +714,7 @@ export const CitizenDashboard: React.FC = () => {
               <div className="p-4 bg-brass-100/90 border-2 border-brass-400 rounded-lg flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-mono font-bold text-brass-800 uppercase tracking-wider block">
-                    अनुमानित मूल्य दायरा (Indicative Market Price Range)
+                    {t('priceRangeTitle', 'Indicative Market Price Range')}
                   </span>
                   <div className="text-xl sm:text-2xl font-mono-num font-black text-steel-900">
                     {formatCurrency(indicativeMin)} — {formatCurrency(indicativeMax)}
@@ -739,7 +739,7 @@ export const CitizenDashboard: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-xs font-bold text-steel-900 block">
-                      पर्यावरण NGO को राशि दान करें (Donate Value to CSR)
+                      {t('donateToCsrLabel', 'Donate Value to Environmental NGO (Plant Trees)')}
                     </span>
                     <span className="text-[11px] text-steel-600">
                       Funds 5 native tree saplings in Delhi Ridge green corridor.
@@ -764,7 +764,7 @@ export const CitizenDashboard: React.FC = () => {
                 className="w-full btn-dhatu-primary py-3.5 rounded-lg text-sm font-bold flex items-center justify-center space-x-2 shadow-tactile"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>पिकअप पुष्टि करें (Confirm Doorstep Pickup Request)</span>
+                <span>{t('confirmPickupBtn', 'Confirm & Request Doorstep Pickup')}</span>
               </button>
             </form>
           </div>
@@ -772,9 +772,9 @@ export const CitizenDashboard: React.FC = () => {
           {/* Right Column: Information & Traceability Guarantee */}
           <div className="lg:col-span-5 space-y-4">
             <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-4">
-              <span className="stamp-seal stamp-verified text-xs">सत्यापित श्रृंखला</span>
+              <span className="stamp-seal stamp-verified text-xs">{t('traceabilityBadge', 'Verified Chain')}</span>
               <h3 className="font-display font-black text-steel-900 text-lg">
-                कबाड़ीवाला कनेक्ट ट्रेसेबिलिटी गारंटी (Traceability Guarantee)
+                {t('traceabilityGuarantee', 'Dhatu Traceability & Chain of Custody Guarantee')}
               </h3>
               <p className="text-xs text-steel-600">
                 How your discarded devices are protected from dangerous open burning:
@@ -805,9 +805,9 @@ export const CitizenDashboard: React.FC = () => {
         <div className="bg-paper-50 rounded-xl p-6 sm:p-8 border-2 border-steel-300 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-steel-200 pb-4">
             <div>
-              <span className="stamp-seal stamp-verified text-xs">पर्यावरण प्रभाव लेखा</span>
+              <span className="stamp-seal stamp-verified text-xs">{t('environmentalImpactHeader', 'Environmental Impact')}</span>
               <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-                व्यक्तिगत लैंडफिल डायवर्जन प्रभाव (Your Environmental Impact)
+                {t('personalImpactTitle', 'Your Environmental & Landfill Diversion Impact')}
               </h2>
               <p className="text-xs text-steel-600">
                 Official metrics audited by Central Pollution Control Board (CPCB) methodology.
@@ -819,31 +819,31 @@ export const CitizenDashboard: React.FC = () => {
               className="btn-dhatu-primary px-4 py-2 rounded text-xs font-bold flex items-center space-x-1.5 self-start sm:self-auto"
             >
               <Award className="w-4 h-4" />
-              <span>प्रमाणपत्र डाउनलोड करें (Download Certificate)</span>
+              <span>{t('downloadCertBtn', 'Download Disposal Certificate')}</span>
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-center">
             <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">ई-कचरा लैंडफिल से बचाया</span>
+              <span className="text-steel-500 text-[10px] uppercase block">{t('ewasteDiverted', 'E-Waste Diverted from Landfills')}</span>
               <span className="text-3xl font-bold text-copper-600">28.2 kg</span>
               <span className="text-[10px] text-forest-600 block mt-1">Zero toxic leaching</span>
             </div>
 
             <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">कार्बन डाइऑक्साइड बचत</span>
+              <span className="text-steel-500 text-[10px] uppercase block">{t('carbonSaved', 'Carbon Emissions Avoided')}</span>
               <span className="text-3xl font-bold text-forest-600">64.5 kg</span>
               <span className="text-[10px] text-steel-500 block mt-1">Equivalent to 4 trees</span>
             </div>
 
             <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">तांबा और धातु पुनर्चक्रण</span>
+              <span className="text-steel-500 text-[10px] uppercase block">{t('metalsRecycled', 'Metals & Copper Recycled')}</span>
               <span className="text-3xl font-bold text-brass-700">8.4 kg</span>
               <span className="text-[10px] text-steel-500 block mt-1">Smelter pure ingot</span>
             </div>
 
             <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">सीएसआर ग्रीन क्रेडिट्स</span>
+              <span className="text-steel-500 text-[10px] uppercase block">{t('csrCreditsEarned', 'CSR Green Credits Earned')}</span>
               <span className="text-3xl font-bold text-steel-900">420 Pts</span>
               <span className="text-[10px] text-copper-700 block mt-1">Eligible for tax rebate</span>
             </div>
@@ -855,9 +855,9 @@ export const CitizenDashboard: React.FC = () => {
       {activeTab === 'dropoff' && (
         <div className="space-y-6">
           <div>
-            <span className="stamp-seal stamp-verified text-xs">स्वयं ड्रॉप-ऑफ विकल्प</span>
+            <span className="stamp-seal stamp-verified text-xs">{t('selfDropoffBadge', 'Self Drop-Off Option')}</span>
             <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-              अधिकृत ई-कचरा ड्रॉप-ऑफ केंद्र (Authorized Collection Centers)
+              {t('selfDropoffTitle', 'Authorized E-Waste Drop-Off Centers')}
             </h2>
             <p className="text-xs text-steel-600">
               For citizens who prefer dropping off items in person without scheduling a home pickup.
@@ -951,7 +951,7 @@ export const CitizenDashboard: React.FC = () => {
           <div className="bg-paper-50 rounded-2xl max-w-md w-full border-4 border-steel-800 shadow-2xl p-6 space-y-4">
             <div className="flex justify-between items-start border-b-2 border-steel-300 pb-3">
               <div>
-                <span className="stamp-seal stamp-verified text-xs">सत्यापित डिजिटल रसीद</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('verifiedReceiptModalTitle', 'Verified Digital Receipt')}</span>
                 <h3 className="font-display font-black text-xl text-steel-900 mt-1">
                   E-Waste Handover Voucher
                 </h3>
@@ -1076,7 +1076,7 @@ export const CitizenDashboard: React.FC = () => {
             }`}
           >
             <Clock className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabMyPickups', 'पिकअप')}</span>
+            <span className="truncate max-w-[70px]">{t('tabMyPickups', 'My Pickups')}</span>
           </button>
 
           <button
@@ -1086,7 +1086,7 @@ export const CitizenDashboard: React.FC = () => {
             }`}
           >
             <Plus className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabSchedulePickup', 'बुक करें')}</span>
+            <span className="truncate max-w-[70px]">{t('tabSchedulePickup', 'Book New')}</span>
           </button>
 
           <button
@@ -1096,7 +1096,7 @@ export const CitizenDashboard: React.FC = () => {
             }`}
           >
             <Award className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabImpact', 'इम्पैक्ट')}</span>
+            <span className="truncate max-w-[70px]">{t('tabImpact', 'Impact')}</span>
           </button>
 
           <button
@@ -1106,7 +1106,7 @@ export const CitizenDashboard: React.FC = () => {
             }`}
           >
             <Building className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabDropoff', 'ड्रॉप-ऑफ')}</span>
+            <span className="truncate max-w-[70px]">{t('tabDropoff', 'Drop-off')}</span>
           </button>
         </div>
       </div>
