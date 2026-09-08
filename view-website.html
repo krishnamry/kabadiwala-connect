@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M7 19h10V4H7v15zm-5-2h4V6H2v11zM18 6v11h4V6h-4z'/></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1B2624" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="./manifest.json" />
     <title>Kabadiwala Connect — e-Waste Traceability & EPR Platform (धातु)</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -12,8 +17,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Mukta:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Roboto+Slab:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+      html, body {
+        overscroll-behavior-y: contain;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
       body {
         font-family: 'Mukta', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }
       h1, h2, h3, .font-display {
         font-family: 'Roboto Slab', serif;
@@ -21,6 +33,9 @@
       .font-mono-num {
         font-family: 'JetBrains Mono', monospace;
         font-variant-numeric: tabular-nums;
+      }
+      button, a, input, select {
+        touch-action: manipulation;
       }
     </style>
     <script type="module" crossorigin src="./assets/index-CIBSzMNH.js"></script>
