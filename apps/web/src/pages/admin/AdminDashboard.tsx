@@ -219,10 +219,10 @@ export const AdminDashboard: React.FC = () => {
   const percentageIncrease = Math.round((earningsDifference / informalCollectorPay) * 100);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
       
       {/* Top Header - Dhatu Industrial Passbook Style */}
-      <div className="bg-steel-900 text-paper-50 rounded-xl p-6 sm:p-8 border-2 border-steel-700 shadow-tactile-lg flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-steel-900 text-paper-50 rounded-xl p-5 sm:p-8 border-2 border-steel-700 shadow-tactile-lg flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
         <div className="space-y-2 z-10">
           <div className="flex flex-wrap items-center gap-2">
             <span className="stamp-seal stamp-verified text-[11px] bg-forest-500/20 text-forest-500 border-forest-500">
@@ -241,7 +241,7 @@ export const AdminDashboard: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
             NDMC Waste & Mines Cell <span className="text-copper-400 font-sans text-lg">(Delhi Central ULB)</span>
           </h1>
-          <p className="text-sm text-paper-300 max-w-2xl font-medium">
+          <p className="text-xs sm:text-sm text-paper-300 max-w-2xl font-medium">
             CPCB E-Waste (Management) Rules 2022 Central Audit Terminal & Traceability Ledger
           </p>
         </div>
@@ -257,11 +257,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b-2 border-steel-300 pb-2">
+      {/* Tabs - Horizontal Scrollable on Mobile Portrait */}
+      <div className="flex overflow-x-auto no-scrollbar gap-2 border-b-2 border-steel-300 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'overview'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -273,7 +273,7 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('traceability')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'traceability'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -285,7 +285,7 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('uniteconomics')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'uniteconomics'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -297,7 +297,7 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('verifications')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'verifications'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -309,7 +309,7 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('epr')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'epr'
               ? 'bg-steel-800 text-white shadow-tactile border border-steel-900'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -729,6 +729,61 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Sticky Mobile Bottom Navigation Bar (Portrait Phone Optimization) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-paper-100 border-t-2 border-steel-300 shadow-tactile-lg p-2 md:hidden">
+        <div className="grid grid-cols-5 gap-1 max-w-lg mx-auto">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'overview' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabOverview', 'Overview')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('traceability')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'traceability' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Layers className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabTraceability', 'Trace')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('uniteconomics')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'uniteconomics' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Calculator className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabUnitEconomics', 'Economics')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('verifications')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'verifications' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Users className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabVerifications', 'Verify')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('epr')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'epr' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <FileSpreadsheet className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabEpr', 'EPR')}</span>
+          </button>
+        </div>
+      </div>
 
     </div>
   );

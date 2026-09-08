@@ -276,10 +276,10 @@ export const CitizenDashboard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
       
       {/* Top Banner - Dhatu Industrial Passbook Style */}
-      <div className="bg-steel-900 text-paper-50 rounded-xl p-6 sm:p-8 border-2 border-steel-700 shadow-tactile-lg flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-steel-900 text-paper-50 rounded-xl p-5 sm:p-8 border-2 border-steel-700 shadow-tactile-lg flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
         <div className="space-y-2 z-10">
           <div className="flex flex-wrap items-center gap-2">
             <span className="stamp-seal stamp-verified text-[11px] bg-forest-500/20 text-forest-500 border-forest-500">
@@ -290,7 +290,7 @@ export const CitizenDashboard: React.FC = () => {
             </span>
             <VoiceAssistButton
               text="Citizen Portal. Request doorstep e-waste pickup, view indicative price estimates, track collector on live map, and claim green environmental credits."
-              hindiText="नागरिक पोर्टल। घर बैठे ई-कचरा पिकअप का अनुरोध करें, अनुमानित मूल्य देखें, कबाड़ीवाले को मैप पर ट्रैक करें और पर्यावरण क्रेडिट पाएं。"
+              hindiText="नागरिक पोर्टल। घर बैठे ई-कचरा पिकअप का अनुरोध करें, अनुमानित मूल्य देखें, कबाड़ीवाले को मैप पर ट्रैक करें और पर्यावरण क्रेडिट पाएं।"
               marathiText="नागरिक पोर्टल. घरावरून ई-कचरा संकलन विनंती करा, अंदाजे दर पहा आणि नकाशावर ट्रॅक करा."
               size="sm"
             />
@@ -298,25 +298,27 @@ export const CitizenDashboard: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
             {t('portalCitizen', 'Citizen e-Waste Portal')}
           </h1>
-          <p className="text-sm text-paper-300 max-w-2xl font-medium">
+          <p className="text-xs sm:text-sm text-paper-300 max-w-2xl font-medium">
             {t('citizenCardDesc', 'Safely channel your electronics into the CPCB authorized formal chain instead of toxic landfills.')}
           </p>
         </div>
 
         {/* Personal Impact Hero Counter (Section 1.A.5) */}
-        <div className="bg-steel-950 p-4 rounded-xl border border-steel-800 text-center sm:text-right z-10">
-          <div className="text-[10px] uppercase font-mono text-paper-400">
-            {t('tabImpact', 'PERSONAL IMPACT STAT')}
-          </div>
-          <div className="text-2xl sm:text-3xl font-mono-num font-black text-brass-400">
-            28.2 kg
-          </div>
-          <div className="text-xs text-forest-400 font-medium">
-            {t('landfillDivertedKg', 'kg Diverted from Landfills')} 🌲
+        <div className="bg-steel-950 p-3.5 sm:p-4 rounded-xl border border-steel-800 text-left sm:text-right z-10 flex sm:flex-col justify-between sm:justify-center items-center sm:items-end">
+          <div>
+            <div className="text-[10px] uppercase font-mono text-paper-400">
+              {t('tabImpact', 'PERSONAL IMPACT STAT')}
+            </div>
+            <div className="text-2xl sm:text-3xl font-mono-num font-black text-brass-400">
+              28.2 kg
+            </div>
+            <div className="text-xs text-forest-400 font-medium">
+              {t('landfillDivertedKg', 'kg Diverted from Landfills')} 🌲
+            </div>
           </div>
           <button
             onClick={() => setShowCertificateModal(true)}
-            className="mt-2 text-[11px] text-copper-400 hover:text-copper-300 font-bold underline flex items-center justify-end gap-1 ml-auto"
+            className="mt-1 sm:mt-2 text-[11px] text-copper-400 hover:text-copper-300 font-bold underline flex items-center gap-1"
           >
             <Award className="w-3.5 h-3.5" />
             <span>{t('downloadCert', 'Download Green Certificate')}</span>
@@ -324,11 +326,11 @@ export const CitizenDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b-2 border-steel-300 pb-2">
+      {/* Tabs - Horizontal Scrollable on Mobile Portrait */}
+      <div className="flex overflow-x-auto no-scrollbar gap-2 border-b-2 border-steel-300 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
         <button
           onClick={() => setActiveTab('pickups')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'pickups'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -340,7 +342,7 @@ export const CitizenDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('new')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'new'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -352,7 +354,7 @@ export const CitizenDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('impact')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'impact'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -364,7 +366,7 @@ export const CitizenDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('dropoff')}
-          className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
             activeTab === 'dropoff'
               ? 'bg-steel-800 text-white shadow-tactile border border-steel-900'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -613,10 +615,39 @@ export const CitizenDashboard: React.FC = () => {
                       setLatitude(28.5700);
                       setLongitude(77.2400);
                     }}
-                    className="px-3 py-2 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400"
+                    className="px-3 py-2 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1"
                   >
-                    GPS
+                    <MapPin className="w-3.5 h-3.5 text-copper-600" />
+                    <span>GPS</span>
                   </button>
+                </div>
+
+                {/* Interactive Doorstep Location Pin Map */}
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-steel-700 font-bold flex items-center gap-1">
+                      <span>📍 {language === 'hi' ? 'मानचित्र पर सटीक गेट चुनें' : language === 'mr' ? 'नकाशावर अचूक जागा निवडा' : 'Pin Doorstep on Map'}:</span>
+                    </span>
+                    <span className="text-[10px] text-copper-700 font-bold bg-paper-200 px-2 py-0.5 rounded border border-steel-300">
+                      {latitude.toFixed(4)}° N, {longitude.toFixed(4)}° E
+                    </span>
+                  </div>
+                  <div className="h-48 sm:h-56 rounded-lg overflow-hidden border-2 border-steel-400 shadow-inner relative">
+                    <LeafletMap
+                      center={[latitude, longitude]}
+                      zoom={15}
+                      selectableLocation={true}
+                      pinLocation={[latitude, longitude]}
+                      onLocationSelect={(lat, lng) => {
+                        setLatitude(lat);
+                        setLongitude(lng);
+                      }}
+                      height="100%"
+                    />
+                    <div className="absolute bottom-2 left-2 right-2 bg-paper-50/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-mono text-steel-700 border border-steel-300 pointer-events-none text-center shadow-sm">
+                      {language === 'hi' ? 'मानचित्र पर टैप करके या पिन खींचकर सटीक पता सेट करें' : language === 'mr' ? 'नकाशावर टॅप करून अचूक जागा निवडा' : 'Tap anywhere on map or drag pin to pinpoint pickup gate'}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -833,6 +864,58 @@ export const CitizenDashboard: React.FC = () => {
             </p>
           </div>
 
+          {/* Drop-off Terminals Map Preview */}
+          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-2">
+            <div className="font-display font-bold text-steel-800 text-sm flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-copper-600" />
+                <span>{language === 'hi' ? 'ड्रॉप-ऑफ केंद्र मानचित्र (दिल्ली एनसीआर)' : language === 'mr' ? 'ड्रॉप-ऑफ केंद्र नकाशा' : 'Authorized Drop-off Centers Map (Delhi NCR)'}</span>
+              </span>
+              <span className="text-xs font-mono text-copper-700 bg-paper-200 px-2.5 py-0.5 rounded border border-steel-300 font-bold">
+                3 Verified Kiosks
+              </span>
+            </div>
+            <div className="h-56 sm:h-64 rounded-lg overflow-hidden border border-steel-300">
+              <LeafletMap
+                center={[28.5685, 77.2412]}
+                zoom={12}
+                markers={[
+                  {
+                    id: 'dc-1',
+                    lat: 28.5700,
+                    lng: 77.2400,
+                    title: 'NDMC E-Waste Facility Lajpat Nagar',
+                    subtitle: 'Near Metro Pillar 42, Feroze Gandhi Marg',
+                    iconEmoji: '🏛️',
+                    badge: '1.2 km',
+                    color: '#B5573A'
+                  },
+                  {
+                    id: 'dc-2',
+                    lat: 28.5355,
+                    lng: 77.2732,
+                    title: 'EcoRecycle Drop-Off Terminal Okhla',
+                    subtitle: 'Plot 42, Phase-II Industrial Area, Okhla',
+                    iconEmoji: '🏭',
+                    badge: '3.2 km',
+                    color: '#3B6B4E'
+                  },
+                  {
+                    id: 'dc-3',
+                    lat: 28.5728,
+                    lng: 77.2215,
+                    title: 'Croma E-Waste Return Kiosk South Ext.',
+                    subtitle: 'Croma Electronics, South Extension-I',
+                    iconEmoji: '🏢',
+                    badge: '4.5 km',
+                    color: '#C9A227'
+                  }
+                ]}
+                height="100%"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {dropoffCenters.map((c, i) => (
               <div key={i} className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm space-y-3">
@@ -982,6 +1065,51 @@ export const CitizenDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* MOBILE BOTTOM NAVIGATION BAR (Thumb-friendly portrait phone navigation) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/95 backdrop-blur-md border-t-2 border-steel-400 px-2 py-1 shadow-tactile-lg">
+        <div className="grid grid-cols-4 gap-1 text-center">
+          <button
+            onClick={() => setActiveTab('pickups')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'pickups' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Clock className="w-5 h-5 mb-0.5" />
+            <span className="truncate max-w-[70px]">{t('tabMyPickups', 'पिकअप')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('new')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'new' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Plus className="w-5 h-5 mb-0.5" />
+            <span className="truncate max-w-[70px]">{t('tabSchedulePickup', 'बुक करें')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('impact')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'impact' ? 'text-forest-700 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Award className="w-5 h-5 mb-0.5" />
+            <span className="truncate max-w-[70px]">{t('tabImpact', 'इम्पैक्ट')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('dropoff')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
+              activeTab === 'dropoff' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Building className="w-5 h-5 mb-0.5" />
+            <span className="truncate max-w-[70px]">{t('tabDropoff', 'ड्रॉप-ऑफ')}</span>
+          </button>
+        </div>
+      </div>
 
     </div>
   );

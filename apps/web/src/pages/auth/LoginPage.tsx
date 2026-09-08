@@ -196,7 +196,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-[85vh] py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-[85vh] py-4 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-6 sm:space-y-8">
       
       {/* Header Banner */}
       <div className="text-center space-y-2 max-w-2xl mx-auto">
@@ -261,7 +261,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-5xl mx-auto">
         
         {/* Left Column: Role Details & Features Preview */}
-        <div className="lg:col-span-6 receipt-stub rounded-2xl p-6 sm:p-8 border-2 border-steel-400 shadow-sm flex flex-col justify-between space-y-6">
+        <div className="order-2 lg:order-1 lg:col-span-6 receipt-stub rounded-2xl p-5 sm:p-8 border-2 border-steel-400 shadow-sm flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-steel-300 pb-3">
               <div>
@@ -305,7 +305,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
         </div>
 
         {/* Right Column: Clean Login Form */}
-        <div className="lg:col-span-6 bg-paper-50 rounded-2xl p-6 sm:p-8 border-2 border-steel-400 shadow-tactile-lg flex flex-col justify-between space-y-6">
+        <div className="order-1 lg:order-2 lg:col-span-6 bg-paper-50 rounded-2xl p-5 sm:p-8 border-2 border-steel-400 shadow-tactile-lg flex flex-col justify-between space-y-6">
           
           <div className="space-y-5">
             <div>

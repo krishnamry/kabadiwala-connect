@@ -2,10 +2,22 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { Pickup } from '../types';
 
+export interface MapCustomMarker {
+  id: string;
+  lat: number;
+  lng: number;
+  title: string;
+  subtitle?: string;
+  iconEmoji?: string;
+  badge?: string;
+  color?: string;
+}
+
 interface LeafletMapProps {
   center?: [number, number];
   zoom?: number;
   pickups?: Pickup[];
+  markers?: MapCustomMarker[];
   selectedPickupId?: string | null;
   onSelectPickup?: (pickup: Pickup) => void;
   onLocationSelect?: (lat: number, lng: number) => void;
@@ -18,6 +30,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
   center = [28.5685, 77.2412], // Delhi Lajpat Nagar region default
   zoom = 13,
   pickups = [],
+  markers = [],
   selectedPickupId,
   onSelectPickup,
   onLocationSelect,
@@ -28,15 +41,20 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [id: string]: L.Marker }>({});
+  const customMarkersRef = useRef<{ [id: string]: L.Marker }>({});
   const pickMarkerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current).setView(center, zoom);
+      const map = L.map(mapContainerRef.current, {
+        zoomControl: true,
+        attributionControl: false
+      }).setView(center, zoom);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        maxZoom: 19
       }).addTo(map);
 
       if (selectableLocation && onLocationSelect) {
@@ -46,11 +64,15 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
       }
 
       mapInstanceRef.current = map;
-    }
 
-    return () => {
-      // Don't necessarily destroy on every small re-render
-    };
+      // Invalidate size after layout calculations (essential for mobile portrait)
+      setTimeout(() => {
+        try { map.invalidateSize(); } catch {}
+      }, 250);
+      setTimeout(() => {
+        try { map.invalidateSize(); } catch {}
+      }, 600);
+    }
   }, []);
 
   // Update center
@@ -127,6 +149,56 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
       markersRef.current[p.id] = marker;
     });
   }, [pickups, selectedPickupId]);
+
+  // Render custom facility / recycler markers
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    Object.values(customMarkersRef.current).forEach(m => m.remove());
+    customMarkersRef.current = {};
+
+    markers.forEach(cm => {
+      const color = cm.color || '#B5573A';
+      const iconHtml = `
+        <div style="
+          background-color: ${color};
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 2px solid white;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          color: white;
+        ">
+          ${cm.iconEmoji || '📍'}
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        className: 'custom-map-facility-marker',
+        html: iconHtml,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      const marker = L.marker([cm.lat, cm.lng], { icon: customIcon }).addTo(map);
+
+      const popupHtml = `
+        <div style="font-family: sans-serif; min-width: 170px; padding: 2px;">
+          <h4 style="margin: 0 0 4px; font-weight: 700; font-size: 13px; color: #1e293b;">${cm.title}</h4>
+          ${cm.subtitle ? `<div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">${cm.subtitle}</div>` : ''}
+          ${cm.badge ? `<span style="display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; background: ${color}20; color: ${color};">${cm.badge}</span>` : ''}
+        </div>
+      `;
+      marker.bindPopup(popupHtml);
+
+      customMarkersRef.current[cm.id] = marker;
+    });
+  }, [markers]);
 
   // Draggable / selected location pin for pickup creation
   useEffect(() => {

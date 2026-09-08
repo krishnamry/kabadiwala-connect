@@ -533,11 +533,11 @@ export const KabadiwalaDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Primary Tab Navigation (Desktop Header) */}
-      <div className="hidden lg:flex items-center space-x-2 border-b-2 border-steel-300 pb-2 overflow-x-auto">
+      {/* Primary Tab Navigation (Horizontal Scrollable for Mobile & Desktop) */}
+      <div className="flex overflow-x-auto no-scrollbar gap-2 border-b-2 border-steel-300 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
         <button
           onClick={() => setActiveTab('lots')}
-          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
             activeTab === 'lots'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -549,7 +549,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('priceboard')}
-          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
             activeTab === 'priceboard'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -561,7 +561,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('recyclers')}
-          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
             activeTab === 'recyclers'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -573,7 +573,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('handover')}
-          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
             activeTab === 'handover'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -585,7 +585,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('passbook')}
-          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
             activeTab === 'passbook'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -597,7 +597,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('safety')}
-          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
             activeTab === 'safety'
               ? 'bg-signal-500 text-white shadow-tactile border border-signal-600'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -609,7 +609,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('pickups')}
-          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
             activeTab === 'pickups'
               ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
               : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
@@ -952,6 +952,36 @@ export const KabadiwalaDashboard: React.FC = () => {
             <span className="text-xs font-mono text-steel-600 bg-paper-200 px-3 py-1 rounded border border-steel-300">
               3 Nearby Matching Hubs
             </span>
+          </div>
+
+          {/* Nearby Authorized Smelters Map Preview */}
+          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-2">
+            <div className="font-display font-bold text-steel-800 text-sm flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Factory className="w-4 h-4 text-copper-600" />
+                <span>{language === 'hi' ? 'अधिकृत रीसायकलर संयंत्र मानचित्र' : language === 'mr' ? 'अधिकृत रीसायकलर नकाशा' : 'Authorized Recyclers & Smelters Map'}</span>
+              </span>
+              <span className="text-xs font-mono text-forest-700 bg-paper-200 px-2.5 py-0.5 rounded border border-steel-300 font-bold">
+                3 CPCB Smelters
+              </span>
+            </div>
+            <div className="h-60 sm:h-72 rounded-lg overflow-hidden border border-steel-300">
+              <LeafletMap
+                center={[28.5550, 77.2700]}
+                zoom={12}
+                markers={nearbyRecyclers.map(r => ({
+                  id: r.id,
+                  lat: r.id === 'rec-1' ? 28.5355 : r.id === 'rec-2' ? 28.5820 : 28.6280,
+                  lng: r.id === 'rec-1' ? 77.2732 : r.id === 'rec-2' ? 77.2210 : 77.3010,
+                  title: r.name,
+                  subtitle: `${r.cpcbReg} • ${r.location}`,
+                  iconEmoji: '🏭',
+                  badge: `★ ${r.rating}`,
+                  color: '#3B6B4E'
+                }))}
+                height="100%"
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -1444,6 +1474,27 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
           )}
 
+          {/* Live Open Pickups Map Visualizer */}
+          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-2">
+            <div className="font-display font-bold text-steel-800 text-sm flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-copper-600" />
+                <span>{language === 'hi' ? 'लाइव कबाड़ पिकअप मैप (दिल्ली एनसीआर)' : language === 'mr' ? 'थेट भंगार पिकअप नकाशा' : 'Live e-Waste Pickups Map (Delhi NCR)'}</span>
+              </span>
+              <span className="text-xs font-mono text-copper-700 bg-paper-200 px-2.5 py-0.5 rounded border border-steel-300 font-bold">
+                {nearbyPickups.length} Nearby Requests (15km)
+              </span>
+            </div>
+            <div className="h-60 sm:h-72 rounded-lg overflow-hidden border border-steel-300">
+              <LeafletMap
+                center={[28.5685, 77.2412]}
+                zoom={13}
+                pickups={nearbyPickups}
+                height="100%"
+              />
+            </div>
+          </div>
+
           {/* List of Available Nearby Pickups */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {nearbyPickups.map(pickup => (
@@ -1487,16 +1538,16 @@ export const KabadiwalaDashboard: React.FC = () => {
       )}
 
       {/* MOBILE BOTTOM TAB BAR (Thumb-Reachable, Low-Literacy Optimized ≥48px touch targets) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper-50/95 backdrop-blur-md border-t-2 border-steel-400 px-2 py-1 shadow-tactile-lg">
-        <div className="grid grid-cols-5 gap-1 text-center">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper-50/95 backdrop-blur-md border-t-2 border-steel-400 px-1 py-1 shadow-tactile-lg">
+        <div className="grid grid-cols-6 gap-0.5 text-center">
           <button
             onClick={() => setActiveTab('lots')}
             className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
               activeTab === 'lots' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
             }`}
           >
-            <Camera className="w-5 h-5 mb-0.5" />
-            <span>{t('tabLots', 'लॉट बनाएं')}</span>
+            <Camera className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabLots', 'लॉट')}</span>
           </button>
 
           <button
@@ -1505,8 +1556,18 @@ export const KabadiwalaDashboard: React.FC = () => {
               activeTab === 'priceboard' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
             }`}
           >
-            <TrendingUp className="w-5 h-5 mb-0.5" />
-            <span>{t('tabPriceBoard', 'दाम पत्रक')}</span>
+            <TrendingUp className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabPriceBoard', 'दाम')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pickups')}
+            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
+              activeTab === 'pickups' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            }`}
+          >
+            <Truck className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('pickups', 'पिकअप')}</span>
           </button>
 
           <button
@@ -1515,8 +1576,8 @@ export const KabadiwalaDashboard: React.FC = () => {
               activeTab === 'recyclers' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
             }`}
           >
-            <Factory className="w-5 h-5 mb-0.5" />
-            <span>{t('tabFindRecyclers', 'रीसायकलर')}</span>
+            <Factory className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabFindRecyclers', 'रीसायकल')}</span>
           </button>
 
           <button
@@ -1525,8 +1586,8 @@ export const KabadiwalaDashboard: React.FC = () => {
               activeTab === 'passbook' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
             }`}
           >
-            <BookOpen className="w-5 h-5 mb-0.5" />
-            <span>{t('tabPassbook', 'पासबुक')}</span>
+            <BookOpen className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabPassbook', 'खाता')}</span>
           </button>
 
           <button
@@ -1535,8 +1596,8 @@ export const KabadiwalaDashboard: React.FC = () => {
               activeTab === 'safety' ? 'text-signal-600 bg-paper-200' : 'text-steel-600'
             }`}
           >
-            <AlertTriangle className="w-5 h-5 mb-0.5" />
-            <span>{t('tabSafety', 'सुरक्षा')}</span>
+            <AlertTriangle className="w-4 h-4 mb-0.5" />
+            <span className="truncate">{t('tabSafety', 'सुरक्षा')}</span>
           </button>
         </div>
       </div>

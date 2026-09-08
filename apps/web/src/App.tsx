@@ -82,7 +82,7 @@ const MainContent: React.FC = () => {
       </main>
 
       {/* Footer — Dhatu Industrial Stamped Style */}
-      <footer className="bg-steel-900 text-paper-300 py-10 border-t-2 border-steel-700 text-xs">
+      <footer className="bg-steel-900 text-paper-300 py-10 pb-28 md:pb-10 border-t-2 border-steel-700 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-2.5">
             <div className="w-7 h-7 rounded bg-copper-600 border border-copper-800 flex items-center justify-center text-white font-display font-black text-sm">

@@ -99,3 +99,21 @@
   transform: translateY(2px);
   border-bottom-width: 1px;
 }
+
+/* Mobile Portrait Phone Optimization Utilities */
+/* Hide scrollbar on mobile horizontal tab strips while preserving touch scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure Leaflet maps adapt seamlessly to mobile touch and viewport orientation changes */
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  border: 2px solid rgba(46, 53, 50, 0.2);
+}
+
