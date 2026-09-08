@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface VoiceAssistProps {
   text: string;
   hindiText?: string;
+  marathiText?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -11,10 +13,12 @@ interface VoiceAssistProps {
 export const VoiceAssistButton: React.FC<VoiceAssistProps> = ({
   text,
   hindiText,
+  marathiText,
   size = 'md',
   className = ''
 }) => {
   const [speaking, setSpeaking] = useState(false);
+  const { language } = useLanguage();
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -30,23 +34,33 @@ export const VoiceAssistButton: React.FC<VoiceAssistProps> = ({
       return;
     }
 
-    const speechText = hindiText || text;
+    let speechText = text;
+    let locale = 'en-IN';
+
+    if (language === 'hi') {
+      speechText = hindiText || text;
+      locale = 'hi-IN';
+    } else if (language === 'mr') {
+      speechText = marathiText || hindiText || text;
+      locale = 'mr-IN';
+    }
+
     const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.lang = hindiText ? 'hi-IN' : 'en-IN';
-    utterance.rate = 0.95;
+    utterance.lang = locale;
+    utterance.rate = 0.92;
 
     utterance.onstart = () => setSpeaking(true);
     utterance.onend = () => setSpeaking(false);
     utterance.onerror = () => setSpeaking(false);
 
-    window.speechSynthesis.cancel(); // clear previous
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   };
 
   const sizeClasses = {
     sm: 'p-1.5 text-xs',
     md: 'p-2 text-sm',
-    lg: 'p-3 text-base'
+    lg: 'p-2.5 text-base'
   };
 
   return (
@@ -54,14 +68,15 @@ export const VoiceAssistButton: React.FC<VoiceAssistProps> = ({
       type="button"
       onClick={handleSpeak}
       title={speaking ? 'Stop Speaking' : 'बोलकर सुनें / Listen Aloud'}
-      className={`inline-flex items-center justify-center rounded-full transition-all ${
+      className={`inline-flex items-center justify-center rounded-lg border transition-all ${
         speaking
-          ? 'bg-amber-500 text-white animate-pulse shadow-md'
-          : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800'
+          ? 'bg-signal-500 text-white border-signal-600 animate-pulse shadow-md'
+          : 'bg-paper-200 hover:bg-brass-100 text-steel-800 border-paper-300 hover:border-brass-400'
       } ${sizeClasses[size]} ${className}`}
     >
-      {speaking ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+      {speaking ? <VolumeX className="w-4 h-4 text-white" /> : <Volume2 className="w-4 h-4 text-copper-600" />}
       <span className="sr-only">Voice Assist</span>
     </button>
   );
 };
+

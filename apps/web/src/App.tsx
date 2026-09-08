@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { LandingPage } from './pages/LandingPage';
 import { CitizenDashboard } from './pages/citizen/CitizenDashboard';
 import { KabadiwalaDashboard } from './pages/kabadiwala/KabadiwalaDashboard';
+import { RecyclerDashboard } from './pages/recycler/RecyclerDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { LoginPage } from './pages/auth/LoginPage';
 import { Role } from './types';
-import { Sparkles, Recycle } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -18,6 +19,7 @@ const MainContent: React.FC = () => {
     if (user) {
       if (user.role === 'CITIZEN') setCurrentView('citizen');
       else if (user.role === 'KABADIWALA') setCurrentView('kabadiwala');
+      else if (user.role === 'RECYCLER') setCurrentView('recycler');
       else if (user.role === 'ADMIN') setCurrentView('admin');
     }
   }, [user?.role, user?.id]);
@@ -26,8 +28,8 @@ const MainContent: React.FC = () => {
     if (loading) {
       return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-          <div className="w-12 h-12 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
-          <p className="text-slate-500 font-medium text-sm">Initializing Kabadiwala Connect...</p>
+          <div className="w-12 h-12 rounded-full border-4 border-copper-600 border-t-transparent animate-spin" />
+          <p className="text-steel-600 font-bold font-display text-sm">प्रारंभ हो रहा है / Initializing Dhatu Ecosystem...</p>
         </div>
       );
     }
@@ -38,6 +40,7 @@ const MainContent: React.FC = () => {
           onSuccess={(role: Role) => {
             if (role === 'CITIZEN') setCurrentView('citizen');
             else if (role === 'KABADIWALA') setCurrentView('kabadiwala');
+            else if (role === 'RECYCLER') setCurrentView('recycler');
             else if (role === 'ADMIN') setCurrentView('admin');
           }}
         />
@@ -52,6 +55,10 @@ const MainContent: React.FC = () => {
       return <KabadiwalaDashboard />;
     }
 
+    if (currentView === 'recycler') {
+      return <RecyclerDashboard />;
+    }
+
     if (currentView === 'admin') {
       return <AdminDashboard />;
     }
@@ -64,7 +71,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/70">
+    <div className="min-h-screen flex flex-col bg-paper-100 text-steel-800">
       <Navbar
         currentTab={currentView}
         onTabChange={(tab: string) => setCurrentView(tab)}
@@ -74,22 +81,22 @@ const MainContent: React.FC = () => {
         {renderActiveView()}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-10 border-t border-slate-800 text-xs">
+      {/* Footer — Dhatu Industrial Stamped Style */}
+      <footer className="bg-steel-900 text-paper-300 py-10 border-t-2 border-steel-700 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold">
-              ♻️
+          <div className="flex items-center space-x-2.5">
+            <div className="w-7 h-7 rounded bg-copper-600 border border-copper-800 flex items-center justify-center text-white font-display font-black text-sm">
+              धा
             </div>
-            <span className="font-bold text-slate-200">Kabadiwala Connect</span>
-            <span>— Smart India Hackathon (SIH 2026) Prototype</span>
+            <span className="font-display font-bold text-paper-50">Kabadiwala Connect (धातु)</span>
+            <span className="text-paper-400">— SIH26229 Ministry of Mines E-Waste Formalization Platform</span>
           </div>
 
-          <div className="flex items-center space-x-6 text-slate-400">
-            <span>Role-based Responsive Web App</span>
-            <span>Leaflet Maps</span>
-            <span>FastAPI ML Classifier</span>
-            <span>CPCB EPR Compliant</span>
+          <div className="flex flex-wrap items-center gap-4 text-paper-400 font-mono text-[11px]">
+            <span>3-Sided Formal Funnel</span>
+            <span>CPCB EPR Form-2/6 Compliant</span>
+            <span>Spoken Vernacular TTS</span>
+            <span>Offline-Tolerant Passbook</span>
           </div>
         </div>
       </footer>
@@ -99,10 +106,13 @@ const MainContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <MainContent />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <MainContent />
+      </AuthProvider>
+    </LanguageProvider>
   );
 };
 
 export default App;
+

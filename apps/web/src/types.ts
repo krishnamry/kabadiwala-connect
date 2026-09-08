@@ -1,4 +1,4 @@
-export type Role = 'CITIZEN' | 'KABADIWALA' | 'ADMIN';
+export type Role = 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN';
 
 export type PickupStatus = 'REQUESTED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
@@ -9,6 +9,7 @@ export interface User {
   role: Role;
   createdAt?: string;
   kabadiwala?: KabadiwalaProfile | null;
+  recycler?: RecyclerProfile | null;
 }
 
 export interface KabadiwalaProfile {
@@ -24,6 +25,22 @@ export interface KabadiwalaProfile {
   serviceRadiusKm?: number;
   user?: User;
   completedJobsCount?: number;
+}
+
+export interface RecyclerProfile {
+  id: string;
+  facilityName: string;
+  cpcbRegNumber: string;
+  statePcb: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+  materialsAccepted: string[];
+  offeredRates: { [category: string]: number };
+  dailyCapacityKg: number;
+  pickupAvailable: boolean;
+  verified: boolean;
+  rating: number;
 }
 
 export interface ScrapItem {
@@ -62,6 +79,62 @@ export interface Pickup {
   notes?: string | null;
   createdAt: string;
   distanceKm?: number;
+  donatedToCsr?: boolean;
+  traceabilityHash?: string;
+}
+
+export interface EWasteLot {
+  id: string;
+  lotCode: string;
+  collectorId: string;
+  collectorName: string;
+  category: string;
+  approxWeightKg: number;
+  estimatedValue: number;
+  recyclerOfferedRate: number;
+  status: 'DRAFT' | 'AVAILABLE' | 'REQUESTED' | 'HANDOVER_PENDING' | 'CONFIRMED' | 'REJECTED';
+  imageUrl?: string;
+  gpsLat: number;
+  gpsLng: number;
+  createdAt: string;
+  confirmedAt?: string;
+  recyclerId?: string;
+  recyclerName?: string;
+  qrCode: string;
+  isOfflineQueued?: boolean;
+}
+
+export interface SafetyGuidanceCard {
+  id: string;
+  hazardTitleEn: string;
+  hazardTitleHi: string;
+  hazardTitleMr: string;
+  category: string;
+  severity: 'CRITICAL' | 'HIGH' | 'WARNING';
+  dosEn: string[];
+  dosHi: string[];
+  dosMr: string[];
+  dontsEn: string[];
+  dontsHi: string[];
+  dontsMr: string[];
+  spokenEn: string;
+  spokenHi: string;
+  spokenMr: string;
+}
+
+export interface TransactionAnomaly {
+  id: string;
+  lotCode: string;
+  collectorName: string;
+  category: string;
+  weightKg: number;
+  declaredValue: number;
+  benchmarkValue: number;
+  divergencePercent: number;
+  reason: string;
+  severity: 'HIGH' | 'MEDIUM';
+  status: 'FLAGGED' | 'REVIEWED' | 'DISMISSED';
+  flaggedAt: string;
 }
 
 export interface Transaction {
@@ -73,12 +146,16 @@ export interface Transaction {
   paymentMethod?: string;
   createdAt: string;
   pickup?: Pickup;
+  isCash?: boolean;
 }
 
 export interface ScrapRate {
   id: string;
   category: string;
+  hindiName?: string;
+  marathiName?: string;
   ratePerKg: number;
+  weeklyDelta: number; // e.g. +15 or -8
   unit: string;
   description: string;
   badge?: string | null;
@@ -120,3 +197,4 @@ export interface MLClassificationResult {
   filename: string;
   dimensions: string;
 }
+

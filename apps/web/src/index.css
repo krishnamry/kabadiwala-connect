@@ -4,7 +4,9 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900;
+    @apply bg-paper-100 text-steel-800 font-body antialiased;
+    background-color: #F4EFE6;
+    color: #2E3532;
   }
 }
 
@@ -13,4 +15,87 @@
   font-family: inherit;
   width: 100%;
   height: 100%;
+}
+
+/* Dhatu (धातु) Design Utilities */
+/* Receipt Stub / Perforated Edge Motif */
+.receipt-stub {
+  background-color: #FAF4F2;
+  border: 1px solid #D5D8D7;
+  position: relative;
+}
+
+.perforated-edge {
+  background-image: radial-gradient(circle, transparent 0, transparent 4px, #FAF4F2 4px);
+  background-size: 16px 16px;
+  background-position: -8px -8px;
+}
+
+/* Physical Stamped Seal Motif (सत्यापित, पूर्ण, लंबित) */
+.stamp-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  font-family: 'Roboto Slab', serif;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  transform: rotate(-1.5deg);
+  mask-image: linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85));
+}
+
+.stamp-verified {
+  color: #3B6B4E;
+  border-color: #3B6B4E;
+  background-color: rgba(59, 107, 78, 0.08);
+}
+
+.stamp-pending {
+  color: #C9A227;
+  border-color: #C9A227;
+  background-color: rgba(201, 162, 39, 0.1);
+}
+
+.stamp-hazard {
+  color: #C1443C;
+  border-color: #C1443C;
+  background-color: rgba(193, 68, 60, 0.08);
+}
+
+/* Pressed Button Effect (Mechanical Tactile Feedback) */
+.btn-dhatu-primary {
+  background-color: #B5573A;
+  color: #FFFFFF;
+  border-bottom: 3px solid #873C25;
+  transition: all 0.1s ease-in-out;
+}
+.btn-dhatu-primary:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+.btn-dhatu-steel {
+  background-color: #2E3532;
+  color: #FFFFFF;
+  border-bottom: 3px solid #141816;
+  transition: all 0.1s ease-in-out;
+}
+.btn-dhatu-steel:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+.btn-dhatu-brass {
+  background-color: #C9A227;
+  color: #1F2422;
+  border-bottom: 3px solid #8E6D14;
+  font-weight: 700;
+  transition: all 0.1s ease-in-out;
+}
+.btn-dhatu-brass:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
 }
