@@ -13,7 +13,7 @@
     "dev:ml": "cd apps/ml-service && ./venv/bin/python3 main.py",
     "seed": "cd apps/api && npm run seed",
     "prisma:push": "cd apps/api && npm run prisma:push",
-    "build": "cd apps/web && npm run build"
+    "build": "cd apps/web && npm run build && cp -r dist/* ../../ && cp dist/index.html ../../view-website.html"
   },
   "keywords": [
     "kabadiwala",

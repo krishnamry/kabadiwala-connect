@@ -2,7 +2,18 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, Language } from '../context/LanguageContext';
 import { Role } from '../types';
-import { User, ShieldCheck, Truck, Factory, LogOut, ChevronDown, Sparkles, Volume2, Globe } from 'lucide-react';
+import {
+  User,
+  ShieldCheck,
+  Truck,
+  Factory,
+  LogOut,
+  ChevronDown,
+  Sparkles,
+  Volume2,
+  Lock,
+  ArrowRight
+} from 'lucide-react';
 
 interface NavbarProps {
   currentTab: string;
@@ -18,25 +29,41 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
   const getRoleBadge = (role: Role) => {
     switch (role) {
       case 'CITIZEN':
-        return <span className="bg-paper-200 text-copper-700 text-[11px] font-bold px-2 py-0.5 rounded border border-copper-300">नागरिक / Citizen</span>;
+        return (
+          <span className="stamp-seal stamp-verified text-[10px] bg-paper-200 text-copper-700 border-copper-400">
+            नागरिक पोर्टल (Citizen)
+          </span>
+        );
       case 'KABADIWALA':
-        return <span className="bg-brass-100 text-brass-800 text-[11px] font-bold px-2 py-0.5 rounded border border-brass-400">कबाड़ीवाला / Collector</span>;
+        return (
+          <span className="stamp-seal stamp-pending text-[10px] bg-brass-100 text-brass-800 border-brass-500">
+            कबाड़ीवाला (Collector)
+          </span>
+        );
       case 'RECYCLER':
-        return <span className="bg-forest-500/10 text-forest-500 text-[11px] font-bold px-2 py-0.5 rounded border border-forest-500/30">रीसायकलर / Aggregator</span>;
+        return (
+          <span className="stamp-seal stamp-verified text-[10px] bg-forest-500/10 text-forest-600 border-forest-600">
+            अधिकृत रीसायकलर (Recycler)
+          </span>
+        );
       case 'ADMIN':
-        return <span className="bg-steel-800 text-paper-100 text-[11px] font-bold px-2 py-0.5 rounded border border-steel-700">Admin / CPCB Audit</span>;
+        return (
+          <span className="stamp-seal stamp-verified text-[10px] bg-steel-800 text-paper-100 border-steel-700">
+            प्रशासन (CPCB Audit)
+          </span>
+        );
     }
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-paper-50/95 backdrop-blur-md border-b-2 border-steel-200 shadow-sm">
+    <header className="sticky top-0 z-40 bg-paper-50/95 backdrop-blur-md border-b-2 border-steel-300 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
           {/* Brand Logo & Philosophy Tag */}
           <div
             className="flex items-center space-x-3 cursor-pointer group"
-            onClick={() => onTabChange('home')}
+            onClick={() => onTabChange(user ? (user.role.toLowerCase()) : 'home')}
           >
             <div className="w-10 h-10 rounded-lg bg-copper-600 border-2 border-copper-800 flex items-center justify-center text-white shadow-tactile group-hover:bg-copper-700 transition-colors">
               <span className="font-display font-black text-xl">धा</span>
@@ -51,11 +78,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                 </span>
               </div>
               <p className="text-[11px] text-steel-600 hidden md:flex items-center gap-1 font-medium">
-                <span>धातु — e-Waste Traceability & EPR Platform</span>
+                <span>धातु — e-Waste Traceability & Formalization</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    speak(language === 'hi' ? 'कबाड़ीवाला कनेक्ट, धातु ई-कचरा ट्रेसेबिलिटी मंच' : language === 'mr' ? 'कबाडीवाला कनेक्ट, धातु ई-कचरा मागोवा व्यासपीठ' : 'Kabadiwala Connect, Dhatu e-waste traceability and EPR platform');
+                    speak(language === 'hi' ? 'कबाड़ीवाला कनेक्ट, धातु ई-कचरा मंच' : language === 'mr' ? 'कबाडीवाला कनेक्ट, धातु ई-कचरा व्यासपीठ' : 'Kabadiwala Connect, Dhatu e-waste platform');
                   }}
                   className="text-copper-600 hover:text-copper-800"
                   title="Listen aloud"
@@ -66,58 +93,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
             </div>
           </div>
 
-          {/* 4-Portal Quick Switcher (Live Demo / Jury Showcase) */}
-          <div className="hidden xl:flex items-center space-x-1 bg-paper-200/80 p-1 rounded-lg border border-steel-300 shadow-inner">
-            <button
-              onClick={() => quickDemoLogin('CITIZEN')}
-              className={`px-3 py-1.5 text-xs font-bold rounded transition-all flex items-center space-x-1.5 ${
-                user?.role === 'CITIZEN'
-                  ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-                  : 'text-steel-700 hover:text-steel-950 hover:bg-paper-100'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>1. {t('portalCitizen', 'Citizen')}</span>
-            </button>
-            <button
-              onClick={() => quickDemoLogin('KABADIWALA')}
-              className={`px-3 py-1.5 text-xs font-bold rounded transition-all flex items-center space-x-1.5 ${
-                user?.role === 'KABADIWALA'
-                  ? 'bg-brass-500 text-steel-950 shadow-tactile border border-brass-600'
-                  : 'text-steel-700 hover:text-steel-950 hover:bg-paper-100'
-              }`}
-            >
-              <Truck className="w-3.5 h-3.5" />
-              <span>2. {t('portalCollector', 'Collector')}</span>
-            </button>
-            <button
-              onClick={() => quickDemoLogin('RECYCLER')}
-              className={`px-3 py-1.5 text-xs font-bold rounded transition-all flex items-center space-x-1.5 ${
-                user?.role === 'RECYCLER'
-                  ? 'bg-forest-500 text-white shadow-tactile border border-forest-600'
-                  : 'text-steel-700 hover:text-steel-950 hover:bg-paper-100'
-              }`}
-            >
-              <Factory className="w-3.5 h-3.5" />
-              <span>3. {t('portalRecycler', 'Recycler')}</span>
-            </button>
-            <button
-              onClick={() => quickDemoLogin('ADMIN')}
-              className={`px-3 py-1.5 text-xs font-bold rounded transition-all flex items-center space-x-1.5 ${
-                user?.role === 'ADMIN'
-                  ? 'bg-steel-800 text-white shadow-tactile border border-steel-900'
-                  : 'text-steel-700 hover:text-steel-950 hover:bg-paper-100'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>4. {t('portalAdmin', 'Admin / CPCB')}</span>
-            </button>
-          </div>
+          {/* Center: Active Role Badge (Clean, Role-Specific, No Clutter!) */}
+          {user && (
+            <div className="hidden md:flex items-center space-x-2">
+              <span className="text-xs text-steel-500 font-mono">Active Terminal:</span>
+              {getRoleBadge(user.role)}
+            </div>
+          )}
 
-          {/* Right Section: Language Toggle & User Profile */}
+          {/* Right Section: Language Toggle & User Actions */}
           <div className="flex items-center space-x-2.5">
             
-            {/* Vernacular Language Toggle ("अ / A") */}
+            {/* Vernacular Language Selector ("अ / A") */}
             <div className="relative">
               <button
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
@@ -159,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
               )}
             </div>
 
-            {/* Profile Dropdown */}
+            {/* Profile Dropdown / Sign In Button */}
             {user ? (
               <div className="relative">
                 <button
@@ -170,13 +157,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                     {user.name.charAt(0)}
                   </div>
                   <div className="text-left hidden sm:block">
-                    <div className="text-xs font-bold text-steel-900 leading-tight flex items-center gap-1">
+                    <div className="text-xs font-bold text-steel-900 leading-tight">
                       {user.name}
-                      {user.kabadiwala?.verified && (
-                        <span className="text-forest-500 font-bold text-[10px]">★</span>
-                      )}
                     </div>
-                    <div>{getRoleBadge(user.role)}</div>
+                    <div className="text-[10px] text-steel-500 font-mono">{user.role}</div>
                   </div>
                   <ChevronDown className="w-4 h-4 text-steel-500" />
                 </button>
@@ -186,48 +170,48 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                     <div className="px-4 py-2 border-b border-steel-200">
                       <p className="font-bold text-steel-900">{user.name}</p>
                       <p className="text-[11px] text-steel-600 font-mono">{user.phone}</p>
-                      <p className="text-[10px] text-steel-500 mt-0.5">Role: <span className="font-bold">{user.role}</span></p>
+                      <div className="mt-1">{getRoleBadge(user.role)}</div>
                     </div>
 
                     <div className="px-3 py-1.5 text-[10px] font-bold text-steel-500 uppercase tracking-wider">
-                      Switch Live Demo Persona
+                      Switch Role Portal
                     </div>
                     <button
                       onClick={() => { quickDemoLogin('CITIZEN'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>1. Ramesh (Citizen Household)</span>
+                      <span>1. Ramesh (Citizen Portal)</span>
                       <span className="text-copper-600 font-bold">Switch</span>
                     </button>
                     <button
                       onClick={() => { quickDemoLogin('KABADIWALA'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>2. Suresh (Collector / कबाड़ीवाला)</span>
+                      <span>2. Suresh (Collector Portal)</span>
                       <span className="text-brass-700 font-bold">Switch</span>
                     </button>
                     <button
                       onClick={() => { quickDemoLogin('RECYCLER'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>3. EcoRecycle (Aggregator)</span>
+                      <span>3. EcoRecycle (Recycler Terminal)</span>
                       <span className="text-forest-600 font-bold">Switch</span>
                     </button>
                     <button
                       onClick={() => { quickDemoLogin('ADMIN'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>4. NDMC / CPCB (EPR Audit)</span>
+                      <span>4. NDMC (CPCB Regulatory Audit)</span>
                       <span className="text-steel-900 font-bold">Switch</span>
                     </button>
 
                     <div className="border-t border-steel-200 mt-1 pt-1">
                       <button
-                        onClick={() => { logout(); setDropdownOpen(false); }}
+                        onClick={() => { logout(); setDropdownOpen(false); onTabChange('login'); }}
                         className="w-full text-left px-4 py-2 text-signal-500 hover:bg-signal-500/10 flex items-center space-x-2 font-bold"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        <span>Sign Out</span>
+                        <span>Sign Out / लॉगआउट</span>
                       </button>
                     </div>
                   </div>
@@ -236,10 +220,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
             ) : (
               <button
                 onClick={() => onTabChange('login')}
-                className="btn-dhatu-primary px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5"
+                className="btn-dhatu px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Launch Portals</span>
+                <Lock className="w-3.5 h-3.5" />
+                <span>पोर्टल में प्रवेश / Sign In</span>
               </button>
             )}
           </div>
@@ -248,4 +232,3 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
     </header>
   );
 };
-

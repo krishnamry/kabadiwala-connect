@@ -17,7 +17,8 @@ import {
   QrCode,
   Layers,
   Flame,
-  Droplet
+  Droplet,
+  Lock
 } from 'lucide-react';
 import { VoiceAssistButton } from '../components/VoiceAssistButton';
 
@@ -55,6 +56,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
           <p className="mt-6 text-base sm:text-xl text-steel-700 max-w-3xl mx-auto leading-relaxed font-medium">
             Bridging the informal door-to-door collector (कबाड़ीवाला) with formal CPCB smelters. Built on a low-literacy, offline-tolerant, vernacular passbook architecture with verifiable digital handovers.
           </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <button
+              onClick={() => onNavigatePortal('login')}
+              className="btn-dhatu px-6 py-3 rounded-xl font-display font-black text-sm shadow-tactile flex items-center space-x-2 transition-all hover:scale-105"
+            >
+              <Lock className="w-4 h-4" />
+              <span>पोर्टल लॉगिन / Role-Based Sign In</span>
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </button>
+          </div>
 
           {/* 4 Interactive Portal Launch Cards (3-Sided Platform + Admin Layer) */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto text-left">
