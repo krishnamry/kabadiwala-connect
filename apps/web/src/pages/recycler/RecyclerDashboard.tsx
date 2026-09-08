@@ -28,7 +28,7 @@ import { VoiceAssistButton } from '../../components/VoiceAssistButton';
 
 export const RecyclerDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { language, t, formatCurrency, speak } = useLanguage();
+  const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   const [activeTab, setActiveTab] = useState<'incoming' | 'handover' | 'rates' | 'anomalies' | 'reports' | 'profile'>('incoming');
 
   // Recycler buying rates state
@@ -294,7 +294,7 @@ export const RecyclerDashboard: React.FC = () => {
           }`}
         >
           <Scale className="w-4 h-4" />
-          <span>1. Incoming Collector Lots ({incomingLots.filter(l => l.status === 'REQUESTED').length})</span>
+          <span>1. {t('tabIncoming', 'Incoming Collector Lots')} ({incomingLots.filter(l => l.status === 'REQUESTED').length})</span>
         </button>
 
         <button
@@ -306,7 +306,7 @@ export const RecyclerDashboard: React.FC = () => {
           }`}
         >
           <QrCode className="w-4 h-4" />
-          <span>2. Confirm Handover (QR Scan)</span>
+          <span>2. {t('tabVerifyQr', 'Confirm Handover (QR Scan)')}</span>
         </button>
 
         <button
@@ -318,7 +318,7 @@ export const RecyclerDashboard: React.FC = () => {
           }`}
         >
           <Sliders className="w-4 h-4" />
-          <span>3. Rate-Setting Console</span>
+          <span>3. {t('tabRateConsole', 'Rate-Setting Console')}</span>
         </button>
 
         <button
@@ -330,7 +330,7 @@ export const RecyclerDashboard: React.FC = () => {
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>4. AI Anomaly Flags ({anomalies.filter(a => a.status === 'FLAGGED').length})</span>
+          <span>4. {t('tabAnomalies', 'AI Anomaly Flags')} ({anomalies.filter(a => a.status === 'FLAGGED').length})</span>
         </button>
 
         <button
@@ -342,7 +342,7 @@ export const RecyclerDashboard: React.FC = () => {
           }`}
         >
           <FileSpreadsheet className="w-4 h-4" />
-          <span>5. CPCB EPR Compliance Reports</span>
+          <span>5. {t('tabReports', 'CPCB EPR Compliance Reports')}</span>
         </button>
 
         <button
@@ -398,7 +398,7 @@ export const RecyclerDashboard: React.FC = () => {
                   </div>
 
                   <h3 className="font-display font-bold text-steel-900 text-base leading-snug">
-                    {lot.category}
+                    {preserveEnglishItemName(lot.category)}
                   </h3>
 
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs bg-paper-100 p-2.5 rounded border border-paper-300 font-mono">
@@ -625,7 +625,7 @@ export const RecyclerDashboard: React.FC = () => {
               {Object.entries(rates).map(([category, rate]) => (
                 <div key={category} className="p-3 bg-white rounded-lg border border-steel-200 flex items-center justify-between gap-4">
                   <div className="flex-1">
-                    <span className="text-xs font-bold text-steel-900 block">{category}</span>
+                    <span className="text-xs font-bold text-steel-900 block">{preserveEnglishItemName(category)}</span>
                     <span className="text-[10px] text-steel-500 font-mono">Commodity Benchmark: ₹{rate - 10} - ₹{rate + 25}/kg</span>
                   </div>
                   <div className="flex items-center space-x-1">
@@ -701,7 +701,7 @@ export const RecyclerDashboard: React.FC = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-paper-100 p-2.5 rounded text-xs font-mono border border-paper-300">
                   <div>
                     <span className="text-[10px] text-steel-500 block">CATEGORY</span>
-                    <span className="font-bold">{anom.category}</span>
+                    <span className="font-bold">{preserveEnglishItemName(anom.category)}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-steel-500 block">WEIGHT</span>

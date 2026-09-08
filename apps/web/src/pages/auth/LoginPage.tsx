@@ -28,7 +28,7 @@ interface LoginPageProps {
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   const { login, quickDemoLogin } = useAuth();
-  const { language, setLanguage, speak } = useLanguage();
+  const { language, setLanguage, speak, t } = useLanguage();
 
   const [selectedRole, setSelectedRole] = useState<Role>('CITIZEN');
   const [phone, setPhone] = useState('9811100001');
@@ -202,13 +202,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       <div className="text-center space-y-2 max-w-2xl mx-auto">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-paper-200 text-steel-800 text-xs font-mono font-bold border border-steel-400 shadow-sm">
           <span className="stamp-seal stamp-verified text-[10px]">SIH26229</span>
-          <span>Role-Based Authentication Gateway</span>
+          <span>{t('authGateway', 'Role-Based Authentication Gateway')}</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-display font-black text-steel-950">
-          पोर्टल में प्रवेश करें / Select Your Role
+          {t('selectRole', 'Select Your Role')}
         </h1>
         <p className="text-xs sm:text-sm text-steel-600 font-medium">
-          Kabadiwala Connect provides a dedicated, purpose-built interface for each stakeholder in India's formal e-waste chain.
+          {t('loginSubtitle', "Kabadiwala Connect provides a dedicated, purpose-built interface for each stakeholder in India's formal e-waste chain.")}
         </p>
       </div>
 
@@ -235,7 +235,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
                   <Icon className="w-5 h-5" />
                 </div>
                 {isSelected && (
-                  <span className="stamp-seal stamp-verified text-[9px]">ACTIVE</span>
+                  <span className="stamp-seal stamp-verified text-[9px]">{t('activeTabBadge', 'ACTIVE')}</span>
                 )}
               </div>
 
@@ -285,7 +285,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
             {/* Feature List for this specific role */}
             <div className="space-y-2 pt-2">
               <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
-                इस पोर्टल की प्रमुख विशेषताएं (Dedicated Features):
+                {t('dedicatedFeatures', 'Dedicated Features for this Portal')}:
               </span>
               <ul className="space-y-2 text-xs text-steel-700">
                 {currentConfig.features.map((feat, idx) => (
@@ -310,13 +310,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
           <div className="space-y-5">
             <div>
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-copper-700 block">
-                AUTHENTICATION
+                {t('authGateway', 'AUTHENTICATION')}
               </span>
               <h3 className="text-xl font-display font-black text-steel-900 mt-0.5">
-                {currentConfig.titleEn} Sign In
+                {language === 'hi' ? currentConfig.titleHi : language === 'mr' ? currentConfig.titleMr : currentConfig.titleEn} {t('signIn', 'Sign In')}
               </h3>
               <p className="text-xs text-steel-500">
-                Enter credentials or use the 1-Click Instant Login button below.
+                {t('loginSubtitle', 'Enter credentials or use the 1-Click Instant Login button below.')}
               </p>
             </div>
 
@@ -328,13 +328,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               className="w-full btn-dhatu py-3.5 px-4 rounded-xl font-display font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-tactile group"
             >
               <Sparkles className="w-4 h-4 text-brass-400 group-hover:scale-110 transition-transform" />
-              <span>1-Click Instant Login as {currentConfig.demoName}</span>
+              <span>{t('instantLogin', '1-Click Instant Login as')} {currentConfig.demoName}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
             <div className="flex items-center my-3">
               <div className="flex-1 border-t border-steel-300"></div>
-              <span className="px-3 text-[10px] font-mono uppercase text-steel-400 font-bold">Or Enter Credentials</span>
+              <span className="px-3 text-[10px] font-mono uppercase text-steel-400 font-bold">{t('orCredentials', 'Or Enter Credentials')}</span>
               <div className="flex-1 border-t border-steel-300"></div>
             </div>
 
@@ -348,7 +348,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               {selectedRole === 'RECYCLER' ? (
                 <div>
                   <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
-                    CPCB Facility Reg Number / Mobile
+                    {t('cpcbRegNumber', 'CPCB Facility Reg Number / Mobile')}
                   </label>
                   <div className="relative">
                     <Building2 className="w-4 h-4 text-steel-400 absolute left-3 top-3" />
@@ -364,7 +364,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               ) : (
                 <div>
                   <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
-                    पंजीकृत मोबाइल नंबर / Mobile Number
+                    {t('mobileNumber', 'Mobile Number')}
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-steel-400 absolute left-3 top-3" />
@@ -381,7 +381,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
 
               <div>
                 <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
-                  सुरक्षा पासवर्ड / Password or PIN
+                  {t('password', 'Password or PIN')}
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-steel-400 absolute left-3 top-3" />
@@ -400,7 +400,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
                 disabled={loading}
                 className="w-full bg-steel-900 hover:bg-steel-800 text-white py-2.5 rounded-lg text-xs font-bold flex items-center justify-center space-x-2 border border-steel-700 shadow"
               >
-                <span>लॉग इन करें / Submit & Open Dashboard</span>
+                <span>{t('submitLogin', 'Submit & Open Dashboard')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </form>

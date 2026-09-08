@@ -31,25 +31,25 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
       case 'CITIZEN':
         return (
           <span className="stamp-seal stamp-verified text-[10px] bg-paper-200 text-copper-700 border-copper-400">
-            नागरिक पोर्टल (Citizen)
+            {t('portalCitizen', 'Citizen Portal')}
           </span>
         );
       case 'KABADIWALA':
         return (
           <span className="stamp-seal stamp-pending text-[10px] bg-brass-100 text-brass-800 border-brass-500">
-            कबाड़ीवाला (Collector)
+            {t('portalCollector', 'Collector / कबाड़ीवाला')}
           </span>
         );
       case 'RECYCLER':
         return (
           <span className="stamp-seal stamp-verified text-[10px] bg-forest-500/10 text-forest-600 border-forest-600">
-            अधिकृत रीसायकलर (Recycler)
+            {t('portalRecycler', 'Authorized Recycler')}
           </span>
         );
       case 'ADMIN':
         return (
           <span className="stamp-seal stamp-verified text-[10px] bg-steel-800 text-paper-100 border-steel-700">
-            प्रशासन (CPCB Audit)
+            {t('portalAdmin', 'CPCB Regulatory Audit')}
           </span>
         );
     }
@@ -96,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           {/* Center: Active Role Badge (Clean, Role-Specific, No Clutter!) */}
           {user && (
             <div className="hidden md:flex items-center space-x-2">
-              <span className="text-xs text-steel-500 font-mono">Active Terminal:</span>
+              <span className="text-xs text-steel-500 font-mono">{t('activeTerminal', 'Active Terminal')}:</span>
               {getRoleBadge(user.role)}
             </div>
           )}
@@ -174,35 +174,35 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                     </div>
 
                     <div className="px-3 py-1.5 text-[10px] font-bold text-steel-500 uppercase tracking-wider">
-                      Switch Role Portal
+                      {t('switchRole', 'Switch Role Portal')}
                     </div>
                     <button
                       onClick={() => { quickDemoLogin('CITIZEN'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>1. Ramesh (Citizen Portal)</span>
-                      <span className="text-copper-600 font-bold">Switch</span>
+                      <span>1. {t('personaCitizen', 'Ramesh Sharma')} ({t('portalCitizen', 'Citizen Portal')})</span>
+                      <span className="text-copper-600 font-bold">{t('actions', 'Switch')}</span>
                     </button>
                     <button
                       onClick={() => { quickDemoLogin('KABADIWALA'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>2. Suresh (Collector Portal)</span>
-                      <span className="text-brass-700 font-bold">Switch</span>
+                      <span>2. {t('personaCollector', 'Suresh Kumar')} ({t('portalCollector', 'Collector Portal')})</span>
+                      <span className="text-brass-700 font-bold">{t('actions', 'Switch')}</span>
                     </button>
                     <button
                       onClick={() => { quickDemoLogin('RECYCLER'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>3. EcoRecycle (Recycler Terminal)</span>
-                      <span className="text-forest-600 font-bold">Switch</span>
+                      <span>3. {t('personaRecycler', 'EcoRecycle')} ({t('portalRecycler', 'Recycler Terminal')})</span>
+                      <span className="text-forest-600 font-bold">{t('actions', 'Switch')}</span>
                     </button>
                     <button
                       onClick={() => { quickDemoLogin('ADMIN'); setDropdownOpen(false); }}
                       className="w-full text-left px-4 py-2 hover:bg-paper-200 flex items-center justify-between text-steel-800 font-medium"
                     >
-                      <span>4. NDMC (CPCB Regulatory Audit)</span>
-                      <span className="text-steel-900 font-bold">Switch</span>
+                      <span>4. {t('personaAdmin', 'NDMC')} ({t('portalAdmin', 'CPCB Regulatory Audit')})</span>
+                      <span className="text-steel-900 font-bold">{t('actions', 'Switch')}</span>
                     </button>
 
                     <div className="border-t border-steel-200 mt-1 pt-1">
@@ -211,7 +211,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                         className="w-full text-left px-4 py-2 text-signal-500 hover:bg-signal-500/10 flex items-center space-x-2 font-bold"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        <span>Sign Out / लॉगआउट</span>
+                        <span>{t('signOut', 'Sign Out')}</span>
                       </button>
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                 className="btn-dhatu px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow"
               >
                 <Lock className="w-3.5 h-3.5" />
-                <span>पोर्टल में प्रवेश / Sign In</span>
+                <span>{t('signInBtn', 'Sign In to Portal')}</span>
               </button>
             )}
           </div>

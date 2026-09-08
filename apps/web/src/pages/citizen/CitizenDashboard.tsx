@@ -31,7 +31,7 @@ import {
 
 export const CitizenDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { language, t, formatCurrency, speak } = useLanguage();
+  const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   const [activeTab, setActiveTab] = useState<'pickups' | 'new' | 'impact' | 'dropoff'>('pickups');
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,6 +81,88 @@ export const CitizenDashboard: React.FC = () => {
   const indicativeMin = items.reduce((sum, i) => sum + i.estWeightKg * (eWasteRates[i.category] || 100) * 0.9, 0);
   const indicativeMax = items.reduce((sum, i) => sum + i.estWeightKg * (eWasteRates[i.category] || 100) * 1.15, 0);
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const pickupsData = await api.getMyPickups().catch(() => []);
+      
+      const finalPickups: Pickup[] = pickupsData.length > 0 ? pickupsData : [
+        {
+          id: 'p-active-01',
+          citizenId: 'mock-citizen-1',
+          citizen: { id: 'mock-citizen-1', name: 'Ramesh Sharma', phone: '9811100001' },
+          kabadiwalaId: 'mock-kaba-1',
+          kabadiwala: {
+            id: 'mock-kaba-1',
+            name: 'Suresh Kumar',
+            phone: '9876543210',
+            kabadiwala: {
+              id: 'k-prof-1',
+              userId: 'mock-kaba-1',
+              vehicleType: 'Solar Cargo Trike',
+              verified: true,
+              reputationScore: 4.9,
+              walletBalance: 12000
+            }
+          },
+          status: 'IN_PROGRESS',
+          address: 'Block D, Flat 402, Lajpat Nagar II, New Delhi',
+          latitude: 28.5700,
+          longitude: 77.2400,
+          scheduledAt: '2026-09-08 11:30 AM',
+          items: [
+            { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.5, ratePerKg: 640 },
+            { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 },
+            { category: 'CRT Monitor Glass Unit', estWeightKg: 12.0, ratePerKg: 12 }
+          ],
+          totalAmount: 4304,
+          notes: 'Doorstep pickup requested with live tracking.',
+          traceabilityHash: '0x8f4a9b2c7e103984fa55',
+          createdAt: '2026-09-08 09:15 AM'
+        },
+        {
+          id: 'p-comp-02',
+          citizenId: 'mock-citizen-1',
+          citizen: { id: 'mock-citizen-1', name: 'Ramesh Sharma', phone: '9811100001' },
+          kabadiwalaId: 'mock-kaba-1',
+          kabadiwala: {
+            id: 'mock-kaba-1',
+            name: 'Suresh Kumar',
+            phone: '9876543210',
+            kabadiwala: {
+              id: 'k-prof-1',
+              userId: 'mock-kaba-1',
+              vehicleType: 'Solar Cargo Trike',
+              verified: true,
+              reputationScore: 4.9,
+              walletBalance: 12000
+            }
+          },
+          status: 'COMPLETED',
+          address: 'Block D, Flat 402, Lajpat Nagar II, New Delhi',
+          latitude: 28.5700,
+          longitude: 77.2400,
+          scheduledAt: '2026-09-01 10:00 AM',
+          items: [
+            { category: 'Lithium-ion Batteries', estWeightKg: 5.0, ratePerKg: 145 },
+            { category: 'LCD/LED Display Panels', estWeightKg: 8.5, ratePerKg: 85 }
+          ],
+          totalAmount: 1447,
+          notes: 'Safe recycling completed. Handover certificate generated.',
+          traceabilityHash: '0x3c7e9184a298bf0182dd',
+          createdAt: '2026-09-01 10:00 AM'
+        }
+      ];
+
+      setPickups(finalPickups);
+      if (finalPickups.length > 0 && !selectedPickup) {
+        setSelectedPickup(finalPickups[0]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Drop-off centers data (Section 1.A.8)
   const dropoffCenters = [
     {
@@ -105,83 +187,6 @@ export const CitizenDashboard: React.FC = () => {
       incentive: '₹200 Store Voucher per laptop/desktop motherboard'
     }
   ];
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const pickupsData = await api.getMyPickups().catch(() => []);
-      
-      // If empty or initial, provide rich demo e-waste pickups
-      const finalPickups: Pickup[] = pickupsData.length > 0 ? pickupsData : [
-        {
-          id: 'p-active-01',
-          citizenId: 'mock-citizen-1',
-          citizen: { id: 'mock-citizen-1', name: 'Ramesh Sharma', phone: '9811100001' },
-          kabadiwalaId: 'mock-kaba-1',
-          kabadiwala: {
-            id: 'mock-kaba-1',
-            name: 'Suresh Kumar',
-            phone: '9876543210',
-            kabadiwala: {
-              id: 'prof-1',
-              userId: 'mock-kaba-1',
-              verified: true,
-              reputationScore: 4.9,
-              walletBalance: 2840,
-              latitude: 28.5685,
-              longitude: 77.2412
-            }
-          },
-          status: 'IN_PROGRESS',
-          address: 'Block D, Flat 402, Lajpat Nagar II, New Delhi',
-          latitude: 28.5700,
-          longitude: 77.2400,
-          scheduledAt: 'Today, 02:30 PM',
-          items: [
-            { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.5, ratePerKg: 640 },
-            { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 },
-            { category: 'CRT Monitor Glass Unit', estWeightKg: 12.0, ratePerKg: 12 }
-          ],
-          totalAmount: 4304,
-          notes: 'Old PC parts and CRT monitor in carton',
-          createdAt: '2026-09-08T09:15:00Z',
-          traceabilityHash: '0x8f4a9b2c7e103984fa55'
-        },
-        {
-          id: 'p-completed-02',
-          citizenId: 'mock-citizen-1',
-          status: 'COMPLETED',
-          address: 'Block D, Flat 402, Lajpat Nagar II, New Delhi',
-          latitude: 28.5700,
-          longitude: 77.2400,
-          scheduledAt: '2026-08-28 11:00 AM',
-          completedAt: '2026-08-28 11:35 AM',
-          items: [
-            { category: 'Lithium-ion Laptop Batteries', estWeightKg: 2.5, actualWeightKg: 2.5, ratePerKg: 145 },
-            { category: 'Engineering E-Plastics (ABS)', estWeightKg: 6.0, actualWeightKg: 6.2, ratePerKg: 38 }
-          ],
-          totalAmount: 598,
-          notes: 'Disposed old laptop battery safely',
-          createdAt: '2026-08-28T10:00:00Z',
-          traceabilityHash: '0x1928374650abcdeffedc',
-          donatedToCsr: true
-        }
-      ];
-
-      setPickups(finalPickups);
-      if (finalPickups.length > 0 && !selectedPickup) {
-        setSelectedPickup(finalPickups[0]);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const handleAddItem = () => {
     setItems([...items, { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.0, ratePerKg: 640 }]);
@@ -237,7 +242,6 @@ export const CitizenDashboard: React.FC = () => {
     }
   };
 
-  // Submit New Pickup Request
   const handleSubmitPickup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
@@ -258,14 +262,13 @@ export const CitizenDashboard: React.FC = () => {
         items,
         totalAmount: Math.round((indicativeMin + indicativeMax) / 2),
         notes: notes + (donateToCsr ? ' [CSR DONATION TO GREEN FOUNDATION]' : ''),
-        createdAt: new Date().toISOString(),
-        donatedToCsr: donateToCsr,
-        traceabilityHash: `0x${Math.random().toString(16).substr(2, 10)}...`
+        createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        traceabilityHash: `0x${Math.random().toString(16).substr(2, 20)}`
       };
 
       setPickups([newPickup, ...pickups]);
       setSelectedPickup(newPickup);
-      setSuccessMessage('E-Waste pickup requested! Assigned to nearby verified collector Suresh Kumar. Live tracking enabled.');
+      setSuccessMessage('Pickup request successfully submitted! Nearest formalized collector has been alerted.');
       setActiveTab('pickups');
     } finally {
       setSubmitting(false);
@@ -275,48 +278,48 @@ export const CitizenDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
-      {/* Top Header - Dhatu Style */}
+      {/* Top Banner - Dhatu Industrial Passbook Style */}
       <div className="bg-steel-900 text-paper-50 rounded-xl p-6 sm:p-8 border-2 border-steel-700 shadow-tactile-lg flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 z-10">
           <div className="flex flex-wrap items-center gap-2">
             <span className="stamp-seal stamp-verified text-[11px] bg-forest-500/20 text-forest-500 border-forest-500">
-              CITIZEN SOURCING LAYER
+              {t('sourcingLayer', 'SOURCING LAYER')}
             </span>
-            <span className="bg-brass-500/20 text-brass-300 font-mono text-xs px-2 py-0.5 rounded border border-brass-500/40">
-              HOUSEHOLD E-WASTE FUNNEL
+            <span className="bg-copper-600/30 text-copper-300 font-mono text-xs px-2 py-0.5 rounded border border-copper-600/50">
+              {t('sihBadge', 'SIH26229')}
             </span>
             <VoiceAssistButton
-              text="Citizen Portal. Request doorstep e-waste pickup, view indicative price estimates, track your collector on map, and earn green impact credits."
-              hindiText="नागरिक पोर्टल। घर बैठे ई-कचरा पिकअप का अनुरोध करें, अनुमानित मूल्य देखें, कबाड़ीवाले को मैप पर ट्रैक करें और पर्यावरण क्रेडिट पाएं।"
+              text="Citizen Portal. Request doorstep e-waste pickup, view indicative price estimates, track collector on live map, and claim green environmental credits."
+              hindiText="नागरिक पोर्टल। घर बैठे ई-कचरा पिकअप का अनुरोध करें, अनुमानित मूल्य देखें, कबाड़ीवाले को मैप पर ट्रैक करें और पर्यावरण क्रेडिट पाएं。"
               marathiText="नागरिक पोर्टल. घरावरून ई-कचरा संकलन विनंती करा, अंदाजे दर पहा आणि नकाशावर ट्रॅक करा."
               size="sm"
             />
           </div>
           <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
-            नागरिक ई-कचरा पोर्टल / Citizen e-Waste Portal
+            {t('portalCitizen', 'Citizen e-Waste Portal')}
           </h1>
           <p className="text-sm text-paper-300 max-w-2xl font-medium">
-            Safely channel your electronics into the CPCB authorized formal chain instead of toxic landfills.
+            {t('citizenCardDesc', 'Safely channel your electronics into the CPCB authorized formal chain instead of toxic landfills.')}
           </p>
         </div>
 
         {/* Personal Impact Hero Counter (Section 1.A.5) */}
         <div className="bg-steel-950 p-4 rounded-xl border border-steel-800 text-center sm:text-right z-10">
           <div className="text-[10px] uppercase font-mono text-paper-400">
-            PERSONAL IMPACT STAT
+            {t('tabImpact', 'PERSONAL IMPACT STAT')}
           </div>
           <div className="text-2xl sm:text-3xl font-mono-num font-black text-brass-400">
             28.2 kg
           </div>
           <div className="text-xs text-forest-400 font-medium">
-            e-Waste Kept Out of Landfill! 🌲
+            {t('landfillDivertedKg', 'kg Diverted from Landfills')} 🌲
           </div>
           <button
             onClick={() => setShowCertificateModal(true)}
             className="mt-2 text-[11px] text-copper-400 hover:text-copper-300 font-bold underline flex items-center justify-end gap-1 ml-auto"
           >
             <Award className="w-3.5 h-3.5" />
-            <span>Download Green Certificate</span>
+            <span>{t('downloadCert', 'Download Green Certificate')}</span>
           </button>
         </div>
       </div>
@@ -332,7 +335,7 @@ export const CitizenDashboard: React.FC = () => {
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>1. मेरे पिकअप एवं लाइव ट्रैकिंग (My Pickups & Live ETA)</span>
+          <span>1. {t('tabMyPickups', 'My Pickups & Live ETA')}</span>
         </button>
 
         <button
@@ -344,7 +347,7 @@ export const CitizenDashboard: React.FC = () => {
           }`}
         >
           <Plus className="w-4 h-4" />
-          <span>2. नया ई-कचरा पिकअप अनुरोध (Book e-Waste Pickup)</span>
+          <span>2. {t('tabSchedulePickup', 'Book e-Waste Pickup')}</span>
         </button>
 
         <button
@@ -356,7 +359,7 @@ export const CitizenDashboard: React.FC = () => {
           }`}
         >
           <Award className="w-4 h-4" />
-          <span>3. पर्यावरण प्रभाव एवं सीएसआर (Impact & CSR Donation)</span>
+          <span>3. {t('tabImpact', 'Impact & CSR Donation')}</span>
         </button>
 
         <button
@@ -368,7 +371,7 @@ export const CitizenDashboard: React.FC = () => {
           }`}
         >
           <Building className="w-4 h-4" />
-          <span>4. अधिकृत ड्रॉप-ऑफ केंद्र (Drop-off Centers)</span>
+          <span>4. {t('tabDropoff', 'Drop-off Centers')}</span>
         </button>
       </div>
 
@@ -416,7 +419,7 @@ export const CitizenDashboard: React.FC = () => {
                   </h4>
 
                   <div className="mt-2 text-xs text-steel-600 space-y-0.5 font-mono">
-                    <div>Items: {p.items.map(i => `${i.category} (~${i.estWeightKg}kg)`).join(', ')}</div>
+                    <div>Items: {p.items.map(i => `${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</div>
                     <div className="flex justify-between font-bold text-steel-800 pt-1">
                       <span>Indicative Payout:</span>
                       <span className="text-copper-700 font-mono-num">₹{p.totalAmount || 620}</span>
@@ -507,12 +510,12 @@ export const CitizenDashboard: React.FC = () => {
                 {/* Material Item Breakdown */}
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
-                    दर्ज ई-कचरा सामान (Declared e-Waste Items):
+                    {t('itemsToRecycle')}:
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono">
                     {selectedPickup.items.map((item, i) => (
                       <div key={i} className="bg-white p-2.5 rounded border border-steel-300">
-                        <span className="font-bold text-steel-900 block">{item.category}</span>
+                        <span className="font-bold text-steel-900 block">{preserveEnglishItemName(item.category)}</span>
                         <span className="text-steel-600">~{item.estWeightKg} kg</span>
                         <span className="text-copper-700 block font-bold">@ ₹{item.ratePerKg}/kg</span>
                       </div>
@@ -574,14 +577,14 @@ export const CitizenDashboard: React.FC = () => {
                 className="btn-dhatu-steel px-4 py-2.5 rounded text-xs font-bold cursor-pointer inline-flex items-center space-x-2 shadow-sm"
               >
                 <Sparkles className="w-4 h-4 text-brass-400" />
-                <span>Upload e-Waste Photo (AI Category Scan)</span>
+                <span>{t('scanAiPhoto', 'Upload e-Waste Photo (AI Category Scan)')}</span>
               </label>
 
               {mlResult && (
                 <div className="p-3 bg-white rounded border border-forest-500/40 text-xs text-steel-800 space-y-1">
                   <div className="font-bold text-forest-700 flex items-center gap-1">
                     <CheckCircle2 className="w-4 h-4 text-forest-600" />
-                    <span>AI Detected: {mlResult.category} ({Math.round(mlResult.confidence * 100)}% confidence)</span>
+                    <span>AI Detected: {preserveEnglishItemName(mlResult.category)} ({Math.round(mlResult.confidence * 100)}% confidence)</span>
                   </div>
                   <p className="text-[11px] text-steel-600">{mlResult.advice}</p>
                 </div>
@@ -593,7 +596,7 @@ export const CitizenDashboard: React.FC = () => {
               {/* Pickup Address */}
               <div>
                 <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
-                  घर या कार्यालय का पता / Address
+                  {t('pickupAddress', 'Pickup Address')}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -612,7 +615,7 @@ export const CitizenDashboard: React.FC = () => {
                     }}
                     className="px-3 py-2 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400"
                   >
-                    Use GPS
+                    GPS
                   </button>
                 </div>
               </div>
@@ -621,14 +624,14 @@ export const CitizenDashboard: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
-                    कबाड़ सामान सूची / Items Declared
+                    {t('itemsToRecycle', 'E-Waste Items to Recycle')}
                   </label>
                   <button
                     type="button"
                     onClick={handleAddItem}
                     className="text-xs text-copper-700 font-bold hover:underline flex items-center gap-1"
                   >
-                    <Plus className="w-3.5 h-3.5" /> सामान जोड़ें (Add Item)
+                    <Plus className="w-3.5 h-3.5" /> {t('addMoreItems', 'Add Item')}
                   </button>
                 </div>
 

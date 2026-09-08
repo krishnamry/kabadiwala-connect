@@ -40,7 +40,7 @@ import {
 
 export const KabadiwalaDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { language, t, formatCurrency, speak } = useLanguage();
+  const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   
   // Active Tab: lots | priceboard | recyclers | handover | passbook | safety | pickups
   const [activeTab, setActiveTab] = useState<'lots' | 'priceboard' | 'recyclers' | 'handover' | 'passbook' | 'safety' | 'pickups'>('lots');
@@ -544,7 +544,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <Camera className="w-4 h-4" />
-          <span>1. लॉट बनाएं (Create Lot & AI Value)</span>
+          <span>1. {t('tabLots', 'Create Lot & AI Value')}</span>
         </button>
 
         <button
@@ -556,7 +556,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <TrendingUp className="w-4 h-4" />
-          <span>2. दाम पत्रक (Spoken Price Board)</span>
+          <span>2. {t('tabPriceBoard', 'Spoken Price Board')}</span>
         </button>
 
         <button
@@ -568,7 +568,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <Factory className="w-4 h-4" />
-          <span>3. रीसायकलर खोजें (Authorized Recyclers)</span>
+          <span>3. {t('tabFindRecyclers', 'Nearby Recyclers')}</span>
         </button>
 
         <button
@@ -580,7 +580,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <QrCode className="w-4 h-4" />
-          <span>4. हैंडओवर रसीद (Handover QR)</span>
+          <span>4. {t('tabHandover', 'Generate QR')}</span>
         </button>
 
         <button
@@ -592,7 +592,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>5. पासबुक लेजर (Passbook Ledger)</span>
+          <span>5. {t('tabPassbook', 'Cash Passbook')}</span>
         </button>
 
         <button
@@ -604,7 +604,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>6. सुरक्षा नियम (Safety Rules)</span>
+          <span>6. {t('tabSafety', 'Safety Guidance')}</span>
         </button>
 
         <button
@@ -616,7 +616,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <Truck className="w-4 h-4" />
-          <span>7. नागरिक पिकअप (Pickups)</span>
+          <span>7. {t('pickups', 'Citizen Pickups')}</span>
         </button>
       </div>
 
@@ -683,7 +683,7 @@ export const KabadiwalaDashboard: React.FC = () => {
               {/* Category Selector */}
               <div>
                 <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
-                  2. ई-कचरा श्रेणी चुनें / Select E-Waste Category
+                  2. {t('selectScrapCategory', 'Select Item Category')}
                 </label>
                 <select
                   value={lotCategory}
@@ -692,7 +692,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 >
                   {priceBoardData.map(p => (
                     <option key={p.category} value={p.category}>
-                      {language === 'hi' ? p.categoryHi : language === 'mr' ? p.categoryMr : p.category} — ₹{p.ratePerKg}/kg
+                      {p.category} — ₹{p.ratePerKg}/{t('perKg', 'kg')}
                     </option>
                   ))}
                 </select>
@@ -877,14 +877,14 @@ export const KabadiwalaDashboard: React.FC = () => {
                     </span>
                     <VoiceAssistButton
                       text={`${item.category}. Current rate is rupees ${item.ratePerKg} per kilogram. ${item.trend === 'UP' ? 'Price increased by rupees ' + item.delta : 'Price stable'}`}
-                      hindiText={`${item.categoryHi}। आज का दाम ${item.ratePerKg} रुपये प्रति किलो है। ${item.delta > 0 ? 'दाम ' + item.delta + ' रुपये बढ़ा है।' : ''}`}
-                      marathiText={`${item.categoryMr}. आजचा दर ${item.ratePerKg} रुपये प्रति किलो आहे.`}
+                      hindiText={`${item.category}। आज का ताजा मंडी भाव ${item.ratePerKg} रुपये प्रति किलो है। ${item.delta > 0 ? 'दाम ' + item.delta + ' रुपये बढ़ा है।' : ''}`}
+                      marathiText={`${item.category}. आजचा थेट बाजार भाव ${item.ratePerKg} रुपये प्रति किलो आहे. ${item.delta > 0 ? 'भाव ' + item.delta + ' रुपये वाढला आहे.' : ''}`}
                       size="sm"
                     />
                   </div>
 
-                  <h3 className="font-display font-bold text-steel-900 text-sm mt-1 leading-snug">
-                    {language === 'hi' ? item.categoryHi : language === 'mr' ? item.categoryMr : item.category}
+                  <h3 className="font-display font-black text-steel-900 text-sm mt-1 leading-snug">
+                    {item.category}
                   </h3>
                   <p className="text-[11px] text-steel-500 mt-1">
                     {item.desc}
@@ -1397,7 +1397,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                   {activeJob.items.map((item, idx) => (
                     <div key={idx} className="bg-white p-3 rounded border border-steel-300 flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-bold text-steel-800 block">{item.category}</span>
+                        <span className="text-xs font-bold text-steel-800 block">{preserveEnglishItemName(item.category)}</span>
                         <span className="text-[10px] text-steel-500">Rate: ₹{item.ratePerKg}/kg</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1462,14 +1462,14 @@ export const KabadiwalaDashboard: React.FC = () => {
                   </h4>
 
                   <div className="mt-2 space-y-1 text-xs text-steel-600">
-                    <p>नागरिक: <strong>{pickup.citizen?.name || 'Ramesh Sharma'}</strong></p>
-                    <p>कबाड़ सामान: <strong>{pickup.items.map(i => `${i.category} (~${i.estWeightKg}kg)`).join(', ')}</strong></p>
+                    <p>{t('citizenName')}: <strong>{pickup.citizen?.name || 'Ramesh Sharma'}</strong></p>
+                    <p>{t('itemsDeclared')}: <strong>{pickup.items.map(i => `${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</strong></p>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-steel-200 flex items-center justify-between">
                   <span className="font-mono font-bold text-copper-700 text-sm">
-                    अनुमानित: ₹{pickup.totalAmount || 620}
+                    {t('estimatedPayout')}: ₹{pickup.totalAmount || 620}
                   </span>
                   <button
                     type="button"
@@ -1477,7 +1477,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                     className="btn-dhatu-primary px-4 py-1.5 rounded text-xs font-bold flex items-center space-x-1"
                   >
                     <Truck className="w-3.5 h-3.5" />
-                    <span>स्वीकार करें (Accept)</span>
+                    <span>{t('acceptPickup')}</span>
                   </button>
                 </div>
               </div>
@@ -1496,7 +1496,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <Camera className="w-5 h-5 mb-0.5" />
-            <span>लॉट बनाएं</span>
+            <span>{t('tabLots', 'लॉट बनाएं')}</span>
           </button>
 
           <button
@@ -1506,7 +1506,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <TrendingUp className="w-5 h-5 mb-0.5" />
-            <span>दाम पत्रक</span>
+            <span>{t('tabPriceBoard', 'दाम पत्रक')}</span>
           </button>
 
           <button
@@ -1516,7 +1516,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <Factory className="w-5 h-5 mb-0.5" />
-            <span>रीसायकलर</span>
+            <span>{t('tabFindRecyclers', 'रीसायकलर')}</span>
           </button>
 
           <button
@@ -1526,7 +1526,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <BookOpen className="w-5 h-5 mb-0.5" />
-            <span>पासबुक</span>
+            <span>{t('tabPassbook', 'पासबुक')}</span>
           </button>
 
           <button
@@ -1536,7 +1536,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             }`}
           >
             <AlertTriangle className="w-5 h-5 mb-0.5" />
-            <span>सुरक्षा</span>
+            <span>{t('tabSafety', 'सुरक्षा')}</span>
           </button>
         </div>
       </div>

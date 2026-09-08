@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
-  const { formatCurrency, speak } = useLanguage();
+  const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [collectors, setCollectors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -268,7 +268,7 @@ export const AdminDashboard: React.FC = () => {
           }`}
         >
           <TrendingUp className="w-4 h-4" />
-          <span>1. Citywide Overview & Volume</span>
+          <span>1. {t('tabOverview')}</span>
         </button>
 
         <button
@@ -280,7 +280,7 @@ export const AdminDashboard: React.FC = () => {
           }`}
         >
           <Layers className="w-4 h-4" />
-          <span>2. Full Traceability Dataset Engine</span>
+          <span>2. {t('tabTraceability')}</span>
         </button>
 
         <button
@@ -292,7 +292,7 @@ export const AdminDashboard: React.FC = () => {
           }`}
         >
           <Calculator className="w-4 h-4" />
-          <span>3. Unit-Economics Calculator (+34% Boost)</span>
+          <span>3. {t('tabUnitEconomics')}</span>
         </button>
 
         <button
@@ -304,7 +304,7 @@ export const AdminDashboard: React.FC = () => {
           }`}
         >
           <Users className="w-4 h-4" />
-          <span>4. Collector KYC Verification ({collectors.length})</span>
+          <span>4. {t('tabVerifications')} ({collectors.length})</span>
         </button>
 
         <button
@@ -316,7 +316,7 @@ export const AdminDashboard: React.FC = () => {
           }`}
         >
           <FileSpreadsheet className="w-4 h-4" />
-          <span>5. CPCB Form-2/6 Regulatory Audit</span>
+          <span>5. {t('tabEpr')}</span>
         </button>
       </div>
 
@@ -424,7 +424,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-steel-300 pb-4">
               <div>
                 <span className="font-mono text-xs font-bold text-copper-700 block">{selectedLotChain.lotCode}</span>
-                <h3 className="font-display font-black text-xl text-steel-900">{selectedLotChain.category}</h3>
+                <h3 className="font-display font-black text-xl text-steel-900">{preserveEnglishItemName(selectedLotChain.category)}</h3>
                 <span className="text-xs font-mono text-steel-500">Gross Intake Weight: {selectedLotChain.totalWeightKg} kg</span>
               </div>
               <span className="stamp-seal stamp-verified text-xs">
@@ -684,7 +684,7 @@ export const AdminDashboard: React.FC = () => {
                         : 'btn-dhatu-primary'
                     }`}
                   >
-                    {c.verified ? 'Revoke Verification' : 'Approve & Issue CPCB Badge'}
+                    {c.verified ? t('rejectKyc') : t('approveKyc')}
                   </button>
                 </div>
               </div>

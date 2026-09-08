@@ -50,11 +50,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black text-steel-950 tracking-tight max-w-4xl mx-auto leading-tight">
-            धातु — Digital Traceability & EPR Exchange for India's <span className="text-copper-600 underline decoration-brass-500 decoration-wavy">e-Waste Economy</span>
+            {t('heroTitle', "धातु — Digital Traceability & EPR Exchange for India's e-Waste Economy")}
           </h1>
 
           <p className="mt-6 text-base sm:text-xl text-steel-700 max-w-3xl mx-auto leading-relaxed font-medium">
-            Bridging the informal door-to-door collector (कबाड़ीवाला) with formal CPCB smelters. Built on a low-literacy, offline-tolerant, vernacular passbook architecture with verifiable digital handovers.
+            {t('heroSubtitle', "Bridging the informal door-to-door collector (कबाड़ीवाला) with formal CPCB smelters. Built on a low-literacy, offline-tolerant, vernacular passbook architecture with verifiable digital handovers.")}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
@@ -63,7 +63,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
               className="btn-dhatu px-6 py-3 rounded-xl font-display font-black text-sm shadow-tactile flex items-center space-x-2 transition-all hover:scale-105"
             >
               <Lock className="w-4 h-4" />
-              <span>पोर्टल लॉगिन / Role-Based Sign In</span>
+              <span>{t('roleBasedLogin', 'Role-Based Sign In')}</span>
               <ArrowRight className="w-4 h-4 ml-1" />
             </button>
           </div>
@@ -81,16 +81,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
                   <div className="w-10 h-10 rounded-lg bg-paper-200 border border-steel-400 flex items-center justify-center text-copper-700 group-hover:scale-105 transition-transform">
                     <User className="w-5 h-5" />
                   </div>
-                  <span className="stamp-seal stamp-verified text-[9px]">PORTAL 1</span>
+                  <span className="stamp-seal stamp-verified text-[9px]">{t('sourcingLayer', 'PORTAL 1')}</span>
                 </div>
-                <h3 className="font-display font-black text-steel-900 text-lg">Citizen Portal</h3>
-                <span className="text-xs font-mono text-copper-600 font-bold block mt-0.5">Sourcing Layer (Ramesh)</span>
+                <h3 className="font-display font-black text-steel-900 text-lg">{t('portalCitizen', 'Citizen Portal')}</h3>
+                <span className="text-xs font-mono text-copper-600 font-bold block mt-0.5">{t('personaCitizen', 'Ramesh Sharma')}</span>
                 <p className="text-xs text-steel-600 mt-2 leading-relaxed">
-                  Request doorstep e-waste pickup, instant indicative price estimates, live collector tracking & CSR tree donation.
+                  {t('citizenCardDesc', 'Request doorstep e-waste pickup, instant indicative price estimates, live collector tracking & CSR tree donation.')}
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-steel-200 flex items-center justify-between text-xs font-bold text-copper-700">
-                <span>Enter as Citizen</span>
+                <span>{t('enterAsCitizen', 'Enter as Citizen')}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -105,16 +105,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
                   <div className="w-10 h-10 rounded-lg bg-brass-100 border border-brass-400 flex items-center justify-center text-steel-900 group-hover:scale-105 transition-transform">
                     <Truck className="w-5 h-5" />
                   </div>
-                  <span className="stamp-seal stamp-pending text-[9px]">CORE ASK</span>
+                  <span className="stamp-seal stamp-pending text-[9px]">{t('coreAsk', 'CORE ASK')}</span>
                 </div>
-                <h3 className="font-display font-black text-steel-900 text-lg">Collector Portal</h3>
-                <span className="text-xs font-mono text-brass-700 font-bold block mt-0.5">कबाड़ीवाला (Suresh)</span>
+                <h3 className="font-display font-black text-steel-900 text-lg">{t('portalCollector', 'Collector Portal')}</h3>
+                <span className="text-xs font-mono text-brass-700 font-bold block mt-0.5">{t('personaCollector', 'Suresh Kumar')}</span>
                 <p className="text-xs text-steel-600 mt-2 leading-relaxed">
-                  Low-literacy lot creation, spoken price board, QR handover generation, passbook running ledger & safety cards.
+                  {t('collectorCardDesc', 'Low-literacy lot creation, spoken price board, QR handover generation, passbook running ledger & safety cards.')}
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-steel-200 flex items-center justify-between text-xs font-bold text-brass-800">
-                <span>Enter as Collector</span>
+                <span>{t('enterAsCollector', 'Enter as Collector')}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -129,16 +129,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
                   <div className="w-10 h-10 rounded-lg bg-forest-500/10 border border-forest-500/30 flex items-center justify-center text-forest-700 group-hover:scale-105 transition-transform">
                     <Factory className="w-5 h-5" />
                   </div>
-                  <span className="stamp-seal stamp-verified text-[9px]">FORMAL SIDE</span>
+                  <span className="stamp-seal stamp-verified text-[9px]">{t('formalSide', 'FORMAL SIDE')}</span>
                 </div>
-                <h3 className="font-display font-black text-steel-900 text-lg">Recycler Portal</h3>
-                <span className="text-xs font-mono text-forest-700 font-bold block mt-0.5">Aggregator (EcoRecycle)</span>
+                <h3 className="font-display font-black text-steel-900 text-lg">{t('portalRecycler', 'Recycler Portal')}</h3>
+                <span className="text-xs font-mono text-forest-700 font-bold block mt-0.5">{t('personaRecycler', 'EcoRecycle')}</span>
                 <p className="text-xs text-steel-600 mt-2 leading-relaxed">
-                  Incoming collector lots review, QR handover confirmation, live rate-setting console & CPCB EPR compliance reports.
+                  {t('recyclerCardDesc', 'Incoming collector lots review, QR handover confirmation, live rate-setting console & CPCB EPR compliance reports.')}
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-steel-200 flex items-center justify-between text-xs font-bold text-forest-700">
-                <span>Enter as Recycler</span>
+                <span>{t('enterAsRecycler', 'Enter as Recycler')}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -153,16 +153,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
                   <div className="w-10 h-10 rounded-lg bg-steel-800 border border-steel-900 flex items-center justify-center text-paper-50 group-hover:scale-105 transition-transform">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
-                  <span className="stamp-seal stamp-verified text-[9px]">AUDIT HUB</span>
+                  <span className="stamp-seal stamp-verified text-[9px]">{t('regulatoryLayer', 'AUDIT HUB')}</span>
                 </div>
-                <h3 className="font-display font-black text-steel-900 text-lg">Admin / CPCB</h3>
-                <span className="text-xs font-mono text-steel-700 font-bold block mt-0.5">Data Layer (NDMC)</span>
+                <h3 className="font-display font-black text-steel-900 text-lg">{t('portalAdmin', 'Admin / CPCB')}</h3>
+                <span className="text-xs font-mono text-steel-700 font-bold block mt-0.5">{t('personaAdmin', 'NDMC')}</span>
                 <p className="text-xs text-steel-600 mt-2 leading-relaxed">
-                  Full traceability dataset engine, interactive unit-economics calculator (+34%), anomaly detection & Form-2 export.
+                  {t('adminCardDesc', 'Full traceability dataset engine, interactive unit-economics calculator (+34%), anomaly detection & Form-2 export.')}
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-steel-200 flex items-center justify-between text-xs font-bold text-steel-900">
-                <span>Enter as Admin</span>
+                <span>{t('enterAsAdmin', 'Enter as Admin')}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
