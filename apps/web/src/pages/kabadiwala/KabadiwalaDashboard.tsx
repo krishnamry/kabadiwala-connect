@@ -2720,77 +2720,92 @@ export const KabadiwalaDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MOBILE BOTTOM TAB BAR (Thumb-Reachable, Low-Literacy Optimized ≥48px touch targets) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper-50/95 backdrop-blur-md border-t-2 border-steel-400 px-1 py-1 shadow-tactile-lg">
-        <div className="grid grid-cols-6 gap-0.5 text-center">
+      {/* MOBILE BOTTOM TAB BAR (Thumb-Reachable, Non-overlapping, Safe-Area Padded) */}
+      <nav
+        aria-label="Collector Navigation"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/98 backdrop-blur-lg border-t-2 border-steel-300 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))]"
+      >
+        <div className="flex items-center justify-around gap-0.5">
           <button
             onClick={() => setActiveTab('lots')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
-              activeTab === 'lots' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'lots'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Camera className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabLots', 'Lots')}</span>
+            <Camera className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavLots', 'Lots')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('priceboard')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
-              activeTab === 'priceboard' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'priceboard'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <TrendingUp className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabPriceBoard', 'Prices')}</span>
+            <TrendingUp className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavPrices', 'Prices')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('pickups')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
-              activeTab === 'pickups' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'pickups'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Truck className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('pickups', 'Pickups')}</span>
+            <Truck className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavPickups', 'Pickups')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('recyclers')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
-              activeTab === 'recyclers' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'recyclers'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Factory className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabFindRecyclers', 'Recyclers')}</span>
+            <Factory className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavRecyclers', 'Recyclers')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('passbook')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
-              activeTab === 'passbook' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'passbook'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <BookOpen className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabPassbook', 'Passbook')}</span>
+            <BookOpen className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavPassbook', 'Passbook')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('safety')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold ${
-              activeTab === 'safety' ? 'text-signal-600 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'safety'
+                ? 'text-signal-600 bg-signal-50 border border-signal-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <AlertTriangle className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabSafety', 'Safety')}</span>
+            <AlertTriangle className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavSafety', 'Safety')}</span>
           </button>
         </div>
-      </div>
+      </nav>
 
       {/* LOT CREATION POPUP CONFIRMATION MODAL */}
       {createdLotModal && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-steel-950/80 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-steel-950/80 backdrop-blur-sm animate-fade-in"
           onClick={() => setCreatedLotModal(null)}
         >
           <div

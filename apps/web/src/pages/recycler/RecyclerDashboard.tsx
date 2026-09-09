@@ -1238,67 +1238,80 @@ export const RecyclerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (Thumb-friendly portrait phone navigation) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/95 backdrop-blur-md border-t-2 border-steel-400 px-1 py-1 shadow-tactile-lg">
-        <div className="grid grid-cols-5 gap-0.5 text-center">
+      {/* MOBILE BOTTOM NAVIGATION BAR (Thumb-friendly, Non-overlapping, Safe-Area Padded) */}
+      <nav
+        aria-label="Recycler Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/98 backdrop-blur-lg border-t-2 border-steel-300 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))]"
+      >
+        <div className="flex items-center justify-around gap-0.5">
           <button
             onClick={() => setActiveTab('incoming')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'incoming' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'incoming'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Scale className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabIncoming', 'Incoming Lots')}</span>
+            <Scale className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavIncoming', 'Lots')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('handover')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'handover' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'handover'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <QrCode className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabVerifyQr', 'Verify QR')}</span>
+            <QrCode className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavVerify', 'Scan QR')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('rates')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'rates' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'rates'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Sliders className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabRateConsole', 'Rates')}</span>
+            <Sliders className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavRates', 'Rates')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('anomalies')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'anomalies' ? 'text-signal-600 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'anomalies'
+                ? 'text-signal-600 bg-signal-50 border border-signal-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <AlertTriangle className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabAnomalies', 'Anomalies')}</span>
+            <AlertTriangle className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavAnomalies', 'Alerts')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('reports')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'reports' ? 'text-steel-900 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'reports'
+                ? 'text-steel-900 bg-paper-200 border border-steel-300 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabReports', 'CPCB Reports')}</span>
+            <FileSpreadsheet className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavReports', 'Reports')}</span>
           </button>
         </div>
-      </div>
+      </nav>
 
       {/* RECYCLER BIDDING MODAL (Rule: valid bid must be >= 50% of asking price) */}
       {biddingLot && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-steel-950/80 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-steel-950/80 backdrop-blur-sm animate-fade-in"
           onClick={() => setBiddingLot(null)}
         >
           <div

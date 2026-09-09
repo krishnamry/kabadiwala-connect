@@ -1211,7 +1211,7 @@ export const CitizenDashboard: React.FC = () => {
 
       {/* VERIFIABLE RECEIPT MODAL (Section 1.A.4) */}
       {showReceiptModal && (
-        <div className="fixed inset-0 z-50 bg-steel-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-steel-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-paper-50 rounded-2xl max-w-md w-full border-4 border-steel-800 shadow-2xl p-6 space-y-4">
             <div className="flex justify-between items-start border-b-2 border-steel-300 pb-3">
               <div>
@@ -1274,7 +1274,7 @@ export const CitizenDashboard: React.FC = () => {
 
       {/* GREEN IMPACT CERTIFICATE MODAL (Section 1.A.7) */}
       {showCertificateModal && (
-        <div className="fixed inset-0 z-50 bg-steel-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-steel-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-paper-50 rounded-2xl max-w-xl w-full border-4 border-brass-600 shadow-2xl p-6 sm:p-8 space-y-5">
             <div className="text-center space-y-1">
               <div className="w-12 h-12 rounded-full bg-brass-100 text-brass-700 flex items-center justify-center mx-auto mb-2 border border-brass-400">
@@ -1328,50 +1328,61 @@ export const CitizenDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (Thumb-friendly portrait phone navigation) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/95 backdrop-blur-md border-t-2 border-steel-400 px-2 py-1 shadow-tactile-lg">
-        <div className="grid grid-cols-4 gap-1 text-center">
+      {/* MOBILE BOTTOM NAVIGATION BAR (Thumb-friendly, Non-overlapping, Safe-Area Padded) */}
+      <nav
+        aria-label="Citizen Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/98 backdrop-blur-lg border-t-2 border-steel-300 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] px-2 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))]"
+      >
+        <div className="flex items-center justify-around gap-1 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab('pickups')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'pickups' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'pickups'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Clock className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabMyPickups', 'My Pickups')}</span>
+            <Clock className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavMyPickups', 'Pickups')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('new')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'new' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'new'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Plus className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabSchedulePickup', 'Book New')}</span>
+            <Plus className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavBook', 'Book')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('impact')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'impact' ? 'text-forest-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'impact'
+                ? 'text-forest-700 bg-forest-50 border border-forest-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Award className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabImpact', 'Impact')}</span>
+            <Award className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavImpact', 'Impact')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('dropoff')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'dropoff' ? 'text-copper-700 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'dropoff'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Building className="w-5 h-5 mb-0.5" />
-            <span className="truncate max-w-[70px]">{t('tabDropoff', 'Drop-off')}</span>
+            <Building className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavDropoff', 'Centers')}</span>
           </button>
         </div>
-      </div>
+      </nav>
 
     </div>
   );

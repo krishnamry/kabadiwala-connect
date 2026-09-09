@@ -63,15 +63,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           
           {/* Brand Logo & Philosophy Tag */}
           <div
-            className="flex items-center space-x-3 cursor-pointer group"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0"
             onClick={() => onTabChange(user ? (user.role.toLowerCase()) : 'home')}
           >
-            <div className="w-10 h-10 rounded-lg bg-copper-600 border-2 border-copper-800 flex items-center justify-center text-white shadow-tactile group-hover:bg-copper-700 transition-colors">
-              <span className="font-display font-black text-xl">धा</span>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-copper-600 border-2 border-copper-800 flex items-center justify-center text-white shadow-tactile group-hover:bg-copper-700 transition-colors shrink-0">
+              <span className="font-display font-black text-base sm:text-xl">धा</span>
             </div>
             <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-display font-extrabold text-xl tracking-tight text-steel-900">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <span className="font-display font-extrabold text-base sm:text-xl tracking-tight text-steel-900">
                   Kabadiwala<span className="text-copper-600">Connect</span>
                 </span>
                 <span className="hidden sm:inline-block bg-brass-100 text-brass-800 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-brass-400">

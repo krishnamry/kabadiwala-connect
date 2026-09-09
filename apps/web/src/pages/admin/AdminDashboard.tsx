@@ -671,60 +671,73 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Sticky Mobile Bottom Navigation Bar (Portrait Phone Optimization) */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-paper-100 border-t-2 border-steel-300 shadow-tactile-lg p-2 md:hidden">
-        <div className="grid grid-cols-5 gap-1 max-w-lg mx-auto">
+      {/* Sticky Mobile Bottom Navigation Bar (Thumb-friendly, Non-overlapping, Safe-Area Padded) */}
+      <nav
+        aria-label="Admin Navigation"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-paper-50/98 backdrop-blur-lg border-t-2 border-steel-300 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))] md:hidden"
+      >
+        <div className="flex items-center justify-around gap-0.5 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'overview' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'overview'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <TrendingUp className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabOverview', 'Overview')}</span>
+            <TrendingUp className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavOverview', 'Overview')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('traceability')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'traceability' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'traceability'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Layers className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabTraceability', 'Trace')}</span>
+            <Layers className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavTrace', 'Trace')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('uniteconomics')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'uniteconomics' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'uniteconomics'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Calculator className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabUnitEconomics', 'Economics')}</span>
+            <Calculator className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavEconomics', 'Economics')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('verifications')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'verifications' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'verifications'
+                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <Users className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabVerifications', 'Verify')}</span>
+            <Users className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavVerifyAdmin', 'Verify')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('epr')}
-            className={`min-h-[48px] py-1 rounded flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-              activeTab === 'epr' ? 'text-copper-600 bg-paper-200' : 'text-steel-600'
+            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+              activeTab === 'epr'
+                ? 'text-steel-900 bg-paper-200 border border-steel-300 font-extrabold shadow-sm'
+                : 'text-steel-600 hover:text-steel-900'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4 mb-0.5" />
-            <span className="truncate">{t('tabEpr', 'EPR')}</span>
+            <FileSpreadsheet className="w-4 h-4 mb-0.5 shrink-0" />
+            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavEpr', 'EPR')}</span>
           </button>
         </div>
-      </div>
+      </nav>
 
     </div>
   );
