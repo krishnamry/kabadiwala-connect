@@ -27,8 +27,12 @@ import {
   Download,
   Building,
   ShieldCheck,
-  Check
+  Check,
+  Navigation,
+  Loader2
 } from 'lucide-react';
+import { getCurrentPosition, reverseGeocode, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
+import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 
 export const CitizenDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -46,11 +50,13 @@ export const CitizenDashboard: React.FC = () => {
   const [showReceiptModal, setShowReceiptModal] = useState<Pickup | null>(null);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
 
-  // New Pickup Form state (E-Waste focused!)
-  const [address, setAddress] = useState('Block D, Flat 402, Lajpat Nagar II, New Delhi');
-  const [latitude, setLatitude] = useState(28.5700);
-  const [longitude, setLongitude] = useState(77.2400);
-  const [scheduledAt, setScheduledAt] = useState('');
+  const [address, setAddress] = useState('Detecting Live Location...');
+  const [latitude, setLatitude] = useState(28.6139);
+  const [longitude, setLongitude] = useState(77.2090);
+  const [userCoords, setUserCoords] = useState<[number, number] | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [gpsFeedback, setGpsFeedback] = useState<string | null>(null);
+  const [scheduledAt, setScheduledAt] = useState(() => new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 16));
   const [notes, setNotes] = useState('');
   
   // E-waste items list
@@ -96,6 +102,7 @@ export const CitizenDashboard: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    handleFetchLiveGPS();
 
     // Listen for storage events across tabs or local mutations
     const handleStorageUpdate = (e: any) => {
@@ -112,30 +119,92 @@ export const CitizenDashboard: React.FC = () => {
     return () => window.removeEventListener('dhatu-storage-change', handleStorageUpdate);
   }, [user?.id]);
 
-  // Drop-off centers data (Section 1.A.8)
-  const dropoffCenters = [
+  const currentRefLat = userCoords ? userCoords[0] : latitude;
+  const currentRefLng = userCoords ? userCoords[1] : longitude;
+
+  // Dynamic Drop-off centers data with live distance calculation (Section 1.A.8)
+  const baseKiosks = [
     {
-      name: 'NDMC E-Waste Facility Lajpat Nagar',
-      address: 'Near Metro Pillar 42, Feroze Gandhi Marg, Lajpat Nagar III',
-      distanceKm: 1.2,
+      id: 'dc-1',
+      name: 'Municipal E-Waste Facility (ULB Hub)',
+      address: 'Authorized ULB Waste Segregation Yard',
+      lat: currentRefLat + 0.007,
+      lng: currentRefLng + 0.005,
       hours: 'Mon-Sat: 08:00 AM - 05:00 PM',
-      incentive: 'Instant Cash or NDMC Property Tax rebate credit'
+      incentive: 'Instant Cash or ULB Property Tax rebate credit',
+      iconEmoji: '🏛️',
+      color: '#B5573A'
     },
     {
-      name: 'EcoRecycle Drop-Off Terminal Okhla',
-      address: 'Plot 42, Phase-II Industrial Area, Okhla',
-      distanceKm: 3.2,
+      id: 'dc-2',
+      name: 'EcoRecycle Drop-Off Terminal',
+      address: 'Industrial Area Recycling Aggregator Hub',
+      lat: currentRefLat - 0.011,
+      lng: currentRefLng + 0.012,
       hours: 'Mon-Sun: 07:00 AM - 08:00 PM',
-      incentive: '+5% Green Bonus on self drop-off weight'
+      incentive: '+5% Green Bonus on self drop-off weight',
+      iconEmoji: '🏭',
+      color: '#3B6B4E'
     },
     {
-      name: 'Croma E-Waste Return Kiosk South Ext.',
-      address: 'Croma Electronics, South Extension-I Market',
-      distanceKm: 4.5,
+      id: 'dc-3',
+      name: 'Electronics Return & Buyback Kiosk',
+      address: 'CPCB Certified Consumer Takeback Center',
+      lat: currentRefLat + 0.013,
+      lng: currentRefLng - 0.008,
       hours: 'Mon-Sun: 10:00 AM - 09:00 PM',
-      incentive: '₹200 Store Voucher per laptop/desktop motherboard'
+      incentive: '₹200 Store Voucher per laptop/desktop motherboard',
+      iconEmoji: '🏢',
+      color: '#C9A227'
     }
   ];
+
+  const dropoffCenters = baseKiosks.map(kiosk => {
+    const dist = calculateDistanceKm(currentRefLat, currentRefLng, kiosk.lat, kiosk.lng);
+    return {
+      ...kiosk,
+      distanceKm: dist,
+      directionsUrl: getDirectionsUrl(kiosk.lat, kiosk.lng, currentRefLat, currentRefLng)
+    };
+  }).sort((a, b) => a.distanceKm - b.distanceKm);
+
+  // Live Location & Reverse Geocode Handlers
+  const handleFetchLiveGPS = async () => {
+    setIsLocating(true);
+    setGpsFeedback(null);
+    try {
+      const pos = await getCurrentPosition();
+      setLatitude(pos.latitude);
+      setLongitude(pos.longitude);
+      setUserCoords([pos.latitude, pos.longitude]);
+      const geo = await reverseGeocode(pos.latitude, pos.longitude);
+      setAddress(geo.address);
+      setGpsFeedback(`📍 Located via ${pos.source.toUpperCase()}: ${geo.shortAddress} (±${pos.accuracy || 15}m)`);
+      hapticSuccess();
+    } catch (err) {
+      console.warn('GPS fetch failed', err);
+      setGpsFeedback('Could not detect live location. Please pinpoint on map.');
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
+  const handleMapLocationSelect = async (lat: number, lng: number, addr?: string) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    if (addr) {
+      setAddress(addr);
+      setGpsFeedback(`📍 Pin placed at: ${addr.split(',').slice(0, 2).join(',')}`);
+    } else {
+      try {
+        const geo = await reverseGeocode(lat, lng);
+        setAddress(geo.address);
+        setGpsFeedback(`📍 Pin placed at: ${geo.shortAddress}`);
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+  };
 
   const handleAddItem = () => {
     setItems([...items, { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.0, ratePerKg: 640 }]);
@@ -177,12 +246,35 @@ export const CitizenDashboard: React.FC = () => {
 
       setMlResult(result);
 
+      let detectedCat = 'Printed Circuit Boards (PCBs)';
+      let detectedRate = result.estRate || 640;
+      const catLower = (result.category || '').toLowerCase();
+      if (catLower.includes('battery') || catLower.includes('cell') || catLower.includes('lithium')) {
+        detectedCat = 'Lithium-ion Batteries';
+        detectedRate = result.estRate || 145;
+      } else if (catLower.includes('wire') || catLower.includes('cable') || catLower.includes('copper')) {
+        detectedCat = 'Copper Cables & Insulated Wires';
+        detectedRate = result.estRate || 480;
+      } else if (catLower.includes('display') || catLower.includes('panel') || catLower.includes('lcd') || catLower.includes('screen') || catLower.includes('led')) {
+        detectedCat = 'LCD/LED Display Panels';
+        detectedRate = result.estRate || 85;
+      } else if (catLower.includes('motor') || catLower.includes('compressor')) {
+        detectedCat = 'Electric Motors & Compressors';
+        detectedRate = result.estRate || 95;
+      } else if (catLower.includes('crt') || catLower.includes('glass')) {
+        detectedCat = 'CRT Monitor Glass Unit';
+        detectedRate = result.estRate || 12;
+      } else if (catLower.includes('plastic') || catLower.includes('abs')) {
+        detectedCat = 'Engineering E-Plastics (ABS/HIPS)';
+        detectedRate = result.estRate || 38;
+      }
+
       setItems(prev => [
         ...prev,
         {
-          category: 'Printed Circuit Boards (PCBs)',
+          category: detectedCat,
           estWeightKg: 2.5,
-          ratePerKg: 640,
+          ratePerKg: detectedRate,
           imageUrl: URL.createObjectURL(file)
         }
       ]);
@@ -229,6 +321,95 @@ export const CitizenDashboard: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCancelPickup = async (pickupId: string) => {
+    if (!confirm('Are you sure you want to cancel this pickup request?')) return;
+    try {
+      await api.cancelPickup(pickupId);
+      const updated = storage.getMyPickups(user?.id, 'CITIZEN');
+      setPickups(updated);
+      setSelectedPickup(prev => (prev?.id === pickupId ? updated.find(p => p.id === pickupId) || null : prev));
+      setSuccessMessage('Pickup request cancelled successfully.');
+    } catch (e: any) {
+      alert('Failed to cancel pickup: ' + (e.message || 'Unknown error'));
+    }
+  };
+
+  const handleDownloadCertificate = () => {
+    const certHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CPCB Safe E-Waste Disposal Certificate - Ramesh Sharma</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #fdfbf7; color: #1c1b19; padding: 40px; margin: 0; }
+    .cert-card { max-width: 760px; margin: 0 auto; border: 8px double #c9a227; background: #fff; padding: 48px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
+    .header { text-align: center; border-bottom: 2px solid #2e3532; padding-bottom: 20px; }
+    .logo { font-size: 32px; font-weight: 900; color: #b5573a; letter-spacing: -1px; }
+    .sub { font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .title { font-size: 26px; font-weight: 800; color: #2e3532; text-align: center; margin-top: 28px; text-transform: uppercase; }
+    .recipient { text-align: center; font-size: 24px; font-weight: bold; color: #b5573a; margin: 20px 0 12px; }
+    .body-text { text-align: center; font-size: 15px; line-height: 1.6; color: #444; max-width: 600px; margin: 0 auto 30px; }
+    .meta-grid { display: flex; justify-content: space-around; background: #f7f3eb; padding: 18px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 30px; font-family: monospace; }
+    .meta-item { text-align: center; }
+    .meta-label { font-size: 11px; color: #777; }
+    .meta-val { font-size: 14px; font-weight: bold; color: #111; margin-top: 4px; }
+    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 20px; border-top: 1px dashed #ccc; font-size: 12px; color: #777; }
+    .stamp { border: 2px solid #3b6b4e; color: #3b6b4e; padding: 8px 16px; border-radius: 4px; font-weight: bold; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="cert-card">
+    <div class="header">
+      <div class="logo">♻️ KABADIWALA CONNECT — DHATU</div>
+      <div class="sub">Ministry of Mines & Central Pollution Control Board (CPCB) Guidelines</div>
+    </div>
+    <div class="title">Certificate of Safe E-Waste Disposal</div>
+    <p style="text-align:center;font-size:13px;color:#888;">This is officially awarded to</p>
+    <div class="recipient">${user?.name || 'Ramesh Sharma'}</div>
+    <div class="body-text">
+      for successfully diverting <strong>28.2 Kilograms</strong> of post-consumer hazardous electronic scrap from Indian landfills through authorized door-to-door collectors and CPCB-registered hydrometallurgical recycling smelters.
+    </div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">CERTIFICATE ID</div>
+        <div class="meta-val">KBD-EPR-2026-DEL-04192</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">DATE OF ISSUE</div>
+        <div class="meta-val">${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">CO2 ABATED</div>
+        <div class="meta-val">64.5 KG</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">STATUS</div>
+        <div class="meta-val" style="color:#3b6b4e;">VERIFIED 100%</div>
+      </div>
+    </div>
+    <div class="footer">
+      <div>
+        <strong>Audit Chain Hash:</strong><br>
+        <code>0x8f4a9b2c7e103984fa5599201948baef77299014</code>
+      </div>
+      <div class="stamp">
+        ✓ CPCB AUDIT SEALED
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([certHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CPCB_EPR_Disposal_Certificate_${Date.now()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setShowCertificateModal(false);
   };
 
   return (
@@ -420,15 +601,27 @@ export const CitizenDashboard: React.FC = () => {
                     </h3>
                   </div>
 
-                  {selectedPickup.kabadiwala && (
-                    <a
-                      href={`tel:${selectedPickup.kabadiwala.phone}`}
-                      className="btn-dhatu-primary px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1.5 self-start sm:self-auto"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                      <span>{t('callCollector', 'Call Collector')}</span>
-                    </a>
-                  )}
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    {selectedPickup.status === 'REQUESTED' && (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelPickup(selectedPickup.id)}
+                        className="px-3 py-1.5 bg-paper-200 hover:bg-signal-500/10 text-signal-600 border border-signal-300 rounded text-xs font-bold transition-colors"
+                      >
+                        {t('cancel', 'Cancel Request')}
+                      </button>
+                    )}
+
+                    {selectedPickup.kabadiwala && (
+                      <a
+                        href={`tel:${selectedPickup.kabadiwala.phone}`}
+                        className="btn-dhatu-primary px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1.5"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>{t('callCollector', 'Call Collector')}</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
 
                 {/* Live ETA Tracker Banner */}
@@ -451,6 +644,49 @@ export const CitizenDashboard: React.FC = () => {
                       marathiText="संग्राहक सुरेश अंदाजे 12 मिनिटात प्रमाणित काट्यासह पोहोचत आहे."
                       size="md"
                     />
+                  </div>
+                )}
+                {/* Layer 1: Handover Verification OTP Card & Audit Seal */}
+                {selectedPickup.status !== 'COMPLETED' ? (
+                  <div className="p-4 bg-paper-100 rounded-xl border-2 border-dashed border-copper-500 shadow-tactile space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="stamp-seal stamp-verified text-[10px]">
+                        LAYER 1 VERIFICATION • DOORSTEP SCRAP HANDOVER
+                      </span>
+                      <span className="font-mono text-xs font-bold text-copper-700 bg-copper-200/60 px-2 py-0.5 rounded border border-copper-400">
+                        SECURE OTP
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <span className="text-xs font-bold text-steel-900 block">
+                          Physical Handover Authorization Code
+                        </span>
+                        <p className="text-[11px] text-steel-600">
+                          Share this 4-digit code with the collector upon arrival to verify physical weighing & authorized handover.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 self-start sm:self-auto">
+                        <span className="font-mono text-2xl font-black text-copper-700 tracking-widest bg-paper-50 px-4 py-1.5 rounded-lg border-2 border-copper-500 shadow-sm">
+                          {selectedPickup.verificationOtp || '4821'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 bg-forest-500/10 border-2 border-forest-500 rounded-xl space-y-1.5 text-xs text-forest-900">
+                    <div className="flex items-center justify-between font-bold">
+                      <span className="flex items-center gap-1.5 text-forest-800">
+                        <CheckCircle2 className="w-4 h-4 text-forest-600 shrink-0" />
+                        <span>Layer 1 Verified: Physical Doorstep Handover Confirmed</span>
+                      </span>
+                      <span className="font-mono text-[11px] text-forest-700 bg-forest-100 px-2 py-0.5 rounded border border-forest-300">
+                        OTP {selectedPickup.verificationOtp || '4821'} MATCHED
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-forest-700 font-mono">
+                      Audit Hash: {selectedPickup.traceabilityHash || '0x8f4a9b2c7e103984fa55'} • Digitally signed & credited
+                    </p>
                   </div>
                 )}
 
@@ -566,17 +802,32 @@ export const CitizenDashboard: React.FC = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      setAddress('Block D, Flat 402, Lajpat Nagar II, New Delhi');
-                      setLatitude(28.5700);
-                      setLongitude(77.2400);
-                    }}
-                    className="px-3 py-2 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1"
+                    onClick={handleFetchLiveGPS}
+                    disabled={isLocating}
+                    title="Detect Current Live Location (GPS / IP)"
+                    className="px-3 py-2 bg-paper-200 hover:bg-copper-100 active:bg-copper-200 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1.5 transition-colors disabled:opacity-50"
                   >
-                    <MapPin className="w-3.5 h-3.5 text-copper-600" />
-                    <span>GPS</span>
+                    {isLocating ? (
+                      <Loader2 className="w-3.5 h-3.5 text-copper-600 animate-spin" />
+                    ) : (
+                      <MapPin className="w-3.5 h-3.5 text-copper-600" />
+                    )}
+                    <span>{isLocating ? 'Locating...' : 'GPS'}</span>
                   </button>
                 </div>
+
+                {gpsFeedback && (
+                  <div className="mt-1.5 p-2 bg-forest-50 border border-forest-300 rounded text-[11px] font-mono text-forest-800 flex items-center justify-between animate-fade-in">
+                    <span>{gpsFeedback}</span>
+                    <button
+                      type="button"
+                      onClick={() => setGpsFeedback(null)}
+                      className="text-forest-600 hover:text-forest-900 font-bold ml-2"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
 
                 {/* Interactive Doorstep Location Pin Map */}
                 <div className="mt-2 space-y-1">
@@ -594,17 +845,79 @@ export const CitizenDashboard: React.FC = () => {
                       zoom={15}
                       selectableLocation={true}
                       pinLocation={[latitude, longitude]}
-                      onLocationSelect={(lat, lng) => {
-                        setLatitude(lat);
-                        setLongitude(lng);
-                      }}
+                      userPosition={userCoords}
+                      onLocationSelect={handleMapLocationSelect}
                       height="100%"
                     />
                     <div className="absolute bottom-2 left-2 right-2 bg-paper-50/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-mono text-steel-700 border border-steel-300 pointer-events-none text-center shadow-sm">
-                      {language === 'hi' ? 'मानचित्र पर टैप करके या पिन खींचकर सटीक पता सेट करें' : language === 'mr' ? 'नकाशावर टॅप करून अचूक जागा निवडा' : 'Tap anywhere on map or drag pin to pinpoint pickup gate'}
+                      {language === 'hi' ? 'मानचित्र पर टैप करके या पिन खींचकर सटीक पता सेट करें' : language === 'mr' ? 'नकाशावर टॅप करून अचूक जागा निवडा' : 'Tap anywhere on map or drag pin to auto-fill street address'}
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Pickup Schedule Slot Selector */}
+              <div>
+                <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
+                  📅 {language === 'hi' ? 'पिकअप का समय चुनें' : language === 'mr' ? 'पिकअप वेळ निवडा' : 'Schedule Pickup Slot'}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setScheduledAt(new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 16))}
+                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                  >
+                    <span className="font-bold block">⚡ Today</span>
+                    <span className="text-[10px] text-steel-500">Within 2 hrs</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + 1);
+                      d.setHours(10, 0, 0, 0);
+                      setScheduledAt(d.toISOString().slice(0, 16));
+                    }}
+                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                  >
+                    <span className="font-bold block">🌅 Tomorrow</span>
+                    <span className="text-[10px] text-steel-500">10:00 AM</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + 1);
+                      d.setHours(16, 0, 0, 0);
+                      setScheduledAt(d.toISOString().slice(0, 16));
+                    }}
+                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                  >
+                    <span className="font-bold block">🌆 Tomorrow</span>
+                    <span className="text-[10px] text-steel-500">04:00 PM</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const d = new Date();
+                      const daysUntilSat = (6 - d.getDay() + 7) % 7 || 7;
+                      d.setDate(d.getDate() + daysUntilSat);
+                      d.setHours(11, 0, 0, 0);
+                      setScheduledAt(d.toISOString().slice(0, 16));
+                    }}
+                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                  >
+                    <span className="font-bold block">🗓️ Weekend</span>
+                    <span className="text-[10px] text-steel-500">Saturday 11 AM</span>
+                  </button>
+                </div>
+                <input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={e => setScheduledAt(e.target.value)}
+                  className="w-full px-3 py-2 text-xs font-mono bg-white border-2 border-steel-300 rounded focus:border-copper-600 focus:outline-none"
+                  required
+                />
               </div>
 
               {/* Items List */}
@@ -676,7 +989,7 @@ export const CitizenDashboard: React.FC = () => {
                     {formatCurrency(indicativeMin)} — {formatCurrency(indicativeMax)}
                   </div>
                   <span className="text-[11px] text-steel-600">
-                    Live rates pulled from CPCB registered aggregators in South Delhi
+                    Live rates pulled from CPCB registered aggregators across India
                   </span>
                 </div>
                 <VoiceAssistButton
@@ -698,7 +1011,7 @@ export const CitizenDashboard: React.FC = () => {
                       {t('donateToCsrLabel', 'Donate Value to Environmental NGO (Plant Trees)')}
                     </span>
                     <span className="text-[11px] text-steel-600">
-                      Funds 5 native tree saplings in Delhi Ridge green corridor.
+                      Funds 5 native tree saplings in national reforestation green corridors.
                     </span>
                   </div>
                 </div>
@@ -825,7 +1138,7 @@ export const CitizenDashboard: React.FC = () => {
             <div className="font-display font-bold text-steel-800 text-sm flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-copper-600" />
-                <span>{language === 'hi' ? 'ड्रॉप-ऑफ केंद्र मानचित्र (दिल्ली एनसीआर)' : language === 'mr' ? 'ड्रॉप-ऑफ केंद्र नकाशा' : 'Authorized Drop-off Centers Map (Delhi NCR)'}</span>
+                <span>{language === 'hi' ? 'ड्रॉप-ऑफ केंद्र मानचित्र' : language === 'mr' ? 'ड्रॉप-ऑफ केंद्र नकाशा' : 'Authorized Drop-off Centers Map'}</span>
               </span>
               <span className="text-xs font-mono text-copper-700 bg-paper-200 px-2.5 py-0.5 rounded border border-steel-300 font-bold">
                 3 Verified Kiosks
@@ -833,40 +1146,19 @@ export const CitizenDashboard: React.FC = () => {
             </div>
             <div className="h-56 sm:h-64 rounded-lg overflow-hidden border border-steel-300">
               <LeafletMap
-                center={[28.5685, 77.2412]}
+                center={[currentRefLat, currentRefLng]}
                 zoom={12}
-                markers={[
-                  {
-                    id: 'dc-1',
-                    lat: 28.5700,
-                    lng: 77.2400,
-                    title: 'NDMC E-Waste Facility Lajpat Nagar',
-                    subtitle: 'Near Metro Pillar 42, Feroze Gandhi Marg',
-                    iconEmoji: '🏛️',
-                    badge: '1.2 km',
-                    color: '#B5573A'
-                  },
-                  {
-                    id: 'dc-2',
-                    lat: 28.5355,
-                    lng: 77.2732,
-                    title: 'EcoRecycle Drop-Off Terminal Okhla',
-                    subtitle: 'Plot 42, Phase-II Industrial Area, Okhla',
-                    iconEmoji: '🏭',
-                    badge: '3.2 km',
-                    color: '#3B6B4E'
-                  },
-                  {
-                    id: 'dc-3',
-                    lat: 28.5728,
-                    lng: 77.2215,
-                    title: 'Croma E-Waste Return Kiosk South Ext.',
-                    subtitle: 'Croma Electronics, South Extension-I',
-                    iconEmoji: '🏢',
-                    badge: '4.5 km',
-                    color: '#C9A227'
-                  }
-                ]}
+                userPosition={userCoords}
+                markers={dropoffCenters.map(c => ({
+                  id: c.id,
+                  lat: c.lat,
+                  lng: c.lng,
+                  title: c.name,
+                  subtitle: c.address,
+                  iconEmoji: c.iconEmoji,
+                  badge: `${c.distanceKm} km`,
+                  color: c.color
+                }))}
                 height="100%"
               />
             </div>
@@ -874,26 +1166,42 @@ export const CitizenDashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {dropoffCenters.map((c, i) => (
-              <div key={i} className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm space-y-3">
-                <div className="flex justify-between items-start">
-                  <span className="stamp-seal stamp-verified text-[9px]">CPCB DROP-OFF</span>
-                  <span className="font-mono text-xs font-bold text-copper-600">{c.distanceKm} km</span>
+              <div key={i} className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm flex flex-col justify-between space-y-3 hover:border-copper-500 transition-colors">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <span className="stamp-seal stamp-verified text-[9px]">CPCB DROP-OFF</span>
+                    <span className="font-mono text-xs font-bold text-copper-600 bg-copper-50 px-2 py-0.5 rounded border border-copper-200">
+                      📍 {c.distanceKm} km away
+                    </span>
+                  </div>
+
+                  <h3 className="font-display font-bold text-steel-900 text-base">
+                    {c.name}
+                  </h3>
+
+                  <div className="space-y-1 text-xs text-steel-600 font-mono">
+                    <p className="flex items-start gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-copper-600 flex-shrink-0 mt-0.5" />
+                      <span>{c.address}</span>
+                    </p>
+                    <p className="text-steel-500">{c.hours}</p>
+                  </div>
+
+                  <div className="p-2.5 bg-paper-200 rounded border border-steel-300 text-xs text-forest-800 font-medium">
+                    🎁 <strong>Incentive:</strong> {c.incentive}
+                  </div>
                 </div>
 
-                <h3 className="font-display font-bold text-steel-900 text-base">
-                  {c.name}
-                </h3>
-
-                <div className="space-y-1 text-xs text-steel-600 font-mono">
-                  <p className="flex items-start gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-copper-600 flex-shrink-0 mt-0.5" />
-                    <span>{c.address}</span>
-                  </p>
-                  <p className="text-steel-500">{c.hours}</p>
-                </div>
-
-                <div className="p-2.5 bg-paper-200 rounded border border-steel-300 text-xs text-forest-800 font-medium">
-                  🎁 <strong>Incentive:</strong> {c.incentive}
+                <div className="pt-2 border-t border-steel-200">
+                  <a
+                    href={c.directionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full btn-dhatu-primary py-2 px-3 rounded text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-transform text-center"
+                  >
+                    <Navigation className="w-3.5 h-3.5" />
+                    <span>Navigate on Google Maps ({c.distanceKm} km) →</span>
+                  </a>
                 </div>
               </div>
             ))}
@@ -1002,10 +1310,8 @@ export const CitizenDashboard: React.FC = () => {
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  alert('Certificate downloaded to your device!');
-                  setShowCertificateModal(false);
-                }}
+                type="button"
+                onClick={handleDownloadCertificate}
                 className="flex-1 btn-dhatu-primary py-2.5 rounded text-xs font-bold flex items-center justify-center space-x-1"
               >
                 <Download className="w-4 h-4" />

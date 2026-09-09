@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { Pickup } from '../types';
+import { getCurrentPosition, reverseGeocode, GeoCoordinates } from '../lib/location';
+import { Navigation, Loader2 } from 'lucide-react';
 
 export interface MapCustomMarker {
   id: string;
@@ -20,14 +22,16 @@ interface LeafletMapProps {
   markers?: MapCustomMarker[];
   selectedPickupId?: string | null;
   onSelectPickup?: (pickup: Pickup) => void;
-  onLocationSelect?: (lat: number, lng: number) => void;
+  onLocationSelect?: (lat: number, lng: number, address?: string) => void;
   selectableLocation?: boolean;
   pinLocation?: [number, number] | null;
   height?: string;
+  showLocateButton?: boolean;
+  userPosition?: [number, number] | null;
 }
 
 export const LeafletMap: React.FC<LeafletMapProps> = ({
-  center = [28.5685, 77.2412], // Delhi Lajpat Nagar region default
+  center = [28.6139, 77.2090], // Default map center
   zoom = 13,
   pickups = [],
   markers = [],
@@ -36,14 +40,21 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
   onLocationSelect,
   selectableLocation = false,
   pinLocation,
-  height = '420px'
+  height = '420px',
+  showLocateButton = true,
+  userPosition
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [id: string]: L.Marker }>({});
   const customMarkersRef = useRef<{ [id: string]: L.Marker }>({});
   const pickMarkerRef = useRef<L.Marker | null>(null);
+  const userBeaconRef = useRef<L.Marker | null>(null);
 
+  const [isLocating, setIsLocating] = useState(false);
+  const [geoNotice, setGeoNotice] = useState<string | null>(null);
+
+  // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -58,8 +69,14 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
       }).addTo(map);
 
       if (selectableLocation && onLocationSelect) {
-        map.on('click', (e: L.LeafletMouseEvent) => {
-          onLocationSelect(e.latlng.lat, e.latlng.lng);
+        map.on('click', async (e: L.LeafletMouseEvent) => {
+          const { lat, lng } = e.latlng;
+          try {
+            const geo = await reverseGeocode(lat, lng);
+            onLocationSelect(lat, lng, geo.address);
+          } catch {
+            onLocationSelect(lat, lng);
+          }
         });
       }
 
@@ -81,6 +98,92 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
       mapInstanceRef.current.setView(center, zoom);
     }
   }, [center[0], center[1], zoom]);
+
+  // Handle User Location Beacon
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const activeUserPos = userPosition;
+    if (activeUserPos) {
+      if (userBeaconRef.current) {
+        userBeaconRef.current.setLatLng(activeUserPos);
+      } else {
+        const beaconHtml = `
+          <div style="position: relative; width: 22px; height: 22px;">
+            <div style="position: absolute; inset: -8px; border-radius: 50%; background: rgba(59, 130, 246, 0.35); animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+            <div style="width: 22px; height: 22px; border-radius: 50%; background: #2563eb; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">
+              •
+            </div>
+          </div>
+        `;
+        const beaconIcon = L.divIcon({
+          className: 'user-live-beacon',
+          html: beaconHtml,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+
+        const beacon = L.marker(activeUserPos, { icon: beaconIcon }).addTo(map);
+        beacon.bindPopup(`
+          <div style="font-family: sans-serif; font-size: 12px; font-weight: bold; color: #1e3a8a;">
+            📍 Your Current Location
+          </div>
+        `);
+        userBeaconRef.current = beacon;
+      }
+    }
+  }, [userPosition]);
+
+  // Handle "Locate Me" button click
+  const handleLocateMe = async () => {
+    setIsLocating(true);
+    setGeoNotice(null);
+    try {
+      const pos: GeoCoordinates = await getCurrentPosition();
+      const map = mapInstanceRef.current;
+      if (map) {
+        map.flyTo([pos.latitude, pos.longitude], 15, { duration: 1.2 });
+
+        // Update or create user live beacon
+        if (userBeaconRef.current) {
+          userBeaconRef.current.setLatLng([pos.latitude, pos.longitude]);
+        } else {
+          const beaconHtml = `
+            <div style="position: relative; width: 22px; height: 22px;">
+              <div style="position: absolute; inset: -8px; border-radius: 50%; background: rgba(59, 130, 246, 0.35); animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #2563eb; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
+            </div>
+          `;
+          const beaconIcon = L.divIcon({
+            className: 'user-live-beacon',
+            html: beaconHtml,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
+          const beacon = L.marker([pos.latitude, pos.longitude], { icon: beaconIcon }).addTo(map);
+          beacon.bindPopup(`<div style="font-family: sans-serif; font-size: 12px; font-weight: bold; color: #1e3a8a;">📍 You Are Here (${pos.source.toUpperCase()})</div>`);
+          userBeaconRef.current = beacon;
+        }
+
+        // If in selectable mode, also update the selected pin & reverse geocode
+        if (selectableLocation && onLocationSelect) {
+          const geo = await reverseGeocode(pos.latitude, pos.longitude);
+          onLocationSelect(pos.latitude, pos.longitude, geo.address);
+          setGeoNotice(`📍 Located: ${geo.shortAddress}`);
+        } else {
+          const geo = await reverseGeocode(pos.latitude, pos.longitude);
+          setGeoNotice(`📍 ${geo.shortAddress}`);
+        }
+      }
+    } catch (err) {
+      console.warn('Locate me failed:', err);
+      setGeoNotice('Could not retrieve live GPS position');
+    } finally {
+      setIsLocating(false);
+      setTimeout(() => setGeoNotice(null), 4000);
+    }
+  };
 
   // Render pickup markers
   useEffect(() => {
@@ -138,6 +241,11 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
             ${p.status}
           </span>
           ${p.distanceKm !== undefined ? `<div style="font-size: 11px; color: #64748b; margin-top: 4px;">📍 ${p.distanceKm} km away</div>` : ''}
+          <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #e2e8f0;">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${p.latitude},${p.longitude}" target="_blank" rel="noopener noreferrer" style="color: #b45309; font-size: 11px; font-weight: bold; text-decoration: none; display: flex; items: center; gap: 4px;">
+              Directions on Maps →
+            </a>
+          </div>
         </div>
       `;
       marker.bindPopup(popupHtml);
@@ -192,6 +300,11 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
           <h4 style="margin: 0 0 4px; font-weight: 700; font-size: 13px; color: #1e293b;">${cm.title}</h4>
           ${cm.subtitle ? `<div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">${cm.subtitle}</div>` : ''}
           ${cm.badge ? `<span style="display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; background: ${color}20; color: ${color};">${cm.badge}</span>` : ''}
+          <div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid #e2e8f0;">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${cm.lat},${cm.lng}" target="_blank" rel="noopener noreferrer" style="color: #b45309; font-size: 11px; font-weight: bold; text-decoration: none;">
+              Open Navigation →
+            </a>
+          </div>
         </div>
       `;
       marker.bindPopup(popupHtml);
@@ -217,10 +330,19 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
         });
 
         const newMarker = L.marker(pinLocation, { icon: pinIcon, draggable: true }).addTo(map);
-        newMarker.on('dragend', () => {
+
+        // Fetch reverse geocode address on drag end
+        newMarker.on('dragend', async () => {
           const latlng = newMarker.getLatLng();
-          if (onLocationSelect) onLocationSelect(latlng.lat, latlng.lng);
+          try {
+            const geo = await reverseGeocode(latlng.lat, latlng.lng);
+            newMarker.bindPopup(`<div style="font-family: sans-serif; font-size: 11px; font-weight: bold;">📍 ${geo.address}</div>`).openPopup();
+            if (onLocationSelect) onLocationSelect(latlng.lat, latlng.lng, geo.address);
+          } catch {
+            if (onLocationSelect) onLocationSelect(latlng.lat, latlng.lng);
+          }
         });
+
         pickMarkerRef.current = newMarker;
       }
     } else if (pickMarkerRef.current) {
@@ -230,10 +352,33 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
   }, [pinLocation]);
 
   return (
-    <div
-      ref={mapContainerRef}
-      style={{ height, width: '100%', borderRadius: '0.75rem', overflow: 'hidden' }}
-      className="border border-slate-200 shadow-inner z-0"
-    />
+    <div className="relative w-full overflow-hidden rounded-xl border border-steel-300 shadow-inner z-0" style={{ height }}>
+      <div ref={mapContainerRef} className="w-full h-full" />
+
+      {/* Floating GPS Locate Control Button */}
+      {showLocateButton && (
+        <button
+          type="button"
+          onClick={handleLocateMe}
+          disabled={isLocating}
+          title="Detect My Live Location (GPS / IP)"
+          className="absolute top-3 right-3 z-[400] bg-paper-50 hover:bg-paper-100 active:bg-paper-200 text-steel-800 px-3 py-1.5 rounded-lg border-2 border-steel-400 shadow-tactile flex items-center gap-1.5 text-xs font-bold font-mono transition-transform active:scale-95 disabled:opacity-60"
+        >
+          {isLocating ? (
+            <Loader2 className="w-3.5 h-3.5 text-copper-600 animate-spin" />
+          ) : (
+            <Navigation className="w-3.5 h-3.5 text-copper-600" />
+          )}
+          <span>{isLocating ? 'Locating...' : 'Locate Me'}</span>
+        </button>
+      )}
+
+      {/* Geocoded Feedback Banner */}
+      {geoNotice && (
+        <div className="absolute top-12 right-3 left-3 z-[400] bg-forest-800 text-paper-50 px-3 py-1.5 rounded-lg text-xs font-mono font-bold shadow-tactile border border-forest-600 flex items-center justify-between animate-fade-in pointer-events-none">
+          <span className="truncate">{geoNotice}</span>
+        </div>
+      )}
+    </div>
   );
 };

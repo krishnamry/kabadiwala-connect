@@ -1,4 +1,4 @@
-export type Role = 'CITIZEN' | 'KABADIWALA' | 'ADMIN';
+export type Role = 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN';
 
 export type PickupStatus = 'REQUESTED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
@@ -56,6 +56,10 @@ export interface Pickup {
   totalAmount?: number | null;
   createdAt: string;
   notes?: string;
+  verificationOtp?: string;
+  isVerified?: boolean;
+  verifiedAt?: string;
+  traceabilityHash?: string;
 }
 
 export interface Transaction {
@@ -106,4 +110,53 @@ export interface MLClassificationResult {
   confidence: number;
   estRate: number;
   advice?: string;
+}
+
+export interface LotBid {
+  id: string;
+  recyclerId: string;
+  recyclerName: string;
+  bidAmount: number;
+  bidPerKg: number;
+  createdAt: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+}
+
+export interface EWasteLotItem {
+  id?: string;
+  category: string;
+  weightKg: number;
+  ratePerKg: number;
+  subtotal?: number;
+}
+
+export interface EWasteLot {
+  id: string;
+  lotCode: string;
+  collectorId: string;
+  collectorName: string;
+  category: string;
+  approxWeightKg: number;
+  estimatedValue: number;
+  askingPrice?: number;
+  minBidAmount?: number;
+  recyclerOfferedRate: number;
+  status: 'DRAFT' | 'AVAILABLE' | 'REQUESTED' | 'BIDDING' | 'HANDOVER_PENDING' | 'CONFIRMED' | 'REJECTED';
+  bids?: LotBid[];
+  highestBid?: number;
+  winningBid?: LotBid;
+  imageUrl?: string;
+  gpsLat: number;
+  gpsLng: number;
+  createdAt: string;
+  confirmedAt?: string;
+  recyclerId?: string;
+  recyclerName?: string;
+  qrCode: string;
+  isOfflineQueued?: boolean;
+  traceabilityHash?: string;
+  weighbridgeOperatorId?: string;
+  verifiedAtWeighbridge?: boolean;
+  isCustomLot?: boolean;
+  items?: EWasteLotItem[];
 }

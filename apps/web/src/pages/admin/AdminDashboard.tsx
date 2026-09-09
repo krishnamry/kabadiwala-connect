@@ -48,35 +48,35 @@ export const AdminDashboard: React.FC = () => {
     totalWeightKg: 18.5,
     stages: [
       {
-        stage: '1. Citizen Pickup at Source',
-        actor: 'Ramesh Sharma (Household)',
+        stage: 'Layer 1: Citizen ➔ Collector Doorstep Handover',
+        actor: 'Ramesh Sharma (Household) ➔ Suresh Kumar',
         location: 'Block D, Lajpat Nagar II, New Delhi',
         timestamp: '08-SEP-2026 09:15 AM',
-        status: 'VERIFIED',
+        status: 'VERIFIED (OTP: 4821)',
         hash: '0x8f4a9b2c7e103984fa55'
       },
       {
-        stage: '2. Doorstep Collector Lot Creation',
+        stage: 'Layer 2: Collector Digital Lot Creation & AI Scan',
         actor: 'Suresh Kumar (Collector #KC-COL-8921)',
         location: 'Lajpat Nagar Ring Road Zone',
         timestamp: '08-SEP-2026 09:30 AM',
-        status: 'DIGITALLY SEALED',
+        status: 'AI VISION VERIFIED (GPS Tagged)',
         hash: '0xa11c4298fc1c149afbf4c'
       },
       {
-        stage: '3. QR Verifiable Handover',
-        actor: 'EcoRecycle Aggregators (CPCB Reg: CPCB-EW-2023-DL-0881)',
+        stage: 'Layer 3: Recycler Weighbridge Scale & Operator Intake',
+        actor: 'EcoRecycle Aggregators (Operator: OP-OKHLA-981)',
         location: 'Okhla Phase-II Gate 3 Weighbridge',
         timestamp: '08-SEP-2026 10:45 AM',
-        status: 'WEIGHED & ACCEPTED (18.5 kg)',
+        status: 'SCALE VERIFIED (18.5 kg, ±0.5% Tol)',
         hash: '0xbb29910aefc882194301'
       },
       {
-        stage: '4. Smelter Hydrometallurgical Extraction',
+        stage: 'Layer 4: Smelter Refining & Central CPCB Registry Filing',
         actor: 'Bharat Precious Metals Refining Unit',
         location: 'Roorkee CPCB Zero-Discharge Smelter',
-        timestamp: 'Scheduled for 11-SEP-2026',
-        status: 'PROCESSING (EPR Credit Issuance)',
+        timestamp: '11-SEP-2026',
+        status: 'EPR AUDIT CERTIFIED (CPCB Form-2)',
         hash: '0x99201948baef77299014'
       }
     ]
@@ -116,8 +116,7 @@ export const AdminDashboard: React.FC = () => {
     setActionLoading(profileId);
     try {
       await api.verifyKabadiwala(profileId, verified);
-      setCollectors(storage.getCollectors());
-      setStats(storage.getAdminStats());
+      await loadData();
     } finally {
       setActionLoading(null);
     }
@@ -174,14 +173,14 @@ export const AdminDashboard: React.FC = () => {
               ULB REGULATORY DASHBOARD
             </span>
             <VoiceAssistButton
-              text="NDMC Waste and Mines Cell Administration Console. Citywide e-waste metrics, end-to-end traceability dataset, and unit economics comparison."
-              hindiText="एनडीएमसी अपशिष्ट एवं खान प्रकोष्ठ प्रशासन कंसोल। शहर भर के ई-कचरा आंकड़े, एंड-टू-एंड ट्रेसेबिलिटी डेटासेट और अर्थशास्त्र कैलकुलेटर।"
-              marathiText="एनडीएमसी कचरा आणि खाण विभाग प्रशासन डॅशबोर्ड. ई-कचरा आकडेवारी आणि ट्रेसेबिलिटी डेटासेट."
+              text="CPCB Waste and Mines Cell Administration Console. National e-waste metrics, end-to-end traceability dataset, and unit economics comparison."
+              hindiText="सीपीसीबी अपशिष्ट एवं खान प्रकोष्ठ प्रशासन कंसोल। राष्ट्रीय स्तर के ई-कचरा आंकड़े, एंड-टू-एंड ट्रेसेबिलिटी डेटासेट और अर्थशास्त्र कैलकुलेटर।"
+              marathiText="सीपीसीबी कचरा आणि खाण विभाग प्रशासन डॅशबोर्ड. राष्ट्रीय ई-कचरा आकडेवारी आणि ट्रेसेबिलिटी डेटासेट."
               size="sm"
             />
           </div>
           <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
-            NDMC Waste & Mines Cell <span className="text-copper-400 font-sans text-lg">(Delhi Central ULB)</span>
+            CPCB Waste & Mines Cell <span className="text-copper-400 font-sans text-lg">(National Regulatory Authority)</span>
           </h1>
           <p className="text-xs sm:text-sm text-paper-300 max-w-2xl font-medium">
             CPCB E-Waste (Management) Rules 2022 Central Audit Terminal & Traceability Ledger
@@ -451,7 +450,7 @@ export const AdminDashboard: React.FC = () => {
                     onChange={e => setMonthlyVolumeKg(parseInt(e.target.value))}
                     className="w-full accent-copper-600"
                   />
-                  <span className="text-[10px] text-steel-500">Average Delhi scrap tricycle collector handles 450 kg/mo</span>
+                  <span className="text-[10px] text-steel-500">Average informal scrap tricycle collector handles 450 kg/mo</span>
                 </div>
 
                 <div>

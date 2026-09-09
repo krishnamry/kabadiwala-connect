@@ -107,6 +107,10 @@ export const api = {
   },
 
   getDemoUsers: async (): Promise<User[]> => {
+    try {
+      const users = await request<User[]>('/auth/demo-users');
+      if (users && users.length > 0) return users;
+    } catch {}
     return storage.getUsers();
   },
 
@@ -201,15 +205,15 @@ export const api = {
       completedAt: new Date().toISOString()
     });
 
-    // Record cash payout transaction in Passbook
+    // Record digital payout transaction in Passbook
     const txn = storage.addPassbookTransaction({
       date: new Date().toISOString().slice(0, 16).replace('T', ' '),
       ref: `KC-PICKUP-${id.slice(-4).toUpperCase()}`,
       desc: `Doorstep Pickup: ${updatedItems.map(i => `${i.actualWeightKg || i.estWeightKg}kg ${i.category.split(' ')[0]}`).join(', ')}`,
       party: currentPickup?.citizen?.name || 'Citizen Customer',
-      type: 'DEBIT',
+      type: 'CREDIT',
       amount: totalAmount || currentPickup?.totalAmount || 620,
-      paymentMode: 'CASH',
+      paymentMode: 'WALLET_ESCROW',
       status: 'VERIFIED'
     });
 
@@ -281,17 +285,26 @@ export const api = {
   },
 
   verifyKabadiwala: async (id: string, verified: boolean) => {
-    request(`/admin/kabadiwalas/${id}/verify`, { method: 'POST', body: JSON.stringify({ verified }) }).catch(() => {});
+    try {
+      await request(`/admin/kabadiwalas/${id}/verify`, { method: 'POST', body: JSON.stringify({ verified }) });
+    } catch {}
     return storage.verifyCollector(id, verified);
   },
 
   getEPRReport: async () => {
+    try {
+      const report = await request<any>('/admin/reports/epr');
+      if (report) return report;
+    } catch {}
     const pickups = storage.getPickups().filter(p => p.status === 'COMPLETED');
     const lots = storage.getLots();
     const collectors = storage.getCollectors();
     return {
       reportType: 'CPCB E-Waste Central Portal Filing (Form-2/6)',
+      reportId: `EPR-CPCB-${Date.now().toString().slice(-6)}`,
       generatedAt: new Date().toISOString(),
+      governingBody: 'Central Pollution Control Board (CPCB) / MoEFCC Guidelines',
+      compliancePeriod: 'FY 2026-2027',
       ulbJurisdiction: 'New Delhi Municipal Council (NDMC)',
       complianceYear: '2026-2027',
       totalTonnageMT: 28.45 + (pickups.length * 0.015),

@@ -31,12 +31,21 @@ async function main() {
   }
   console.log(`✅ Seeded ${rates.length} scrap categories.`);
 
-  // 2. Seed Admin User
+  // 2. Seed Admin & Recycler Users
   const admin = await prisma.user.create({
     data: {
       name: 'Municipal Admin (NDMC)',
       phone: '9999900000',
       role: 'ADMIN',
+      password: hashedPassword,
+    }
+  });
+
+  const recycler = await prisma.user.create({
+    data: {
+      name: 'EcoRecycle Aggregators Ltd',
+      phone: '9822200002',
+      role: 'RECYCLER',
       password: hashedPassword,
     }
   });
@@ -454,6 +463,7 @@ async function main() {
   console.log('Demo Credentials:');
   console.log('  Citizen:     9811100001 (Ramesh Sharma) / password123');
   console.log('  Kabadiwala:  9876543210 (Suresh Kumar) / password123');
+  console.log('  Recycler:    9822200002 (EcoRecycle Aggregators Ltd) / password123');
   console.log('  Admin:       9999900000 (Municipal NDMC) / password123');
   console.log('----------------------------------------------------');
 }

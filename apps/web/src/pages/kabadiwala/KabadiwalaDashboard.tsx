@@ -3,10 +3,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
 import { storage, STORAGE_KEYS, PassbookTxn } from '../../lib/storage';
-import { Pickup, EWasteLot, LotBid, SafetyGuidanceCard } from '../../types';
+import { Pickup, EWasteLot, EWasteLotItem, LotBid, SafetyGuidanceCard, ScrapRate, MLClassificationResult } from '../../types';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
+import { getCurrentPosition, reverseGeocode, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
 import {
   Truck,
   MapPin,
@@ -41,7 +42,10 @@ import {
   X,
   Tag,
   Eye,
-  CheckCircle
+  CheckCircle,
+  Package,
+  Layers,
+  Trash2
 } from 'lucide-react';
 
 export const KabadiwalaDashboard: React.FC = () => {
@@ -72,87 +76,36 @@ export const KabadiwalaDashboard: React.FC = () => {
   const [syncing, setSyncing] = useState(false);
 
   // Lot Creation State
-  const [lotCategory, setLotCategory] = useState('High-grade PCB (Motherboards/Servers)');
+  const [lotTypeMode, setLotTypeMode] = useState<'single' | 'custom'>('single');
+  const [lotCategory, setLotCategory] = useState('High-grade Printed Circuit Boards (PCBs)');
   const [lotWeight, setLotWeight] = useState(12.5);
   const [lotPhotoTaken, setLotPhotoTaken] = useState(false);
+  const [lotPhotoClassifying, setLotPhotoClassifying] = useState(false);
+  const [lotMlResult, setLotMlResult] = useState<MLClassificationResult | null>(null);
   const [aiValuation, setAiValuation] = useState(8000);
   const [lotCreatedSuccess, setLotCreatedSuccess] = useState<string | null>(null);
 
-  // Live Price Board Dataset (Category, buying price, 7-day trend, spoken texts)
-  const priceBoardData = [
-    {
-      category: 'High-grade PCB (Motherboard/RAM)',
-      categoryHi: 'हाई-ग्रेड सर्किट बोर्ड (मदरबोर्ड/रैम)',
-      categoryMr: 'हाय-ग्रेड सर्किट बोर्ड (मदरबोर्ड/रॅम)',
-      ratePerKg: 640,
-      delta: 25,
-      trend: 'UP',
-      desc: 'Gold/Copper rich server & desktop logic boards'
-    },
-    {
-      category: 'Clean Copper Wire (Bright Strip)',
-      categoryHi: 'साफ तांबा तार (ब्राइट छिला हुआ)',
-      categoryMr: 'स्वच्छ तांब्याची तार (सोलेली)',
-      ratePerKg: 480,
-      delta: 15,
-      trend: 'UP',
-      desc: 'Pure peeled motor/transformer winding wire'
-    },
-    {
-      category: 'Low-grade PCB (Power Supplies/TV)',
-      categoryHi: 'लो-ग्रेड सर्किट बोर्ड (पावर सप्लाई/टीवी)',
-      categoryMr: 'लो-ग्रेड सर्किट बोर्ड (टीव्ही/पॉवर सप्लाय)',
-      ratePerKg: 180,
-      delta: -8,
-      trend: 'DOWN',
-      desc: 'Single layer brown consumer electronic boards'
-    },
-    {
-      category: 'Lithium-ion Batteries (Laptop/EV)',
-      categoryHi: 'लिथियम-आयन बैटरियां (लैपटॉप/ईवी)',
-      categoryMr: 'लिथियम-आयन बॅटऱ्या (लॅपटॉप/ईव्ही)',
-      ratePerKg: 145,
-      delta: 10,
-      trend: 'UP',
-      desc: 'Cobalt-rich cell packs, intact terminals'
-    },
-    {
-      category: 'Electric Motors & Magnets',
-      categoryHi: 'इलेक्ट्रिक मोटर और चुंबक',
-      categoryMr: 'इलेक्ट्रिक मोटर आणि चुंबक',
-      ratePerKg: 95,
-      delta: 5,
-      trend: 'UP',
-      desc: 'Heavy copper core stator and neodymium rotors'
-    },
-    {
-      category: 'LCD / LED Display Panels',
-      categoryHi: 'एलसीडी और एलईडी डिस्प्ले पैनल',
-      categoryMr: 'एलसीडी आणि एलईडी डिस्प्ले पॅनेल्स',
-      ratePerKg: 85,
-      delta: 4,
-      trend: 'UP',
-      desc: 'Intact backlight diffuser and glass panels'
-    },
-    {
-      category: 'Engineering Mixed E-Plastics',
-      categoryHi: 'मिश्रित ई-प्लास्टिक (ABS/HIPS)',
-      categoryMr: 'मिश्रित ई-प्लास्टिक (ABS/HIPS)',
-      ratePerKg: 38,
-      delta: -2,
-      trend: 'DOWN',
-      desc: 'Rigid printer & monitor casing polymers'
-    },
-    {
-      category: 'CRT Glass (Funnel Treated)',
-      categoryHi: 'सीआरटी कांच (लीड उपचारित)',
-      categoryMr: 'सीआरटी काच (लेड प्रक्रिया)',
-      ratePerKg: 12,
-      delta: 0,
-      trend: 'STABLE',
-      desc: 'Intact vacuum bulb glass for smelter flux'
-    }
-  ];
+  // Custom Mixed Lot Line Items State
+  const [customLotItems, setCustomLotItems] = useState<Array<{ id: string; category: string; weightKg: number; ratePerKg: number; subtotal: number }>>([
+    { id: 'cli-1', category: 'High-grade Printed Circuit Boards (PCBs)', weightKg: 8.0, ratePerKg: 640, subtotal: 5120 },
+    { id: 'cli-2', category: 'Copper Cables & Insulated Wires', weightKg: 6.5, ratePerKg: 480, subtotal: 3120 },
+    { id: 'cli-3', category: 'Lithium-ion Batteries', weightKg: 4.0, ratePerKg: 145, subtotal: 580 }
+  ]);
+  const [newCustomCategory, setNewCustomCategory] = useState('Engineering E-Plastics (ABS/HIPS)');
+  const [newCustomWeight, setNewCustomWeight] = useState(5.0);
+
+  // Dynamic Live Price Board Dataset (Category, buying price, 7-day trend, spoken texts)
+  const [liveRates, setLiveRates] = useState<ScrapRate[]>(() => storage.getRates());
+
+  const priceBoardData = liveRates.map(r => ({
+    category: r.category,
+    categoryHi: r.hindiName || r.category,
+    categoryMr: r.marathiName || r.hindiName || r.category,
+    ratePerKg: r.ratePerKg,
+    delta: r.weeklyDelta ?? 0,
+    trend: (r.weeklyDelta ?? 0) > 0 ? 'UP' : (r.weeklyDelta ?? 0) < 0 ? 'DOWN' : 'STABLE',
+    desc: r.description
+  }));
 
   // Recycler Directory Data (Ranked by distance, rate, CPCB status)
   const nearbyRecyclers = [
@@ -161,6 +114,8 @@ export const KabadiwalaDashboard: React.FC = () => {
       name: 'EcoRecycle Aggregators Ltd (Unit-II)',
       cpcbReg: 'CPCB-EW-2023-DL-0881',
       distanceKm: 3.2,
+      lat: 28.5355,
+      lng: 77.2732,
       location: 'Okhla Phase-II, New Delhi',
       rateMultiplier: '100% Top Benchmark',
       pickupAvailable: true,
@@ -172,6 +127,8 @@ export const KabadiwalaDashboard: React.FC = () => {
       name: 'GreenEarth Refiners & Smelters',
       cpcbReg: 'CPCB-EW-2022-DL-0412',
       distanceKm: 6.8,
+      lat: 28.6280,
+      lng: 77.1250,
       location: 'Mayapuri Industrial Area, New Delhi',
       rateMultiplier: '98% Benchmark',
       pickupAvailable: true,
@@ -183,6 +140,8 @@ export const KabadiwalaDashboard: React.FC = () => {
       name: 'Bharat Metal & E-Waste Solutions',
       cpcbReg: 'CPCB-EW-2024-UP-1190',
       distanceKm: 9.4,
+      lat: 28.5820,
+      lng: 77.3150,
       location: 'Sector 8, Noida (UP)',
       rateMultiplier: '104% Bulk Bonus (+4%)',
       pickupAvailable: false,
@@ -267,21 +226,33 @@ export const KabadiwalaDashboard: React.FC = () => {
   const [passbookTransactions, setPassbookTransactions] = useState<PassbookTxn[]>(() => storage.getPassbookTransactions());
   const [walletBalance, setWalletBalance] = useState<number>(() => storage.getWalletBalance());
 
-  // Citizen Pickups State
+  // Collector Live Location & Pickups State
+  const [collectorCoords, setCollectorCoords] = useState<[number, number]>([28.5685, 77.2412]);
+  const [collectorLocationName, setCollectorLocationName] = useState<string>('Detecting Live Location...');
+  const [isUpdatingLocation, setIsUpdatingLocation] = useState<boolean>(false);
   const [nearbyPickups, setNearbyPickups] = useState<Pickup[]>([]);
   const [activeJob, setActiveJob] = useState<Pickup | null>(null);
   const [itemWeights, setItemWeights] = useState<{ [category: string]: number }>({});
   const [completingJob, setCompletingJob] = useState(false);
   const [jobSuccess, setJobSuccess] = useState<string | null>(null);
+  const [citizenOtpInput, setCitizenOtpInput] = useState('');
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   // Active Handover Generator Ticket
   const [handoverLotCode, setHandoverLotCode] = useState('KC-LOT-9821');
 
-  // Load Pickups
-  const loadPickups = async () => {
+  // Load Pickups with real distance calculation
+  const loadPickups = async (overrideCoords?: [number, number]) => {
     try {
-      const nearby = await api.getNearbyPickups(28.5685, 77.2412, 15).catch(() => storage.getNearbyPickups(28.5685, 77.2412, 15));
-      setNearbyPickups(nearby);
+      const coords = overrideCoords || collectorCoords;
+      const nearby = await api.getNearbyPickups(coords[0], coords[1], 25).catch(() => storage.getNearbyPickups(coords[0], coords[1], 25));
+      const sortedNearby = nearby.map(p => ({
+        ...p,
+        distanceKm: calculateDistanceKm(coords[0], coords[1], p.latitude, p.longitude)
+      })).sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
+
+      setNearbyPickups(sortedNearby);
       const my = await api.getMyPickups().catch(() => storage.getMyPickups(user?.id, 'KABADIWALA'));
       const current = my.find(p => p.status === 'IN_PROGRESS' || p.status === 'ACCEPTED');
       if (current) {
@@ -297,8 +268,26 @@ export const KabadiwalaDashboard: React.FC = () => {
     }
   };
 
+  const detectCollectorLocation = async () => {
+    setIsUpdatingLocation(true);
+    try {
+      const pos = await getCurrentPosition();
+      const coords: [number, number] = [pos.latitude, pos.longitude];
+      setCollectorCoords(coords);
+      const geo = await reverseGeocode(pos.latitude, pos.longitude);
+      setCollectorLocationName(geo.shortAddress);
+      await loadPickups(coords);
+      hapticSuccess();
+    } catch (err) {
+      console.warn('Collector live location fetch failed', err);
+    } finally {
+      setIsUpdatingLocation(false);
+    }
+  };
+
   useEffect(() => {
     loadPickups();
+    detectCollectorLocation();
 
     // Listen for storage events across tabs or local mutations
     const handleStorageChange = (e: any) => {
@@ -313,18 +302,82 @@ export const KabadiwalaDashboard: React.FC = () => {
         setPassbookTransactions(storage.getPassbookTransactions());
         setWalletBalance(storage.getWalletBalance());
       }
+      if (key === STORAGE_KEYS.RATES || key === '*') {
+        setLiveRates(storage.getRates());
+      }
     };
 
     window.addEventListener('dhatu-storage-change', handleStorageChange);
     return () => window.removeEventListener('dhatu-storage-change', handleStorageChange);
   }, [user?.id]);
 
-  // Update AI Valuation when lot weight or category changes
+  // Update AI Valuation when lot weight, category, mode, or custom items change
   useEffect(() => {
-    const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
+    if (lotTypeMode === 'single') {
+      const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
+      const rate = rateItem ? rateItem.ratePerKg : 400;
+      setAiValuation(Math.round(rate * lotWeight));
+    } else {
+      const total = customLotItems.reduce((acc, it) => acc + it.subtotal, 0);
+      setAiValuation(Math.round(total));
+    }
+  }, [lotTypeMode, lotCategory, lotWeight, customLotItems, priceBoardData]);
+
+  // Add item to custom mixed lot
+  const handleAddCustomLotItem = () => {
+    if (newCustomWeight <= 0) return;
+    const rateItem = priceBoardData.find(p => p.category.includes(newCustomCategory) || newCustomCategory.includes(p.category));
     const rate = rateItem ? rateItem.ratePerKg : 400;
-    setAiValuation(Math.round(rate * lotWeight));
-  }, [lotCategory, lotWeight]);
+    const subtotal = Math.round(rate * newCustomWeight);
+
+    const existingIdx = customLotItems.findIndex(i => i.category === newCustomCategory);
+    if (existingIdx >= 0) {
+      setCustomLotItems(prev => prev.map((item, idx) => {
+        if (idx === existingIdx) {
+          const updatedWeight = Math.round((item.weightKg + newCustomWeight) * 10) / 10;
+          return {
+            ...item,
+            weightKg: updatedWeight,
+            subtotal: Math.round(item.ratePerKg * updatedWeight)
+          };
+        }
+        return item;
+      }));
+    } else {
+      setCustomLotItems(prev => [
+        ...prev,
+        {
+          id: `cli-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          category: newCustomCategory,
+          weightKg: newCustomWeight,
+          ratePerKg: rate,
+          subtotal
+        }
+      ]);
+    }
+    hapticSuccess();
+  };
+
+  // Adjust weight of custom lot item (+ / - 0.5 kg)
+  const handleUpdateCustomItemWeight = (id: string, deltaKg: number) => {
+    setCustomLotItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const nextWeight = Math.max(0.5, Math.round((item.weightKg + deltaKg) * 10) / 10);
+        return {
+          ...item,
+          weightKg: nextWeight,
+          subtotal: Math.round(item.ratePerKg * nextWeight)
+        };
+      }
+      return item;
+    }));
+  };
+
+  // Remove item from custom lot
+  const handleRemoveCustomLotItem = (id: string) => {
+    setCustomLotItems(prev => prev.filter(item => item.id !== id));
+    hapticSuccess();
+  };
 
   // Toggle Offline Mode
   const handleToggleOffline = () => {
@@ -339,36 +392,108 @@ export const KabadiwalaDashboard: React.FC = () => {
     setSyncing(true);
     setTimeout(() => {
       setSyncing(false);
-      offlineQueue.forEach(lot => storage.saveLot(lot));
-      alert(`Synchronized ${offlineQueue.length} offline lots to the Dhatu central ledger!`);
+      offlineQueue.forEach(lot => storage.saveLot({ ...lot, isOfflineQueued: false }));
+      const count = offlineQueue.length;
       setOfflineQueue([]);
       localStorage.removeItem('dhatu_offline_lots');
+      setMyLots(storage.getMyLots(user?.id));
+      hapticSuccess();
+      setLotCreatedSuccess(`Synchronized ${count} offline lots to the Dhatu central ledger!`);
     }, 1500);
   };
 
-  // Handle Create Lot
+  // ML Scrap Photo Upload & Auto-Classification
+  const handleLotPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLotPhotoClassifying(true);
+    setLotMlResult(null);
+    try {
+      const result = await api.classifyScrapImage(file);
+      setLotMlResult(result);
+      setLotPhotoTaken(true);
+
+      // Auto-match category based on result
+      let matchedCategory = 'High-grade Printed Circuit Boards (PCBs)';
+      const catLower = (result.category || '').toLowerCase();
+      if (catLower.includes('battery') || catLower.includes('cell') || catLower.includes('lithium')) {
+        matchedCategory = 'Lithium-ion Batteries';
+      } else if (catLower.includes('cable') || catLower.includes('wire') || catLower.includes('copper')) {
+        matchedCategory = 'Copper Cables & Insulated Wires';
+      } else if (catLower.includes('display') || catLower.includes('lcd') || catLower.includes('led') || catLower.includes('screen') || catLower.includes('panel')) {
+        matchedCategory = 'LCD/LED Display Panels';
+      } else if (catLower.includes('motor') || catLower.includes('compressor')) {
+        matchedCategory = 'Electric Motors & Compressors';
+      } else if (catLower.includes('pcb') || catLower.includes('circuit') || catLower.includes('board') || catLower.includes('ewaste') || catLower.includes('e-waste')) {
+        matchedCategory = 'High-grade Printed Circuit Boards (PCBs)';
+      } else if (catLower.includes('plastic') || catLower.includes('abs')) {
+        matchedCategory = 'Engineering E-Plastics (ABS/HIPS)';
+      } else if (catLower.includes('crt') || catLower.includes('glass')) {
+        matchedCategory = 'CRT Monitor Glass Unit';
+      }
+      setLotCategory(matchedCategory);
+      hapticSuccess();
+    } catch {
+      setLotPhotoTaken(true);
+    } finally {
+      setLotPhotoClassifying(false);
+    }
+  };
+
+  // Handle Create Lot (supports both Single Material and Custom Mixed Lots)
   const handleCreateLot = (e: React.FormEvent) => {
     e.preventDefault();
-    const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
-    const rate = rateItem ? rateItem.ratePerKg : 400;
-    const estVal = Math.round(rate * lotWeight);
+
+    let finalCategory = lotCategory;
+    let finalWeight = lotWeight;
+    let finalValuation = aiValuation;
+    let offeredRate = 400;
+    let isCustom = false;
+    let itemsPayload: EWasteLotItem[] | undefined = undefined;
+
+    if (lotTypeMode === 'custom') {
+      if (customLotItems.length === 0) {
+        alert('Please add at least one material to the custom lot.');
+        return;
+      }
+      isCustom = true;
+      finalWeight = Math.round(customLotItems.reduce((sum, it) => sum + it.weightKg, 0) * 10) / 10;
+      finalValuation = Math.round(customLotItems.reduce((sum, it) => sum + it.subtotal, 0));
+      offeredRate = finalWeight > 0 ? Math.round(finalValuation / finalWeight) : 400;
+      finalCategory = `Custom Mixed Lot (${customLotItems.length} Materials)`;
+      itemsPayload = customLotItems.map(it => ({
+        id: it.id,
+        category: it.category,
+        weightKg: it.weightKg,
+        ratePerKg: it.ratePerKg,
+        subtotal: it.subtotal
+      }));
+    } else {
+      const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
+      offeredRate = rateItem ? rateItem.ratePerKg : 400;
+      finalValuation = Math.round(offeredRate * lotWeight);
+    }
+
     const newLot: EWasteLot = {
       id: `lot-local-${Date.now()}`,
       lotCode: `KC-LOT-${Math.floor(1000 + Math.random() * 9000)}`,
       collectorId: user?.id || 'mock-kaba-1',
       collectorName: user?.name || 'Suresh Kumar',
-      category: lotCategory,
-      approxWeightKg: lotWeight,
-      estimatedValue: estVal,
-      askingPrice: estVal,
-      minBidAmount: Math.round(estVal * 0.5),
-      recyclerOfferedRate: rate,
+      category: finalCategory,
+      approxWeightKg: finalWeight,
+      estimatedValue: finalValuation,
+      askingPrice: finalValuation,
+      minBidAmount: Math.round(finalValuation * 0.5),
+      recyclerOfferedRate: offeredRate,
       status: 'AVAILABLE',
-      gpsLat: 28.5685,
-      gpsLng: 77.2412,
+      gpsLat: collectorCoords[0],
+      gpsLng: collectorCoords[1],
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      qrCode: `KBD-EWASTE-${Math.floor(1000 + Math.random() * 9000)}-DELHI`,
+      qrCode: `KBD-EWASTE-${Math.floor(1000 + Math.random() * 9000)}-IN`,
       isOfflineQueued: isOffline,
+      isCustomLot: isCustom,
+      items: itemsPayload,
       bids: []
     };
 
@@ -382,7 +507,7 @@ export const KabadiwalaDashboard: React.FC = () => {
       localStorage.setItem('dhatu_offline_lots', JSON.stringify(updatedQueue));
       setLotCreatedSuccess(`Offline Lot #${newLot.lotCode} saved locally! It will sync once reconnecting.`);
     } else {
-      setLotCreatedSuccess(`Lot #${newLot.lotCode} created and stored in local storage! Broadcasted to nearby authorized recyclers.`);
+      setLotCreatedSuccess(`Lot #${newLot.lotCode} (${isCustom ? 'Custom Mixed Lot' : newLot.category}) created and stored in local storage! Broadcasted to nearby authorized recyclers.`);
     }
 
     setHandoverLotCode(newLot.lotCode);
@@ -422,12 +547,16 @@ export const KabadiwalaDashboard: React.FC = () => {
   const handleAcceptPickup = async (pickup: Pickup) => {
     try {
       const accepted = await api.acceptPickup(pickup.id);
+      const initialWeights: { [c: string]: number } = {};
+      (accepted.items || []).forEach(i => {
+        initialWeights[i.category] = i.actualWeightKg || i.estWeightKg || 5;
+      });
+      setItemWeights(initialWeights);
       setActiveJob(accepted);
       setActiveTab('pickups');
       await loadPickups();
       speak(language === 'hi' ? 'पिकअप स्वीकार कर लिया गया है।' : language === 'mr' ? 'संकलन स्वीकारले आहे.' : 'Pickup accepted');
     } catch (e: any) {
-      alert('Accepted: ' + pickup.address);
       const accepted = storage.updatePickupStatus(pickup.id, 'ACCEPTED', {
         kabadiwalaId: user?.id || 'mock-kaba-1',
         kabadiwala: {
@@ -436,7 +565,13 @@ export const KabadiwalaDashboard: React.FC = () => {
           phone: user?.phone || '9876543210'
         }
       });
-      setActiveJob(accepted || { ...pickup, status: 'ACCEPTED' });
+      const target = accepted || { ...pickup, status: 'ACCEPTED' as const };
+      const initialWeights: { [c: string]: number } = {};
+      (target.items || []).forEach(i => {
+        initialWeights[i.category] = i.actualWeightKg || i.estWeightKg || 5;
+      });
+      setItemWeights(initialWeights);
+      setActiveJob(target);
       setActiveTab('pickups');
       await loadPickups();
     }
@@ -445,19 +580,40 @@ export const KabadiwalaDashboard: React.FC = () => {
   // Complete Pickup
   const handleCompletePickup = async () => {
     if (!activeJob) return;
+
+    // Layer 1 Handover Verification: Verify Citizen OTP
+    const expectedOtp = activeJob.verificationOtp || '4821';
+    if (citizenOtpInput.trim() && citizenOtpInput.trim() !== expectedOtp) {
+      setOtpError(`Verification code mismatch! Enter citizen's 4-digit handover OTP (${expectedOtp})`);
+      triggerHaptic(50);
+      return;
+    }
+    if (!citizenOtpInput.trim() && !isOtpVerified) {
+      setOtpError(`Physical Handover Verification Required: Enter citizen's 4-digit OTP or click 'Scan / Autofill'`);
+      triggerHaptic(50);
+      return;
+    }
+
     setCompletingJob(true);
     try {
-      const itemsPayload = Object.entries(itemWeights).map(([category, actualWeightKg]) => ({
-        category,
-        actualWeightKg
+      const itemsPayload = (activeJob.items || []).map(item => ({
+        category: item.category,
+        actualWeightKg: itemWeights[item.category] ?? item.actualWeightKg ?? item.estWeightKg ?? 5
       }));
       const res = await api.completePickup(activeJob.id, itemsPayload).catch(() => ({
-        pickup: storage.updatePickupStatus(activeJob.id, 'COMPLETED'),
+        pickup: storage.updatePickupStatus(activeJob.id, 'COMPLETED', {
+          isVerified: true,
+          verifiedAt: new Date().toISOString()
+        }),
         transaction: null,
         totalAmount: activeJob.totalAmount || 620
       }));
-      setJobSuccess(`Pickup completed! Handover receipt stamped. Cash payment of ₹${res.totalAmount || activeJob.totalAmount || 620} recorded in Passbook.`);
+      setJobSuccess(`Pickup completed! Layer 1 Handover Verified (OTP: ${expectedOtp}). Payment of ₹${res.totalAmount || activeJob.totalAmount || 620} recorded in Passbook.`);
       setActiveJob(null);
+      setItemWeights({});
+      setCitizenOtpInput('');
+      setIsOtpVerified(false);
+      setOtpError(null);
       setWalletBalance(storage.getWalletBalance());
       setPassbookTransactions(storage.getPassbookTransactions());
       await loadPickups();
@@ -499,7 +655,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             <div className="flex items-center space-x-3 text-xs text-paper-300">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-copper-400" />
-                <span>Operating Zone: Lajpat Nagar & South Delhi</span>
+                <span>Operating Zone: {collectorLocationName && collectorLocationName !== 'Detecting Live Location...' ? collectorLocationName : 'Pan-India Active Network'}</span>
               </span>
               <span className="text-forest-400 font-bold">★ 4.9 Rating (142 Jobs)</span>
             </div>
@@ -699,7 +855,12 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
           </div>
 
-          {lotsSubView === 'create' ? (
+          {lotsSubView === 'create' ? (() => {
+            const customTotalWeight = Math.round(customLotItems.reduce((sum, item) => sum + item.weightKg, 0) * 10) / 10;
+            const customTotalValue = Math.round(customLotItems.reduce((sum, item) => sum + item.subtotal, 0));
+            const customBlendedRate = customTotalWeight > 0 ? Math.round(customTotalValue / customTotalWeight) : 0;
+
+            return (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
               <div className="lg:col-span-7 bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-5">
@@ -707,9 +868,18 @@ export const KabadiwalaDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="stamp-seal stamp-verified text-xs">{t('lotCreationBadge', 'Lot Creation')}</span>
                     <VoiceAssistButton
-                      text="Create lot. Photograph item, enter approx weight, get instant AI valuation estimate."
-                      hindiText="लॉट बनाएं। कबाड़ की फोटो लें, वजन डालें और तुरंत अनुमानित दाम देखें।"
-                      marathiText="नवीन लॉट तयार करा. फोटो घ्या, वजन टाका आणि अंदाजे किंमत पहा."
+                      text={lotTypeMode === 'custom' 
+                        ? `Custom mixed lot mode. Add multiple scrap materials to bundle into one consignment. Total weight ${customTotalWeight} kilograms.`
+                        : "Create lot. Photograph item, enter approx weight, get instant AI valuation estimate."
+                      }
+                      hindiText={lotTypeMode === 'custom'
+                        ? `कस्टम मिक्स्ड लॉट मोड। एक साथ कई तरह का कबाड़ जोड़ें। कुल वजन ${customTotalWeight} किलो।`
+                        : "लॉट बनाएं। कबाड़ की फोटो लें, वजन डालें और तुरंत अनुमानित दाम देखें।"
+                      }
+                      marathiText={lotTypeMode === 'custom'
+                        ? `कस्टम मिक्स्ड लॉट मोड. एकाच लॉटमध्ये विविध प्रकारचे भंगार जोडा. एकूण वजन ${customTotalWeight} किलो.`
+                        : "नवीन लॉट तयार करा. फोटो घ्या, वजन टाका आणि अंदाजे किंमत पहा."
+                      }
                       size="sm"
                     />
                   </div>
@@ -717,7 +887,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                     {t('digitalLotCreatorTitle', 'Digital E-Waste Lot Creator')}
                   </h2>
                   <p className="text-xs text-steel-600 font-medium">
-                    Photograph material, select e-waste category, specify weight, and generate a verified digital lot.
+                    {lotTypeMode === 'custom'
+                      ? 'Bundle multiple scrap materials into a single certified lot with itemized rates and automatic valuation.'
+                      : 'Photograph material, select e-waste category, specify weight, and generate a verified digital lot.'}
                   </p>
                 </div>
 
@@ -732,102 +904,346 @@ export const KabadiwalaDashboard: React.FC = () => {
                 )}
 
                 <form onSubmit={handleCreateLot} className="space-y-4">
-                  
-                  {/* Photo Upload / Capture Simulator */}
+
+                  {/* Lot Mode Toggle: Single vs Custom Mixed */}
                   <div>
                     <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
-                      {t('uploadPhotoLabel', '1. Upload or Capture Photograph')}
+                      {t('lotTypeSelection', '1. Select Lot Configuration')}
                     </label>
-                    <div
-                      onClick={() => setLotPhotoTaken(true)}
-                      className="cursor-pointer border-2 border-dashed border-steel-400 hover:border-copper-600 rounded-lg p-6 bg-paper-100 flex flex-col items-center justify-center space-y-2 text-center transition-colors"
+                    <div className="bg-paper-200/90 p-1.5 rounded-xl border-2 border-steel-300 grid grid-cols-2 gap-2 shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => setLotTypeMode('single')}
+                        className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                          lotTypeMode === 'single'
+                            ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
+                            : 'bg-white text-steel-700 hover:bg-paper-100 border border-steel-300'
+                        }`}
+                      >
+                        <Package className="w-4 h-4 shrink-0" />
+                        <span>{t('singleMaterialLot', 'Single Material Lot')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLotTypeMode('custom')}
+                        className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                          lotTypeMode === 'custom'
+                            ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
+                            : 'bg-white text-steel-700 hover:bg-paper-100 border border-steel-300'
+                        }`}
+                      >
+                        <Layers className="w-4 h-4 shrink-0" />
+                        <span>{t('customMixedLot', 'Custom Mixed Lot')}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-copper-100 text-copper-800 font-mono font-bold">
+                          {customLotItems.length} items
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Photo Upload / Capture Simulator with Real AI Classification */}
+                  <div>
+                    <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
+                      {t('uploadPhotoLabel', '2. Upload or Capture Photograph')}
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLotPhotoUpload}
+                      id="lot-camera-input"
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="lot-camera-input"
+                      className="cursor-pointer border-2 border-dashed border-steel-400 hover:border-copper-600 rounded-lg p-6 bg-paper-100 flex flex-col items-center justify-center space-y-2 text-center transition-colors block"
                     >
-                      <div className="w-12 h-12 rounded-full bg-copper-100 text-copper-700 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-copper-100 text-copper-700 flex items-center justify-center mx-auto">
                         <Camera className="w-6 h-6" />
                       </div>
-                      {lotPhotoTaken ? (
-                        <div className="text-forest-700 font-bold text-xs flex items-center gap-1">
+                      {lotPhotoClassifying ? (
+                        <div className="text-copper-700 font-bold text-xs flex items-center justify-center gap-1.5 animate-pulse">
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>AI Scanning Scrap Material...</span>
+                        </div>
+                      ) : lotMlResult ? (
+                        <div className="space-y-1">
+                          <div className="text-forest-700 font-bold text-xs flex items-center justify-center gap-1">
+                            <CheckCircle2 className="w-4 h-4 text-forest-600" />
+                            <span>AI Detected: {preserveEnglishItemName(lotMlResult.category)} ({Math.round(lotMlResult.confidence * 100)}% match)</span>
+                          </div>
+                          <p className="text-[11px] text-steel-600">{lotMlResult.advice}</p>
+                        </div>
+                      ) : lotPhotoTaken ? (
+                        <div className="text-forest-700 font-bold text-xs flex items-center justify-center gap-1">
                           <CheckCircle2 className="w-4 h-4" /> {t('photoCapturedMsg', 'Photo Captured & Verified (1080p)')}
                         </div>
                       ) : (
                         <div>
                           <span className="text-xs font-bold text-steel-800 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
-                          <span className="text-[11px] text-steel-500">AI automatically detects CRTs, LCDs, PCBs, Cables, Batteries</span>
+                          <span className="text-[11px] text-steel-500">
+                            {lotTypeMode === 'custom' ? 'Snap photo of mixed consignment or composite scrap batch' : 'AI automatically detects CRTs, LCDs, PCBs, Cables, Batteries'}
+                          </span>
                         </div>
                       )}
-                    </div>
-                  </div>
-
-                  {/* Category Selector */}
-                  <div>
-                    <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
-                      2. {t('selectScrapCategory', 'Select Item Category')}
                     </label>
-                    <select
-                      value={lotCategory}
-                      onChange={e => setLotCategory(e.target.value)}
-                      className="w-full px-3 py-2.5 text-xs font-bold bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
-                    >
-                      {priceBoardData.map(p => (
-                        <option key={p.category} value={p.category}>
-                          {p.category} — ₹{p.ratePerKg}/{t('perKg', 'kg')}
-                        </option>
-                      ))}
-                    </select>
                   </div>
 
-                  {/* Weight Stepper (Low-Literacy Friendly +/- Buttons) */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
-                        {t('approxWeightLabel', '3. Enter Approx Weight (Kilograms)')}
-                      </label>
-                      <span className="text-xs font-mono text-steel-500 font-medium">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setLotWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
-                        className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
-                      >
-                        <Minus className="w-6 h-6" />
-                      </button>
-
-                      <div className="flex-1 bg-white border-2 border-steel-400 rounded-lg p-3 text-center">
-                        <span className="text-3xl font-mono-num font-black text-steel-900">
-                          {lotWeight}
-                        </span>
-                        <span className="text-xs font-bold text-steel-500 ml-1.5 uppercase">kg</span>
+                  {lotTypeMode === 'single' ? (
+                    <>
+                      {/* Category Selector */}
+                      <div>
+                        <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
+                          3. {t('selectScrapCategory', 'Select Item Category')}
+                        </label>
+                        <select
+                          value={lotCategory}
+                          onChange={e => setLotCategory(e.target.value)}
+                          className="w-full px-3 py-2.5 text-xs font-bold bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                        >
+                          {priceBoardData.map(p => (
+                            <option key={p.category} value={p.category}>
+                              {p.category} — ₹{p.ratePerKg}/{t('perKg', 'kg')}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setLotWeight(w => Math.round((w + 0.5) * 10) / 10)}
-                        className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
-                      >
-                        <Plus className="w-6 h-6" />
-                      </button>
+                      {/* Weight Stepper (Low-Literacy Friendly +/- Buttons) */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
+                            {t('approxWeightLabel', '4. Enter Approx Weight (Kilograms)')}
+                          </label>
+                          <span className="text-xs font-mono text-steel-500 font-medium">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setLotWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
+                            className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
+                          >
+                            <Minus className="w-6 h-6" />
+                          </button>
+
+                          <div className="flex-1 bg-white border-2 border-steel-400 rounded-lg p-3 text-center">
+                            <span className="text-3xl font-mono-num font-black text-steel-900">
+                              {lotWeight}
+                            </span>
+                            <span className="text-xs font-bold text-steel-500 ml-1.5 uppercase">kg</span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setLotWeight(w => Math.round((w + 0.5) * 10) / 10)}
+                            className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
+                          >
+                            <Plus className="w-6 h-6" />
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    /* CUSTOM MIXED LOT BUILDER SECTION */
+                    <div className="space-y-4 pt-1">
+                      <div className="p-3.5 bg-paper-100 rounded-xl border-2 border-steel-300 space-y-3">
+                        <div className="flex items-center justify-between border-b border-steel-200 pb-2">
+                          <div className="flex items-center gap-1.5">
+                            <Layers className="w-4 h-4 text-copper-700" />
+                            <span className="text-xs font-bold text-steel-900 uppercase tracking-wider">
+                              3. Add Material Line Items
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-mono text-copper-700 font-bold">
+                            {customLotItems.length} Materials in Lot
+                          </span>
+                        </div>
+
+                        {/* Add Item Form Controls */}
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                          <div className="sm:col-span-6">
+                            <label className="block text-[10px] uppercase font-bold text-steel-600 mb-1">
+                              Material Type
+                            </label>
+                            <select
+                              value={newCustomCategory}
+                              onChange={e => setNewCustomCategory(e.target.value)}
+                              className="w-full px-2.5 py-2 text-xs font-bold bg-white border border-steel-300 rounded focus:border-copper-600 focus:outline-none"
+                            >
+                              {priceBoardData.map(p => (
+                                <option key={p.category} value={p.category}>
+                                  {p.category} (₹{p.ratePerKg}/kg)
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="sm:col-span-3">
+                            <label className="block text-[10px] uppercase font-bold text-steel-600 mb-1">
+                              Weight (kg)
+                            </label>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setNewCustomWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
+                                className="w-7 h-8 bg-paper-200 hover:bg-paper-300 border border-steel-300 rounded flex items-center justify-center text-xs font-bold"
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0.5"
+                                value={newCustomWeight}
+                                onChange={e => setNewCustomWeight(Math.max(0.5, parseFloat(e.target.value) || 0.5))}
+                                className="w-full text-center px-1.5 py-1 text-xs font-mono font-bold bg-white border border-steel-300 rounded"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewCustomWeight(w => Math.round((w + 0.5) * 10) / 10)}
+                                className="w-7 h-8 bg-paper-200 hover:bg-paper-300 border border-steel-300 rounded flex items-center justify-center text-xs font-bold"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="sm:col-span-3 flex items-end">
+                            <button
+                              type="button"
+                              onClick={handleAddCustomLotItem}
+                              className="w-full py-2 px-2 bg-copper-600 hover:bg-copper-700 text-white rounded text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-colors"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Add Item</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* List of Added Custom Materials */}
+                        <div className="space-y-1.5 pt-2">
+                          <span className="text-[10px] font-bold text-steel-500 uppercase tracking-wider block">
+                            Included Material Manifest:
+                          </span>
+
+                          {customLotItems.length === 0 ? (
+                            <div className="text-center py-4 bg-paper-50 rounded border border-dashed border-steel-300 text-xs text-steel-500">
+                              No items added yet. Choose a material and click "Add Item".
+                            </div>
+                          ) : (
+                            <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                              {customLotItems.map(item => (
+                                <div
+                                  key={item.id}
+                                  className="p-2 bg-white rounded border border-steel-300 flex items-center justify-between text-xs font-mono gap-2 shadow-2xs"
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-bold text-steel-900 truncate font-sans text-xs">
+                                      {preserveEnglishItemName(item.category)}
+                                    </div>
+                                    <div className="text-[10px] text-steel-500">
+                                      Benchmark Rate: ₹{item.ratePerKg}/kg
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    {/* Weight adjustment buttons */}
+                                    <div className="flex items-center gap-1 bg-paper-100 px-1.5 py-0.5 rounded border border-steel-200">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleUpdateCustomItemWeight(item.id, -0.5)}
+                                        className="w-4 h-5 text-steel-600 hover:text-steel-900 font-bold"
+                                      >
+                                        -
+                                      </button>
+                                      <span className="font-bold text-steel-900 text-xs w-10 text-center">
+                                        {item.weightKg} kg
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleUpdateCustomItemWeight(item.id, 0.5)}
+                                        className="w-4 h-5 text-steel-600 hover:text-steel-900 font-bold"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+
+                                    {/* Subtotal */}
+                                    <span className="font-black text-forest-700 w-16 text-right">
+                                      ₹{item.subtotal.toLocaleString('en-IN')}
+                                    </span>
+
+                                    {/* Delete Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveCustomLotItem(item.id)}
+                                      className="p-1 text-steel-400 hover:text-signal-500 transition-colors"
+                                      title="Remove item"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Mixed Lot Summary Strip */}
+                        {customLotItems.length > 0 && (
+                          <div className="pt-2 border-t border-steel-200 grid grid-cols-3 gap-2 text-center text-xs font-mono">
+                            <div className="bg-paper-200/60 p-1.5 rounded">
+                              <span className="text-[10px] text-steel-500 block">TOTAL ITEMS</span>
+                              <span className="font-bold text-steel-900">{customLotItems.length} Types</span>
+                            </div>
+                            <div className="bg-paper-200/60 p-1.5 rounded">
+                              <span className="text-[10px] text-steel-500 block">TOTAL NET WT</span>
+                              <span className="font-bold text-steel-900">{customTotalWeight} kg</span>
+                            </div>
+                            <div className="bg-paper-200/60 p-1.5 rounded">
+                              <span className="text-[10px] text-steel-500 block">BLENDED RATE</span>
+                              <span className="font-bold text-copper-700">₹{customBlendedRate}/kg avg</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Real-time AI Valuation Card */}
                   <div className="bg-forest-500/10 border-2 border-forest-600 rounded-lg p-4 flex items-center justify-between">
                     <div>
                       <span className="text-[10px] uppercase font-mono font-bold text-forest-800 tracking-wider block">
-                        {t('instantAiValue', 'Instant AI Value Estimate')}
+                        {lotTypeMode === 'custom' ? 'Composite Lot Total Valuation' : t('instantAiValue', 'Instant AI Value Estimate')}
                       </span>
                       <span className="text-2xl sm:text-3xl font-mono-num font-black text-forest-700">
                         {formatCurrency(aiValuation)}
                       </span>
                       <span className="text-[11px] text-steel-600 block">
-                        Ask Price: ₹{Math.round(aiValuation / lotWeight)}/kg • Min Bid: ₹{Math.round(aiValuation * 0.5)} (50%)
+                        {lotTypeMode === 'custom' ? (
+                          <>
+                            Net: {customTotalWeight} kg • Avg Rate: ₹{customBlendedRate}/kg • Min Bid: ₹{Math.round(aiValuation * 0.5).toLocaleString('en-IN')} (50%)
+                          </>
+                        ) : (
+                          <>
+                            Ask Price: ₹{lotWeight > 0 ? Math.round(aiValuation / lotWeight) : 0}/kg • Min Bid: ₹{Math.round(aiValuation * 0.5).toLocaleString('en-IN')} (50%)
+                          </>
+                        )}
                       </span>
                     </div>
                     <VoiceAssistButton
-                      text={`Indicative value: ${formatCurrency(aiValuation)} for ${lotWeight} kilograms.`}
-                      hindiText={`अनुमानित मूल्य: ${lotWeight} किलो के लिए ${formatCurrency(aiValuation)}.`}
-                      marathiText={`अंदाजे किंमत: ${lotWeight} किलोसाठी ${formatCurrency(aiValuation)}.`}
+                      text={lotTypeMode === 'custom'
+                        ? `Custom lot with ${customLotItems.length} materials. Total weight ${customTotalWeight} kilograms, estimated value ${formatCurrency(aiValuation)}.`
+                        : `Indicative value: ${formatCurrency(aiValuation)} for ${lotWeight} kilograms.`
+                      }
+                      hindiText={lotTypeMode === 'custom'
+                        ? `कस्टम लॉट में ${customLotItems.length} सामग्रियां हैं। कुल वजन ${customTotalWeight} किलो, अनुमानित मूल्य ${formatCurrency(aiValuation)}.`
+                        : `अनुमानित मूल्य: ${lotWeight} किलो के लिए ${formatCurrency(aiValuation)}.`
+                      }
+                      marathiText={lotTypeMode === 'custom'
+                        ? `कस्टम लॉटमध्ये ${customLotItems.length} प्रकार आहेत. एकूण वजन ${customTotalWeight} किलो, अंदाजे किंमत ${formatCurrency(aiValuation)}.`
+                        : `अंदाजे किंमत: ${lotWeight} किलोसाठी ${formatCurrency(aiValuation)}.`
+                      }
                       size="md"
                     />
                   </div>
@@ -837,7 +1253,12 @@ export const KabadiwalaDashboard: React.FC = () => {
                     className="w-full btn-dhatu-primary py-3.5 rounded-lg text-sm font-bold flex items-center justify-center space-x-2 shadow-tactile"
                   >
                     <Sparkles className="w-4 h-4" />
-                    <span>{language === 'hi' ? 'लॉट बनाएं और रीसायकलर को भेजें' : language === 'mr' ? 'लॉट तयार करा आणि पाठवा' : 'Generate Digital Lot & Broadcast'}</span>
+                    <span>
+                      {lotTypeMode === 'custom'
+                        ? (language === 'hi' ? 'कस्टम मिक्स्ड लॉट बनाएं और रीसायकलर को भेजें' : language === 'mr' ? 'कस्टम मिक्स्ड लॉट तयार करा आणि पाठवा' : 'Generate Custom Mixed Lot & Broadcast')
+                        : (language === 'hi' ? 'लॉट बनाएं और रीसायकलर को भेजें' : language === 'mr' ? 'लॉट तयार करा आणि पाठवा' : 'Generate Digital Lot & Broadcast')
+                      }
+                    </span>
                   </button>
                 </form>
               </div>
@@ -847,7 +1268,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                 <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 shadow-sm space-y-4">
                   <div className="flex justify-between items-start border-b border-steel-300 pb-3">
                     <div>
-                      <span className="stamp-seal stamp-verified text-[11px]">CPCB LOT VOUCHER</span>
+                      <span className="stamp-seal stamp-verified text-[11px]">
+                        {lotTypeMode === 'custom' ? 'CPCB CUSTOM MIXED VOUCHER' : 'CPCB LOT VOUCHER'}
+                      </span>
                       <div className="font-display font-black text-xl text-steel-900 mt-1">
                         {handoverLotCode}
                       </div>
@@ -861,15 +1284,23 @@ export const KabadiwalaDashboard: React.FC = () => {
                   <div className="space-y-2 text-xs font-mono text-steel-800 bg-paper-100 p-3 rounded border border-paper-300">
                     <div className="flex justify-between">
                       <span className="text-steel-500">Material Category:</span>
-                      <span className="font-bold">{lotCategory.slice(0, 22)}...</span>
+                      <span className="font-bold">
+                        {lotTypeMode === 'custom' ? `Custom Mixed (${customLotItems.length} Materials)` : `${lotCategory.slice(0, 22)}...`}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-steel-500">Approx Weight:</span>
-                      <span className="font-bold">{lotWeight} kg</span>
+                      <span className="font-bold">
+                        {lotTypeMode === 'custom' ? `${customTotalWeight} kg` : `${lotWeight} kg`}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-steel-500">Benchmark Rate:</span>
-                      <span className="font-bold text-copper-600">₹{Math.round(aiValuation / lotWeight)}/kg</span>
+                      <span className="text-steel-500">
+                        {lotTypeMode === 'custom' ? 'Blended Benchmark Rate:' : 'Benchmark Rate:'}
+                      </span>
+                      <span className="font-bold text-copper-600">
+                        ₹{lotTypeMode === 'custom' ? customBlendedRate : (lotWeight > 0 ? Math.round(aiValuation / lotWeight) : 0)}/kg
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-steel-500">Estimated Value:</span>
@@ -879,6 +1310,26 @@ export const KabadiwalaDashboard: React.FC = () => {
                       <span className="text-steel-500">Min Acceptable Bid (50%):</span>
                       <span className="font-bold text-copper-700">{formatCurrency(Math.round(aiValuation * 0.5))}</span>
                     </div>
+
+                    {/* Custom Lot Manifest preview in Voucher */}
+                    {lotTypeMode === 'custom' && customLotItems.length > 0 && (
+                      <div className="pt-2 border-t border-paper-300 space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-steel-600 block">
+                          Manifest Breakdown:
+                        </span>
+                        <div className="space-y-1">
+                          {customLotItems.map(item => (
+                            <div key={item.id} className="flex justify-between text-[11px] text-steel-700">
+                              <span className="truncate pr-1">• {item.category.split(' ')[0]}</span>
+                              <span className="font-bold text-copper-800 shrink-0">
+                                {item.weightKg} kg (₹{item.subtotal.toLocaleString('en-IN')})
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex justify-between pt-1 border-t border-paper-300 text-[10px] text-steel-500">
                       <span>GPS Lat/Lng:</span>
                       <span>28.5685, 77.2412</span>
@@ -891,7 +1342,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                       <span>Traceability Record Sealed</span>
                     </div>
                     <p>
-                      This lot is broadcasted to verified recyclers. Present the QR code upon vehicle delivery to claim instant cash or wallet credit.
+                      {lotTypeMode === 'custom'
+                        ? 'This composite lot contains multi-grade scrap. Recyclers can bid on the aggregated consignment.'
+                        : 'This lot is broadcasted to verified recyclers. Present the QR code upon vehicle delivery to claim instant cash or wallet credit.'}
                     </p>
                   </div>
 
@@ -927,7 +1380,8 @@ export const KabadiwalaDashboard: React.FC = () => {
               </div>
 
             </div>
-          ) : (
+            );
+          })() : (
             /* MY CREATED LOTS VIEW WITH BIDDING & ACCEPTANCE */
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-steel-300 pb-3">
@@ -1007,7 +1461,14 @@ export const KabadiwalaDashboard: React.FC = () => {
                         >
                           <div className="space-y-3">
                             <div className="flex items-center justify-between border-b border-steel-300 pb-2">
-                              <span className="font-mono text-xs font-bold text-copper-700">{lot.lotCode}</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono text-xs font-bold text-copper-700">{lot.lotCode}</span>
+                                {lot.isOfflineQueued && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                    Offline Queued
+                                  </span>
+                                )}
+                              </div>
                               <span
                                 className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${
                                   lot.status === 'CONFIRMED'
@@ -1027,7 +1488,44 @@ export const KabadiwalaDashboard: React.FC = () => {
                               <h4 className="font-display font-bold text-steel-900 text-sm leading-snug">
                                 {preserveEnglishItemName(lot.category)}
                               </h4>
-                              <span className="text-[11px] text-steel-500 font-mono">Logged at: {lot.createdAt}</span>
+                              <span className="text-[11px] text-steel-500 font-mono block">Logged at: {lot.createdAt}</span>
+
+                              {/* Layer 2 Verification Seals */}
+                              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-forest-50 text-forest-700 border border-forest-300 flex items-center gap-1">
+                                  <ShieldCheck className="w-3 h-3 text-forest-600" />
+                                  <span>Layer 2: AI Verified</span>
+                                </span>
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-steel-100 text-steel-700 border border-steel-300">
+                                  GPS: {lot.gpsLat?.toFixed(2)}°, {lot.gpsLng?.toFixed(2)}°
+                                </span>
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-copper-50 text-copper-700 border border-copper-200">
+                                  KYC: KC-COL-8921
+                                </span>
+                              </div>
+
+                              {/* Custom Mixed Lot Manifest Breakdown */}
+                              {lot.isCustomLot && lot.items && lot.items.length > 0 && (
+                                <div className="mt-2.5 space-y-1 bg-white p-2.5 rounded-lg border border-steel-300 font-mono text-xs">
+                                  <div className="flex items-center justify-between text-[10px] uppercase font-bold text-copper-800 pb-1 border-b border-steel-200">
+                                    <span className="flex items-center gap-1">
+                                      <Layers className="w-3 h-3 text-copper-600" />
+                                      <span>Mixed Manifest ({lot.items.length} types)</span>
+                                    </span>
+                                    <span>Blended ₹{lot.recyclerOfferedRate}/kg</span>
+                                  </div>
+                                  <div className="space-y-1 pt-1">
+                                    {lot.items.map((item, idx) => (
+                                      <div key={idx} className="flex justify-between items-center text-[11px] text-steel-800">
+                                        <span className="truncate pr-1">• {preserveEnglishItemName(item.category)}</span>
+                                        <span className="font-bold text-copper-700 shrink-0">
+                                          {item.weightKg} kg (₹{item.ratePerKg}/kg)
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* Specs Grid */}
@@ -1155,9 +1653,9 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="stamp-seal stamp-verified text-xs">{t('tabPriceBoard', 'Price Board')}</span>
                 <VoiceAssistButton
-                  text="Live e-waste price board. Buying rates by category and weekly trend in Delhi NCR."
-                  hindiText="लाइव ई-कचरा दाम पत्रक। दिल्ली एनसीआर में आज के खरीदारी दाम और साप्ताहिक रुझान।"
-                  marathiText="थेट ई-कचरा भाव फलक. दिल्ली परिसरातील आजचे खरेदी दर आणि साप्ताहिक कल."
+                  text="Live e-waste price board. Buying rates by category and weekly trend across India."
+                  hindiText="लाइव ई-कचरा दाम पत्रक। अखिल भारतीय आज के खरीदारी दाम और साप्ताहिक रुझान।"
+                  marathiText="थेट ई-कचरा भाव फलक. देशभरातील आजचे खरेदी दर आणि साप्ताहिक कल."
                   size="sm"
                 />
               </div>
@@ -1227,27 +1725,20 @@ export const KabadiwalaDashboard: React.FC = () => {
               </div>
             ))}
           </div>
-
-          <div className="p-4 bg-paper-200 rounded-lg border border-steel-300 text-xs text-steel-700 flex items-center justify-between">
-            <span className="font-medium">
-              {language === 'hi' ? '💡 पारदर्शी दाम नीति: कोई बिचौलिया कटौती नहीं। रीसायकलर से सीधा 100% भुगतान।' : language === 'mr' ? '💡 पारदर्शक दर धोरण: कोणतीही दलाली कपात नाही. थेट १००% दर.' : '💡 Transparent Pricing Policy: Zero middleman commission. Direct 100% payout from smelters.'}
-            </span>
-            <span className="font-mono text-steel-500 text-[11px]">CPCB Market Index 2026</span>
-          </div>
         </div>
       )}
 
-      {/* TAB 3: RECYCLER DISCOVERY & RANKING */}
+      {/* TAB 3: AUTHORIZED RECYCLERS DIRECTORY & MARKET INTELLIGENCE */}
       {activeTab === 'recyclers' && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel-300 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="stamp-seal stamp-verified text-xs">{t('tabFindRecyclers', 'Recyclers')}</span>
+                <span className="stamp-seal stamp-verified text-xs">{t('tabFindRecyclers', 'Recycler Hubs')}</span>
                 <VoiceAssistButton
-                  text="Nearby authorized recyclers. Ranked by distance, rate offered, and pickup availability."
-                  hindiText="पास के अधिकृत रीसायकलर। दूरी, दिए जाने वाले दाम और पिकअप सुविधा के आधार पर क्रमबद्ध।"
-                  marathiText="जवळचे अधिकृत रीसायकलर. अंतर आणि दरांच्या आधारे क्रमवारी."
+                  text="Authorized recyclers directory. Find certified smelting centers matching your location."
+                  hindiText="अधिकृत रीसायकलर सूची। अपने स्थान से जुड़े अधिकृत केंद्र खोजें।"
+                  marathiText="अधिकृत रीसायकलर यादी. आपल्या जवळचे अधिकृत केंद्र शोधा."
                   size="sm"
                 />
               </div>
@@ -1255,7 +1746,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 {t('nearbyRecyclersTitle', 'Authorized Recyclers & Smelters')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
-                Verified CPCB registered facilities matching your operating area in Delhi NCR.
+                Verified CPCB registered facilities matching your operating area across India.
               </p>
             </div>
 
@@ -1277,83 +1768,103 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
             <div className="h-60 sm:h-72 rounded-lg overflow-hidden border border-steel-300">
               <LeafletMap
-                center={[28.5550, 77.2700]}
+                center={collectorCoords}
                 zoom={12}
-                markers={nearbyRecyclers.map(r => ({
-                  id: r.id,
-                  lat: r.id === 'rec-1' ? 28.5355 : r.id === 'rec-2' ? 28.5820 : 28.6280,
-                  lng: r.id === 'rec-1' ? 77.2732 : r.id === 'rec-2' ? 77.2210 : 77.3010,
-                  title: r.name,
-                  subtitle: `${r.cpcbReg} • ${r.location}`,
-                  iconEmoji: '🏭',
-                  badge: `★ ${r.rating}`,
-                  color: '#3B6B4E'
-                }))}
+                userPosition={collectorCoords}
+                markers={nearbyRecyclers.map(r => {
+                  const dist = calculateDistanceKm(collectorCoords[0], collectorCoords[1], r.lat, r.lng);
+                  return {
+                    id: r.id,
+                    lat: r.lat,
+                    lng: r.lng,
+                    title: r.name,
+                    subtitle: `${r.cpcbReg} • ${r.location}`,
+                    iconEmoji: '🏭',
+                    badge: `${dist} km • ★ ${r.rating}`,
+                    color: '#3B6B4E'
+                  };
+                })}
                 height="100%"
               />
             </div>
           </div>
 
           <div className="space-y-4">
-            {nearbyRecyclers.map((rec, idx) => (
-              <div
-                key={rec.id}
-                className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-copper-500 transition-colors"
-              >
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="stamp-seal stamp-verified text-[10px]">
-                      CPCB REGISTERED
-                    </span>
-                    <span className="font-mono text-xs text-copper-700 font-bold">
-                      {rec.cpcbReg}
-                    </span>
-                    <span className="text-xs text-forest-700 font-bold">★ {rec.rating}</span>
-                  </div>
+            {nearbyRecyclers.map((rec, idx) => {
+              const liveDistance = calculateDistanceKm(collectorCoords[0], collectorCoords[1], rec.lat, rec.lng);
+              const directionsUrl = getDirectionsUrl(rec.lat, rec.lng, collectorCoords[0], collectorCoords[1]);
 
-                  <h3 className="font-display font-black text-lg text-steel-900">
-                    {rec.name}
-                  </h3>
-
-                  <p className="text-xs text-steel-600 flex items-center gap-1 font-medium">
-                    <MapPin className="w-3.5 h-3.5 text-copper-600" />
-                    <span>{rec.location}</span>
-                    <span className="font-mono text-copper-700 font-bold">({rec.distanceKm} km away)</span>
-                  </p>
-
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {rec.acceptedMaterials.map(mat => (
-                      <span key={mat} className="text-[10px] font-mono bg-paper-200 text-steel-700 px-2 py-0.5 rounded border border-steel-300">
-                        {mat}
+              return (
+                <div
+                  key={rec.id}
+                  className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-copper-500 transition-colors"
+                >
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="stamp-seal stamp-verified text-[10px]">
+                        CPCB REGISTERED
                       </span>
-                    ))}
+                      <span className="font-mono text-xs text-copper-700 font-bold">
+                        {rec.cpcbReg}
+                      </span>
+                      <span className="text-xs text-forest-700 font-bold">★ {rec.rating}</span>
+                      <span className="text-xs font-mono font-bold text-copper-700 bg-copper-50 px-2 py-0.5 rounded border border-copper-200">
+                        📍 {liveDistance} km away
+                      </span>
+                    </div>
+
+                    <h3 className="font-display font-black text-lg text-steel-900">
+                      {rec.name}
+                    </h3>
+
+                    <p className="text-xs text-steel-600 flex items-center gap-1 font-medium">
+                      <MapPin className="w-3.5 h-3.5 text-copper-600" />
+                      <span>{rec.location}</span>
+                    </p>
+
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {rec.acceptedMaterials.map(mat => (
+                        <span key={mat} className="text-[10px] font-mono bg-paper-200 text-steel-700 px-2 py-0.5 rounded border border-steel-300">
+                          {mat}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:items-end gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-steel-200">
+                    <div className="text-right">
+                      <span className="text-xs font-mono font-bold text-copper-600 block">{rec.rateMultiplier}</span>
+                      <span className="text-[11px] text-steel-500">
+                        {rec.pickupAvailable ? '🚚 Doorstep Mini-Truck Pickup Available' : '🏢 Self Drop-Off at Gate'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href={directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-2 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
+                      >
+                        <Navigation className="w-3.5 h-3.5 text-copper-600" />
+                        <span>Navigate ({liveDistance} km)</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          alert(`Lot dispatched to ${rec.name}! Handover reference code generated.`);
+                          setActiveTab('handover');
+                        }}
+                        className="btn-dhatu-primary px-4 py-2 rounded text-xs font-bold flex items-center space-x-1"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{t('sellLotHere', 'Sell Lot to this Facility')}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex flex-col sm:items-end gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-steel-200">
-                  <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-copper-600 block">{rec.rateMultiplier}</span>
-                    <span className="text-[11px] text-steel-500">
-                      {rec.pickupAvailable ? '🚚 Doorstep Mini-Truck Pickup Available' : '🏢 Self Drop-Off at Gate'}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        alert(`Lot dispatched to ${rec.name}! Handover reference code generated.`);
-                        setActiveTab('handover');
-                      }}
-                      className="btn-dhatu-primary px-4 py-2 rounded text-xs font-bold flex items-center space-x-1"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{t('sellLotHere', 'Sell Lot to this Facility')}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -1691,7 +2202,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
 
             <button
-              onClick={loadPickups}
+              onClick={() => loadPickups()}
               className="px-3 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 border border-steel-400 rounded text-xs font-bold flex items-center space-x-1"
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -1770,6 +2281,61 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Layer 1 Verification: Citizen Handover OTP */}
+              <div className="p-3.5 bg-paper-100 rounded-lg border-2 border-dashed border-steel-400 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-steel-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-copper-600" />
+                    <span>Layer 1 Verification: Citizen Handover OTP</span>
+                  </span>
+                  <span className="text-[10px] text-steel-500 font-mono">
+                    Mandatory physical check
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-steel-600">
+                  Ask citizen {activeJob.citizen?.name || 'Ramesh'} for the 4-digit verification code displayed on their portal to confirm physical collection.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="text"
+                    maxLength={4}
+                    value={citizenOtpInput}
+                    onChange={e => {
+                      setCitizenOtpInput(e.target.value.replace(/\D/g, ''));
+                      setOtpError(null);
+                    }}
+                    placeholder="4-digit OTP"
+                    className="w-32 px-3 py-2 text-sm font-mono font-bold tracking-widest text-center bg-white border-2 border-steel-400 rounded-lg focus:border-copper-600 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const expected = activeJob.verificationOtp || '4821';
+                      setCitizenOtpInput(expected);
+                      setIsOtpVerified(true);
+                      setOtpError(null);
+                      hapticSuccess();
+                    }}
+                    className="btn-dhatu-steel px-3 py-2 text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm"
+                  >
+                    <QrCode className="w-3.5 h-3.5 text-copper-600" />
+                    <span>Scan / Autofill ({activeJob.verificationOtp || '4821'})</span>
+                  </button>
+
+                  {isOtpVerified && (
+                    <span className="text-xs font-bold text-forest-700 flex items-center gap-1 bg-forest-50 px-2 py-1 rounded border border-forest-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-forest-600" /> Handover Verified
+                    </span>
+                  )}
+                </div>
+
+                {otpError && (
+                  <p className="text-[11px] text-signal-600 font-bold animate-pulse">{otpError}</p>
+                )}
+              </div>
+
               <div className="pt-2 border-t border-steel-200 flex justify-end">
                 <button
                   type="button"
@@ -1785,20 +2351,45 @@ export const KabadiwalaDashboard: React.FC = () => {
           )}
 
           {/* Live Open Pickups Map Visualizer */}
-          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-2">
-            <div className="font-display font-bold text-steel-800 text-sm flex items-center justify-between">
+          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-3">
+            <div className="font-display font-bold text-steel-800 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-copper-600" />
-                <span>{language === 'hi' ? 'लाइव कबाड़ पिकअप मैप (दिल्ली एनसीआर)' : language === 'mr' ? 'थेट भंगार पिकअप नकाशा' : 'Live e-Waste Pickups Map (Delhi NCR)'}</span>
+                <span>{t('livePickupsMapTitle', 'Live e-Waste Pickups Map')}</span>
               </span>
-              <span className="text-xs font-mono text-copper-700 bg-paper-200 px-2.5 py-0.5 rounded border border-steel-300 font-bold">
-                {nearbyPickups.length} Nearby Requests (15km)
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={detectCollectorLocation}
+                  disabled={isUpdatingLocation}
+                  className="px-2.5 py-1 bg-paper-200 hover:bg-copper-100 active:bg-copper-200 text-steel-800 text-xs font-mono font-bold rounded border border-steel-300 flex items-center gap-1 transition-colors disabled:opacity-50"
+                  title="Refresh live GPS position"
+                >
+                  <RefreshCw className={`w-3 h-3 text-copper-600 ${isUpdatingLocation ? 'animate-spin' : ''}`} />
+                  <span>{isUpdatingLocation ? 'Locating...' : 'Update GPS'}</span>
+                </button>
+                <span className="text-xs font-mono text-copper-700 bg-paper-200 px-2.5 py-1 rounded border border-steel-300 font-bold">
+                  {nearbyPickups.length} Nearby Requests
+                </span>
+              </div>
+            </div>
+
+            {/* Collector Base Location Live Breadcrumb */}
+            <div className="text-[11px] font-mono text-steel-700 bg-paper-200/80 p-2 rounded border border-steel-300 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 truncate">
+                <span className="w-2 h-2 rounded-full bg-forest-600 animate-pulse shrink-0" />
+                <span className="truncate">Your Live Base: <strong>{collectorLocationName}</strong></span>
+              </span>
+              <span className="text-copper-700 font-bold shrink-0 ml-2">
+                {collectorCoords[0].toFixed(4)}°, {collectorCoords[1].toFixed(4)}°
               </span>
             </div>
+
             <div className="h-60 sm:h-72 rounded-lg overflow-hidden border border-steel-300">
               <LeafletMap
-                center={[28.5685, 77.2412]}
+                center={collectorCoords}
                 zoom={13}
+                userPosition={collectorCoords}
                 pickups={nearbyPickups}
                 height="100%"
               />
@@ -1815,7 +2406,14 @@ export const KabadiwalaDashboard: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between border-b border-steel-200 pb-2 mb-2">
                     <span className="font-mono text-xs font-bold text-copper-700">Ref #{pickup.id.slice(0, 8)}</span>
-                    <span className="text-[10px] font-mono text-steel-500 font-medium">{pickup.scheduledAt.slice(11, 16)}</span>
+                    <div className="flex items-center gap-2">
+                      {pickup.distanceKm !== undefined && (
+                        <span className="text-[10px] font-mono text-forest-700 font-bold bg-forest-50 px-1.5 py-0.5 rounded border border-forest-300">
+                          📍 {pickup.distanceKm} km away
+                        </span>
+                      )}
+                      <span className="text-[10px] font-mono text-steel-500 font-medium">{pickup.scheduledAt.slice(11, 16)}</span>
+                    </div>
                   </div>
 
                   <h4 className="font-display font-bold text-steel-900 text-sm">
@@ -1828,18 +2426,30 @@ export const KabadiwalaDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-steel-200 flex items-center justify-between">
+                <div className="pt-2 border-t border-steel-200 flex flex-wrap items-center justify-between gap-2">
                   <span className="font-mono font-bold text-copper-700 text-sm">
                     {t('estimatedPayout')}: ₹{pickup.totalAmount || 620}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => handleAcceptPickup(pickup)}
-                    className="btn-dhatu-primary px-4 py-1.5 rounded text-xs font-bold flex items-center space-x-1"
-                  >
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>{t('acceptPickup')}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={getDirectionsUrl(pickup.latitude, pickup.longitude, collectorCoords[0], collectorCoords[1])}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
+                      title="Open Google Maps Driving Directions"
+                    >
+                      <Navigation className="w-3.5 h-3.5 text-copper-600" />
+                      <span>Directions</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleAcceptPickup(pickup)}
+                      className="btn-dhatu-primary px-4 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow-sm active:scale-98 transition-transform"
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>{t('acceptPickup')}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1959,6 +2569,29 @@ export const KabadiwalaDashboard: React.FC = () => {
                   {preserveEnglishItemName(createdLotModal.category)}
                 </div>
               </div>
+
+              {/* Custom Mixed Lot Manifest Breakdown in Modal */}
+              {createdLotModal.isCustomLot && createdLotModal.items && createdLotModal.items.length > 0 && (
+                <div className="p-2.5 bg-paper-50 rounded-lg border border-steel-300 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-[10px] uppercase font-bold text-copper-800 pb-1 border-b border-steel-200">
+                    <span className="flex items-center gap-1">
+                      <Layers className="w-3 h-3 text-copper-600" />
+                      <span>Mixed Manifest ({createdLotModal.items.length} materials)</span>
+                    </span>
+                    <span>Avg ₹{createdLotModal.recyclerOfferedRate}/kg</span>
+                  </div>
+                  <div className="space-y-1">
+                    {createdLotModal.items.map((it, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-[11px] text-steel-800">
+                        <span className="truncate pr-1">• {preserveEnglishItemName(it.category)}</span>
+                        <span className="font-bold text-copper-700 shrink-0">
+                          {it.weightKg} kg (₹{it.ratePerKg}/kg)
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
                 <div className="bg-paper-50 p-2 rounded border border-steel-200">

@@ -6,7 +6,7 @@ export interface AuthenticatedUser {
   id: string;
   name: string;
   phone: string;
-  role: 'CITIZEN' | 'KABADIWALA' | 'ADMIN';
+  role: 'CITIZEN' | 'KABADIWALA' | 'ADMIN' | 'RECYCLER';
 }
 
 declare global {
@@ -40,7 +40,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const requireRole = (allowedRoles: ('CITIZEN' | 'KABADIWALA' | 'ADMIN')[]) => {
+export const requireRole = (allowedRoles: ('CITIZEN' | 'KABADIWALA' | 'ADMIN' | 'RECYCLER')[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });

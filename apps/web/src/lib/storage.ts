@@ -142,6 +142,8 @@ const SEED_PICKUPS: Pickup[] = [
     totalAmount: 4304,
     notes: 'Doorstep pickup requested with live tracking.',
     traceabilityHash: '0x8f4a9b2c7e103984fa55',
+    verificationOtp: '4821',
+    isVerified: false,
     createdAt: '2026-09-08 09:15 AM',
     distanceKm: 0.8
   },
@@ -176,6 +178,9 @@ const SEED_PICKUPS: Pickup[] = [
     totalAmount: 1447,
     notes: 'Safe recycling completed. Handover certificate generated.',
     traceabilityHash: '0x3c7e9184a298bf0182dd',
+    verificationOtp: '3912',
+    isVerified: true,
+    verifiedAt: '2026-09-01 10:45 AM',
     createdAt: '2026-09-01 10:00 AM',
     distanceKm: 0.8
   },
@@ -195,6 +200,8 @@ const SEED_PICKUPS: Pickup[] = [
     totalAmount: 2170,
     notes: '2 desktop towers, want fast pickup today.',
     traceabilityHash: '0x7e8b91a20c34567def12',
+    verificationOtp: '7194',
+    isVerified: false,
     createdAt: '2026-09-08 10:00 AM',
     distanceKm: 1.4
   },
@@ -214,6 +221,8 @@ const SEED_PICKUPS: Pickup[] = [
     totalAmount: 2835,
     notes: 'Office network cabling and laptop battery replacements.',
     traceabilityHash: '0x12a9b34c89df70123ef4',
+    verificationOtp: '5520',
+    isVerified: false,
     createdAt: '2026-09-08 10:30 AM',
     distanceKm: 2.8
   }
@@ -235,7 +244,7 @@ const SEED_LOTS: EWasteLot[] = [
     gpsLat: 28.5685,
     gpsLng: 77.2412,
     createdAt: '2026-09-08 09:30 AM',
-    qrCode: 'KBD-EWASTE-9821-DELHI',
+    qrCode: 'KBD-EWASTE-9821-IN',
     bids: [
       {
         id: 'bid-01',
@@ -264,7 +273,7 @@ const SEED_LOTS: EWasteLot[] = [
     gpsLat: 28.5420,
     gpsLng: 77.2580,
     createdAt: '2026-09-08 10:15 AM',
-    qrCode: 'KBD-EWASTE-9824-DELHI',
+    qrCode: 'KBD-EWASTE-9824-IN',
     bids: []
   },
   {
@@ -282,7 +291,31 @@ const SEED_LOTS: EWasteLot[] = [
     gpsLat: 28.5210,
     gpsLng: 77.2740,
     createdAt: '2026-09-08 11:00 AM',
-    qrCode: 'KBD-EWASTE-9830-DELHI',
+    qrCode: 'KBD-EWASTE-9830-IN',
+    bids: []
+  },
+  {
+    id: 'lot-104',
+    lotCode: 'KC-LOT-9840',
+    collectorId: 'mock-kaba-1',
+    collectorName: 'Suresh Kumar',
+    category: 'Custom Mixed Lot (3 Materials)',
+    approxWeightKg: 27.0,
+    estimatedValue: 12885,
+    askingPrice: 12885,
+    minBidAmount: 6443,
+    recyclerOfferedRate: 477,
+    status: 'AVAILABLE',
+    gpsLat: 28.5685,
+    gpsLng: 77.2412,
+    createdAt: '2026-09-08 11:30 AM',
+    qrCode: 'KBD-EWASTE-9840-IN',
+    isCustomLot: true,
+    items: [
+      { category: 'High-grade Printed Circuit Boards (PCBs)', weightKg: 10.0, ratePerKg: 640, subtotal: 6400 },
+      { category: 'Copper Cables & Insulated Wires', weightKg: 12.0, ratePerKg: 480, subtotal: 5760 },
+      { category: 'Lithium-ion Batteries', weightKg: 5.0, ratePerKg: 145, subtotal: 725 }
+    ],
     bids: []
   }
 ];
@@ -618,15 +651,21 @@ export const storage = {
   savePickup: (pickup: Pickup): Pickup => {
     const pickups = storage.getPickups();
     const existingIndex = pickups.findIndex(p => p.id === pickup.id);
+    const enriched: Pickup = {
+      ...pickup,
+      verificationOtp: pickup.verificationOtp || String(Math.floor(1000 + Math.random() * 9000)),
+      traceabilityHash: pickup.traceabilityHash || `0x${Math.random().toString(16).substr(2, 16)}`,
+      isVerified: pickup.status === 'COMPLETED' ? true : (pickup.isVerified || false)
+    };
     let updated: Pickup[];
     if (existingIndex >= 0) {
       updated = [...pickups];
-      updated[existingIndex] = pickup;
+      updated[existingIndex] = enriched;
     } else {
-      updated = [pickup, ...pickups];
+      updated = [enriched, ...pickups];
     }
     saveToStorage(STORAGE_KEYS.PICKUPS, updated);
-    return pickup;
+    return enriched;
   },
   updatePickupStatus: (
     id: string,
@@ -637,10 +676,14 @@ export const storage = {
     const idx = pickups.findIndex(p => p.id === id);
     if (idx === -1) return null;
 
+    const isNowCompleted = status === 'COMPLETED';
     const updatedPickup: Pickup = {
       ...pickups[idx],
       ...details,
-      status
+      status,
+      isVerified: isNowCompleted ? true : (pickups[idx].isVerified || false),
+      verifiedAt: isNowCompleted ? (details?.verifiedAt || new Date().toISOString()) : pickups[idx].verifiedAt,
+      traceabilityHash: pickups[idx].traceabilityHash || `0x${Math.random().toString(16).substr(2, 16)}`
     };
     pickups[idx] = updatedPickup;
     saveToStorage(STORAGE_KEYS.PICKUPS, pickups);
@@ -706,25 +749,27 @@ export const storage = {
     if (idx === -1) throw new Error('Lot not found');
 
     const lot = lots[idx];
-    const ask = lot.askingPrice || lot.estimatedValue;
-    const minBid = Math.round(ask * 0.5);
-    if (bidData.bidAmount < minBid) {
+    const ask = Number(lot.askingPrice || lot.estimatedValue || 0);
+    const minBid = Number(lot.minBidAmount) || Math.floor(ask * 0.5);
+    const numericBid = Number(bidData.bidAmount);
+    if (isNaN(numericBid) || numericBid < minBid) {
       throw new Error(`Invalid bid: Must be at least ₹${minBid} (50% of asking price ₹${ask})`);
     }
 
+    const weight = Number(lot.approxWeightKg) || 1;
     const newBid: LotBid = {
       id: `bid-${Date.now()}`,
       recyclerId: bidData.recyclerId,
       recyclerName: bidData.recyclerName,
-      bidAmount: bidData.bidAmount,
-      bidPerKg: Math.round(bidData.bidAmount / (lot.approxWeightKg || 1)),
+      bidAmount: numericBid,
+      bidPerKg: Math.round(numericBid / weight),
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'PENDING'
     };
 
     const existingBids = lot.bids || [];
     const updatedBids = [newBid, ...existingBids];
-    const highestBid = Math.max(...updatedBids.map(b => b.bidAmount));
+    const highestBid = Math.max(...updatedBids.map(b => Number(b.bidAmount)));
 
     const updatedLot: EWasteLot = {
       ...lot,
@@ -820,7 +865,26 @@ export const storage = {
   },
   updateRate: (category: string, newRate: number): void => {
     const rates = storage.getRates();
-    const idx = rates.findIndex(r => r.category.toLowerCase().includes(category.toLowerCase()));
+    const catLower = category.toLowerCase();
+    const idx = rates.findIndex(r => {
+      const rLower = r.category.toLowerCase();
+      if (rLower === catLower) return true;
+      if (rLower.includes(catLower) || catLower.includes(rLower)) return true;
+      // Keyword matching
+      if ((catLower.includes('pcb') || catLower.includes('circuit')) && (rLower.includes('pcb') || rLower.includes('circuit'))) {
+        const isHigh = catLower.includes('high') || catLower.includes('server') || catLower.includes('motherboard');
+        const rIsHigh = rLower.includes('high') || rLower.includes('server') || rLower.includes('motherboard');
+        return isHigh === rIsHigh;
+      }
+      if ((catLower.includes('copper') || catLower.includes('wire') || catLower.includes('cable')) && (rLower.includes('copper') || rLower.includes('cable'))) return true;
+      if ((catLower.includes('battery') || catLower.includes('li-ion')) && (rLower.includes('battery') || rLower.includes('li-ion'))) return true;
+      if (catLower.includes('motor') && rLower.includes('motor')) return true;
+      if ((catLower.includes('lcd') || catLower.includes('led') || catLower.includes('display')) && (rLower.includes('lcd') || rLower.includes('display'))) return true;
+      if ((catLower.includes('plastic') || catLower.includes('abs')) && (rLower.includes('plastic') || rLower.includes('abs'))) return true;
+      if (catLower.includes('crt') && rLower.includes('crt')) return true;
+      return false;
+    });
+
     if (idx >= 0) {
       const oldRate = rates[idx].ratePerKg;
       rates[idx] = {

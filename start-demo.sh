@@ -19,8 +19,7 @@ fi
 # 2. Setup Database & Backend
 echo "📦 Setting up database schema and seed..."
 cd apps/api
-npx prisma db push --accept-data-loss
-npx ts-node-dev prisma/seed.ts
+npm run seed
 
 echo "🚀 Starting Express Backend on port 5000..."
 npm run dev > /tmp/api-service.log 2>&1 &

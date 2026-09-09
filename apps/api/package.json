@@ -4,10 +4,10 @@
   "description": "Express + TypeScript backend for Kabadiwala Connect",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "seed": "ts-node-dev prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "axios": "^1.7.2",

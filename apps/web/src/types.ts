@@ -81,6 +81,9 @@ export interface Pickup {
   distanceKm?: number;
   donatedToCsr?: boolean;
   traceabilityHash?: string;
+  verificationOtp?: string;
+  isVerified?: boolean;
+  verifiedAt?: string;
 }
 
 export interface LotBid {
@@ -91,6 +94,14 @@ export interface LotBid {
   bidPerKg: number;
   createdAt: string;
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+}
+
+export interface EWasteLotItem {
+  id?: string;
+  category: string;
+  weightKg: number;
+  ratePerKg: number;
+  subtotal?: number;
 }
 
 export interface EWasteLot {
@@ -117,6 +128,11 @@ export interface EWasteLot {
   recyclerName?: string;
   qrCode: string;
   isOfflineQueued?: boolean;
+  traceabilityHash?: string;
+  weighbridgeOperatorId?: string;
+  verifiedAtWeighbridge?: boolean;
+  isCustomLot?: boolean;
+  items?: EWasteLotItem[];
 }
 
 export interface SafetyGuidanceCard {

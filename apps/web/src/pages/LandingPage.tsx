@@ -186,7 +186,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
               </p>
             </div>
             <span className="text-xs font-mono text-steel-600 bg-paper-200 px-3 py-1.5 rounded border border-steel-300 self-start sm:self-auto">
-              Delhi NCR Zone Benchmark
+              National CPCB Zone Benchmark
             </span>
           </div>
 
