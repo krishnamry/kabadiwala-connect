@@ -130,7 +130,54 @@ To make your repository private so that it is only visible to you and authorized
 
 ---
 
-## 5. Mobile Progressive Web App (PWA) Deployment
+## 5. Android Native App (`.apk`) Deployment
+
+Kabadiwala Connect is packaged as a true native Android application powered by Capacitor 8, Android SDK 36, and Java 21.
+
+### 📱 Prebuilt APK File Location
+A compiled debug APK is ready in the repository root:
+- **File:** [`KabadiwalaConnect.apk`](file:///home/krishna/KBD/KabadiwalaConnect.apk) (Size: ~8.6 MB)
+- **App ID:** `org.kabadiwalaconnect.app`
+- **Version:** `1.0` (Build `1`)
+- **Min Android Version:** Android 7.0 (API level 24)
+- **Target Android Version:** Android 16 (API level 36)
+
+### 📲 How to Install on Any Android Device
+1. Transfer `KabadiwalaConnect.apk` to your phone via:
+   - Direct download from GitHub (visit the repository on your mobile Chrome/browser and tap `KabadiwalaConnect.apk` > **View raw** or **Download**)
+   - USB cable transfer to phone storage
+   - Google Drive, Telegram, or WhatsApp document sharing
+2. Tap the downloaded `.apk` file on your phone.
+3. If prompted by Android, enable **"Install unknown apps"** for your browser / file manager (Settings > Apps > Special app access > Install unknown apps).
+4. Tap **Install**.
+5. Open **Kabadiwala Connect** from your app drawer!
+
+### 🔄 Automated CI/CD APK Builds (GitHub Actions)
+The repository includes a GitHub Actions workflow ([`.github/workflows/build-android-apk.yml`](file:///home/krishna/KBD/.github/workflows/build-android-apk.yml)):
+- Every `git push` to `master` automatically triggers a fresh Android compilation in Ubuntu.
+- Once finished, go to the **Actions** tab in GitHub > click the latest workflow run > download the generated **`KabadiwalaConnect-Android-APK`** artifact zip containing the ready-to-install `.apk`.
+
+### 🛠️ Local Android Build Commands
+```bash
+# 1. Build web bundle and sync assets into Android native project
+npm run cap:sync
+
+# 2. Compile debug APK locally
+npm run build:apk
+
+# 3. Open project directly in Android Studio (for emulator or USB debugging)
+npm run cap:open
+```
+
+### 🚀 Integrated Native Hardware Plugins
+- **GPS Location:** `@capacitor/geolocation` (Precision scrap lot geotagging)
+- **Camera & Gallery:** `@capacitor/camera` (Lot photo uploads & voucher QR scanning)
+- **Haptic Feedback:** `@capacitor/haptics` (Vibration feedback on trade confirmations)
+- **System Status Bar:** `@capacitor/status-bar` (Themed emerald/dark green branding)
+
+---
+
+## 6. Mobile Progressive Web App (PWA) Deployment
 
 The frontend includes a configured web manifest ([`manifest.json`](file:///home/krishna/KBD/manifest.json)), high-resolution iconography, and viewport safe-area styling for full-screen standalone mobile use.
 
@@ -144,7 +191,7 @@ The frontend includes a configured web manifest ([`manifest.json`](file:///home/
 
 ---
 
-## 6. Architecture & File Reference
+## 7. Architecture & File Reference
 
 - [`apps/api/src/index.ts`](file:///home/krishna/KBD/apps/api/src/index.ts): Express server serving the REST API on `/api` and the SPA frontend on `/`.
 - [`apps/web/`](file:///home/krishna/KBD/apps/web/): React 18 + Vite frontend with Citizen, Collector, Recycler, and Admin dashboards.
