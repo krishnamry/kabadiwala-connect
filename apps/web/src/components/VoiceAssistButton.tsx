@@ -18,43 +18,31 @@ export const VoiceAssistButton: React.FC<VoiceAssistProps> = ({
   className = ''
 }) => {
   const [speaking, setSpeaking] = useState(false);
-  const { language } = useLanguage();
+  const { language, speak, stopSpeaking, t } = useLanguage();
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!('speechSynthesis' in window)) {
-      alert('Speech synthesis is not supported in this browser.');
-      return;
-    }
-
     if (speaking) {
-      window.speechSynthesis.cancel();
+      stopSpeaking();
       setSpeaking(false);
       return;
     }
 
     let speechText = text;
-    let locale = 'en-IN';
-
     if (language === 'hi') {
-      speechText = hindiText || text;
-      locale = 'hi-IN';
+      speechText = hindiText || t(text, text);
     } else if (language === 'mr') {
-      speechText = marathiText || hindiText || text;
-      locale = 'mr-IN';
+      speechText = marathiText || (hindiText ? t(hindiText, hindiText) : t(text, text));
     }
 
-    const utterance = new SpeechSynthesisUtterance(speechText);
-    utterance.lang = locale;
-    utterance.rate = 0.92;
+    setSpeaking(true);
+    speak(speechText, language);
 
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    // Auto-reset speaking icon state after speech completes
+    setTimeout(() => {
+      setSpeaking(false);
+    }, Math.max(2500, Math.min(15000, speechText.length * 75)));
   };
 
   const sizeClasses = {

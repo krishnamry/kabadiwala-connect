@@ -15,7 +15,7 @@ const registerSchema = zod_1.z.object({
     name: zod_1.z.string().min(2, 'Name must be at least 2 characters'),
     phone: zod_1.z.string().min(10, 'Phone must be at least 10 digits'),
     password: zod_1.z.string().min(6, 'Password must be at least 6 characters'),
-    role: zod_1.z.enum(['CITIZEN', 'KABADIWALA', 'ADMIN']).default('CITIZEN'),
+    role: zod_1.z.enum(['CITIZEN', 'KABADIWALA', 'ADMIN', 'RECYCLER']).default('CITIZEN'),
     vehicleType: zod_1.z.string().optional(),
     aadhaarNumber: zod_1.z.string().optional()
 });
@@ -133,7 +133,7 @@ router.get('/demo-users', async (req, res, next) => {
     try {
         const users = await prisma_1.prisma.user.findMany({
             where: {
-                phone: { in: ['9811100001', '9876543210', '9999900000', '9876543212'] }
+                phone: { in: ['9811100001', '9876543210', '9822200002', '9999900000', '9876543212'] }
             },
             select: {
                 id: true,

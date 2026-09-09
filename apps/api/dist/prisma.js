@@ -125,15 +125,27 @@ class SQLitePrismaClient {
             return row;
         },
         findMany: async (params) => {
-            let rows = [];
+            let query = 'SELECT * FROM User';
+            const args = [];
+            const clauses = [];
             if (params?.where?.phone?.in) {
                 const placeholders = params.where.phone.in.map(() => '?').join(',');
-                rows = this.db.prepare(`SELECT * FROM User WHERE phone IN (${placeholders})`).all(...params.where.phone.in);
+                clauses.push(`phone IN (${placeholders})`);
+                args.push(...params.where.phone.in);
             }
-            else {
-                rows = this.db.prepare('SELECT * FROM User').all();
+            else if (params?.where?.phone) {
+                clauses.push('phone = ?');
+                args.push(params.where.phone);
             }
-            return rows.map(r => {
+            if (params?.where?.role) {
+                clauses.push('role = ?');
+                args.push(params.where.role);
+            }
+            if (clauses.length > 0) {
+                query += ' WHERE ' + clauses.join(' AND ');
+            }
+            const rows = this.db.prepare(query).all(...args);
+            return rows.map((r) => {
                 const kProfile = this.db.prepare('SELECT * FROM KabadiwalaProfile WHERE userId = ?').get(r.id);
                 return {
                     ...r,
@@ -328,15 +340,29 @@ class SQLitePrismaClient {
         count: async (params) => {
             let query = 'SELECT COUNT(*) as c FROM Pickup';
             const args = [];
-            if (params?.where?.status) {
-                if (typeof params.where.status === 'string') {
-                    query += ' WHERE status = ?';
-                    args.push(params.where.status);
+            const clauses = [];
+            if (params?.where) {
+                if (params.where.status) {
+                    if (typeof params.where.status === 'string') {
+                        clauses.push('status = ?');
+                        args.push(params.where.status);
+                    }
+                    else if (params.where.status.in) {
+                        const ph = params.where.status.in.map(() => '?').join(',');
+                        clauses.push(`status IN (${ph})`);
+                        args.push(...params.where.status.in);
+                    }
                 }
-                else if (params.where.status.in) {
-                    const ph = params.where.status.in.map(() => '?').join(',');
-                    query += ` WHERE status IN (${ph})`;
-                    args.push(...params.where.status.in);
+                if (params.where.citizenId) {
+                    clauses.push('citizenId = ?');
+                    args.push(params.where.citizenId);
+                }
+                if (params.where.kabadiwalaId) {
+                    clauses.push('kabadiwalaId = ?');
+                    args.push(params.where.kabadiwalaId);
+                }
+                if (clauses.length > 0) {
+                    query += ' WHERE ' + clauses.join(' AND ');
                 }
             }
             return this.db.prepare(query).get(...args).c;
@@ -368,6 +394,12 @@ class SQLitePrismaClient {
         }
         // transactions
         p.transactions = this.db.prepare('SELECT * FROM "Transaction" WHERE pickupId = ?').all(row.id);
+        // Cryptographic verification fields & Handover OTP
+        const digitsOnly = p.id.replace(/\D/g, '');
+        p.verificationOtp = digitsOnly.length >= 4 ? digitsOnly.slice(-4) : '4821';
+        p.traceabilityHash = `0x${crypto_1.default.createHash('sha256').update(p.id + (p.completedAt || p.createdAt)).digest('hex').slice(0, 16)}`;
+        p.isVerified = p.status === 'COMPLETED';
+        p.verifiedAt = p.completedAt || null;
         return p;
     }
     // 4. ScrapItem
@@ -403,10 +435,10 @@ class SQLitePrismaClient {
             query += ' ORDER BY createdAt DESC';
             const rows = this.db.prepare(query).all(...args);
             if (params?.include?.pickup) {
-                return rows.map(r => ({
+                return Promise.all(rows.map(async (r) => ({
                     ...r,
-                    pickup: this.pickup.findUnique({ where: { id: r.pickupId } })
-                }));
+                    pickup: await this.pickup.findUnique({ where: { id: r.pickupId } })
+                })));
             }
             return rows;
         },

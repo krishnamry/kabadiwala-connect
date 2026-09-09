@@ -148,6 +148,8 @@ export interface EWasteLot {
   imageUrl?: string;
   gpsLat: number;
   gpsLng: number;
+  locationAddress?: string;
+  locationZone?: string;
   createdAt: string;
   confirmedAt?: string;
   recyclerId?: string;

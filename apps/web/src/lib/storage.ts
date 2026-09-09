@@ -243,6 +243,8 @@ const SEED_LOTS: EWasteLot[] = [
     status: 'BIDDING',
     gpsLat: 28.5685,
     gpsLng: 77.2412,
+    locationAddress: 'Suresh Scrap Yard, Near Gate 3, Mayapuri Industrial Area Phase II, New Delhi',
+    locationZone: 'Mayapuri Scrap Cluster, Delhi',
     createdAt: '2026-09-08 09:30 AM',
     qrCode: 'KBD-EWASTE-9821-IN',
     bids: [
@@ -272,6 +274,8 @@ const SEED_LOTS: EWasteLot[] = [
     status: 'REQUESTED',
     gpsLat: 28.5420,
     gpsLng: 77.2580,
+    locationAddress: 'Mohan Scrap Depot, Plot 42, Okhla Industrial Area Phase-1, New Delhi',
+    locationZone: 'Okhla Scrap Zone, Delhi',
     createdAt: '2026-09-08 10:15 AM',
     qrCode: 'KBD-EWASTE-9824-IN',
     bids: []
@@ -290,6 +294,8 @@ const SEED_LOTS: EWasteLot[] = [
     status: 'AVAILABLE',
     gpsLat: 28.5210,
     gpsLng: 77.2740,
+    locationAddress: 'Radhe E-Waste Hub, Near Metro Pillar 142, Seelampur, Delhi',
+    locationZone: 'Seelampur E-Waste Market, Delhi',
     createdAt: '2026-09-08 11:00 AM',
     qrCode: 'KBD-EWASTE-9830-IN',
     bids: []
@@ -308,6 +314,8 @@ const SEED_LOTS: EWasteLot[] = [
     status: 'AVAILABLE',
     gpsLat: 28.5685,
     gpsLng: 77.2412,
+    locationAddress: 'Suresh Scrap Yard, Near Gate 3, Mayapuri Industrial Area Phase II, New Delhi',
+    locationZone: 'Mayapuri Scrap Cluster, Delhi',
     createdAt: '2026-09-08 11:30 AM',
     qrCode: 'KBD-EWASTE-9840-IN',
     isCustomLot: true,

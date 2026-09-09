@@ -266,68 +266,68 @@ export const AdminDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-xl border-2 border-steel-300 shadow-sm">
-              <span className="text-steel-500 font-mono text-[10px] uppercase block">TOTAL E-WASTE DIVERTED</span>
+              <span className="text-steel-500 font-mono text-[10px] uppercase block">{t('citywideTonnage', 'TOTAL E-WASTE DIVERTED')}</span>
               <div className="text-3xl font-mono-num font-black text-copper-600 mt-1">
                 {(stats.totalKg / 1000).toFixed(2)} MT
               </div>
               <span className="text-xs text-forest-600 font-bold block mt-1">
-                28,450 kg kept out of landfills
+                {language === 'hi' ? '२८,४५० किग्रा कचरा लैंडफिल से बचाया' : language === 'mr' ? '२८,४५० कि.ग्रा. कचरा डेपोत जाण्यापासून वाचवला' : '28,450 kg kept out of landfills'}
               </span>
             </div>
 
             <div className="bg-white p-5 rounded-xl border-2 border-steel-300 shadow-sm">
-              <span className="text-steel-500 font-mono text-[10px] uppercase block">ACTIVE FORMAL COLLECTORS</span>
+              <span className="text-steel-500 font-mono text-[10px] uppercase block">{t('activeCollectors', 'ACTIVE FORMAL COLLECTORS')}</span>
               <div className="text-3xl font-mono-num font-black text-steel-900 mt-1">
                 {stats.activeKabadiwalas}
               </div>
               <span className="text-xs text-brass-700 font-bold block mt-1">
-                {stats.verifiedPercent}% Aadhaar KYC Verified
+                {stats.verifiedPercent}% {language === 'hi' ? 'आधार केवाईसी सत्यापित' : language === 'mr' ? 'आधार केवायसी प्रमाणित' : 'Aadhaar KYC Verified'}
               </span>
             </div>
 
             <div className="bg-white p-5 rounded-xl border-2 border-steel-300 shadow-sm">
-              <span className="text-steel-500 font-mono text-[10px] uppercase block">FORMAL TRANSACTIONS</span>
+              <span className="text-steel-500 font-mono text-[10px] uppercase block">{language === 'hi' ? 'औपचारिक डिजिटल लेनदेन' : language === 'mr' ? 'औपचारिक डिजिटल व्यवहार' : 'FORMAL TRANSACTIONS'}</span>
               <div className="text-3xl font-mono-num font-black text-forest-600 mt-1">
                 {stats.totalPickups}
               </div>
               <span className="text-xs text-steel-500 font-bold block mt-1">
-                100% with GPS & timestamp
+                {language === 'hi' ? '१००% जीपीएस एवं समय मुहर सहित' : language === 'mr' ? '१००% जीपीएस आणि वेळ नोंदीसह' : '100% with GPS & timestamp'}
               </span>
             </div>
 
             <div className="bg-white p-5 rounded-xl border-2 border-steel-300 shadow-sm">
-              <span className="text-steel-500 font-mono text-[10px] uppercase block">VALUE PAID TO COLLECTORS</span>
+              <span className="text-steel-500 font-mono text-[10px] uppercase block">{language === 'hi' ? 'कबाड़ीवालों को भुगतान की गई राशि' : language === 'mr' ? 'संग्राहकांना दिलेली रक्कम' : 'VALUE PAID TO COLLECTORS'}</span>
               <div className="text-3xl font-mono-num font-black text-brass-700 mt-1">
                 {formatCurrency(stats.totalRevenue)}
               </div>
               <span className="text-xs text-copper-600 font-bold block mt-1">
-                Direct to kabadiwala wallets
+                {language === 'hi' ? 'सीधे कबाड़ीवाला वॉलेट में' : language === 'mr' ? 'थेट संग्राहक वॉलेटमध्ये' : 'Direct to kabadiwala wallets'}
               </span>
             </div>
           </div>
 
           {/* Environmental Savings Grid */}
           <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-4">
-            <span className="stamp-seal stamp-verified text-xs">CPCB GREEN METRICS</span>
+            <span className="stamp-seal stamp-verified text-xs">{language === 'hi' ? 'सीपीसीबी हरित मानक' : language === 'mr' ? 'सीपीसीबी हरित निर्देशांक' : 'CPCB GREEN METRICS'}</span>
             <h3 className="font-display font-bold text-steel-900 text-lg">
-              Cumulative Environmental Impact Saved
+              {t('environmentalImpactHeader', 'Cumulative Environmental Impact Saved')}
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center font-mono">
               <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">CO2 PREVENTED</span>
+                <span className="text-steel-500 text-[10px] block">{t('carbonSaved', 'CO2 PREVENTED')}</span>
                 <span className="text-2xl font-bold text-forest-600">58.2 MT</span>
               </div>
               <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">TREES EQUIVALENT</span>
+                <span className="text-steel-500 text-[10px] block">{t('treesPlanted', 'TREES EQUIVALENT')}</span>
                 <span className="text-2xl font-bold text-forest-600">3,840</span>
               </div>
               <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">WATER SAVED</span>
+                <span className="text-steel-500 text-[10px] block">{language === 'hi' ? 'जल संरक्षण' : language === 'mr' ? 'पाण्याची बचत' : 'WATER SAVED'}</span>
                 <span className="text-2xl font-bold text-copper-600">1.94 Lakh L</span>
               </div>
               <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">LEAD SLAG BLOCKED</span>
+                <span className="text-steel-500 text-[10px] block">{language === 'hi' ? 'सीसा अपशिष्ट रोका गया' : language === 'mr' ? 'लेड कचरा रोखला' : 'LEAD SLAG BLOCKED'}</span>
                 <span className="text-2xl font-bold text-signal-600">760 kg</span>
               </div>
             </div>
@@ -340,12 +340,12 @@ export const AdminDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-steel-300 pb-3">
             <div>
-              <span className="stamp-seal stamp-verified text-xs">END-TO-END CHAIN OF CUSTODY</span>
+              <span className="stamp-seal stamp-verified text-xs">{language === 'hi' ? 'एंड-टू-एंड कस्टडी श्रृंखला' : language === 'mr' ? 'पूर्ण साखळी मागोवा' : 'END-TO-END CHAIN OF CUSTODY'}</span>
               <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-                Full Material Traceability Dataset Engine
+                {t('traceabilityTitle', 'Full Material Traceability Dataset Engine')}
               </h2>
               <p className="text-xs text-steel-600">
-                Every gram of e-waste is accounted for from household pickup to authorized smelting. Tamper-evident ledger satisfying Section 0.
+                {language === 'hi' ? 'घरेलू पिकअप से लेकर अधिकृत स्मेल्टर तक ई-कचरे के प्रत्येक ग्राम का पूर्ण हिसाब।' : language === 'mr' ? 'घरगुती संकलनापासून ते अधिकृत स्मेल्टरपर्यंत ई-कचऱ्याच्या प्रत्येक ग्रॅमचा संपूर्ण मागोवा.' : 'Every gram of e-waste is accounted for from household pickup to authorized smelting.'}
               </p>
             </div>
 
@@ -356,7 +356,7 @@ export const AdminDashboard: React.FC = () => {
                 className="px-3 py-1.5 text-xs font-mono uppercase bg-white border border-steel-400 rounded"
               />
               <button className="btn-dhatu-steel px-3 py-1.5 rounded text-xs font-bold">
-                Lookup Lot
+                {language === 'hi' ? 'लॉट खोजें' : language === 'mr' ? 'लॉट शोधा' : 'Lookup Lot'}
               </button>
             </div>
           </div>

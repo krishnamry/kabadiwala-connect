@@ -549,7 +549,7 @@ export const CitizenDashboard: React.FC = () => {
                           : 'bg-paper-200 text-steel-700 border border-steel-300'
                       }`}
                     >
-                      {p.status}
+                      {t(p.status)}
                     </span>
                   </div>
 
@@ -558,9 +558,9 @@ export const CitizenDashboard: React.FC = () => {
                   </h4>
 
                   <div className="mt-2 text-xs text-steel-600 space-y-0.5 font-mono">
-                    <div>Items: {p.items.map(i => `${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</div>
+                    <div>{t('itemsToRecycle', 'Items')}: {p.items.map(i => `${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</div>
                     <div className="flex justify-between font-bold text-steel-800 pt-1">
-                      <span>Indicative Payout:</span>
+                      <span>{t('indicative payout:', 'Indicative Payout:')}</span>
                       <span className="text-copper-700 font-mono-num">₹{p.totalAmount || 620}</span>
                     </div>
                   </div>
@@ -578,7 +578,7 @@ export const CitizenDashboard: React.FC = () => {
                         className="text-xs text-copper-700 font-bold underline flex items-center gap-1"
                       >
                         <QrCode className="w-3.5 h-3.5" />
-                        <span>Verifiable Receipt</span>
+                        <span>{t('viewReceipt', 'Verifiable Receipt')}</span>
                       </button>
                     </div>
                   )}
@@ -594,7 +594,7 @@ export const CitizenDashboard: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-steel-300 pb-3">
                   <div>
                     <span className="stamp-seal stamp-pending text-xs">
-                      {selectedPickup.status === 'COMPLETED' ? 'HANDOVER COMPLETED' : 'COLLECTOR DISPATCHED'}
+                      {selectedPickup.status === 'COMPLETED' ? t('HANDOVER COMPLETED', 'HANDOVER COMPLETED') : t('COLLECTOR DISPATCHED', 'COLLECTOR DISPATCHED')}
                     </span>
                     <h3 className="text-lg font-display font-black text-steel-900 mt-1">
                       {selectedPickup.address}
@@ -629,13 +629,13 @@ export const CitizenDashboard: React.FC = () => {
                   <div className="p-4 bg-brass-100/80 border-2 border-brass-400 rounded-lg flex items-center justify-between">
                     <div className="space-y-0.5">
                       <span className="text-[10px] font-mono font-bold text-brass-800 uppercase tracking-wider block">
-                        LIVE ETA ESTIMATE
+                        {t('LIVE ETA ESTIMATE', 'LIVE ETA ESTIMATE')}
                       </span>
                       <div className="text-lg font-display font-black text-steel-900">
-                        Collector Suresh is 1.4 km away (Arriving in ~12 mins)
+                        {language === 'hi' ? 'कबाड़ीवाला सुरेश लगभग 1.4 किमी दूर है (~12 मिनट में आगमन)' : language === 'mr' ? 'संग्राहक सुरेश अंदाजे 1.4 किमी अंतरावर आहे (~12 मिनिटांत आगमन)' : 'Collector Suresh is 1.4 km away (Arriving in ~12 mins)'}
                       </div>
                       <p className="text-xs text-steel-600">
-                        Vehicle: Solar Cargo Tricycle (DL-10-KBD-89) • Verified Aadhaar
+                        {language === 'hi' ? 'वाहन: सोलर कार्गो ट्राइक (DL-10-KBD-89) • सत्यापित आधार' : language === 'mr' ? 'वाहन: सोलर कार्गो ट्रायसायकल (DL-10-KBD-89) • प्रमाणित आधार' : 'Vehicle: Solar Cargo Tricycle (DL-10-KBD-89) • Verified Aadhaar'}
                       </p>
                     </div>
                     <VoiceAssistButton
@@ -651,19 +651,19 @@ export const CitizenDashboard: React.FC = () => {
                   <div className="p-4 bg-paper-100 rounded-xl border-2 border-dashed border-copper-500 shadow-tactile space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="stamp-seal stamp-verified text-[10px]">
-                        LAYER 1 VERIFICATION • DOORSTEP SCRAP HANDOVER
+                        {t('layer 1 verification: citizen handover otp', 'LAYER 1 VERIFICATION • DOORSTEP SCRAP HANDOVER')}
                       </span>
                       <span className="font-mono text-xs font-bold text-copper-700 bg-copper-200/60 px-2 py-0.5 rounded border border-copper-400">
-                        SECURE OTP
+                        {t('SECURE OTP', 'SECURE OTP')}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <span className="text-xs font-bold text-steel-900 block">
-                          Physical Handover Authorization Code
+                          {language === 'hi' ? 'भौतिक हस्तांतरण प्राधिकरण कोड' : language === 'mr' ? 'प्रत्यक्ष हस्तांतरण प्रमाणीकरण कोड' : 'Physical Handover Authorization Code'}
                         </span>
                         <p className="text-[11px] text-steel-600">
-                          Share this 4-digit code with the collector upon arrival to verify physical weighing & authorized handover.
+                          {language === 'hi' ? 'वजन सत्यापन एवं आधिकारिक हस्तांतरण हेतु कबाड़ीवाले के आने पर यह ४-अंकीय कोड साझा करें।' : language === 'mr' ? 'वजन तपासणी व प्रमाणित हस्तांतरणासाठी संग्राहक आल्यावर हा ४-अंकी कोड सांगा.' : 'Share this 4-digit code with the collector upon arrival to verify physical weighing & authorized handover.'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -678,7 +678,7 @@ export const CitizenDashboard: React.FC = () => {
                     <div className="flex items-center justify-between font-bold">
                       <span className="flex items-center gap-1.5 text-forest-800">
                         <CheckCircle2 className="w-4 h-4 text-forest-600 shrink-0" />
-                        <span>Layer 1 Verified: Physical Doorstep Handover Confirmed</span>
+                        <span>{t('layer 1 verified: physical doorstep handover confirmed', 'Layer 1 Verified: Physical Doorstep Handover Confirmed')}</span>
                       </span>
                       <span className="font-mono text-[11px] text-forest-700 bg-forest-100 px-2 py-0.5 rounded border border-forest-300">
                         OTP {selectedPickup.verificationOtp || '4821'} MATCHED

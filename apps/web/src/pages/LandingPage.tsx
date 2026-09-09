@@ -182,11 +182,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
                 {t('mandiPriceBoardTitle', 'Live Material Benchmark Price Board')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
-                Live rates backed by international secondary metals exchange (London Metal Exchange + CPCB India).
+                {t('mandiPriceBoardSub', 'Live rates backed by international secondary metals exchange (London Metal Exchange + CPCB India).')}
               </p>
             </div>
             <span className="text-xs font-mono text-steel-600 bg-paper-200 px-3 py-1.5 rounded border border-steel-300 self-start sm:self-auto">
-              National CPCB Zone Benchmark
+              {t('mandiPriceBoardZone', 'National CPCB Zone Benchmark')}
             </span>
           </div>
 
@@ -194,25 +194,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
             <div className="bg-white p-3.5 rounded border border-steel-300">
               <span className="text-[10px] text-steel-500 uppercase block">High-Grade PCBs</span>
               <span className="text-2xl font-bold text-copper-600">₹640 /kg</span>
-              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹25 this week</span>
+              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹25 {t('thisWeek', 'this week')}</span>
             </div>
 
             <div className="bg-white p-3.5 rounded border border-steel-300">
               <span className="text-[10px] text-steel-500 uppercase block">Clean Copper Wire</span>
               <span className="text-2xl font-bold text-copper-600">₹480 /kg</span>
-              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹15 this week</span>
+              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹15 {t('thisWeek', 'this week')}</span>
             </div>
 
             <div className="bg-white p-3.5 rounded border border-steel-300">
               <span className="text-[10px] text-steel-500 uppercase block">Li-ion Batteries</span>
               <span className="text-2xl font-bold text-copper-600">₹145 /kg</span>
-              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹10 this week</span>
+              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹10 {t('thisWeek', 'this week')}</span>
             </div>
 
             <div className="bg-white p-3.5 rounded border border-steel-300">
               <span className="text-[10px] text-steel-500 uppercase block">Electric Motors</span>
               <span className="text-2xl font-bold text-copper-600">₹95 /kg</span>
-              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹5 this week</span>
+              <span className="text-[10px] text-forest-600 block mt-0.5">▲ +₹5 {t('thisWeek', 'this week')}</span>
             </div>
           </div>
         </div>
@@ -227,10 +227,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
               📖
             </div>
             <h4 className="font-display font-black text-steel-900 text-lg">
-              Ledger-First Mental Model
+              {t('ledgerFirstTitle', 'Ledger-First Mental Model')}
             </h4>
             <p className="text-xs text-steel-600 leading-relaxed">
-              Collectors already trust physical passbooks. We digitize that exact metaphor with stamped receipts, running totals, and cash-first records rather than confusing SaaS abstractions.
+              {t('ledgerFirstDesc', 'Collectors already trust physical passbooks. We digitize that exact metaphor with stamped receipts, running totals, and cash-first records rather than confusing SaaS abstractions.')}
             </p>
           </div>
 
@@ -239,10 +239,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
               🗣️
             </div>
             <h4 className="font-display font-black text-steel-900 text-lg">
-              Vernacular & Voice-First
+              {t('voiceFirstTitle', 'Vernacular & Voice-First')}
             </h4>
             <p className="text-xs text-steel-600 leading-relaxed">
-              Every critical price, weight, and safety hazard is narrated aloud in Hindi and Marathi via the Web Speech API. Large 48px touch targets for outdoor, gloved use.
+              {t('voiceFirstDesc', 'Every critical price, weight, and safety hazard is narrated aloud in Hindi and Marathi via the Web Speech API. Large 48px touch targets for outdoor, gloved use.')}
             </p>
           </div>
 
@@ -251,10 +251,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
               📵
             </div>
             <h4 className="font-display font-black text-steel-900 text-lg">
-              Offline-Tolerant Engine
+              {t('offlineFirstTitle', 'Offline-Tolerant Engine')}
             </h4>
             <p className="text-xs text-steel-600 leading-relaxed">
-              Create lots, check cached price boards, and generate handovers with zero cellular reception. Queued lots synchronize automatically upon reconnecting to cell towers.
+              {t('offlineFirstDesc', 'Create lots, check cached price boards, and generate handovers with zero cellular reception. Queued lots synchronize automatically upon reconnecting to cell towers.')}
             </p>
           </div>
 

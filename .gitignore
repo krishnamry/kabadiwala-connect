@@ -5,3 +5,4 @@ apps/ml-service/venv/
 apps/api/prisma/*.db*
 .env
 .env.local
+.neon

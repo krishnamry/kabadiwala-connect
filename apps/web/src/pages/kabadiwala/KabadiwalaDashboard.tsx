@@ -45,8 +45,84 @@ import {
   CheckCircle,
   Package,
   Layers,
-  Trash2
+  Trash2,
+  Building2,
+  Edit3
 } from 'lucide-react';
+
+export interface ScrapHubPreset {
+  id: string;
+  nameEn: string;
+  nameHi: string;
+  nameMr: string;
+  address: string;
+  zone: string;
+  lat: number;
+  lng: number;
+}
+
+export const SCRAP_HUB_PRESETS: ScrapHubPreset[] = [
+  {
+    id: 'mayapuri',
+    nameEn: 'Mayapuri Scrap Yard (Phase II, West Delhi)',
+    nameHi: 'मायापुरी कबाड़ मंडी (फेज २, पश्चिम दिल्ली)',
+    nameMr: 'मायापुरी भंगार बाजार (फेज २, नवी दिल्ली)',
+    address: 'Suresh Scrap Yard, Near Gate 3, Mayapuri Industrial Area Phase II, New Delhi',
+    zone: 'Mayapuri Scrap Cluster, Delhi',
+    lat: 28.6369,
+    lng: 77.1264
+  },
+  {
+    id: 'okhla',
+    nameEn: 'Okhla Industrial Scrap Yard (Phase 1, South Delhi)',
+    nameHi: 'ओखला औद्योगिक कबाड़ क्षेत्र (फेज १, दक्षिण दिल्ली)',
+    nameMr: 'ओखला औद्योगिक भंगार क्षेत्र (फेज १, नवी दिल्ली)',
+    address: 'Plot 42, Container Road, Okhla Industrial Area Phase-1, New Delhi',
+    zone: 'Okhla Scrap Zone, Delhi',
+    lat: 28.5284,
+    lng: 77.2798
+  },
+  {
+    id: 'seelampur',
+    nameEn: 'Seelampur E-Waste Dismantling Market (East Delhi)',
+    nameHi: 'सीलमपुर ई-कचरा मार्केट (पूर्वी दिल्ली)',
+    nameMr: 'सीलमपूर ई-कचरा बाजार (पूर्व दिल्ली)',
+    address: 'Shop 14, Main Market, Near Metro Pillar 142, Seelampur, Delhi',
+    zone: 'Seelampur E-Waste Market, Delhi',
+    lat: 28.6692,
+    lng: 77.2685
+  },
+  {
+    id: 'dharavi',
+    nameEn: 'Dharavi Scrap Transit Yard (Mumbai)',
+    nameHi: 'धारावी स्क्रैप ट्रांजिट यार्ड (मुंबई)',
+    nameMr: 'धारावी भंगार ट्रान्झिट यार्ड (मुंबई)',
+    address: 'Transit Yard 9, 60 Feet Road, Dharavi, Mumbai',
+    zone: 'Dharavi Recycling Cluster, Mumbai',
+    lat: 19.0416,
+    lng: 72.8535
+  },
+  {
+    id: 'kurla',
+    nameEn: 'Kurla West Scrap Market (Mumbai)',
+    nameHi: 'कुर्ला वेस्ट कबाड़ बाजार (मुंबई)',
+    nameMr: 'कुर्ला पश्चिम भंगार बाजार (मुंबई)',
+    address: 'CST Road Scrap Yard, Kurla West, Mumbai',
+    zone: 'Kurla West Scrap Market, Mumbai',
+    lat: 19.0688,
+    lng: 72.8797
+  },
+  {
+    id: 'pune_shivajinagar',
+    nameEn: 'Shivaji Nagar Scrap Cluster (Pune)',
+    nameHi: 'शिवाजी नगर स्क्रैप क्लस्टर (पुणे)',
+    nameMr: 'शिवाजी नगर भंगार क्लस्टर (पुणे)',
+    address: 'Kasba Peth Scrap Depot, Shivaji Nagar, Pune',
+    zone: 'Shivaji Nagar Scrap Cluster, Pune',
+    lat: 18.5314,
+    lng: 73.8446
+  }
+];
 
 export const KabadiwalaDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -84,6 +160,44 @@ export const KabadiwalaDashboard: React.FC = () => {
   const [lotMlResult, setLotMlResult] = useState<MLClassificationResult | null>(null);
   const [aiValuation, setAiValuation] = useState(8000);
   const [lotCreatedSuccess, setLotCreatedSuccess] = useState<string | null>(null);
+
+  // Lot Handover Location State
+  const [lotLocationMode, setLotLocationMode] = useState<'preset' | 'gps' | 'custom'>('preset');
+  const [selectedHubPreset, setSelectedHubPreset] = useState<string>('mayapuri');
+  const [lotLocationAddress, setLotLocationAddress] = useState<string>(SCRAP_HUB_PRESETS[0].address);
+  const [lotLocationZone, setLotLocationZone] = useState<string>(SCRAP_HUB_PRESETS[0].zone);
+  const [lotCoords, setLotCoords] = useState<[number, number]>([SCRAP_HUB_PRESETS[0].lat, SCRAP_HUB_PRESETS[0].lng]);
+  const [isDetectingLotLocation, setIsDetectingLotLocation] = useState<boolean>(false);
+
+  const handleDetectLotGps = async () => {
+    setIsDetectingLotLocation(true);
+    try {
+      const pos = await getCurrentPosition();
+      const coords: [number, number] = [pos.latitude, pos.longitude];
+      setLotCoords(coords);
+      const geo = await reverseGeocode(pos.latitude, pos.longitude);
+      const addr = geo.displayName || `${geo.shortAddress}, ${geo.city}`;
+      setLotLocationAddress(addr);
+      setLotLocationZone(geo.suburb || geo.city || 'Live GPS Location');
+      setLotLocationMode('gps');
+      hapticSuccess();
+    } catch (err) {
+      console.warn('Lot GPS detection failed', err);
+    } finally {
+      setIsDetectingLotLocation(false);
+    }
+  };
+
+  const handleSelectHubPreset = (hubId: string) => {
+    const hub = SCRAP_HUB_PRESETS.find(h => h.id === hubId);
+    if (hub) {
+      setSelectedHubPreset(hubId);
+      setLotLocationAddress(hub.address);
+      setLotLocationZone(hub.zone);
+      setLotCoords([hub.lat, hub.lng]);
+      setLotLocationMode('preset');
+    }
+  };
 
   // Custom Mixed Lot Line Items State
   const [customLotItems, setCustomLotItems] = useState<Array<{ id: string; category: string; weightKg: number; ratePerKg: number; subtotal: number }>>([
@@ -487,8 +601,10 @@ export const KabadiwalaDashboard: React.FC = () => {
       minBidAmount: Math.round(finalValuation * 0.5),
       recyclerOfferedRate: offeredRate,
       status: 'AVAILABLE',
-      gpsLat: collectorCoords[0],
-      gpsLng: collectorCoords[1],
+      gpsLat: lotCoords[0],
+      gpsLng: lotCoords[1],
+      locationAddress: lotLocationAddress,
+      locationZone: lotLocationZone,
       createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       qrCode: `KBD-EWASTE-${Math.floor(1000 + Math.random() * 9000)}-IN`,
       isOfflineQueued: isOffline,
@@ -655,9 +771,9 @@ export const KabadiwalaDashboard: React.FC = () => {
             <div className="flex items-center space-x-3 text-xs text-paper-300">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-copper-400" />
-                <span>Operating Zone: {collectorLocationName && collectorLocationName !== 'Detecting Live Location...' ? collectorLocationName : 'Pan-India Active Network'}</span>
+                <span>{t('operatingZone', 'Operating Zone: Pan-India Active Network')}</span>
               </span>
-              <span className="text-forest-400 font-bold">★ 4.9 Rating (142 Jobs)</span>
+              <span className="text-forest-400 font-bold">★ 4.9 {language === 'hi' ? 'रेटिंग (१४२ कार्य)' : language === 'mr' ? 'रेटिंग (१४२ कामे)' : 'Rating (142 Jobs)'}</span>
             </div>
           </div>
 
@@ -714,10 +830,10 @@ export const KabadiwalaDashboard: React.FC = () => {
             <span className="font-bold">
               {t('offlineModeActive', 'Offline Mode Active:')}
             </span>
-            <span>Lots are cached locally in your phone storage and queued for auto-sync.</span>
+            <span>{t('offlineModeDesc', 'Lots are cached locally in your phone storage and queued for auto-sync.')}</span>
           </div>
           <span className="font-mono text-xs font-bold text-copper-700">
-            {offlineQueue.length} lots pending sync
+            {t(`${offlineQueue.length} lots pending sync`, `${offlineQueue.length} lots pending sync`)}
           </span>
         </div>
       )}
@@ -841,16 +957,16 @@ export const KabadiwalaDashboard: React.FC = () => {
                 <span>{t('myCreatedLots', 'My Created Lots')} ({myLots.length})</span>
                 {myLots.some(l => (l.bids && l.bids.length > 0)) && (
                   <span className="bg-brass-400 text-steel-950 text-[10px] font-mono font-black px-1.5 py-0.5 rounded-full animate-pulse">
-                    {myLots.reduce((sum, l) => sum + (l.bids?.length || 0), 0)} Bids
+                    {myLots.reduce((sum, l) => sum + (l.bids?.length || 0), 0)} {t('bidsReceived', 'Bids')}
                   </span>
                 )}
               </button>
             </div>
 
             <div className="text-xs font-mono text-steel-600 flex items-center gap-2">
-              <span className="hidden sm:inline">Recycler Bidding Rule:</span>
+              <span className="hidden sm:inline">{t('biddingRule', 'Recycler Bidding Rule:')}</span>
               <span className="bg-paper-200 px-2.5 py-1 rounded border border-steel-300 font-bold text-copper-700">
-                Min 50% of Ask Value
+                {t('minAskRule', 'Min 50% of Ask Value')}
               </span>
             </div>
           </div>
@@ -1210,6 +1326,125 @@ export const KabadiwalaDashboard: React.FC = () => {
                     </div>
                   )}
 
+                  {/* 5. Set Handover / Scrap Yard Location */}
+                  <div className="space-y-2.5 p-3.5 bg-paper-100 rounded-xl border-2 border-steel-300">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-copper-600 shrink-0" />
+                        <label className="text-xs font-bold text-steel-800 uppercase tracking-wider">
+                          {t('lotLocationLabel', '5. Set Handover / Scrap Yard Location')}
+                        </label>
+                      </div>
+                      <span className="text-[10px] font-mono text-steel-600 font-bold uppercase bg-white px-2 py-0.5 rounded border border-steel-300">
+                        {lotLocationMode === 'gps' ? '🛰️ GPS Lock' : lotLocationMode === 'preset' ? '🏭 Scrap Hub' : '✏️ Custom'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-steel-600">
+                      {t('lotLocationDesc', 'Specify where the recycler will inspect and pick up this lot.')}
+                    </p>
+
+                    {/* 3 Location Mode Switcher Buttons */}
+                    <div className="grid grid-cols-3 gap-1.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleDetectLotGps}
+                        disabled={isDetectingLotLocation}
+                        className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all border ${
+                          lotLocationMode === 'gps'
+                            ? 'bg-copper-600 text-white border-copper-700 shadow-sm'
+                            : 'bg-white text-steel-700 border-steel-300 hover:bg-paper-200'
+                        }`}
+                      >
+                        <Navigation className={`w-3.5 h-3.5 ${isDetectingLotLocation ? 'animate-spin' : ''}`} />
+                        <span>{isDetectingLotLocation ? t('detectingLocation', 'Detecting...') : t('detectLiveGps', 'Live GPS')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setLotLocationMode('preset')}
+                        className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all border ${
+                          lotLocationMode === 'preset'
+                            ? 'bg-copper-600 text-white border-copper-700 shadow-sm'
+                            : 'bg-white text-steel-700 border-steel-300 hover:bg-paper-200'
+                        }`}
+                      >
+                        <Building2 className="w-3.5 h-3.5" />
+                        <span>{t('quickPresets', 'Scrap Hubs')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setLotLocationMode('custom')}
+                        className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all border ${
+                          lotLocationMode === 'custom'
+                            ? 'bg-copper-600 text-white border-copper-700 shadow-sm'
+                            : 'bg-white text-steel-700 border-steel-300 hover:bg-paper-200'
+                        }`}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>{t('customAddress', 'Custom')}</span>
+                      </button>
+                    </div>
+
+                    {/* Mode 1: Preset Dropdown */}
+                    {lotLocationMode === 'preset' && (
+                      <div className="space-y-1.5 pt-1">
+                        <select
+                          value={selectedHubPreset}
+                          onChange={e => handleSelectHubPreset(e.target.value)}
+                          className="w-full px-3 py-2 text-xs font-bold bg-white border border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                        >
+                          {SCRAP_HUB_PRESETS.map(hub => (
+                            <option key={hub.id} value={hub.id}>
+                              {language === 'hi' ? hub.nameHi : language === 'mr' ? hub.nameMr : hub.nameEn}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Mode 2: Custom Address text input */}
+                    {lotLocationMode === 'custom' && (
+                      <div className="space-y-1.5 pt-1">
+                        <input
+                          type="text"
+                          value={lotLocationAddress}
+                          onChange={e => {
+                            setLotLocationAddress(e.target.value);
+                            setLotLocationZone(e.target.value.split(',')[0] || 'Custom Yard');
+                          }}
+                          placeholder={t('customAddressPlaceholder', 'Enter yard address, shop number, or landmark...')}
+                          className="w-full px-3 py-2 text-xs bg-white border border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                        />
+                      </div>
+                    )}
+
+                    {/* Active Location Display Badge & Coordinates */}
+                    <div className="p-2.5 bg-white rounded-lg border border-steel-300 flex items-start justify-between gap-2 text-xs font-mono">
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-copper-700">
+                          <MapPin className="w-3 h-3 text-copper-600 shrink-0" />
+                          <span>{lotLocationZone || 'Active Handover Yard'}</span>
+                        </div>
+                        <p className="text-steel-800 text-xs truncate font-sans font-medium" title={lotLocationAddress}>
+                          {lotLocationAddress}
+                        </p>
+                        <span className="text-[10px] text-steel-500 block">
+                          Coordinates: {lotCoords[0].toFixed(4)}° N, {lotCoords[1].toFixed(4)}° E
+                        </span>
+                      </div>
+                      <a
+                        href={getDirectionsUrl(lotCoords[0], lotCoords[1])}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 text-[10px] font-bold text-copper-700 hover:text-copper-900 flex items-center gap-0.5 underline pt-1"
+                      >
+                        <span>Map</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+
                   {/* Real-time AI Valuation Card */}
                   <div className="bg-forest-500/10 border-2 border-forest-600 rounded-lg p-4 flex items-center justify-between">
                     <div>
@@ -1330,9 +1565,18 @@ export const KabadiwalaDashboard: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="flex justify-between pt-1 border-t border-paper-300 text-[10px] text-steel-500">
-                      <span>GPS Lat/Lng:</span>
-                      <span>28.5685, 77.2412</span>
+                    <div className="flex justify-between items-start pt-1.5 border-t border-paper-300 text-[11px]">
+                      <span className="text-steel-500 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-copper-600 shrink-0" />
+                        <span>{t('handoverLocation', 'Handover Location')}:</span>
+                      </span>
+                      <span className="font-bold text-copper-700 text-right max-w-[180px] truncate" title={lotLocationAddress}>
+                        {lotLocationZone || lotLocationAddress}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-steel-500">
+                      <span>GPS Coordinates:</span>
+                      <span>{lotCoords[0].toFixed(4)}°, {lotCoords[1].toFixed(4)}°</span>
                     </div>
                   </div>
 
@@ -1407,7 +1651,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                           : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
                       }`}
                     >
-                      {f === 'ALL' ? 'All Lots' : f.replace('_', ' ')}
+                      {f === 'ALL' ? t('allLots', 'All Lots') : t(f, f.replace('_', ' '))}
                       {f === 'ALL' && ` (${myLots.length})`}
                       {f === 'BIDDING' && ` (${myLots.filter(l => l.status === 'BIDDING' || (l.bids && l.bids.length > 0)).length})`}
                     </button>
@@ -1480,7 +1724,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                                     : 'bg-steel-200 text-steel-800 border border-steel-400'
                                 }`}
                               >
-                                {lot.status === 'BIDDING' || hasBids ? `BIDDING (${bidsCount} Bids)` : lot.status}
+                                {lot.status === 'BIDDING' || hasBids ? `${t('BIDDING')} (${bidsCount} ${t('bidsReceived', 'Bids')})` : t(lot.status)}
                               </span>
                             </div>
 
@@ -1494,7 +1738,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                               <div className="flex flex-wrap items-center gap-1.5 pt-1">
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-forest-50 text-forest-700 border border-forest-300 flex items-center gap-1">
                                   <ShieldCheck className="w-3 h-3 text-forest-600" />
-                                  <span>Layer 2: AI Verified</span>
+                                  <span>{t('layer 2: ai verified', 'Layer 2: AI Verified')}</span>
                                 </span>
                                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-steel-100 text-steel-700 border border-steel-300">
                                   GPS: {lot.gpsLat?.toFixed(2)}°, {lot.gpsLng?.toFixed(2)}°
@@ -1504,15 +1748,34 @@ export const KabadiwalaDashboard: React.FC = () => {
                                 </span>
                               </div>
 
+                              {/* Handover Location Banner */}
+                              <div className="mt-2 text-[11px] text-steel-800 bg-paper-100 p-2 rounded-lg border border-steel-300 flex items-center justify-between gap-1.5 font-mono">
+                                <div className="flex items-center gap-1.5 min-w-0 truncate">
+                                  <MapPin className="w-3.5 h-3.5 text-copper-600 shrink-0" />
+                                  <span className="truncate" title={lot.locationAddress || lot.locationZone || `${lot.gpsLat?.toFixed(4)}°, ${lot.gpsLng?.toFixed(4)}°`}>
+                                    {lot.locationZone || lot.locationAddress || `GPS: ${lot.gpsLat?.toFixed(2)}°, ${lot.gpsLng?.toFixed(2)}°`}
+                                  </span>
+                                </div>
+                                <a
+                                  href={getDirectionsUrl(lot.gpsLat, lot.gpsLng)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-copper-700 hover:text-copper-900 font-bold shrink-0 flex items-center gap-0.5 underline text-[10px]"
+                                >
+                                  <span>Map</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </div>
+
                               {/* Custom Mixed Lot Manifest Breakdown */}
                               {lot.isCustomLot && lot.items && lot.items.length > 0 && (
                                 <div className="mt-2.5 space-y-1 bg-white p-2.5 rounded-lg border border-steel-300 font-mono text-xs">
                                   <div className="flex items-center justify-between text-[10px] uppercase font-bold text-copper-800 pb-1 border-b border-steel-200">
                                     <span className="flex items-center gap-1">
                                       <Layers className="w-3 h-3 text-copper-600" />
-                                      <span>Mixed Manifest ({lot.items.length} types)</span>
+                                      <span>{t('customMixedLot', 'Mixed Manifest')} ({lot.items.length} {t('items', 'types')})</span>
                                     </span>
-                                    <span>Blended ₹{lot.recyclerOfferedRate}/kg</span>
+                                    <span>{t('blendedRate', 'Blended')} ₹{lot.recyclerOfferedRate}/kg</span>
                                   </div>
                                   <div className="space-y-1 pt-1">
                                     {lot.items.map((item, idx) => (
@@ -1531,20 +1794,20 @@ export const KabadiwalaDashboard: React.FC = () => {
                             {/* Specs Grid */}
                             <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-paper-100 p-3 rounded-lg border border-paper-300">
                               <div>
-                                <span className="text-steel-500 text-[10px] block uppercase">Weight</span>
+                                <span className="text-steel-500 text-[10px] block uppercase">{t('weight', 'Weight')}</span>
                                 <span className="font-black text-steel-900">{lot.approxWeightKg} kg</span>
                               </div>
                               <div>
-                                <span className="text-steel-500 text-[10px] block uppercase">Asking Price</span>
+                                <span className="text-steel-500 text-[10px] block uppercase">{t('askingPrice', 'Asking Price')}</span>
                                 <span className="font-black text-forest-700">{formatCurrency(ask)}</span>
                               </div>
                               <div className="col-span-2 pt-1 border-t border-paper-300 flex items-center justify-between text-[10px]">
-                                <span className="text-steel-500">Min Valid Bid (50%):</span>
+                                <span className="text-steel-500">{t('minAskRule', 'Min Valid Bid (50%):')}</span>
                                 <span className="font-bold text-copper-700">{formatCurrency(minBid)}</span>
                               </div>
                               {lot.highestBid && (
                                 <div className="col-span-2 flex items-center justify-between text-[11px] bg-forest-500/10 p-1.5 rounded border border-forest-500/30">
-                                  <span className="text-forest-800 font-bold">Highest Offer:</span>
+                                  <span className="text-forest-800 font-bold">{t('highestOffer:', 'Highest Offer:')}</span>
                                   <span className="font-black text-forest-700 font-mono-num">{formatCurrency(lot.highestBid)}</span>
                                 </div>
                               )}
@@ -1553,7 +1816,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                             {/* Recycler Bids Section */}
                             <div className="space-y-2">
                               <span className="text-[11px] font-bold text-steel-700 uppercase tracking-wider block">
-                                Recycler Bids ({bidsCount})
+                                {t('bidsReceived', 'Recycler Bids')} ({bidsCount})
                               </span>
 
                               {hasBids ? (
@@ -1586,21 +1849,21 @@ export const KabadiwalaDashboard: React.FC = () => {
                                             className="btn-dhatu-primary py-1 text-[11px] font-bold rounded flex items-center justify-center gap-1 shadow-sm"
                                           >
                                             <Check className="w-3 h-3" />
-                                            <span>Accept Bid</span>
+                                            <span>{t('acceptBid', 'Accept Bid')}</span>
                                           </button>
                                           <button
                                             type="button"
                                             onClick={() => handleRejectBid(lot.id, bid.id)}
                                             className="bg-paper-200 hover:bg-signal-500/10 text-steel-700 hover:text-signal-600 border border-steel-300 py-1 text-[11px] font-bold rounded"
                                           >
-                                            Decline
+                                            {t('decline', 'Decline')}
                                           </button>
                                         </div>
                                       )}
 
                                       {bid.status === 'ACCEPTED' && (
                                         <div className="text-forest-700 font-bold text-[10px] flex items-center gap-1">
-                                          <CheckCircle className="w-3 h-3" /> Winning Accepted Bid
+                                          <CheckCircle className="w-3 h-3" /> {language === 'hi' ? 'स्वीकृत विजेता बोली' : language === 'mr' ? 'स्वीकारलेली अंतिम बोली' : 'Winning Accepted Bid'}
                                         </div>
                                       )}
                                     </div>
@@ -1608,13 +1871,13 @@ export const KabadiwalaDashboard: React.FC = () => {
                                 </div>
                               ) : (
                                 <div className="p-2.5 bg-paper-100 rounded-lg border border-steel-300 text-[11px] text-steel-600 space-y-1.5">
-                                  <p>Awaiting bids from nearby authorized aggregators.</p>
+                                  <p>{t('awaitingBids', 'Awaiting bids from nearby authorized aggregators.')}</p>
                                   <button
                                     type="button"
                                     onClick={() => handleSimulateBid(lot)}
                                     className="text-[10px] font-bold text-copper-700 hover:text-copper-900 underline flex items-center gap-1"
                                   >
-                                    <Sparkles className="w-3 h-3" /> Simulate Recycler Bid ({formatCurrency(Math.round(ask * 0.88))})
+                                    <Sparkles className="w-3 h-3" /> {language === 'hi' ? 'रीसायकलर बोली सिमुलेट करें' : language === 'mr' ? 'रीसायकलर बोली सिम्युलेट करा' : 'Simulate Recycler Bid'} ({formatCurrency(Math.round(ask * 0.88))})
                                   </button>
                                 </div>
                               )}
@@ -1632,7 +1895,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                               className="flex-1 btn-dhatu-brass py-2 rounded text-xs font-bold flex items-center justify-center gap-1 shadow-sm"
                             >
                               <QrCode className="w-3.5 h-3.5" />
-                              <span>Open QR</span>
+                              <span>{t('openQr', 'Open QR')}</span>
                             </button>
                           </div>
                         </div>
