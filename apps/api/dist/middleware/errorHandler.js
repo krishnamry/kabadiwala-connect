@@ -12,7 +12,11 @@ const errorHandler = (err, req, res, next) => {
         });
     }
     const statusCode = err.status || err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
+    const isProd = process.env.NODE_ENV === 'production';
+    // Avoid leaking database internal errors or stack traces to clients in production
+    const message = (statusCode >= 500 && isProd)
+        ? 'An internal server error occurred. Please try again later.'
+        : (err.message || 'Error processing request');
     return res.status(statusCode).json({
         success: false,
         error: message

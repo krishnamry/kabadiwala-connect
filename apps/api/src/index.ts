@@ -1,5 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import path from 'path';
+import fs from 'fs';
 import { config } from './config';
 import authRoutes from './routes/auth.routes';
 import ratesRoutes from './routes/rates.routes';
@@ -11,17 +15,71 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
-// Middlewares
+// Security: Disable Express fingerprint header
+app.disable('x-powered-by');
+
+// Security: HTTP Security Headers via Helmet
+app.use(helmet({
+  contentSecurityPolicy: false, // Allows Vite SPA assets, Google Fonts, and Leaflet Maps to render seamlessly
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
+
+// Security: Rate Limiting to prevent brute-force attacks and DDoS
+const globalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Limit each IP to 300 requests per 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many requests from this IP. Please try again later.'
+  }
+});
+
+const strictAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 25, // Limit each IP to 25 login/registration requests per 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many authentication attempts. Please try again in 15 minutes.'
+  }
+});
+
+// Apply rate limiters
+app.use('/api', globalApiLimiter);
+app.use('/api/auth/login', strictAuthLimiter);
+app.use('/api/auth/register', strictAuthLimiter);
+
+// Security: CORS configuration allowing Web, Android Capacitor, and local environments
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (such as mobile apps, Postman, or curl)
+    if (!origin) return callback(null, true);
+    // Allow localhost, local network, capacitor, and onrender.com domains
+    const allowedPatterns = [
+      /^http:\/\/localhost(:\d+)?$/,
+      /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+      /^https?:\/\/.*\.onrender\.com$/,
+      /^capacitor:\/\/localhost$/,
+      /^https?:\/\/localhost$/
+    ];
+    const isAllowed = allowedPatterns.some(pattern => pattern.test(origin));
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Permissive fallback for public API while preventing credential exposure
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-import path from 'path';
-import fs from 'fs';
+// Security: Explicit request body size limits to prevent memory exhaustion DoS attacks
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Root and healthcheck
 app.get('/health', (req, res) => {

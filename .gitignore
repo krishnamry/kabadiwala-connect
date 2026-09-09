@@ -3,6 +3,7 @@ dist/
 *.log
 apps/ml-service/venv/
 apps/api/prisma/*.db*
-.env
-.env.local
+**/.env
+**/.env.*
+!**/.env.example
 .neon

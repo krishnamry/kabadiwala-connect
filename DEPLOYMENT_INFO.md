@@ -71,13 +71,13 @@ The project is linked to a serverless PostgreSQL database on Neon with Managed B
   ```
 
 ### Connection Strings & Auth Endpoints
-- **Pooled Connection String (`DATABASE_URL`):**
+- **Pooled Connection String (`DATABASE_URL` configured in Render Environment Secrets):**
   ```
-  postgresql://neondb_owner:npg_c5JmBuz9Slie@ep-divine-resonance-b3hfmbt9-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
+  postgresql://neondb_owner:[NEON_PASSWORD]@ep-divine-resonance-b3hfmbt9-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
   ```
 - **Direct / Unpooled Connection String (`DATABASE_URL_UNPOOLED`):**
   ```
-  postgresql://neondb_owner:npg_c5JmBuz9Slie@ep-divine-resonance-b3hfmbt9.c-4.ap-southeast-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
+  postgresql://neondb_owner:[NEON_PASSWORD]@ep-divine-resonance-b3hfmbt9.c-4.ap-southeast-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
   ```
 - **Neon Auth Base URL:**
   ```
