@@ -415,14 +415,14 @@ export const CitizenDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
       
-      {/* Top Banner - Dhatu Industrial Passbook Style */}
-      <div className="bg-steel-900 text-paper-50 rounded-xl p-5 sm:p-8 border-2 border-steel-700 shadow-tactile-lg flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+      {/* Top Banner - Material 3 Expressive Container */}
+      <div className="bg-gradient-to-br from-amber-900 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-m3-2 border border-amber-800/30 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 z-10">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="stamp-seal stamp-verified text-[11px] bg-forest-500/20 text-forest-500 border-forest-500">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-amber-500/25 text-amber-200 border border-amber-400/30">
               {t('sourcingLayer', 'SOURCING LAYER')}
             </span>
-            <span className="bg-copper-600/30 text-copper-300 font-mono text-xs px-2 py-0.5 rounded border border-copper-600/50">
+            <span className="rounded-full px-3 py-1 font-mono text-xs font-bold bg-white/10 text-slate-200 border border-white/15">
               {t('sihBadge', 'SIH26229')}
             </span>
             <VoiceAssistButton
@@ -432,45 +432,45 @@ export const CitizenDashboard: React.FC = () => {
               size="sm"
             />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
+          <h1 className="text-3xl sm:text-4xl font-display font-black tracking-tight text-white">
             {t('portalCitizen', 'Citizen e-Waste Portal')}
           </h1>
-          <p className="text-xs sm:text-sm text-paper-300 max-w-2xl font-medium">
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl font-normal">
             {t('citizenCardDesc', 'Safely channel your electronics into the CPCB authorized formal chain instead of toxic landfills.')}
           </p>
         </div>
 
         {/* Personal Impact Hero Counter (Section 1.A.5) */}
-        <div className="bg-steel-950 p-3.5 sm:p-4 rounded-xl border border-steel-800 text-left sm:text-right z-10 flex sm:flex-col justify-between sm:justify-center items-center sm:items-end">
+        <div className="bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/15 text-left sm:text-right z-10 flex sm:flex-col justify-between sm:justify-center items-center sm:items-end">
           <div>
-            <div className="text-[10px] uppercase font-mono text-paper-400">
+            <div className="text-xs uppercase font-medium text-slate-300 tracking-wider">
               {t('tabImpact', 'PERSONAL IMPACT STAT')}
             </div>
-            <div className="text-2xl sm:text-3xl font-mono-num font-black text-brass-400">
+            <div className="text-3xl sm:text-4xl font-display font-black text-amber-300">
               28.2 kg
             </div>
-            <div className="text-xs text-forest-400 font-medium">
+            <div className="text-xs text-emerald-300 font-semibold mt-0.5">
               {t('landfillDivertedKg', 'kg Diverted from Landfills')} 🌲
             </div>
           </div>
           <button
             onClick={() => setShowCertificateModal(true)}
-            className="mt-1 sm:mt-2 text-[11px] text-copper-400 hover:text-copper-300 font-bold underline flex items-center gap-1"
+            className="mt-2 text-xs text-amber-300 hover:text-amber-200 font-bold underline flex items-center gap-1.5"
           >
-            <Award className="w-3.5 h-3.5" />
+            <Award className="w-4 h-4" />
             <span>{t('downloadCert', 'Download Green Certificate')}</span>
           </button>
         </div>
       </div>
 
-      {/* Tabs - Horizontal Scrollable on Mobile Portrait */}
-      <div className="flex overflow-x-auto no-scrollbar gap-2 border-b-2 border-steel-300 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
+      {/* Tabs - Material 3 Expressive Pill Tabs */}
+      <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
         <button
           onClick={() => setActiveTab('pickups')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'pickups'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Clock className="w-4 h-4" />
@@ -479,10 +479,10 @@ export const CitizenDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('new')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'new'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Plus className="w-4 h-4" />
@@ -491,10 +491,10 @@ export const CitizenDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('impact')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'impact'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Award className="w-4 h-4" />
@@ -503,10 +503,10 @@ export const CitizenDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('dropoff')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'dropoff'
-              ? 'bg-steel-800 text-white shadow-tactile border border-steel-900'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Building className="w-4 h-4" />
@@ -1328,58 +1328,66 @@ export const CitizenDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (Thumb-friendly, Non-overlapping, Safe-Area Padded) */}
+      {/* MOBILE BOTTOM NAVIGATION BAR (Material 3 Expressive Navigation Bar) */}
       <nav
         aria-label="Citizen Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/98 backdrop-blur-lg border-t-2 border-steel-300 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] px-2 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0.75rem))]"
       >
         <div className="flex items-center justify-around gap-1 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab('pickups')}
-            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'pickups'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Clock className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavMyPickups', 'Pickups')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'pickups' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Clock className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavMyPickups', 'Pickups')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('new')}
-            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'new'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Plus className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavBook', 'Book')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'new' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Plus className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavBook', 'Book')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('impact')}
-            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'impact'
-                ? 'text-forest-700 bg-forest-50 border border-forest-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Award className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavImpact', 'Impact')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'impact' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Award className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavImpact', 'Impact')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('dropoff')}
-            className={`flex-1 min-w-0 py-1.5 px-1 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'dropoff'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Building className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavDropoff', 'Centers')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'dropoff' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Building className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavDropoff', 'Centers')}</span>
           </button>
         </div>
       </nav>

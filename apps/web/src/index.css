@@ -4,9 +4,9 @@
 
 @layer base {
   body {
-    @apply bg-paper-100 text-steel-800 font-body antialiased;
-    background-color: #F4EFE6;
-    color: #2E3532;
+    @apply bg-[#F8FAFC] text-slate-800 font-body antialiased;
+    background-color: #F8FAFC;
+    color: #0F172A;
   }
 }
 
@@ -17,91 +17,123 @@
   height: 100%;
 }
 
-/* Dhatu (धातु) Design Utilities */
-/* Receipt Stub / Perforated Edge Motif */
+/* Material 3 Expressive Design System Utilities */
+
+/* M3 Elevated Surface Cards */
+.m3-card {
+  background-color: #FFFFFF;
+  border-radius: 1.5rem; /* 24px rounded-3xl */
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.m3-card:hover {
+  box-shadow: 0 4px 16px 2px rgba(0, 0, 0, 0.06);
+}
+
+.m3-card-tonal {
+  background-color: #F0FDF4; /* soft mint emerald */
+  border-radius: 1.5rem;
+  border: 1px solid rgba(187, 247, 208, 0.6);
+}
+
+.m3-card-terracotta {
+  background-color: #FFF7ED; /* soft warm terracotta */
+  border-radius: 1.5rem;
+  border: 1px solid rgba(254, 215, 170, 0.6);
+}
+
+/* Backward-compatible .receipt-stub transformed to modern M3 rounded surface */
 .receipt-stub {
-  background-color: #FAF4F2;
-  border: 1px solid #D5D8D7;
-  position: relative;
+  background-color: #FFFFFF;
+  border-radius: 1.25rem;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease-in-out;
+}
+.receipt-stub:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-.perforated-edge {
-  background-image: radial-gradient(circle, transparent 0, transparent 4px, #FAF4F2 4px);
-  background-size: 16px 16px;
-  background-position: -8px -8px;
-}
-
-/* Physical Stamped Seal Motif (सत्यापित, पूर्ण, लंबित) */
+/* Modern Pill Badges (Replaces cluttered jagged stamps with clean M3 status pills) */
 .stamp-seal {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  text-transform: uppercase;
-  font-family: 'Roboto Slab', serif;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  padding: 3px 8px;
-  border: 2px solid currentColor;
-  border-radius: 4px;
-  transform: rotate(-1.5deg);
-  mask-image: linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85));
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem; /* 12px legible */
+  line-height: 1rem;
+  padding: 4px 10px;
+  border-radius: 9999px; /* Pill */
+  border: 1px solid currentColor;
 }
 
 .stamp-verified {
-  color: #3B6B4E;
-  border-color: #3B6B4E;
-  background-color: rgba(59, 107, 78, 0.08);
+  color: #047857;
+  border-color: #A7F3D0;
+  background-color: #ECFDF5;
 }
 
 .stamp-pending {
-  color: #C9A227;
-  border-color: #C9A227;
-  background-color: rgba(201, 162, 39, 0.1);
+  color: #B45309;
+  border-color: #FDE68A;
+  background-color: #FFFBEB;
 }
 
 .stamp-hazard {
-  color: #C1443C;
-  border-color: #C1443C;
-  background-color: rgba(193, 68, 60, 0.08);
+  color: #B91C1C;
+  border-color: #FECACA;
+  background-color: #FEF2F2;
 }
 
-/* Pressed Button Effect (Mechanical Tactile Feedback) */
+/* Material 3 Expressive Pill Buttons */
+.btn-dhatu,
 .btn-dhatu-primary {
-  background-color: #B5573A;
+  background-color: #047857;
   color: #FFFFFF;
-  border-bottom: 3px solid #873C25;
-  transition: all 0.1s ease-in-out;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(4, 120, 87, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.btn-dhatu:hover,
+.btn-dhatu-primary:hover {
+  background-color: #065F46;
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+  transform: translateY(-1px);
+}
+.btn-dhatu:active,
 .btn-dhatu-primary:active {
-  transform: translateY(2px);
-  border-bottom-width: 1px;
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(4, 120, 87, 0.2);
 }
 
 .btn-dhatu-steel {
-  background-color: #2E3532;
+  background-color: #0F172A;
   color: #FFFFFF;
-  border-bottom: 3px solid #141816;
-  transition: all 0.1s ease-in-out;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.btn-dhatu-steel:active {
-  transform: translateY(2px);
-  border-bottom-width: 1px;
+.btn-dhatu-steel:hover {
+  background-color: #1E293B;
+  transform: translateY(-1px);
 }
 
 .btn-dhatu-brass {
-  background-color: #C9A227;
-  color: #1F2422;
-  border-bottom: 3px solid #8E6D14;
+  background-color: #D97706;
+  color: #FFFFFF;
+  border-radius: 9999px;
   font-weight: 700;
-  transition: all 0.1s ease-in-out;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.btn-dhatu-brass:active {
-  transform: translateY(2px);
-  border-bottom-width: 1px;
+.btn-dhatu-brass:hover {
+  background-color: #B45309;
 }
 
 /* Mobile Portrait Phone Optimization Utilities */
-/* Hide scrollbar on mobile horizontal tab strips while preserving touch scrolling */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -111,9 +143,10 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Ensure Leaflet maps adapt seamlessly to mobile touch and viewport orientation changes */
 .leaflet-touch .leaflet-control-layers,
 .leaflet-touch .leaflet-bar {
-  border: 2px solid rgba(46, 53, 50, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
 }
 

@@ -741,19 +741,19 @@ export const KabadiwalaDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6 pb-28">
       
-      {/* Top Collector Header Bar - Passbook Meets Industrial Metaphor */}
-      <div className="bg-steel-900 text-paper-50 rounded-xl p-5 sm:p-7 border-2 border-steel-700 shadow-tactile-lg relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Top Collector Header Bar - Material 3 Expressive Container */}
+      <div className="bg-gradient-to-br from-emerald-900 via-teal-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-m3-2 border border-emerald-800/40 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           
-          <div className="space-y-1.5 z-10">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="stamp-seal stamp-verified text-[11px] bg-forest-500/20 text-forest-500 border-forest-500">
+          <div className="space-y-2 z-10">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-emerald-500/25 text-emerald-200 border border-emerald-400/30">
                 {t('verifiedCollector', 'VERIFIED COLLECTOR')}
               </span>
-              <span className="bg-brass-500/20 text-brass-300 font-mono text-xs px-2 py-0.5 rounded border border-brass-500/40">
+              <span className="rounded-full px-3 py-1 font-mono text-xs font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
                 ID: KC-COL-8921
               </span>
-              <span className="bg-steel-800 text-paper-300 text-xs px-2 py-0.5 rounded font-mono">
+              <span className="rounded-full px-3 py-1 font-medium text-xs bg-white/10 text-slate-200 border border-white/15">
                 {user?.kabadiwala?.vehicleType || 'Solar Cargo Trike'}
               </span>
               <VoiceAssistButton
@@ -764,45 +764,45 @@ export const KabadiwalaDashboard: React.FC = () => {
               />
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
+            <h1 className="text-3xl sm:text-4xl font-display font-black tracking-tight text-white">
               {language === 'hi' || language === 'mr' ? 'सुरेश कुमार' : 'Suresh Kumar'}
             </h1>
 
-            <div className="flex items-center space-x-3 text-xs text-paper-300">
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-copper-400" />
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-emerald-300" />
                 <span>{t('operatingZone', 'Operating Zone: Pan-India Active Network')}</span>
               </span>
-              <span className="text-forest-400 font-bold">★ 4.9 {language === 'hi' ? 'रेटिंग (१४२ कार्य)' : language === 'mr' ? 'रेटिंग (१४२ कामे)' : 'Rating (142 Jobs)'}</span>
+              <span className="text-emerald-300 font-bold">★ 4.9 {language === 'hi' ? 'रेटिंग (१४२ कार्य)' : language === 'mr' ? 'रेटिंग (१४२ कामे)' : 'Rating (142 Jobs)'}</span>
             </div>
           </div>
 
           {/* Running Balance & Offline Mode Controls */}
-          <div className="flex flex-wrap items-center gap-3 z-10">
-            <div className="bg-steel-950 p-3 rounded-lg border border-steel-800 text-right">
-              <div className="text-[10px] uppercase font-mono text-paper-400">
+          <div className="flex flex-wrap items-center gap-4 z-10">
+            <div className="bg-white/10 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-white/15 text-left sm:text-right">
+              <div className="text-xs uppercase font-medium text-slate-300 tracking-wider">
                 {t('passbookBalance', 'Passbook Balance')}
               </div>
-              <div className="text-xl sm:text-2xl font-mono-num font-bold text-brass-400">
+              <div className="text-2xl sm:text-3xl font-display font-black text-amber-300">
                 {formatCurrency(walletBalance)}
               </div>
-              <div className="text-[10px] text-forest-400 font-medium flex items-center justify-end gap-1">
+              <div className="text-xs text-emerald-300 font-semibold flex items-center sm:justify-end gap-1 mt-0.5">
                 <span>{t('cashFirst', '💵 Cash-First Support')}</span>
               </div>
             </div>
 
             {/* Offline Mode Switcher */}
-            <div className="flex flex-col items-end gap-1">
+            <div className="flex flex-col items-end gap-2">
               <button
                 onClick={handleToggleOffline}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 border transition-all ${
+                className={`px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold flex items-center space-x-2 transition-all shadow-sm ${
                   isOffline
-                    ? 'bg-signal-500 text-white border-signal-600 animate-pulse'
-                    : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border-steel-400'
+                    ? 'bg-rose-600 text-white animate-pulse'
+                    : 'bg-white/20 hover:bg-white/30 text-white border border-white/20'
                 }`}
                 title="Toggle Offline Tolerant Mode"
               >
-                {isOffline ? <WifiOff className="w-3.5 h-3.5" /> : <Wifi className="w-3.5 h-3.5 text-forest-600" />}
+                {isOffline ? <WifiOff className="w-4 h-4" /> : <Wifi className="w-4 h-4 text-emerald-300" />}
                 <span>{isOffline ? t('offlineMode', '📵 Offline Mode') : t('onlineMode', '🌐 Online')}</span>
               </button>
 
@@ -810,9 +810,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                 <button
                   onClick={handleSyncOfflineLots}
                   disabled={syncing}
-                  className="btn-dhatu-brass px-2.5 py-1 rounded text-[11px] font-bold flex items-center space-x-1 shadow-sm"
+                  className="px-3.5 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold flex items-center space-x-1.5 shadow-sm"
                 >
-                  <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
                   <span>{t('syncPendingLots', 'Sync Pending Lots')} ({offlineQueue.length})</span>
                 </button>
               )}
@@ -824,28 +824,28 @@ export const KabadiwalaDashboard: React.FC = () => {
 
       {/* Offline Pending Sync Warning Banner */}
       {isOffline && (
-        <div className="p-3 bg-amber-500/10 border-2 border-brass-500 rounded-lg text-xs text-steel-900 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <WifiOff className="w-4 h-4 text-brass-700" />
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-sm text-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm">
+          <div className="flex items-center space-x-2.5">
+            <WifiOff className="w-5 h-5 text-amber-700 shrink-0" />
             <span className="font-bold">
               {t('offlineModeActive', 'Offline Mode Active:')}
             </span>
-            <span>{t('offlineModeDesc', 'Lots are cached locally in your phone storage and queued for auto-sync.')}</span>
+            <span className="text-slate-700">{t('offlineModeDesc', 'Lots are cached locally in your phone storage and queued for auto-sync.')}</span>
           </div>
-          <span className="font-mono text-xs font-bold text-copper-700">
+          <span className="font-semibold text-xs text-amber-800 bg-amber-100 px-3 py-1 rounded-full self-start sm:self-auto">
             {t(`${offlineQueue.length} lots pending sync`, `${offlineQueue.length} lots pending sync`)}
           </span>
         </div>
       )}
 
-      {/* Primary Tab Navigation (Horizontal Scrollable for Mobile & Desktop) */}
-      <div className="flex overflow-x-auto no-scrollbar gap-2 border-b-2 border-steel-300 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
+      {/* Primary Tab Navigation (Material 3 Expressive Pill Tabs) */}
+      <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
         <button
           onClick={() => setActiveTab('lots')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'lots'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Camera className="w-4 h-4" />
@@ -854,10 +854,10 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('priceboard')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'priceboard'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -866,10 +866,10 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('recyclers')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'recyclers'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Factory className="w-4 h-4" />
@@ -878,10 +878,10 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('handover')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'handover'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <QrCode className="w-4 h-4" />
@@ -890,10 +890,10 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('passbook')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'passbook'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -902,10 +902,10 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('safety')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'safety'
-              ? 'bg-signal-500 text-white shadow-tactile border border-signal-600'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-rose-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -914,10 +914,10 @@ export const KabadiwalaDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('pickups')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'pickups'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Truck className="w-4 h-4" />
@@ -929,15 +929,15 @@ export const KabadiwalaDashboard: React.FC = () => {
       {activeTab === 'lots' && (
         <div className="space-y-6">
           {/* Sub-view Switcher: Create Lot vs My Created Lots */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-paper-50 p-3 rounded-xl border-2 border-steel-300 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-m3-1">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setLotsSubView('create')}
-                className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-all ${
+                className={`px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 transition-all ${
                   lotsSubView === 'create'
-                    ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-                    : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
                 <Plus className="w-4 h-4" />
@@ -947,25 +947,25 @@ export const KabadiwalaDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setLotsSubView('mylots')}
-                className={`px-4 py-2.5 rounded-lg font-bold text-xs flex items-center gap-2 transition-all ${
+                className={`px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 transition-all ${
                   lotsSubView === 'mylots'
-                    ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-                    : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
                 <FileText className="w-4 h-4" />
                 <span>{t('myCreatedLots', 'My Created Lots')} ({myLots.length})</span>
                 {myLots.some(l => (l.bids && l.bids.length > 0)) && (
-                  <span className="bg-brass-400 text-steel-950 text-[10px] font-mono font-black px-1.5 py-0.5 rounded-full animate-pulse">
+                  <span className="bg-amber-400 text-slate-950 text-xs font-mono font-extrabold px-2 py-0.5 rounded-full animate-pulse">
                     {myLots.reduce((sum, l) => sum + (l.bids?.length || 0), 0)} {t('bidsReceived', 'Bids')}
                   </span>
                 )}
               </button>
             </div>
 
-            <div className="text-xs font-mono text-steel-600 flex items-center gap-2">
+            <div className="text-xs font-semibold text-slate-600 flex items-center gap-2 px-2">
               <span className="hidden sm:inline">{t('biddingRule', 'Recycler Bidding Rule:')}</span>
-              <span className="bg-paper-200 px-2.5 py-1 rounded border border-steel-300 font-bold text-copper-700">
+              <span className="bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 font-bold text-emerald-800">
                 {t('minAskRule', 'Min 50% of Ask Value')}
               </span>
             </div>
@@ -979,10 +979,10 @@ export const KabadiwalaDashboard: React.FC = () => {
             return (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
-              <div className="lg:col-span-7 bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-5">
+              <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-m3-1 space-y-6">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="stamp-seal stamp-verified text-xs">{t('lotCreationBadge', 'Lot Creation')}</span>
+                    <span className="rounded-full px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold">{t('lotCreationBadge', 'Lot Creation')}</span>
                     <VoiceAssistButton
                       text={lotTypeMode === 'custom' 
                         ? `Custom mixed lot mode. Add multiple scrap materials to bundle into one consignment. Total weight ${customTotalWeight} kilograms.`
@@ -999,10 +999,10 @@ export const KabadiwalaDashboard: React.FC = () => {
                       size="sm"
                     />
                   </div>
-                  <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+                  <h2 className="text-2xl font-display font-black text-slate-900 mt-2">
                     {t('digitalLotCreatorTitle', 'Digital E-Waste Lot Creator')}
                   </h2>
-                  <p className="text-xs text-steel-600 font-medium">
+                  <p className="text-sm text-slate-600 font-normal mt-1">
                     {lotTypeMode === 'custom'
                       ? 'Bundle multiple scrap materials into a single certified lot with itemized rates and automatic valuation.'
                       : 'Photograph material, select e-waste category, specify weight, and generate a verified digital lot.'}
@@ -1010,30 +1010,30 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
 
                 {lotCreatedSuccess && (
-                  <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-lg text-xs text-forest-800 space-y-1">
-                    <div className="font-bold flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-forest-600" />
+                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-sm text-emerald-900 space-y-1">
+                    <div className="font-bold flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                       <span>{t('lotCreatedSuccessTitle', 'Lot Registered Successfully!')}</span>
                     </div>
                     <p>{lotCreatedSuccess}</p>
                   </div>
                 )}
 
-                <form onSubmit={handleCreateLot} className="space-y-4">
+                <form onSubmit={handleCreateLot} className="space-y-5">
 
                   {/* Lot Mode Toggle: Single vs Custom Mixed */}
                   <div>
-                    <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                       {t('lotTypeSelection', '1. Select Lot Configuration')}
                     </label>
-                    <div className="bg-paper-200/90 p-1.5 rounded-xl border-2 border-steel-300 grid grid-cols-2 gap-2 shadow-sm">
+                    <div className="bg-slate-100 p-1.5 rounded-2xl border border-slate-200 grid grid-cols-2 gap-2 shadow-sm">
                       <button
                         type="button"
                         onClick={() => setLotTypeMode('single')}
-                        className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                        className={`py-2.5 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                           lotTypeMode === 'single'
-                            ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-                            : 'bg-white text-steel-700 hover:bg-paper-100 border border-steel-300'
+                            ? 'bg-white text-emerald-900 shadow-sm border border-slate-200/80'
+                            : 'text-slate-600 hover:text-slate-900'
                         }`}
                       >
                         <Package className="w-4 h-4 shrink-0" />
@@ -1042,15 +1042,15 @@ export const KabadiwalaDashboard: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setLotTypeMode('custom')}
-                        className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                        className={`py-2.5 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                           lotTypeMode === 'custom'
-                            ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-                            : 'bg-white text-steel-700 hover:bg-paper-100 border border-steel-300'
+                            ? 'bg-white text-emerald-900 shadow-sm border border-slate-200/80'
+                            : 'text-slate-600 hover:text-slate-900'
                         }`}
                       >
                         <Layers className="w-4 h-4 shrink-0" />
                         <span>{t('customMixedLot', 'Custom Mixed Lot')}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-copper-100 text-copper-800 font-mono font-bold">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold">
                           {customLotItems.length} items
                         </span>
                       </button>
@@ -1071,32 +1071,32 @@ export const KabadiwalaDashboard: React.FC = () => {
                     />
                     <label
                       htmlFor="lot-camera-input"
-                      className="cursor-pointer border-2 border-dashed border-steel-400 hover:border-copper-600 rounded-lg p-6 bg-paper-100 flex flex-col items-center justify-center space-y-2 text-center transition-colors block"
+                      className="cursor-pointer border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-3xl p-6 bg-slate-50/70 hover:bg-emerald-50/30 flex flex-col items-center justify-center space-y-3 text-center transition-all block shadow-sm"
                     >
-                      <div className="w-12 h-12 rounded-full bg-copper-100 text-copper-700 flex items-center justify-center mx-auto">
-                        <Camera className="w-6 h-6" />
+                      <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto shadow-sm">
+                        <Camera className="w-7 h-7" />
                       </div>
                       {lotPhotoClassifying ? (
-                        <div className="text-copper-700 font-bold text-xs flex items-center justify-center gap-1.5 animate-pulse">
+                        <div className="text-emerald-800 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
                           <RefreshCw className="w-4 h-4 animate-spin" />
                           <span>AI Scanning Scrap Material...</span>
                         </div>
                       ) : lotMlResult ? (
-                        <div className="space-y-1">
-                          <div className="text-forest-700 font-bold text-xs flex items-center justify-center gap-1">
-                            <CheckCircle2 className="w-4 h-4 text-forest-600" />
+                        <div className="space-y-1.5">
+                          <div className="text-emerald-900 font-bold text-sm flex items-center justify-center gap-1.5">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                             <span>AI Detected: {preserveEnglishItemName(lotMlResult.category)} ({Math.round(lotMlResult.confidence * 100)}% match)</span>
                           </div>
-                          <p className="text-[11px] text-steel-600">{lotMlResult.advice}</p>
+                          <p className="text-xs text-slate-600 font-normal">{lotMlResult.advice}</p>
                         </div>
                       ) : lotPhotoTaken ? (
-                        <div className="text-forest-700 font-bold text-xs flex items-center justify-center gap-1">
-                          <CheckCircle2 className="w-4 h-4" /> {t('photoCapturedMsg', 'Photo Captured & Verified (1080p)')}
+                        <div className="text-emerald-800 font-bold text-sm flex items-center justify-center gap-1.5">
+                          <CheckCircle2 className="w-5 h-5" /> {t('photoCapturedMsg', 'Photo Captured & Verified (1080p)')}
                         </div>
                       ) : (
                         <div>
-                          <span className="text-xs font-bold text-steel-800 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
-                          <span className="text-[11px] text-steel-500">
+                          <span className="text-sm font-bold text-slate-900 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
+                          <span className="text-xs text-slate-500 mt-1 block">
                             {lotTypeMode === 'custom' ? 'Snap photo of mixed consignment or composite scrap batch' : 'AI automatically detects CRTs, LCDs, PCBs, Cables, Batteries'}
                           </span>
                         </div>
@@ -1108,13 +1108,13 @@ export const KabadiwalaDashboard: React.FC = () => {
                     <>
                       {/* Category Selector */}
                       <div>
-                        <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                           3. {t('selectScrapCategory', 'Select Item Category')}
                         </label>
                         <select
                           value={lotCategory}
                           onChange={e => setLotCategory(e.target.value)}
-                          className="w-full px-3 py-2.5 text-xs font-bold bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                          className="w-full px-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
                         >
                           {priceBoardData.map(p => (
                             <option key={p.category} value={p.category}>
@@ -1126,33 +1126,33 @@ export const KabadiwalaDashboard: React.FC = () => {
 
                       {/* Weight Stepper (Low-Literacy Friendly +/- Buttons) */}
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                             {t('approxWeightLabel', '4. Enter Approx Weight (Kilograms)')}
                           </label>
-                          <span className="text-xs font-mono text-steel-500 font-medium">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
+                          <span className="text-xs text-slate-500 font-semibold">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <button
                             type="button"
                             onClick={() => setLotWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
-                            className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
+                            className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-emerald-100 border border-slate-200 flex items-center justify-center text-slate-800 hover:text-emerald-900 active:scale-95 transition-transform shadow-sm"
                           >
                             <Minus className="w-6 h-6" />
                           </button>
 
-                          <div className="flex-1 bg-white border-2 border-steel-400 rounded-lg p-3 text-center">
-                            <span className="text-3xl font-mono-num font-black text-steel-900">
+                          <div className="flex-1 bg-white border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-sm">
+                            <span className="text-3xl sm:text-4xl font-display font-black text-slate-900">
                               {lotWeight}
                             </span>
-                            <span className="text-xs font-bold text-steel-500 ml-1.5 uppercase">kg</span>
+                            <span className="text-sm font-bold text-slate-500 ml-2 uppercase">kg</span>
                           </div>
 
                           <button
                             type="button"
                             onClick={() => setLotWeight(w => Math.round((w + 0.5) * 10) / 10)}
-                            className="w-14 h-14 rounded-lg bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center text-steel-900 active:scale-95 transition-transform"
+                            className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-emerald-100 border border-slate-200 flex items-center justify-center text-slate-800 hover:text-emerald-900 active:scale-95 transition-transform shadow-sm"
                           >
                             <Plus className="w-6 h-6" />
                           </button>
@@ -2720,82 +2720,94 @@ export const KabadiwalaDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MOBILE BOTTOM TAB BAR (Thumb-Reachable, Non-overlapping, Safe-Area Padded) */}
+      {/* MOBILE BOTTOM TAB BAR (Material 3 Expressive Navigation Bar) */}
       <nav
         aria-label="Collector Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-paper-50/98 backdrop-blur-lg border-t-2 border-steel-300 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))]"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0.75rem))]"
       >
-        <div className="flex items-center justify-around gap-0.5">
+        <div className="flex items-center justify-around gap-1 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab('lots')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'lots'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Camera className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavLots', 'Lots')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'lots' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Camera className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavLots', 'Lots')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('priceboard')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'priceboard'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <TrendingUp className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavPrices', 'Prices')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'priceboard' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <TrendingUp className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavPrices', 'Prices')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('pickups')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'pickups'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Truck className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavPickups', 'Pickups')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'pickups' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Truck className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavPickups', 'Pickups')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('recyclers')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'recyclers'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Factory className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavRecyclers', 'Recyclers')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'recyclers' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Factory className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavRecyclers', 'Recyclers')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('passbook')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'passbook'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <BookOpen className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavPassbook', 'Passbook')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'passbook' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <BookOpen className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavPassbook', 'Passbook')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('safety')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'safety'
-                ? 'text-signal-600 bg-signal-50 border border-signal-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-rose-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <AlertTriangle className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavSafety', 'Safety')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'safety' ? 'bg-rose-100 text-rose-800' : 'text-slate-500'}`}>
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavSafety', 'Safety')}</span>
           </button>
         </div>
       </nav>

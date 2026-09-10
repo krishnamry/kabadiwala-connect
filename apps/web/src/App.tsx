@@ -72,7 +72,7 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-paper-100 text-steel-800">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-800 font-body antialiased">
       <Navbar
         currentTab={currentView}
         onTabChange={(tab: string) => setCurrentView(tab)}
@@ -82,22 +82,24 @@ const MainContent: React.FC = () => {
         {renderActiveView()}
       </main>
 
-      {/* Footer — Dhatu Industrial Stamped Style (Hidden on mobile when using Dashboard to eliminate bottom bar collision) */}
-      <footer className={`bg-steel-900 text-paper-300 py-8 border-t-2 border-steel-700 text-xs ${currentView !== 'home' ? 'hidden md:block' : 'pb-16 md:pb-8'}`}>
+      {/* Modern Material Expressive Footer (Hidden on mobile when using Dashboard to eliminate bottom bar collision) */}
+      <footer className={`bg-slate-900 text-slate-300 py-8 border-t border-slate-800 text-sm ${currentView !== 'home' ? 'hidden md:block' : 'pb-20 md:pb-8'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-7 h-7 rounded bg-copper-600 border border-copper-800 flex items-center justify-center text-white font-display font-black text-sm">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-display font-extrabold text-sm shadow-sm">
               धा
             </div>
-            <span className="font-display font-bold text-paper-50">Kabadiwala Connect ({language === 'en' ? 'Dhatu' : 'धातु'})</span>
-            <span className="text-paper-400">— {t('sihSub', 'Ministry of Mines — Informal e-Waste Integration')}</span>
+            <div>
+              <span className="font-display font-bold text-white text-base">Kabadiwala Connect ({language === 'en' ? 'Dhatu' : 'धातु'})</span>
+              <span className="text-slate-400 text-xs block sm:inline sm:ml-2">— {t('sihSub', 'Ministry of Mines — Informal e-Waste Integration')}</span>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-paper-400 font-mono text-[11px]">
-            <span>3-Sided Formal Funnel</span>
-            <span>CPCB EPR Form-2/6 Compliant</span>
-            <span>Spoken Vernacular TTS</span>
-            <span>Offline-Tolerant Passbook</span>
+          <div className="flex flex-wrap items-center gap-3 text-slate-400 text-xs">
+            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">3-Sided Formal Funnel</span>
+            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">CPCB EPR Compliant</span>
+            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">Spoken TTS</span>
+            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">Offline-Tolerant</span>
           </div>
         </div>
       </footer>

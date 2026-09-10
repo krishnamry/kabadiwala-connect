@@ -162,14 +162,14 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
       
-      {/* Top Header - Dhatu Industrial Passbook Style */}
-      <div className="bg-steel-900 text-paper-50 rounded-xl p-5 sm:p-8 border-2 border-steel-700 shadow-tactile-lg flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+      {/* Top Header - Material 3 Expressive Container */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-m3-2 border border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-2 z-10">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="stamp-seal stamp-verified text-[11px] bg-forest-500/20 text-forest-500 border-forest-500">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-emerald-500/25 text-emerald-200 border border-emerald-400/30">
               MINISTRY OF MINES & CPCB
             </span>
-            <span className="bg-brass-500/20 text-brass-300 font-mono text-xs px-2 py-0.5 rounded border border-brass-500/40">
+            <span className="rounded-full px-3 py-1 font-mono text-xs font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
               ULB REGULATORY DASHBOARD
             </span>
             <VoiceAssistButton
@@ -179,18 +179,18 @@ export const AdminDashboard: React.FC = () => {
               size="sm"
             />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-paper-50">
-            CPCB Waste & Mines Cell <span className="text-copper-400 font-sans text-lg">(National Regulatory Authority)</span>
+          <h1 className="text-3xl sm:text-4xl font-display font-black tracking-tight text-white">
+            CPCB Waste & Mines Cell <span className="text-slate-300 font-sans text-xl font-normal">(National Regulatory Authority)</span>
           </h1>
-          <p className="text-xs sm:text-sm text-paper-300 max-w-2xl font-medium">
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl font-normal">
             CPCB E-Waste (Management) Rules 2022 Central Audit Terminal & Traceability Ledger
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2 z-10">
+        <div className="flex flex-wrap gap-3 z-10">
           <button
             onClick={handleExportEPR}
-            className="btn-dhatu-primary px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-2"
+            className="px-6 py-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold flex items-center space-x-2 transition-all shadow-sm"
           >
             <Download className="w-4 h-4" />
             <span>Export CPCB EPR Audit (JSON)</span>
@@ -198,14 +198,14 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs - Horizontal Scrollable on Mobile Portrait */}
-      <div className="flex overflow-x-auto no-scrollbar gap-2 border-b-2 border-steel-300 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
+      {/* Tabs - Material 3 Expressive Pill Tabs */}
+      <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'overview'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -214,10 +214,10 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('traceability')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'traceability'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -226,10 +226,10 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('uniteconomics')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'uniteconomics'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Calculator className="w-4 h-4" />
@@ -238,10 +238,10 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('verifications')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'verifications'
-              ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -250,10 +250,10 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('epr')}
-          className={`flex-shrink-0 whitespace-nowrap px-4 py-2.5 rounded-lg font-bold text-xs flex items-center space-x-2 transition-all ${
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'epr'
-              ? 'bg-steel-800 text-white shadow-tactile border border-steel-900'
-              : 'bg-paper-200 text-steel-800 hover:bg-paper-300 border border-steel-300'
+              ? 'bg-emerald-700 text-white shadow-m3-1'
+              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
           <FileSpreadsheet className="w-4 h-4" />
@@ -671,70 +671,80 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Sticky Mobile Bottom Navigation Bar (Thumb-friendly, Non-overlapping, Safe-Area Padded) */}
+      {/* Sticky Mobile Bottom Navigation Bar (Material 3 Expressive Navigation Bar) */}
       <nav
         aria-label="Admin Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-paper-50/98 backdrop-blur-lg border-t-2 border-steel-300 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] px-1 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0.75rem))] md:hidden"
       >
-        <div className="flex items-center justify-around gap-0.5 max-w-md mx-auto">
+        <div className="flex items-center justify-around gap-1 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'overview'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <TrendingUp className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavOverview', 'Overview')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'overview' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <TrendingUp className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavOverview', 'Overview')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('traceability')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'traceability'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Layers className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavTrace', 'Trace')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'traceability' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Layers className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavTrace', 'Trace')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('uniteconomics')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'uniteconomics'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Calculator className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavEconomics', 'Economics')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'uniteconomics' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Calculator className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavEconomics', 'Economics')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('verifications')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'verifications'
-                ? 'text-copper-700 bg-copper-50 border border-copper-200 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <Users className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavVerifyAdmin', 'Verify')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'verifications' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <Users className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavVerifyAdmin', 'Verify')}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('epr')}
-            className={`flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'epr'
-                ? 'text-steel-900 bg-paper-200 border border-steel-300 font-extrabold shadow-sm'
-                : 'text-steel-600 hover:text-steel-900'
+                ? 'text-emerald-950 font-bold'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4 mb-0.5 shrink-0" />
-            <span className="text-[10px] leading-tight truncate w-full text-center">{t('mNavEpr', 'EPR')}</span>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'epr' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+              <FileSpreadsheet className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavEpr', 'EPR')}</span>
           </button>
         </div>
       </nav>

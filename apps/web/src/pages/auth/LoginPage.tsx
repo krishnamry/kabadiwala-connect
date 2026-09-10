@@ -199,21 +199,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     <div className="min-h-[85vh] py-4 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-6 sm:space-y-8">
       
       {/* Header Banner */}
-      <div className="text-center space-y-2 max-w-2xl mx-auto">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-paper-200 text-steel-800 text-xs font-mono font-bold border border-steel-400 shadow-sm">
-          <span className="stamp-seal stamp-verified text-[10px]">SIH26229</span>
+      <div className="text-center space-y-3 max-w-2xl mx-auto">
+        <div className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-white text-slate-800 text-xs sm:text-sm font-semibold border border-slate-200 shadow-sm">
+          <span className="rounded-full px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold">SIH26229</span>
           <span>{t('authGateway', 'Role-Based Authentication Gateway')}</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-display font-black text-steel-950">
+        <h1 className="text-3xl sm:text-5xl font-display font-black text-slate-900 tracking-tight">
           {t('selectRole', 'Select Your Role')}
         </h1>
-        <p className="text-xs sm:text-sm text-steel-600 font-medium">
+        <p className="text-sm sm:text-base text-slate-600 font-normal">
           {t('loginSubtitle', "Kabadiwala Connect provides a dedicated, purpose-built interface for each stakeholder in India's formal e-waste chain.")}
         </p>
       </div>
 
       {/* 4 Dedicated Role Selector Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl mx-auto">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
         {(['CITIZEN', 'KABADIWALA', 'RECYCLER', 'ADMIN'] as Role[]).map(r => {
           const cfg = roleConfig[r];
           const Icon = cfg.icon;
@@ -224,33 +224,33 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               key={r}
               type="button"
               onClick={() => handleRoleSelect(r)}
-              className={`p-4 rounded-xl text-left border-2 transition-all flex flex-col justify-between space-y-3 ${
+              className={`p-5 rounded-3xl text-left border transition-all duration-200 flex flex-col justify-between space-y-3.5 ${
                 isSelected
-                  ? `receipt-stub ${cfg.borderColor} shadow-tactile-lg bg-white`
-                  : 'bg-paper-100 border-steel-300 hover:border-steel-400 opacity-75 hover:opacity-100'
+                  ? 'border-emerald-600 ring-2 ring-emerald-500/20 shadow-m3-2 bg-white'
+                  : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm hover:shadow-m3-1'
               }`}
             >
               <div className="flex justify-between items-start">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${cfg.bgColor} ${cfg.themeColor}`}>
-                  <Icon className="w-5 h-5" />
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold ${cfg.bgColor} ${cfg.themeColor} shadow-sm`}>
+                  <Icon className="w-6 h-6" />
                 </div>
                 {isSelected && (
-                  <span className="stamp-seal stamp-verified text-[9px]">{t('activeTabBadge', 'ACTIVE')}</span>
+                  <span className="rounded-full px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold">{t('activeTabBadge', 'ACTIVE')}</span>
                 )}
               </div>
 
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-steel-500 block">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">
                   {cfg.badge}
                 </span>
-                <h3 className="font-display font-bold text-steel-900 text-sm mt-0.5 leading-snug">
+                <h3 className="font-display font-black text-slate-900 text-base mt-1 leading-snug">
                   {language === 'hi' ? cfg.titleHi : language === 'mr' ? cfg.titleMr : cfg.titleEn}
                 </h3>
               </div>
 
-              <div className="text-[11px] font-mono font-bold text-copper-700 flex items-center justify-between pt-1 border-t border-paper-200">
+              <div className="text-xs font-semibold text-emerald-800 flex items-center justify-between pt-2 border-t border-slate-100">
                 <span>{cfg.demoName.split(' ')[0]}</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4 text-slate-400" />
               </div>
             </button>
           );
@@ -261,12 +261,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-5xl mx-auto">
         
         {/* Left Column: Role Details & Features Preview */}
-        <div className="order-2 lg:order-1 lg:col-span-6 receipt-stub rounded-2xl p-5 sm:p-8 border-2 border-steel-400 shadow-sm flex flex-col justify-between space-y-6">
+        <div className="order-2 lg:order-1 lg:col-span-6 m3-card rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-m3-1 flex flex-col justify-between space-y-6 bg-white">
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-steel-300 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
-                <span className="stamp-seal stamp-verified text-xs">{currentConfig.badge}</span>
-                <h2 className="text-xl sm:text-2xl font-display font-black text-steel-900 mt-1">
+                <span className="rounded-full px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold">{currentConfig.badge}</span>
+                <h2 className="text-xl sm:text-2xl font-display font-black text-slate-900 mt-2">
                   {language === 'hi' ? currentConfig.titleHi : language === 'mr' ? currentConfig.titleMr : currentConfig.titleEn}
                 </h2>
               </div>
@@ -278,19 +278,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               />
             </div>
 
-            <p className="text-xs text-steel-700 leading-relaxed font-medium">
+            <p className="text-sm text-slate-600 leading-relaxed font-normal">
               {currentConfig.subtitle}
             </p>
 
             {/* Feature List for this specific role */}
-            <div className="space-y-2 pt-2">
-              <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
+            <div className="space-y-2.5 pt-2">
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
                 {t('dedicatedFeatures', 'Dedicated Features for this Portal')}:
               </span>
-              <ul className="space-y-2 text-xs text-steel-700">
+              <ul className="space-y-2.5 text-sm text-slate-700">
                 {currentConfig.features.map((feat, idx) => (
-                  <li key={idx} className="flex items-start space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-forest-600 flex-shrink-0 mt-0.5" />
+                  <li key={idx} className="flex items-start space-x-2.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                     <span>{feat}</span>
                   </li>
                 ))}
@@ -298,24 +298,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
             </div>
           </div>
 
-          <div className="p-3 bg-paper-200 rounded-lg border border-steel-300 text-xs text-steel-600 flex items-center justify-between font-mono">
-            <span>Persona: <strong>{currentConfig.demoName}</strong></span>
-            <span>Tel: <strong>{currentConfig.demoPhone}</strong></span>
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-600 flex items-center justify-between font-sans">
+            <span>Persona: <strong className="text-slate-900">{currentConfig.demoName}</strong></span>
+            <span>Tel: <strong className="text-slate-900">{currentConfig.demoPhone}</strong></span>
           </div>
         </div>
 
         {/* Right Column: Clean Login Form */}
-        <div className="order-1 lg:order-2 lg:col-span-6 bg-paper-50 rounded-2xl p-5 sm:p-8 border-2 border-steel-400 shadow-tactile-lg flex flex-col justify-between space-y-6">
+        <div className="order-1 lg:order-2 lg:col-span-6 m3-card rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-m3-2 flex flex-col justify-between space-y-6 bg-white">
           
-          <div className="space-y-5">
+          <div className="space-y-6">
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-copper-700 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 block">
                 {t('authGateway', 'AUTHENTICATION')}
               </span>
-              <h3 className="text-xl font-display font-black text-steel-900 mt-0.5">
+              <h3 className="text-2xl font-display font-black text-slate-900 mt-1">
                 {language === 'hi' ? currentConfig.titleHi : language === 'mr' ? currentConfig.titleMr : currentConfig.titleEn} {t('signIn', 'Sign In')}
               </h3>
-              <p className="text-xs text-steel-500">
+              <p className="text-sm text-slate-500 mt-1 font-normal">
                 {t('loginSubtitle', 'Enter credentials or use the 1-Click Instant Login button below.')}
               </p>
             </div>
@@ -325,21 +325,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               type="button"
               onClick={handleInstantDemoLogin}
               disabled={loading}
-              className="w-full btn-dhatu py-3.5 px-4 rounded-xl font-display font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-tactile group"
+              className="w-full py-4 px-6 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-display font-bold text-sm sm:text-base flex items-center justify-center space-x-2 shadow-m3-1 hover:shadow-m3-2 transition-all group"
             >
-              <Sparkles className="w-4 h-4 text-brass-400 group-hover:scale-110 transition-transform" />
+              <Sparkles className="w-5 h-5 text-amber-300 group-hover:scale-110 transition-transform" />
               <span>{t('instantLogin', '1-Click Instant Login as')} {currentConfig.demoName}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            <div className="flex items-center my-3">
-              <div className="flex-1 border-t border-steel-300"></div>
-              <span className="px-3 text-[10px] font-mono uppercase text-steel-400 font-bold">{t('orCredentials', 'Or Enter Credentials')}</span>
-              <div className="flex-1 border-t border-steel-300"></div>
+            <div className="flex items-center my-4">
+              <div className="flex-1 border-t border-slate-200"></div>
+              <span className="px-3 text-xs uppercase text-slate-400 font-semibold">{t('orCredentials', 'Or Enter Credentials')}</span>
+              <div className="flex-1 border-t border-slate-200"></div>
             </div>
 
             {error && (
-              <div className="p-3 bg-signal-500/10 border-2 border-signal-500 rounded-lg text-signal-700 text-xs font-bold">
+              <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-sm font-semibold">
                 {error}
               </div>
             )}
@@ -347,50 +347,50 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {selectedRole === 'RECYCLER' ? (
                 <div>
-                  <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     {t('cpcbRegNumber', 'CPCB Facility Reg Number / Mobile')}
                   </label>
                   <div className="relative">
-                    <Building2 className="w-4 h-4 text-steel-400 absolute left-3 top-3" />
+                    <Building2 className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="text"
                       required
                       value={facilityReg}
                       onChange={e => setFacilityReg(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs font-mono font-bold bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                      className="w-full pl-11 pr-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
                     />
                   </div>
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     {t('mobileNumber', 'Mobile Number')}
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-steel-400 absolute left-3 top-3" />
+                    <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
                     <input
                       type="tel"
                       required
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs font-mono font-bold bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                      className="w-full pl-11 pr-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   {t('password', 'Password or PIN')}
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-steel-400 absolute left-3 top-3" />
+                  <Lock className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs font-mono bg-white border-2 border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                    className="w-full pl-11 pr-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
                   />
                 </div>
               </div>
@@ -398,15 +398,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-steel-900 hover:bg-steel-800 text-white py-2.5 rounded-lg text-xs font-bold flex items-center justify-center space-x-2 border border-steel-700 shadow"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 px-6 rounded-full text-sm font-bold flex items-center justify-center space-x-2 shadow-sm transition-all"
               >
                 <span>{t('submitLogin', 'Submit & Open Dashboard')}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           </div>
 
-          <div className="text-[11px] text-steel-500 text-center border-t border-steel-200 pt-3">
+          <div className="text-xs text-slate-500 text-center border-t border-slate-100 pt-4">
             Protected by CPCB EPR Formal Traceability Standards • SIH 2026
           </div>
 

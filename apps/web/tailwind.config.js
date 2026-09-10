@@ -81,15 +81,19 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Roboto Slab"', 'serif'],
-        body: ['"Mukta"', '"Noto Sans Devanagari"', 'sans-serif'],
+        display: ['"Outfit"', '"Plus Jakarta Sans"', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', '"Noto Sans Devanagari"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
-        'press': 'inset 0 2px 4px rgba(0,0,0,0.25)',
-        'tactile': '0 2px 0 #2E3532',
-        'tactile-lg': '0 4px 0 #2E3532',
-        'stamp': '0 0 0 2px #3B6B4E, 0 2px 4px rgba(59,107,78,0.2)',
+        'm3-1': '0 1px 3px 1px rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.04)',
+        'm3-2': '0 2px 8px 2px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+        'm3-3': '0 4px 16px 3px rgba(0, 0, 0, 0.08), 0 2px 6px 0 rgba(0, 0, 0, 0.04)',
+        'm3-4': '0 8px 24px 4px rgba(0, 0, 0, 0.1), 0 4px 10px 0 rgba(0, 0, 0, 0.06)',
+        'press': 'inset 0 2px 4px rgba(0,0,0,0.15)',
+        'tactile': '0 1px 3px rgba(0,0,0,0.08)',
+        'tactile-lg': '0 4px 12px rgba(0,0,0,0.08)',
+        'stamp': '0 0 0 2px #047857, 0 2px 4px rgba(4,120,87,0.15)',
       }
     },
   },
