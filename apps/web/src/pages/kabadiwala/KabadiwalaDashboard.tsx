@@ -741,8 +741,11 @@ export const KabadiwalaDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6 pb-28">
       
-      {/* Top Collector Header Bar - Material 3 Expressive Container */}
-      <div className="bg-gradient-to-br from-emerald-900 via-teal-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-m3-2 border border-emerald-800/40 relative overflow-hidden">
+      {/* Top Collector Header Bar - Android 17 Expressive Dynamic Hero */}
+      <div
+        style={{ background: 'var(--gradient-hero)' }}
+        className="text-white rounded-[32px] p-6 sm:p-8 shadow-m3-3 border border-white/10 relative overflow-hidden transition-all duration-300"
+      >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           
           <div className="space-y-2 z-10">

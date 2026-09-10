@@ -33,13 +33,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
   return (
     <div className="space-y-16 pb-24 font-body">
       
-      {/* Hero Section — Material 3 Expressive Hero */}
-      <section className="relative overflow-hidden pt-12 pb-16 lg:pt-24 lg:pb-28 bg-gradient-to-b from-emerald-50/60 via-slate-50 to-white border-b border-slate-200/80">
+      {/* Hero Section — Android 17 / Material 3 Expressive Hero */}
+      <section
+        style={{ background: 'var(--gradient-hero-subtle)' }}
+        className="relative overflow-hidden pt-12 pb-16 lg:pt-24 lg:pb-28 border-b border-slate-200/80 transition-all duration-300"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           
           {/* SIH Badge Pill */}
           <div className="inline-flex items-center space-x-2.5 px-4 py-2 rounded-full bg-white text-slate-800 text-xs sm:text-sm font-semibold mb-8 border border-slate-200/90 shadow-m3-1 animate-fade-in">
-            <span className="rounded-full px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold">SIH26229</span>
+            <span className="rounded-full px-2.5 py-0.5 chip-primary-m3 text-xs font-bold">SIH26229</span>
             <span>Ministry of Mines — Informal e-Waste Integration</span>
             <VoiceAssistButton
               text="Kabadiwala Connect. Digital formalization platform for informal scrap collectors and CPCB authorized e-waste recyclers."
@@ -60,7 +63,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <button
               onClick={() => onNavigatePortal('login')}
-              className="px-8 py-4 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-display font-bold text-base shadow-m3-2 hover:shadow-m3-3 flex items-center space-x-2.5 transition-all hover:scale-105 active:scale-95"
+              className="px-8 py-4 rounded-full btn-primary-m3 font-display font-bold text-base shadow-m3-2 hover:shadow-m3-3 flex items-center space-x-2.5 transition-all hover:scale-105 active:scale-95"
             >
               <Lock className="w-5 h-5" />
               <span>{t('roleBasedLogin', 'Role-Based Sign In')}</span>

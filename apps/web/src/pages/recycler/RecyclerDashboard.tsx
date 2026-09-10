@@ -294,8 +294,11 @@ export const RecyclerDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
       
-      {/* Top Header - Material 3 Expressive Container */}
-      <div className="bg-gradient-to-br from-teal-900 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-m3-2 border border-teal-800/30 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      {/* Top Header - Android 17 Expressive Dynamic Hero */}
+      <div
+        style={{ background: 'var(--gradient-hero)' }}
+        className="text-white rounded-[32px] p-6 sm:p-8 shadow-m3-3 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden transition-all duration-300"
+      >
         <div className="space-y-2 z-10">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-teal-500/25 text-teal-200 border border-teal-400/30">

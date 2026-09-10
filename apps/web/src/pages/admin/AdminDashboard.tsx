@@ -162,11 +162,14 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
       
-      {/* Top Header - Material 3 Expressive Container */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-m3-2 border border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      {/* Top Header - Android 17 Expressive Dynamic Hero */}
+      <div
+        style={{ background: 'var(--gradient-hero)' }}
+        className="text-white rounded-[32px] p-6 sm:p-8 shadow-m3-3 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden transition-all duration-300"
+      >
         <div className="space-y-2 z-10">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-emerald-500/25 text-emerald-200 border border-emerald-400/30">
+            <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-white/20 text-white border border-white/30">
               MINISTRY OF MINES & CPCB
             </span>
             <span className="rounded-full px-3 py-1 font-mono text-xs font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
@@ -190,7 +193,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="flex flex-wrap gap-3 z-10">
           <button
             onClick={handleExportEPR}
-            className="px-6 py-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold flex items-center space-x-2 transition-all shadow-sm"
+            className="px-6 py-3 rounded-full btn-primary-m3 text-sm font-bold flex items-center space-x-2 transition-all shadow-sm"
           >
             <Download className="w-4 h-4" />
             <span>Export CPCB EPR Audit (JSON)</span>

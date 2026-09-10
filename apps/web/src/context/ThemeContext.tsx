@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
-export type ThemeId = 'emerald' | 'cobalt' | 'copper' | 'slate';
+export type ThemeId = 'emerald' | 'cobalt' | 'copper' | 'slate' | 'amethyst';
 
 export interface ThemeConfig {
   id: ThemeId;
@@ -70,6 +70,19 @@ export const THEMES: ThemeConfig[] = [
     primaryLight: '#64748B',
     accent: '#94A3B8',
     swatchClass: 'bg-slate-700'
+  },
+  {
+    id: 'amethyst',
+    nameEn: 'Amethyst Violet',
+    nameHi: 'नीलम बैंगनी',
+    nameMr: 'जांभळा नीलम',
+    primary: '#7C3AED',
+    primaryHover: '#6D28D9',
+    primaryContainer: '#F5F3FF',
+    onPrimaryContainer: '#4C1D95',
+    primaryLight: '#8B5CF6',
+    accent: '#A78BFA',
+    swatchClass: 'bg-purple-600'
   }
 ];
 
@@ -91,6 +104,8 @@ function applyThemeVariables(cfg: ThemeConfig) {
   root.style.setProperty('--color-on-primary-container', cfg.onPrimaryContainer);
   root.style.setProperty('--color-primary-light', cfg.primaryLight);
   root.style.setProperty('--color-primary-focus', `${cfg.primary}33`);
+  root.style.setProperty('--gradient-hero', `linear-gradient(135deg, ${cfg.primary}EE 0%, #0F172A 100%)`);
+  root.style.setProperty('--gradient-hero-subtle', `linear-gradient(135deg, ${cfg.primaryContainer} 0%, #FFFFFF 100%)`);
 }
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
