@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { Capacitor } from '@capacitor/core';
 import { Navbar } from './components/Navbar';
 import { LandingPage } from './pages/LandingPage';
 import { CitizenDashboard } from './pages/citizen/CitizenDashboard';
@@ -13,7 +15,13 @@ import { Role } from './types';
 const MainContent: React.FC = () => {
   const { user, loading } = useAuth();
   const { language, t } = useLanguage();
-  const [currentView, setCurrentView] = useState<string>('home');
+  const isNative = Capacitor.isNativePlatform();
+
+  // On native Android APK, start directly on login page for an authentic app experience!
+  const [currentView, setCurrentView] = useState<string>(() => {
+    if (isNative) return 'login';
+    return 'home';
+  });
 
   // When user logs in or role changes, redirect to their role's dashboard
   useEffect(() => {
@@ -22,15 +30,20 @@ const MainContent: React.FC = () => {
       else if (user.role === 'KABADIWALA') setCurrentView('kabadiwala');
       else if (user.role === 'RECYCLER') setCurrentView('recycler');
       else if (user.role === 'ADMIN') setCurrentView('admin');
+    } else if (isNative) {
+      setCurrentView('login');
     }
-  }, [user?.role, user?.id]);
+  }, [user?.role, user?.id, isNative]);
 
   const renderActiveView = () => {
     if (loading) {
       return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-          <div className="w-12 h-12 rounded-full border-4 border-copper-600 border-t-transparent animate-spin" />
-          <p className="text-steel-600 font-bold font-display text-sm">{t('initializing', 'Initializing Dhatu Ecosystem...')}</p>
+          <div 
+            className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin"
+            style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
+          />
+          <p className="text-slate-600 font-bold font-display text-sm">{t('initializing', 'Initializing Dhatu Ecosystem...')}</p>
         </div>
       );
     }
@@ -82,38 +95,42 @@ const MainContent: React.FC = () => {
         {renderActiveView()}
       </main>
 
-      {/* Modern Material Expressive Footer (Hidden on mobile when using Dashboard to eliminate bottom bar collision) */}
-      <footer className={`bg-slate-900 text-slate-300 py-8 border-t border-slate-800 text-sm ${currentView !== 'home' ? 'hidden md:block' : 'pb-20 md:pb-8'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-display font-extrabold text-sm shadow-sm">
-              धा
+      {/* Modern Material Expressive Footer (Hidden on native Android APK & mobile dashboard views) */}
+      {!isNative && (
+        <footer className={`bg-slate-900 text-slate-300 py-8 border-t border-slate-800 text-sm ${currentView !== 'home' ? 'hidden md:block' : 'pb-20 md:pb-8'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-display font-extrabold text-sm shadow-sm">
+                धा
+              </div>
+              <div>
+                <span className="font-display font-bold text-white text-base">Kabadiwala Connect ({language === 'en' ? 'Dhatu' : 'धातु'})</span>
+                <span className="text-slate-400 text-xs block sm:inline sm:ml-2">— {t('sihSub', 'Ministry of Mines — Informal e-Waste Integration')}</span>
+              </div>
             </div>
-            <div>
-              <span className="font-display font-bold text-white text-base">Kabadiwala Connect ({language === 'en' ? 'Dhatu' : 'धातु'})</span>
-              <span className="text-slate-400 text-xs block sm:inline sm:ml-2">— {t('sihSub', 'Ministry of Mines — Informal e-Waste Integration')}</span>
-            </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-slate-400 text-xs">
-            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">3-Sided Formal Funnel</span>
-            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">CPCB EPR Compliant</span>
-            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">Spoken TTS</span>
-            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">Offline-Tolerant</span>
+            <div className="flex flex-wrap items-center gap-3 text-slate-400 text-xs">
+              <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">3-Sided Formal Funnel</span>
+              <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">CPCB EPR Compliant</span>
+              <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">Spoken TTS</span>
+              <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">Offline-Tolerant</span>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };
 
 export const App: React.FC = () => {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <MainContent />
-      </AuthProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <MainContent />
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 };
 

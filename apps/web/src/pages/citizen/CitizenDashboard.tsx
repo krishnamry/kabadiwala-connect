@@ -469,7 +469,7 @@ export const CitizenDashboard: React.FC = () => {
           onClick={() => setActiveTab('pickups')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'pickups'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -481,7 +481,7 @@ export const CitizenDashboard: React.FC = () => {
           onClick={() => setActiveTab('new')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'new'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -493,7 +493,7 @@ export const CitizenDashboard: React.FC = () => {
           onClick={() => setActiveTab('impact')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'impact'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -505,7 +505,7 @@ export const CitizenDashboard: React.FC = () => {
           onClick={() => setActiveTab('dropoff')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'dropoff'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -1338,11 +1338,11 @@ export const CitizenDashboard: React.FC = () => {
             onClick={() => setActiveTab('pickups')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'pickups'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'pickups' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'pickups' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Clock className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavMyPickups', 'Pickups')}</span>
@@ -1352,11 +1352,11 @@ export const CitizenDashboard: React.FC = () => {
             onClick={() => setActiveTab('new')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'new'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'new' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'new' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Plus className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavBook', 'Book')}</span>
@@ -1366,11 +1366,11 @@ export const CitizenDashboard: React.FC = () => {
             onClick={() => setActiveTab('impact')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'impact'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'impact' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'impact' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Award className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavImpact', 'Impact')}</span>
@@ -1380,11 +1380,11 @@ export const CitizenDashboard: React.FC = () => {
             onClick={() => setActiveTab('dropoff')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'dropoff'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'dropoff' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'dropoff' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Building className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavDropoff', 'Centers')}</span>

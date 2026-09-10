@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage, Language } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
+import { Capacitor } from '@capacitor/core';
+import { ThemeSelector } from './ThemeSelector';
 import { Role } from '../types';
 import {
   User,
@@ -24,8 +27,21 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
   const { user, logout, quickDemoLogin } = useAuth();
   const { language, setLanguage, t, speak } = useLanguage();
+  const { currentThemeConfig } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+
+  const isNative = Capacitor.isNativePlatform();
+
+  const handleLogoClick = () => {
+    if (user) {
+      onTabChange(user.role.toLowerCase());
+    } else if (isNative) {
+      onTabChange('login');
+    } else {
+      onTabChange('home');
+    }
+  };
 
   const getRoleBadge = (role: Role) => {
     switch (role) {
@@ -69,17 +85,22 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           {/* Brand Logo & Philosophy Tag */}
           <div
             className="flex items-center space-x-2 sm:space-x-3.5 cursor-pointer group shrink-0"
-            onClick={() => onTabChange(user ? (user.role.toLowerCase()) : 'home')}
+            onClick={handleLogoClick}
           >
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-all shrink-0">
+            <div 
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all shrink-0"
+              style={{
+                background: `linear-gradient(135deg, ${currentThemeConfig.primary}, ${currentThemeConfig.primaryLight})`
+              }}
+            >
               <span className="font-display font-black text-lg sm:text-2xl">धा</span>
             </div>
             <div>
               <div className="flex items-center space-x-1.5 sm:space-x-2.5">
                 <span className="font-display font-extrabold text-base sm:text-2xl tracking-tight text-slate-900">
-                  Kabadiwala<span className="text-emerald-600">Connect</span>
+                  Kabadiwala<span style={{ color: currentThemeConfig.primary }}>Connect</span>
                 </span>
-                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60 font-mono">
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-mono">
                   SIH26229
                 </span>
               </div>
@@ -90,7 +111,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                     e.stopPropagation();
                     speak(language === 'hi' ? 'कबाड़ीवाला कनेक्ट, धातु ई-कचरा मंच' : language === 'mr' ? 'कबाडीवाला कनेक्ट, धातु ई-कचरा व्यासपीठ' : 'Kabadiwala Connect, Dhatu e-waste formalization platform');
                   }}
-                  className="text-emerald-600 hover:text-emerald-800 transition-colors"
+                  className="hover:opacity-75 transition-opacity"
+                  style={{ color: currentThemeConfig.primary }}
                   title={t('listen', 'Listen aloud')}
                 >
                   <Volume2 className="w-3.5 h-3.5 inline" />
@@ -107,9 +129,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
             </div>
           )}
 
-          {/* Right Section: Language Toggle & User Actions */}
+          {/* Right Section: Theme Selector, Language Toggle & User Actions */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             
+            {/* Theme Selector */}
+            <ThemeSelector />
+
             {/* Smart Vernacular Language Selector */}
             <div className="relative">
               <button
@@ -230,15 +255,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : currentTab !== 'login' ? (
               <button
                 onClick={() => onTabChange('login')}
-                className="rounded-full px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-sm transition-all hover:scale-[1.02]"
+                className="btn-primary-m3 rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition-all hover:scale-[1.02]"
               >
                 <Lock className="w-3.5 h-3.5" />
                 <span>{t('signInBtn', 'Sign In')}</span>
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

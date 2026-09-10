@@ -204,7 +204,7 @@ export const AdminDashboard: React.FC = () => {
           onClick={() => setActiveTab('overview')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'overview'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -216,7 +216,7 @@ export const AdminDashboard: React.FC = () => {
           onClick={() => setActiveTab('traceability')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'traceability'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -228,7 +228,7 @@ export const AdminDashboard: React.FC = () => {
           onClick={() => setActiveTab('uniteconomics')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'uniteconomics'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -240,7 +240,7 @@ export const AdminDashboard: React.FC = () => {
           onClick={() => setActiveTab('verifications')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'verifications'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -252,7 +252,7 @@ export const AdminDashboard: React.FC = () => {
           onClick={() => setActiveTab('epr')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'epr'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -681,11 +681,11 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => setActiveTab('overview')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'overview'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'overview' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'overview' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <TrendingUp className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavOverview', 'Overview')}</span>
@@ -695,11 +695,11 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => setActiveTab('traceability')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'traceability'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'traceability' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'traceability' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Layers className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavTrace', 'Trace')}</span>
@@ -709,11 +709,11 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => setActiveTab('uniteconomics')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'uniteconomics'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'uniteconomics' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'uniteconomics' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Calculator className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavEconomics', 'Economics')}</span>
@@ -723,11 +723,11 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => setActiveTab('verifications')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'verifications'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'verifications' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'verifications' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Users className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavVerifyAdmin', 'Verify')}</span>
@@ -737,11 +737,11 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => setActiveTab('epr')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'epr'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'epr' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'epr' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <FileSpreadsheet className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavEpr', 'EPR')}</span>

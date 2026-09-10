@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
+import { Capacitor } from '@capacitor/core';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Role } from '../../types';
 import {
   User,
@@ -12,13 +15,10 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
-  Volume2,
   Building2,
-  Scale,
-  QrCode,
-  Award,
+  ChevronRight,
   Info,
-  ChevronRight
+  ChevronDown
 } from 'lucide-react';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
 
@@ -28,7 +28,8 @@ interface LoginPageProps {
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   const { login, quickDemoLogin } = useAuth();
-  const { language, setLanguage, speak, t } = useLanguage();
+  const { language, t } = useLanguage();
+  const { currentThemeConfig } = useTheme();
 
   const [selectedRole, setSelectedRole] = useState<Role>('CITIZEN');
   const [phone, setPhone] = useState('9811100001');
@@ -36,8 +37,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   const [facilityReg, setFacilityReg] = useState('CPCB-EW-2023-DL-0881');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showFeatures, setShowFeatures] = useState(false);
 
-  // Role details metadata
   const roleConfig: Record<Role, {
     titleEn: string;
     titleHi: string;
@@ -47,10 +48,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     demoName: string;
     demoPhone: string;
     defaultPhone: string;
-    icon: any;
-    themeColor: string;
-    borderColor: string;
-    bgColor: string;
+    icon: React.ElementType;
     features: string[];
     voiceText: string;
     voiceHi: string;
@@ -58,49 +56,41 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
   }> = {
     CITIZEN: {
       titleEn: 'Citizen & Household',
-      titleHi: 'नागरिक एवं घरेलू उपभोक्ता',
-      titleMr: 'नागरिक व घरगुती ग्राहक',
+      titleHi: 'नागरिक एवं उपभोक्ता',
+      titleMr: 'नागरिक व ग्राहक',
       subtitle: 'Schedule doorstep pickup for old electronics, view indicative market rates, track collector with live ETA, and earn green tree credits.',
-      badge: 'SOURCING LAYER',
+      badge: 'CITIZEN PORTAL',
       demoName: 'Ramesh Sharma',
       demoPhone: '9811100001',
       defaultPhone: '9811100001',
       icon: User,
-      themeColor: 'text-copper-600',
-      borderColor: 'border-copper-600',
-      bgColor: 'bg-copper-500/10',
       features: [
-        'AI E-Waste photo identification & category detection',
+        'Doorstep pickup request with photo upload',
         'Indicative price estimate range before booking',
-        'Live collector GPS location & ETA countdown (12 mins)',
-        'Verifiable digital handover receipt & CSR tree donation',
-        'CPCB Certificate of Safe E-Waste Disposal download'
+        'Live collector GPS location & ETA countdown',
+        'Digital handover receipt & CSR green credits',
+        'CPCB Certificate of Safe Disposal download'
       ],
       voiceText: 'Citizen Login. Book doorstep pickup for electronic waste and track collector Ramesh.',
       voiceHi: 'नागरिक लॉगिन। पुराने ई-कचरे के पिकअप का अनुरोध करें और कबाड़ीवाले को ट्रैक करें।',
       voiceMr: 'नागरिक लॉगिन. जुन्या इलेक्ट्रॉनिक्स भंगारासाठी पिकअप बुक करा.'
     },
     KABADIWALA: {
-      titleEn: 'Doorstep Scrap Collector',
+      titleEn: 'Doorstep Collector',
       titleHi: 'कबाड़ीवाला (संग्राहक)',
       titleMr: 'भंगार संग्राहक',
       subtitle: 'Voice-first portal with large touch buttons. Digital lot creation, live spoken price board, QR handover, and running cash passbook.',
-      badge: 'CORE SIH26229 ASK',
+      badge: 'COLLECTOR PORTAL',
       demoName: 'Suresh Kumar',
       demoPhone: '9876543210',
       defaultPhone: '9876543210',
       icon: Truck,
-      themeColor: 'text-brass-700',
-      borderColor: 'border-brass-600',
-      bgColor: 'bg-brass-500/10',
       features: [
         'Spoken price board with live audio playback (Hindi/Marathi)',
-        'Easy digital lot creation with +/- weight steppers',
+        'Digital lot creation with +/- weight steppers & GPS tag',
         'Nearby CPCB authorized recycler discovery & ranking',
         'Digital verifiable QR handover ticket generator',
-        'Running passbook ledger with cash-first reconciliation',
-        'Offline-tolerant mode (saves lots with zero internet)',
-        'Pictorial safety guidance cards for hazardous e-waste'
+        'Running passbook ledger with cash reconciliation'
       ],
       voiceText: 'Kabadiwala Collector Login. Voice-first passbook for Suresh Kumar with live price board.',
       voiceHi: 'कबाड़ीवाला लॉगिन। बोलता हुआ दाम पत्रक, आसान लॉट निर्माण और नकद खाता बही।',
@@ -111,39 +101,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       titleHi: 'अधिकृत रीसायकलर',
       titleMr: 'अधिकृत रीसायकलर',
       subtitle: 'CPCB & State PCB registered facility portal. Receive collector lots, verify scale weight, confirm QR handovers, and export EPR compliance reports.',
-      badge: 'FORMAL INTERFACE',
+      badge: 'RECYCLER PORTAL',
       demoName: 'EcoRecycle Aggregators Ltd',
       demoPhone: '9822200002',
       defaultPhone: '9822200002',
       icon: Factory,
-      themeColor: 'text-forest-600',
-      borderColor: 'border-forest-600',
-      bgColor: 'bg-forest-500/10',
       features: [
         'Incoming collector lot requests review (Accept/Reject/Counter)',
         'QR code scanner closing the formal traceability chain',
         'Live rate-setting console broadcasting to collector boards',
-        'Statistical AI anomaly flags on abnormal weights/values',
-        'Exportable CPCB Form-2 & Form-6 regulatory filing reports',
-        'Facility processing capacity and pickup vehicle fleet manager'
+        'Statistical anomaly flags on abnormal weights/values',
+        'Exportable CPCB Form-2 & Form-6 regulatory filing reports'
       ],
       voiceText: 'Authorized Recycler Portal. Intake electronic waste lots and close traceability loops.',
       voiceHi: 'अधिकृत रीसायकलर पोर्टल। कबाड़ीवालों के लॉट स्वीकारें और ईपीआर रिपोर्ट निकालें।',
       voiceMr: 'अधिकृत रीसायकलर पोर्टल. ई-कचरा लॉट स्वीकारा आणि ईपीआर अहवाल मिळवा.'
     },
     ADMIN: {
-      titleEn: 'Admin & Regulatory Audit',
-      titleHi: 'प्रशासन एवं सीपीसीबी ऑडिट',
-      titleMr: 'प्रशासन व सीपीसीबी तपासणी',
+      titleEn: 'Regulatory & Audit',
+      titleHi: 'प्रशासन एवं ऑडिट',
+      titleMr: 'प्रशासन व तपासणी',
       subtitle: 'Central regulatory dashboard for Municipal Urban Local Bodies (ULBs). Complete traceability datasets, unit-economics calculator, and KYC verification.',
-      badge: 'REGULATORY DATA LAYER',
+      badge: 'REGULATORY AUDIT',
       demoName: 'NDMC Waste & Mines Cell',
       demoPhone: '9999900000',
       defaultPhone: '9999900000',
       icon: ShieldCheck,
-      themeColor: 'text-steel-900',
-      borderColor: 'border-steel-800',
-      bgColor: 'bg-steel-800/10',
       features: [
         'Citywide e-waste tonnage & environmental impact analytics',
         'End-to-end 4-stage material traceability dataset with SHA-256 hashes',
@@ -163,6 +146,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     setSelectedRole(r);
     setPhone(roleConfig[r].defaultPhone);
     setError(null);
+    if (Capacitor.isNativePlatform()) {
+      try {
+        Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+      } catch {}
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,7 +162,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
       await login(phone, password);
       onSuccess(selectedRole);
     } catch (err: any) {
-      // Fallback for seamless demo testing if backend is offline
+      // Fallback for seamless offline/demo testing
       await quickDemoLogin(selectedRole);
       onSuccess(selectedRole);
     } finally {
@@ -186,6 +174,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     setError(null);
     setLoading(true);
     try {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
+        } catch {}
+      }
       await quickDemoLogin(selectedRole);
       onSuccess(selectedRole);
     } catch (err: any) {
@@ -195,26 +188,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
     }
   };
 
+  const rolesList: Role[] = ['CITIZEN', 'KABADIWALA', 'RECYCLER', 'ADMIN'];
+
   return (
-    <div className="min-h-[85vh] py-4 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-6xl mx-auto space-y-6 sm:space-y-8">
+    <div className="min-h-[82vh] py-3 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-4xl mx-auto flex flex-col justify-center">
       
-      {/* Header Banner */}
-      <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <div className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-white text-slate-800 text-xs sm:text-sm font-semibold border border-slate-200 shadow-sm">
-          <span className="rounded-full px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold">SIH26229</span>
-          <span>{t('authGateway', 'Role-Based Authentication Gateway')}</span>
+      {/* App Branding & Welcome Header */}
+      <div className="text-center space-y-2 mb-4 sm:mb-6">
+        <div 
+          className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-2xl flex items-center justify-center text-white shadow-md mb-2"
+          style={{
+            background: `linear-gradient(135deg, ${currentThemeConfig.primary}, ${currentThemeConfig.primaryLight})`
+          }}
+        >
+          <span className="font-display font-black text-xl sm:text-2xl">धा</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-display font-black text-slate-900 tracking-tight">
-          {t('selectRole', 'Select Your Role')}
+        <h1 className="text-2xl sm:text-3xl font-display font-black text-slate-900 tracking-tight">
+          {t('welcomeApp', 'Kabadiwala Connect')}
         </h1>
-        <p className="text-sm sm:text-base text-slate-600 font-normal">
-          {t('loginSubtitle', "Kabadiwala Connect provides a dedicated, purpose-built interface for each stakeholder in India's formal e-waste chain.")}
+        <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto">
+          {t('loginSubtitleApp', 'Smart Informal Waste & EPR Traceability Platform. Select your portal to continue.')}
         </p>
       </div>
 
-      {/* 4 Dedicated Role Selector Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
-        {(['CITIZEN', 'KABADIWALA', 'RECYCLER', 'ADMIN'] as Role[]).map(r => {
+      {/* M3 Segmented Role Selector Tabs */}
+      <div className="bg-slate-200/70 p-1 rounded-2xl sm:rounded-full grid grid-cols-2 sm:grid-cols-4 gap-1 mb-4 sm:mb-6 shadow-inner">
+        {rolesList.map(r => {
           const cfg = roleConfig[r];
           const Icon = cfg.icon;
           const isSelected = selectedRole === r;
@@ -224,192 +223,197 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
               key={r}
               type="button"
               onClick={() => handleRoleSelect(r)}
-              className={`p-5 rounded-3xl text-left border transition-all duration-200 flex flex-col justify-between space-y-3.5 ${
+              className={`py-2.5 px-3 rounded-xl sm:rounded-full flex items-center justify-center space-x-2 transition-all font-semibold text-xs sm:text-sm ${
                 isSelected
-                  ? 'border-emerald-600 ring-2 ring-emerald-500/20 shadow-m3-2 bg-white'
-                  : 'bg-white border-slate-200/80 hover:border-slate-300 shadow-sm hover:shadow-m3-1'
+                  ? 'bg-white text-slate-900 shadow-sm font-bold scale-[1.01]'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <div className="flex justify-between items-start">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold ${cfg.bgColor} ${cfg.themeColor} shadow-sm`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-                {isSelected && (
-                  <span className="rounded-full px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold">{t('activeTabBadge', 'ACTIVE')}</span>
-                )}
-              </div>
-
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">
-                  {cfg.badge}
-                </span>
-                <h3 className="font-display font-black text-slate-900 text-base mt-1 leading-snug">
-                  {language === 'hi' ? cfg.titleHi : language === 'mr' ? cfg.titleMr : cfg.titleEn}
-                </h3>
-              </div>
-
-              <div className="text-xs font-semibold text-emerald-800 flex items-center justify-between pt-2 border-t border-slate-100">
-                <span>{cfg.demoName.split(' ')[0]}</span>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
-              </div>
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{
+                  backgroundColor: isSelected ? currentThemeConfig.primary : '#94A3B8'
+                }}
+              />
+              <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-70'}`} />
+              <span className="truncate">
+                {language === 'hi' ? cfg.titleHi : language === 'mr' ? cfg.titleMr : cfg.titleEn.split(' ')[0]}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Dedicated Role Login Card & Feature Showcase */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-5xl mx-auto">
+      {/* Main Authentication Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-m3-2 overflow-hidden transition-all">
         
-        {/* Left Column: Role Details & Features Preview */}
-        <div className="order-2 lg:order-1 lg:col-span-6 m3-card rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-m3-1 flex flex-col justify-between space-y-6 bg-white">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <span className="rounded-full px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold">{currentConfig.badge}</span>
-                <h2 className="text-xl sm:text-2xl font-display font-black text-slate-900 mt-2">
-                  {language === 'hi' ? currentConfig.titleHi : language === 'mr' ? currentConfig.titleMr : currentConfig.titleEn}
-                </h2>
+        {/* Active Role Banner */}
+        <div 
+          className="px-5 sm:px-8 py-4 border-b border-slate-100 flex items-center justify-between"
+          style={{ backgroundColor: currentThemeConfig.primaryContainer }}
+        >
+          <div className="flex items-center space-x-3">
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm"
+              style={{ backgroundColor: currentThemeConfig.primary }}
+            >
+              <currentConfig.icon className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                  {currentConfig.badge}
+                </span>
+                <span className="text-[11px] font-medium px-2 py-0.2 rounded-full bg-white/80 text-slate-700">
+                  {currentConfig.demoName.split(' ')[0]}
+                </span>
               </div>
-              <VoiceAssistButton
-                text={currentConfig.voiceText}
-                hindiText={currentConfig.voiceHi}
-                marathiText={currentConfig.voiceMr}
-                size="sm"
-              />
-            </div>
-
-            <p className="text-sm text-slate-600 leading-relaxed font-normal">
-              {currentConfig.subtitle}
-            </p>
-
-            {/* Feature List for this specific role */}
-            <div className="space-y-2.5 pt-2">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
-                {t('dedicatedFeatures', 'Dedicated Features for this Portal')}:
-              </span>
-              <ul className="space-y-2.5 text-sm text-slate-700">
-                {currentConfig.features.map((feat, idx) => (
-                  <li key={idx} className="flex items-start space-x-2.5">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
+              <h2 className="text-base sm:text-lg font-display font-black text-slate-900 leading-tight">
+                {language === 'hi' ? currentConfig.titleHi : language === 'mr' ? currentConfig.titleMr : currentConfig.titleEn}
+              </h2>
             </div>
           </div>
 
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-600 flex items-center justify-between font-sans">
-            <span>Persona: <strong className="text-slate-900">{currentConfig.demoName}</strong></span>
-            <span>Tel: <strong className="text-slate-900">{currentConfig.demoPhone}</strong></span>
-          </div>
+          <VoiceAssistButton
+            text={currentConfig.voiceText}
+            hindiText={currentConfig.voiceHi}
+            marathiText={currentConfig.voiceMr}
+            size="sm"
+          />
         </div>
 
-        {/* Right Column: Clean Login Form */}
-        <div className="order-1 lg:order-2 lg:col-span-6 m3-card rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-m3-2 flex flex-col justify-between space-y-6 bg-white">
+        {/* Action Body */}
+        <div className="p-5 sm:p-8 space-y-5">
           
-          <div className="space-y-6">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 block">
-                {t('authGateway', 'AUTHENTICATION')}
-              </span>
-              <h3 className="text-2xl font-display font-black text-slate-900 mt-1">
-                {language === 'hi' ? currentConfig.titleHi : language === 'mr' ? currentConfig.titleMr : currentConfig.titleEn} {t('signIn', 'Sign In')}
-              </h3>
-              <p className="text-sm text-slate-500 mt-1 font-normal">
-                {t('loginSubtitle', 'Enter credentials or use the 1-Click Instant Login button below.')}
-              </p>
+          {/* 1-Click Fast Instant Login Button (M3 High-Touch Action) */}
+          <button
+            type="button"
+            onClick={handleInstantDemoLogin}
+            disabled={loading}
+            className="w-full py-3.5 sm:py-4 px-5 rounded-full text-white font-display font-bold text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-m3-1 hover:shadow-m3-2 active:scale-98 transition-all group"
+            style={{ backgroundColor: currentThemeConfig.primary }}
+          >
+            <Sparkles className="w-5 h-5 text-amber-300 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="truncate">
+              {t('instantLogin', '1-Click Fast Login as')} {currentConfig.demoName}
+            </span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" />
+          </button>
+
+          {/* Divider */}
+          <div className="flex items-center my-3">
+            <div className="flex-1 border-t border-slate-200"></div>
+            <span className="px-3 text-[11px] uppercase text-slate-400 font-semibold tracking-wider">
+              {t('orCredentials', 'Or Login with Phone & PIN')}
+            </span>
+            <div className="flex-1 border-t border-slate-200"></div>
+          </div>
+
+          {error && (
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs sm:text-sm font-semibold">
+              {error}
             </div>
+          )}
 
-            {/* Instant 1-Click Demo Button (Prominent for User & Jury) */}
-            <button
-              type="button"
-              onClick={handleInstantDemoLogin}
-              disabled={loading}
-              className="w-full py-4 px-6 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-display font-bold text-sm sm:text-base flex items-center justify-center space-x-2 shadow-m3-1 hover:shadow-m3-2 transition-all group"
-            >
-              <Sparkles className="w-5 h-5 text-amber-300 group-hover:scale-110 transition-transform" />
-              <span>{t('instantLogin', '1-Click Instant Login as')} {currentConfig.demoName}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            <div className="flex items-center my-4">
-              <div className="flex-1 border-t border-slate-200"></div>
-              <span className="px-3 text-xs uppercase text-slate-400 font-semibold">{t('orCredentials', 'Or Enter Credentials')}</span>
-              <div className="flex-1 border-t border-slate-200"></div>
-            </div>
-
-            {error && (
-              <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-sm font-semibold">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {selectedRole === 'RECYCLER' ? (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t('cpcbRegNumber', 'CPCB Facility Reg Number / Mobile')}
-                  </label>
-                  <div className="relative">
-                    <Building2 className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      required
-                      value={facilityReg}
-                      onChange={e => setFacilityReg(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    {t('mobileNumber', 'Mobile Number')}
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={e => setPhone(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
-                    />
-                  </div>
-                </div>
-              )}
-
+          {/* Direct Credentials Form */}
+          <form onSubmit={handleSubmit} className="space-y-3.5">
+            {selectedRole === 'RECYCLER' ? (
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  {t('password', 'Password or PIN')}
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  {t('cpcbRegNumber', 'CPCB Facility Reg Number')}
                 </label>
                 <div className="relative">
-                  <Lock className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
+                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
-                    type="password"
+                    type="text"
                     required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
+                    value={facilityReg}
+                    onChange={e => setFacilityReg(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:outline-none transition-all shadow-sm"
+                    style={{ '--tw-ring-color': currentThemeConfig.primary } as any}
                   />
                 </div>
               </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  {t('mobileNumber', 'Mobile Phone Number')}
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:outline-none transition-all shadow-sm"
+                    style={{ '--tw-ring-color': currentThemeConfig.primary } as any}
+                  />
+                </div>
+              </div>
+            )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 px-6 rounded-full text-sm font-bold flex items-center justify-center space-x-2 shadow-sm transition-all"
-              >
-                <span>{t('submitLogin', 'Submit & Open Dashboard')}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
+            <div>
+              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                {t('password', 'Security PIN / Password')}
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:outline-none transition-all shadow-sm"
+                  style={{ '--tw-ring-color': currentThemeConfig.primary } as any}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 px-5 rounded-full text-sm font-bold flex items-center justify-center space-x-2 shadow-sm active:scale-98 transition-all"
+            >
+              <span>{t('submitLogin', 'Sign In with Password')}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
+
+          {/* Collapsible / Clean Portal Capabilities */}
+          <div className="pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => setShowFeatures(!showFeatures)}
+              className="w-full flex items-center justify-between text-xs font-semibold text-slate-500 hover:text-slate-800 py-1 transition-colors"
+            >
+              <div className="flex items-center space-x-1.5">
+                <Info className="w-3.5 h-3.5 text-slate-400" />
+                <span>{t('portalCapabilities', 'Portal Features & Information')}</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showFeatures ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showFeatures && (
+              <div className="mt-2.5 p-3.5 bg-slate-50 rounded-2xl border border-slate-150 space-y-2 animate-fade-in text-xs text-slate-600">
+                <p className="font-medium">{currentConfig.subtitle}</p>
+                <ul className="space-y-1.5 pt-1">
+                  {currentConfig.features.map((feat, idx) => (
+                    <li key={idx} className="flex items-center space-x-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
-          <div className="text-xs text-slate-500 text-center border-t border-slate-100 pt-4">
-            Protected by CPCB EPR Formal Traceability Standards • SIH 2026
-          </div>
+        </div>
 
+        {/* Security / Compliance Micro-Footer */}
+        <div className="px-5 py-2.5 bg-slate-50 text-[11px] font-medium text-slate-400 text-center border-t border-slate-100">
+          CPCB EPR Formal Compliance Certified • SIH26229
         </div>
 
       </div>

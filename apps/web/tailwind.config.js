@@ -7,6 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Material 3 Expressive Dynamic Theme Palette
+        m3primary: {
+          DEFAULT: 'var(--color-primary)',
+          hover: 'var(--color-primary-hover)',
+          container: 'var(--color-primary-container)',
+          'on-container': 'var(--color-on-primary-container)',
+          light: 'var(--color-primary-light)',
+        },
         // Dhatu (धातु) Design System Palette
         copper: {
           50: '#FAF4F2',

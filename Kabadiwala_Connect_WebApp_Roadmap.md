@@ -268,3 +268,4 @@ Build charts (recharts) consuming /api/admin/stats:
 - [ ] Map, ML classification, and wallet updates all tested live (not just in isolation)
 - [ ] One person owns the demo laptop/network fallback (offline video backup in case Wi-Fi fails at venue)
 - [ ] PPT screenshots taken from the actual running app, not mockups
+

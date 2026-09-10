@@ -7,10 +7,61 @@
   --safe-area-inset-top: env(safe-area-inset-top, 0px);
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
   --app-top-inset: max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0px));
+
+  /* Dynamic Theme Variables (Default Emerald) */
+  --color-primary: #006C4C;
+  --color-primary-hover: #00533A;
+  --color-primary-container: #E6F7F0;
+  --color-on-primary-container: #003825;
+  --color-primary-light: #10B981;
+  --color-primary-focus: rgba(0, 108, 76, 0.2);
 }
 
 .pt-safe-top {
   padding-top: max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0px));
+}
+
+/* Material 3 Expressive Dynamic Buttons & Chips */
+.btn-primary-m3 {
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.05);
+}
+.btn-primary-m3:hover {
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 2px 8px 2px rgba(0, 0, 0, 0.08);
+  transform: translateY(-0.5px);
+}
+.btn-primary-m3:active {
+  transform: scale(0.98);
+}
+
+.chip-primary-m3 {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  border-radius: 9999px;
+  font-weight: 700;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.m3-nav-pill-active {
+  background-color: var(--color-primary-container) !important;
+  color: var(--color-on-primary-container) !important;
+  font-weight: 800;
+}
+
+.m3-tab-pill-active {
+  background-color: var(--color-primary) !important;
+  color: #FFFFFF !important;
+  font-weight: 700;
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.08);
+}
+
+.m3-active-ring {
+  box-shadow: 0 0 0 2px var(--color-primary), 0 4px 16px 2px rgba(0, 0, 0, 0.06);
 }
 
 @layer base {

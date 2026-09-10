@@ -844,7 +844,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           onClick={() => setActiveTab('lots')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'lots'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -856,7 +856,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           onClick={() => setActiveTab('priceboard')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'priceboard'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -868,7 +868,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           onClick={() => setActiveTab('recyclers')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'recyclers'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -880,7 +880,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           onClick={() => setActiveTab('handover')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'handover'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -892,7 +892,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           onClick={() => setActiveTab('passbook')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'passbook'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -916,7 +916,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           onClick={() => setActiveTab('pickups')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'pickups'
-              ? 'bg-emerald-700 text-white shadow-m3-1'
+              ? 'm3-tab-pill-active'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
           }`}
         >
@@ -2730,11 +2730,11 @@ export const KabadiwalaDashboard: React.FC = () => {
             onClick={() => setActiveTab('lots')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'lots'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'lots' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'lots' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Camera className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavLots', 'Lots')}</span>
@@ -2744,11 +2744,11 @@ export const KabadiwalaDashboard: React.FC = () => {
             onClick={() => setActiveTab('priceboard')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'priceboard'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'priceboard' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'priceboard' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <TrendingUp className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavPrices', 'Prices')}</span>
@@ -2758,11 +2758,11 @@ export const KabadiwalaDashboard: React.FC = () => {
             onClick={() => setActiveTab('pickups')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'pickups'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'pickups' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'pickups' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Truck className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavPickups', 'Pickups')}</span>
@@ -2772,11 +2772,11 @@ export const KabadiwalaDashboard: React.FC = () => {
             onClick={() => setActiveTab('recyclers')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'recyclers'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'recyclers' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'recyclers' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Factory className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavRecyclers', 'Recyclers')}</span>
@@ -2786,11 +2786,11 @@ export const KabadiwalaDashboard: React.FC = () => {
             onClick={() => setActiveTab('passbook')}
             className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'passbook'
-                ? 'text-emerald-950 font-bold'
+                ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'passbook' ? 'bg-emerald-100 text-emerald-800' : 'text-slate-500'}`}>
+            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'passbook' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <BookOpen className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavPassbook', 'Passbook')}</span>
