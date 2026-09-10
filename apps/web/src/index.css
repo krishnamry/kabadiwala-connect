@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --status-bar-height: 0px;
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --app-top-inset: max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0px));
+}
+
+.pt-safe-top {
+  padding-top: max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0px));
+}
+
 @layer base {
   body {
     @apply bg-[#F8FAFC] text-slate-800 font-body antialiased;
