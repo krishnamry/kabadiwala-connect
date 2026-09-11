@@ -3,21 +3,17 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage, Language } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Capacitor } from '@capacitor/core';
-import { ThemeSelector } from './ThemeSelector';
-import { SettingsModal } from './SettingsModal';
-import { ProfileModal } from './ProfileModal';
 import { Role } from '../types';
+import { triggerHaptic } from '../lib/haptics';
 import {
-  User,
+  User as UserIcon,
   ShieldCheck,
   Truck,
   Factory,
   LogOut,
   ChevronDown,
-  Sparkles,
   Volume2,
   Lock,
-  ArrowRight,
   Languages,
   Settings
 } from 'lucide-react';
@@ -33,12 +29,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
   const { currentThemeConfig } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
 
   const isNative = Capacitor.isNativePlatform();
 
   const handleLogoClick = () => {
+    triggerHaptic(15);
     if (user) {
       onTabChange(user.role.toLowerCase());
     } else if (isNative) {
@@ -52,26 +47,26 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
     switch (role) {
       case 'CITIZEN':
         return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-sm">
-            {t('portalCitizen', 'Citizen Portal')}
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
+            {t('portalCitizen', 'Citizen')}
           </span>
         );
       case 'KABADIWALA':
         return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200/80 shadow-sm">
-            {t('portalCollector', 'Collector Portal')}
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200/80 shadow-2xs">
+            {t('portalCollector', 'Collector')}
           </span>
         );
       case 'RECYCLER':
         return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-900 border border-teal-200/80 shadow-sm">
-            {t('portalRecycler', 'Authorized Recycler')}
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-900 border border-teal-200/80 shadow-2xs">
+            {t('portalRecycler', 'Recycler')}
           </span>
         );
       case 'ADMIN':
         return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-900 border border-slate-250 shadow-sm">
-            {t('portalAdmin', 'CPCB Regulatory Audit')}
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-900 border border-slate-250 shadow-2xs">
+            {t('portalAdmin', 'Audit')}
           </span>
         );
     }
@@ -79,37 +74,37 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
 
   return (
     <header 
-      className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-all"
+      className="sticky top-0 z-40 bg-white/95 dark:bg-[#131D31]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-all w-full overflow-x-hidden"
       style={{
         paddingTop: 'var(--app-top-inset, env(safe-area-inset-top, 0px))'
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-15 sm:h-18 gap-2">
           
-          {/* Brand Logo & Philosophy Tag */}
+          {/* Left: Brand Logo */}
           <div
-            className="flex items-center space-x-2 sm:space-x-3.5 cursor-pointer group shrink-0"
+            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0 min-w-0"
             onClick={handleLogoClick}
           >
             <div 
-              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all shrink-0"
               style={{
                 background: `linear-gradient(135deg, ${currentThemeConfig.primary}, ${currentThemeConfig.primaryLight})`
               }}
             >
-              <span className="font-display font-black text-lg sm:text-2xl">धा</span>
+              <span className="font-display font-black text-base sm:text-xl">धा</span>
             </div>
-            <div>
-              <div className="flex items-center space-x-1.5 sm:space-x-2.5">
-                <span className="font-display font-extrabold text-base sm:text-2xl tracking-tight text-slate-900">
+            <div className="min-w-0">
+              <div className="flex items-center space-x-1.5">
+                <span className="font-display font-extrabold text-sm sm:text-xl tracking-tight text-slate-900 dark:text-white truncate">
                   Kabadiwala<span style={{ color: currentThemeConfig.primary }}>Connect</span>
                 </span>
-                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 font-mono">
+                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
                   SIH26229
                 </span>
               </div>
-              <p className="text-xs text-slate-500 hidden md:flex items-center gap-1.5 font-medium">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden lg:flex items-center gap-1 font-medium truncate">
                 <span>{t('dhatuTag', 'Dhatu — Smart e-Waste Traceability & Formalization')}</span>
                 <button
                   onClick={(e) => {
@@ -126,70 +121,76 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
             </div>
           </div>
 
-          {/* Center: Active Role Badge (Clean, Role-Specific) */}
+          {/* Center: Active Role Badge (Desktop Only) */}
           {user && (
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden lg:flex items-center space-x-2">
               <span className="text-xs text-slate-500 font-medium">{t('activeTerminal', 'Terminal')}:</span>
               {getRoleBadge(user.role)}
             </div>
           )}
 
-          {/* Right Section: Theme Selector, Language Toggle & User Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Right Section: Language Toggle, Settings Button & Profile */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
             
-            {/* Theme Selector */}
-            <ThemeSelector />
-
-            {/* App Settings Button */}
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(true)}
-              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#1A263D] hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all active:scale-95"
-              title={t('settingsBtn', 'Settings (Themes, Display, Voice, Data)')}
-              aria-label="Settings"
-            >
-              <Settings className="w-4 h-4 text-slate-700 dark:text-slate-200" />
-            </button>
-
             {/* Smart Vernacular Language Selector */}
             <div className="relative">
               <button
-                onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold text-xs sm:text-sm shadow-sm transition-all"
+                type="button"
+                onClick={() => {
+                  triggerHaptic(15);
+                  setLangMenuOpen(!langMenuOpen);
+                }}
+                className="flex items-center space-x-1 p-2 sm:px-3 sm:py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm shadow-2xs transition-all active:scale-95"
                 title={t('langSelect', 'Change Language')}
+                aria-label="Language Selector"
               >
-                <Languages className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
+                <Languages className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <span className="hidden sm:inline">
                   {language === 'en' ? 'English' : language === 'hi' ? 'हिन्दी' : 'मराठी'}
                 </span>
-                <span className="sm:hidden font-mono uppercase">
+                <span className="sm:hidden font-mono uppercase text-[11px] font-bold">
                   {language === 'en' ? 'EN' : language === 'hi' ? 'हि' : 'मरा'}
                 </span>
-                <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-500" />
+                <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
 
               {langMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-sm animate-fade-in">
-                  <div className="px-4 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#131D31] rounded-2xl shadow-xl border border-slate-150 dark:border-slate-800 py-2 z-50 text-sm animate-fade-in">
+                  <div className="px-4 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
                     {t('selectLanguage', 'Select Language')}
                   </div>
                   <button
-                    onClick={() => { setLanguage('en'); setLangMenuOpen(false); }}
-                    className={`w-full text-left px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors ${language === 'en' ? 'font-bold text-emerald-700 bg-emerald-50/60' : 'text-slate-800'}`}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic(20);
+                      setLanguage('en');
+                      setLangMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${language === 'en' ? 'font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30' : 'text-slate-800 dark:text-slate-200'}`}
                   >
                     <span>English</span>
                     {language === 'en' && <span className="text-emerald-600 font-bold">✓</span>}
                   </button>
                   <button
-                    onClick={() => { setLanguage('hi'); setLangMenuOpen(false); }}
-                    className={`w-full text-left px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors ${language === 'hi' ? 'font-bold text-emerald-700 bg-emerald-50/60' : 'text-slate-800'}`}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic(20);
+                      setLanguage('hi');
+                      setLangMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${language === 'hi' ? 'font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30' : 'text-slate-800 dark:text-slate-200'}`}
                   >
                     <span>हिन्दी (Hindi)</span>
                     {language === 'hi' && <span className="text-emerald-600 font-bold">✓</span>}
                   </button>
                   <button
-                    onClick={() => { setLanguage('mr'); setLangMenuOpen(false); }}
-                    className={`w-full text-left px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 transition-colors ${language === 'mr' ? 'font-bold text-emerald-700 bg-emerald-50/60' : 'text-slate-800'}`}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic(20);
+                      setLanguage('mr');
+                      setLangMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors ${language === 'mr' ? 'font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30' : 'text-slate-800 dark:text-slate-200'}`}
                   >
                     <span>मराठी (Marathi)</span>
                     {language === 'mr' && <span className="text-emerald-600 font-bold">✓</span>}
@@ -198,103 +199,52 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
               )}
             </div>
 
-            {/* Profile Dropdown / Sign In Button */}
+            {/* App Settings Page Button (Opens Dedicated Settings Page) */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic(15);
+                onTabChange('settings');
+              }}
+              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-2xs transition-all active:scale-95"
+              title={t('settingsBtn', 'Settings (Themes, Display, Voice, Data)')}
+              aria-label="Settings"
+            >
+              <Settings className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+            </button>
+
+            {/* Profile Button (Opens Dedicated Profile Page) */}
             {user ? (
               <div className="relative">
                 <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center space-x-2 p-1 sm:px-2.5 sm:py-1.5 rounded-full border border-slate-200 hover:border-emerald-500 bg-white shadow-sm transition-all"
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(15);
+                    onTabChange('profile');
+                  }}
+                  className="flex items-center space-x-1.5 p-1 sm:px-2.5 sm:py-1 rounded-full border border-slate-200 dark:border-slate-700 hover:border-emerald-500 bg-white dark:bg-slate-800 shadow-2xs transition-all active:scale-95"
+                  title="View Profile & Security"
+                  aria-label="My Profile"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 text-white font-bold text-sm flex items-center justify-center shadow-sm">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center shadow-sm shrink-0">
                     {user.name.charAt(0)}
                   </div>
                   <div className="text-left hidden sm:block">
-                    <div className="text-xs font-bold text-slate-900 leading-tight">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight max-w-[80px] truncate">
                       {user.name}
                     </div>
-                    <div className="text-[11px] text-slate-500 font-medium">{user.role}</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{user.role}</div>
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
                 </button>
-
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-3xl shadow-xl border border-slate-150 py-3 z-50 text-sm animate-fade-in">
-                    <div className="px-5 py-3 border-b border-slate-100">
-                      <p className="font-bold text-slate-900 text-base">{user.name}</p>
-                      <p className="text-xs text-slate-500 font-mono mt-0.5">{user.phone}</p>
-                      <div className="mt-2">{getRoleBadge(user.role)}</div>
-                    </div>
-
-                    {/* Personal Profile & Settings Shortcuts */}
-                    <div className="px-2 pt-2 pb-1 border-b border-slate-100 space-y-0.5">
-                      <button
-                        type="button"
-                        onClick={() => { setProfileOpen(true); setDropdownOpen(false); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center gap-2 text-slate-800 font-bold text-xs transition-colors"
-                      >
-                        <User className="w-4 h-4 text-emerald-600" />
-                        <span>{t('myProfile', 'My Profile & Security')}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setSettingsOpen(true); setDropdownOpen(false); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center gap-2 text-slate-800 font-bold text-xs transition-colors"
-                      >
-                        <Settings className="w-4 h-4 text-slate-600" />
-                        <span>{t('appSettings', 'App Settings & Themes')}</span>
-                      </button>
-                    </div>
-
-                    <div className="px-4 pt-3 pb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      {t('switchRole', 'Switch Role Portal')}
-                    </div>
-                    <div className="px-2 space-y-0.5">
-                      <button
-                        onClick={() => { quickDemoLogin('CITIZEN'); setDropdownOpen(false); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center justify-between text-slate-800 font-medium transition-colors"
-                      >
-                        <span>1. {t('personaCitizen', 'Ramesh Sharma')} ({t('portalCitizen', 'Citizen')})</span>
-                        <span className="text-emerald-600 font-bold text-xs">{t('actions', 'Switch')}</span>
-                      </button>
-                      <button
-                        onClick={() => { quickDemoLogin('KABADIWALA'); setDropdownOpen(false); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center justify-between text-slate-800 font-medium transition-colors"
-                      >
-                        <span>2. {t('personaCollector', 'Suresh Kumar')} ({t('portalCollector', 'Collector')})</span>
-                        <span className="text-amber-700 font-bold text-xs">{t('actions', 'Switch')}</span>
-                      </button>
-                      <button
-                        onClick={() => { quickDemoLogin('RECYCLER'); setDropdownOpen(false); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center justify-between text-slate-800 font-medium transition-colors"
-                      >
-                        <span>3. {t('personaRecycler', 'EcoRecycle')} ({t('portalRecycler', 'Recycler')})</span>
-                        <span className="text-teal-700 font-bold text-xs">{t('actions', 'Switch')}</span>
-                      </button>
-                      <button
-                        onClick={() => { quickDemoLogin('ADMIN'); setDropdownOpen(false); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center justify-between text-slate-800 font-medium transition-colors"
-                      >
-                        <span>4. {t('personaAdmin', 'NDMC')} ({t('portalAdmin', 'Audit')})</span>
-                        <span className="text-slate-900 font-bold text-xs">{t('actions', 'Switch')}</span>
-                      </button>
-                    </div>
-
-                    <div className="border-t border-slate-100 mt-2 pt-2 px-2">
-                      <button
-                        onClick={() => { logout(); setDropdownOpen(false); onTabChange('login'); }}
-                        className="w-full text-left px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl flex items-center space-x-2 font-bold transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>{t('signOut', 'Sign Out')}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : currentTab !== 'login' ? (
               <button
-                onClick={() => onTabChange('login')}
-                className="btn-primary-m3 rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold flex items-center space-x-1.5 transition-all hover:scale-[1.02]"
+                type="button"
+                onClick={() => {
+                  triggerHaptic(15);
+                  onTabChange('login');
+                }}
+                className="btn-primary-m3 rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold flex items-center space-x-1 transition-all hover:scale-[1.02] shrink-0"
               >
                 <Lock className="w-3.5 h-3.5" />
                 <span>{t('signInBtn', 'Sign In')}</span>
@@ -303,20 +253,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           </div>
         </div>
       </div>
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onOpenProfile={() => setProfileOpen(true)}
-      />
-
-      {/* Profile Modal */}
-      <ProfileModal
-        isOpen={profileOpen}
-        onClose={() => setProfileOpen(false)}
-        onOpenSettings={() => setSettingsOpen(true)}
-      />
     </header>
   );
 };

@@ -11,6 +11,8 @@ import { RecyclerDashboard } from './pages/recycler/RecyclerDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { LoginPage } from './pages/auth/LoginPage';
 import { LanguageSelectScreen } from './pages/auth/LanguageSelectScreen';
+import { SettingsPage } from './pages/settings/SettingsPage';
+import { ProfilePage } from './pages/profile/ProfilePage';
 import { Role } from './types';
 
 const MainContent: React.FC = () => {
@@ -27,16 +29,40 @@ const MainContent: React.FC = () => {
     return 'home';
   });
 
+  // Track previous view for seamless Back navigation from Settings and Profile pages
+  const [previousView, setPreviousView] = useState<string>(() => {
+    if (isNative) return 'login';
+    return 'home';
+  });
+
+  const handleNavigate = (newView: string) => {
+    if (newView === 'settings' || newView === 'profile') {
+      if (currentView !== 'settings' && currentView !== 'profile') {
+        setPreviousView(currentView);
+      }
+    }
+    setCurrentView(newView);
+  };
+
+  const handleBack = () => {
+    const fallback = user ? user.role.toLowerCase() : (isNative ? 'login' : 'home');
+    setCurrentView(previousView || fallback);
+  };
+
   // When user logs in or role changes, redirect to their role's dashboard
   useEffect(() => {
     if (user) {
-      if (user.role === 'CITIZEN') setCurrentView('citizen');
-      else if (user.role === 'KABADIWALA') setCurrentView('kabadiwala');
-      else if (user.role === 'RECYCLER') setCurrentView('recycler');
-      else if (user.role === 'ADMIN') setCurrentView('admin');
+      if (currentView !== 'settings' && currentView !== 'profile') {
+        if (user.role === 'CITIZEN') setCurrentView('citizen');
+        else if (user.role === 'KABADIWALA') setCurrentView('kabadiwala');
+        else if (user.role === 'RECYCLER') setCurrentView('recycler');
+        else if (user.role === 'ADMIN') setCurrentView('admin');
+      }
     } else if (isNative) {
       const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
-      setCurrentView(hasChosenLanguage ? 'login' : 'language-select');
+      if (currentView !== 'settings' && currentView !== 'profile') {
+        setCurrentView(hasChosenLanguage ? 'login' : 'language-select');
+      }
     }
   }, [user?.role, user?.id, isNative]);
 
@@ -48,7 +74,7 @@ const MainContent: React.FC = () => {
             className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin"
             style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
           />
-          <p className="text-slate-600 font-bold font-display text-sm">{t('initializing', 'Initializing Dhatu Ecosystem...')}</p>
+          <p className="text-slate-600 dark:text-slate-300 font-bold font-display text-sm">{t('initializing', 'Initializing Dhatu Ecosystem...')}</p>
         </div>
       );
     }
@@ -61,10 +87,28 @@ const MainContent: React.FC = () => {
       );
     }
 
+    if (currentView === 'settings') {
+      return (
+        <SettingsPage
+          onBack={handleBack}
+          onOpenProfile={() => handleNavigate('profile')}
+        />
+      );
+    }
+
+    if (currentView === 'profile') {
+      return (
+        <ProfilePage
+          onBack={handleBack}
+          onOpenSettings={() => handleNavigate('settings')}
+        />
+      );
+    }
+
     if (currentView === 'login') {
       return (
         <LoginPage
-          onChangeLanguage={() => setCurrentView('language-select')}
+          onChangeLanguage={() => handleNavigate('language-select')}
           onSuccess={(role: Role) => {
             if (role === 'CITIZEN') setCurrentView('citizen');
             else if (role === 'KABADIWALA') setCurrentView('kabadiwala');
@@ -93,17 +137,19 @@ const MainContent: React.FC = () => {
 
     return (
       <LandingPage
-        onNavigatePortal={(portal: string) => setCurrentView(portal)}
+        onNavigatePortal={(portal: string) => handleNavigate(portal)}
       />
     );
   };
 
+  const isFullscreenSubpage = currentView === 'language-select' || currentView === 'settings' || currentView === 'profile';
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors">
-      {currentView !== 'language-select' && (
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors duration-200">
+      {!isFullscreenSubpage && (
         <Navbar
           currentTab={currentView}
-          onTabChange={(tab: string) => setCurrentView(tab)}
+          onTabChange={(tab: string) => handleNavigate(tab)}
         />
       )}
 
@@ -111,8 +157,8 @@ const MainContent: React.FC = () => {
         {renderActiveView()}
       </main>
 
-      {/* Modern Material Expressive Footer (Hidden on native Android APK & mobile dashboard views) */}
-      {!isNative && (
+      {/* Modern Material Expressive Footer (Hidden on native Android APK, subpages, & mobile dashboard views) */}
+      {!isNative && !isFullscreenSubpage && (
         <footer className={`bg-slate-900 text-slate-300 py-8 border-t border-slate-800 text-sm ${currentView !== 'home' ? 'hidden md:block' : 'pb-20 md:pb-8'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-3">
@@ -151,4 +197,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-
