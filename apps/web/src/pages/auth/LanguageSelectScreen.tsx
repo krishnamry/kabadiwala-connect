@@ -73,9 +73,14 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 p-4 sm:p-6 transition-colors duration-200">
+    <div 
+      className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 p-4 sm:p-6 transition-colors duration-200"
+      style={{
+        paddingTop: 'max(1rem, var(--app-top-inset, env(safe-area-inset-top, 0px)))'
+      }}
+    >
       {/* Top Header */}
-      <div className="w-full max-w-md mx-auto pt-6 sm:pt-10 text-center">
+      <div className="w-full max-w-md mx-auto pt-2 sm:pt-6 text-center">
         {/* App Logo Emblem */}
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-[22px] bg-emerald-600/10 dark:bg-emerald-500/20 border-2 border-emerald-500/30 mb-4 shadow-sm animate-fade-in">
           <Globe className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />

@@ -77,8 +77,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 font-body transition-colors duration-200">
-      {/* Top Header Bar */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-[#131D31]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs">
+      {/* Top Header Bar with Android Status Bar Safe Inset */}
+      <div 
+        className="sticky top-0 z-40 bg-white/98 dark:bg-[#131D31]/98 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-sm w-full"
+        style={{
+          paddingTop: 'var(--app-top-inset, env(safe-area-inset-top, 0px))'
+        }}
+      >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button

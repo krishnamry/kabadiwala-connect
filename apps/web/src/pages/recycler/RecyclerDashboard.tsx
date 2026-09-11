@@ -349,13 +349,13 @@ export const RecyclerDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tab Bar - Material 3 Expressive Pill Tabs */}
-      <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
+      <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 px-1 flex-nowrap w-full">
         <button
           onClick={() => setActiveTab('incoming')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'incoming'
               ? 'm3-tab-pill-active'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
           <Scale className="w-4 h-4" />
@@ -367,7 +367,7 @@ export const RecyclerDashboard: React.FC = () => {
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'handover'
               ? 'm3-tab-pill-active'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
           <QrCode className="w-4 h-4" />
@@ -379,7 +379,7 @@ export const RecyclerDashboard: React.FC = () => {
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'rates'
               ? 'm3-tab-pill-active'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
           <Sliders className="w-4 h-4" />
@@ -391,7 +391,7 @@ export const RecyclerDashboard: React.FC = () => {
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'anomalies'
               ? 'bg-rose-700 text-white shadow-m3-1'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -403,7 +403,7 @@ export const RecyclerDashboard: React.FC = () => {
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'reports'
               ? 'm3-tab-pill-active'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
           <FileSpreadsheet className="w-4 h-4" />

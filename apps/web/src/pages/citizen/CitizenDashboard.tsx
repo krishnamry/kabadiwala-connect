@@ -29,7 +29,10 @@ import {
   ShieldCheck,
   Check,
   Navigation,
-  Loader2
+  Loader2,
+  Search,
+  Link2,
+  ExternalLink
 } from 'lucide-react';
 import { getCurrentPosition, reverseGeocode, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
@@ -189,17 +192,85 @@ export const CitizenDashboard: React.FC = () => {
     }
   };
 
+  const [googleMapsLink, setGoogleMapsLink] = useState('');
+  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
+
+  // Helper to parse coordinates from Google Maps link or raw coordinates
+  const parseCoordinatesFromText = (text: string): [number, number] | null => {
+    if (!text) return null;
+    const atMatch = text.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (atMatch) return [parseFloat(atMatch[1]), parseFloat(atMatch[2])];
+    
+    const qMatch = text.match(/[?&](?:q|ll)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (qMatch) return [parseFloat(qMatch[1]), parseFloat(qMatch[2])];
+
+    const rawMatch = text.match(/(-?\d{1,2}\.\d+)[,\s]+(-?\d{1,3}\.\d+)/);
+    if (rawMatch) return [parseFloat(rawMatch[1]), parseFloat(rawMatch[2])];
+
+    return null;
+  };
+
+  const handleFetchLocationFromAddress = async () => {
+    const query = googleMapsLink.trim() || address.trim();
+    if (!query || query === 'Detecting Live Location...') {
+      setGpsFeedback('Please enter an address or Google Maps link first.');
+      return;
+    }
+
+    setIsGeocodingAddress(true);
+    setGpsFeedback(null);
+    try {
+      // 1. Try direct coordinate parsing (e.g. from Google Maps link or lat,lng)
+      const parsedCoords = parseCoordinatesFromText(query);
+      if (parsedCoords) {
+        setLatitude(parsedCoords[0]);
+        setLongitude(parsedCoords[1]);
+        setUserCoords(parsedCoords);
+        const geo = await reverseGeocode(parsedCoords[0], parsedCoords[1]);
+        if (!address || address === 'Detecting Live Location...') {
+          setAddress(geo.address);
+        }
+        setGpsFeedback(`✓ Location confirmed on map from link: ${geo.shortAddress} (${parsedCoords[0].toFixed(4)}° N, ${parsedCoords[1].toFixed(4)}° E)`);
+        hapticSuccess();
+        return;
+      }
+
+      // 2. Query OSM Nominatim geocoder
+      const searchTarget = googleMapsLink.trim() ? (address.trim() || query) : address.trim();
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTarget)}&limit=1`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setLatitude(lat);
+        setLongitude(lon);
+        setUserCoords([lat, lon]);
+        setGpsFeedback(`✓ Location confirmed on map: ${data[0].display_name.split(',').slice(0, 3).join(', ')}`);
+        hapticSuccess();
+      } else {
+        setGpsFeedback('Could not resolve exact coordinates. Tap or drag pin on map to set location.');
+      }
+    } catch (err) {
+      console.warn('Geocoding error', err);
+      setGpsFeedback('Error fetching location from address. Please pinpoint on map.');
+    } finally {
+      setIsGeocodingAddress(false);
+    }
+  };
+
   const handleMapLocationSelect = async (lat: number, lng: number, addr?: string) => {
     setLatitude(lat);
     setLongitude(lng);
     if (addr) {
       setAddress(addr);
-      setGpsFeedback(`📍 Pin placed at: ${addr.split(',').slice(0, 2).join(',')}`);
+      setGpsFeedback(`✓ Pin placed & confirmed at: ${addr.split(',').slice(0, 2).join(',')}`);
     } else {
       try {
         const geo = await reverseGeocode(lat, lng);
         setAddress(geo.address);
-        setGpsFeedback(`📍 Pin placed at: ${geo.shortAddress}`);
+        setGpsFeedback(`✓ Pin placed & confirmed at: ${geo.shortAddress}`);
       } catch (err) {
         console.warn(err);
       }
@@ -467,13 +538,13 @@ export const CitizenDashboard: React.FC = () => {
       </div>
 
       {/* Tabs - Material 3 Expressive Pill Tabs */}
-      <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 flex-nowrap">
+      <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 px-1 flex-nowrap w-full">
         <button
           onClick={() => setActiveTab('pickups')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'pickups'
               ? 'm3-tab-pill-active'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
           <Clock className="w-4 h-4" />
@@ -485,11 +556,11 @@ export const CitizenDashboard: React.FC = () => {
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'new'
               ? 'm3-tab-pill-active'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
           <Plus className="w-4 h-4" />
-          <span>2. {t('tabSchedulePickup', 'Book e-Waste Pickup')}</span>
+          <span>2. {t('tabRequestPickup', 'Request Doorstep Pickup')}</span>
         </button>
 
         <button
@@ -497,11 +568,11 @@ export const CitizenDashboard: React.FC = () => {
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'impact'
               ? 'm3-tab-pill-active'
-              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80 shadow-sm'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
-          <Award className="w-4 h-4" />
-          <span>3. {t('tabImpact', 'Impact & CSR Donation')}</span>
+          <Heart className="w-4 h-4" />
+          <span>3. {t('tabGreenImpact', 'Green Impact & Carbon')}</span>
         </button>
 
         <button
@@ -790,59 +861,116 @@ export const CitizenDashboard: React.FC = () => {
 
             <form onSubmit={handleSubmitPickup} className="space-y-4">
               
-              {/* Pickup Address */}
-              <div>
-                <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
-                  {t('pickupAddress', 'Pickup Address')}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={e => setAddress(e.target.value)}
-                    className="flex-1 px-3 py-2 text-xs font-mono bg-white border-2 border-steel-300 rounded focus:border-copper-600 focus:outline-none"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={handleFetchLiveGPS}
-                    disabled={isLocating}
-                    title="Detect Current Live Location (GPS / IP)"
-                    className="px-3 py-2 bg-paper-200 hover:bg-copper-100 active:bg-copper-200 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1.5 transition-colors disabled:opacity-50"
-                  >
-                    {isLocating ? (
-                      <Loader2 className="w-3.5 h-3.5 text-copper-600 animate-spin" />
-                    ) : (
-                      <MapPin className="w-3.5 h-3.5 text-copper-600" />
-                    )}
-                    <span>{isLocating ? 'Locating...' : 'GPS'}</span>
-                  </button>
+              {/* Pickup Address & Location Geocoding */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-steel-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>{t('pickupAddress', 'Pickup Address')}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">{t('manualOrGps', 'Type address, paste link, or use map')}</span>
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={e => setAddress(e.target.value)}
+                      placeholder="House/flat no., street name, locality, landmark, pincode..."
+                      className="flex-1 px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border-2 border-steel-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none shadow-xs"
+                      required
+                    />
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleFetchLocationFromAddress}
+                        disabled={isGeocodingAddress}
+                        title="Fetch coordinates & confirm on map from filled address"
+                        className="px-3 py-2 bg-paper-200 dark:bg-slate-800 hover:bg-copper-100 dark:hover:bg-slate-700 active:bg-copper-200 text-steel-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-steel-400 dark:border-slate-600 flex items-center gap-1.5 transition-colors disabled:opacity-50 shadow-2xs"
+                      >
+                        {isGeocodingAddress ? (
+                          <Loader2 className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400 animate-spin" />
+                        ) : (
+                          <Search className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400" />
+                        )}
+                        <span>{isGeocodingAddress ? 'Fetching...' : 'Fetch Location'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleFetchLiveGPS}
+                        disabled={isLocating}
+                        title="Detect Current Live Location (GPS / IP)"
+                        className="px-3 py-2 bg-paper-200 dark:bg-slate-800 hover:bg-copper-100 dark:hover:bg-slate-700 active:bg-copper-200 text-steel-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-steel-400 dark:border-slate-600 flex items-center gap-1.5 transition-colors disabled:opacity-50 shadow-2xs"
+                      >
+                        {isLocating ? (
+                          <Loader2 className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400 animate-spin" />
+                        ) : (
+                          <MapPin className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400" />
+                        )}
+                        <span>{isLocating ? 'Locating...' : 'GPS'}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
+                {/* Optional Google Maps Link */}
+                <div>
+                  <label className="block text-xs font-bold text-steel-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <Link2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span>{t('gmapsLinkOpt', 'Google Maps Link')} <span className="text-slate-400 font-normal lowercase">({t('optional', 'optional')})</span></span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-normal">{t('pasteLinkOrCoords', 'paste maps.app.goo.gl or coordinates')}</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={googleMapsLink}
+                      onChange={e => setGoogleMapsLink(e.target.value)}
+                      placeholder="e.g. https://maps.app.goo.gl/xyz or 28.6139, 77.2090"
+                      className="flex-1 px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border-2 border-steel-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none shadow-xs"
+                    />
+                    {googleMapsLink.trim() && (
+                      <button
+                        type="button"
+                        onClick={handleFetchLocationFromAddress}
+                        disabled={isGeocodingAddress}
+                        className="px-3.5 py-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-xl border border-emerald-300 dark:border-emerald-700 flex items-center gap-1 shrink-0 shadow-2xs"
+                        title="Locate from Google Maps link"
+                      >
+                        <Search className="w-3.5 h-3.5" />
+                        <span>Locate</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Location Feedback / Confirmation Banner */}
                 {gpsFeedback && (
-                  <div className="mt-1.5 p-2 bg-forest-50 border border-forest-300 rounded text-[11px] font-mono text-forest-800 flex items-center justify-between animate-fade-in">
-                    <span>{gpsFeedback}</span>
+                  <div className="p-2.5 bg-forest-50 dark:bg-emerald-950/40 border border-forest-300 dark:border-emerald-700/60 rounded-xl text-xs font-mono text-forest-800 dark:text-emerald-300 flex items-center justify-between animate-fade-in shadow-2xs">
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>{gpsFeedback}</span>
+                    </span>
                     <button
                       type="button"
                       onClick={() => setGpsFeedback(null)}
-                      className="text-forest-600 hover:text-forest-900 font-bold ml-2"
+                      className="text-forest-600 dark:text-emerald-400 hover:opacity-75 font-bold ml-2 text-sm"
                     >
                       ✕
                     </button>
                   </div>
                 )}
 
-                {/* Interactive Doorstep Location Pin Map */}
-                <div className="mt-2 space-y-1">
+                {/* Interactive Doorstep Location Pin Map Confirmation */}
+                <div className="space-y-1 pt-1">
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-steel-700 font-bold flex items-center gap-1">
-                      <span>📍 {language === 'hi' ? 'मानचित्र पर सटीक गेट चुनें' : language === 'mr' ? 'नकाशावर अचूक जागा निवडा' : 'Pin Doorstep on Map'}:</span>
+                    <span className="text-steel-700 dark:text-slate-300 font-bold flex items-center gap-1">
+                      <span>📍 {language === 'hi' ? 'मानचित्र पर सटीक गेट चुनें (पिन पुष्टी)' : language === 'mr' ? 'नकाशावर अचूक जागा निवडा (पिन पुष्टी)' : 'Doorstep Location Map Confirmation'}:</span>
                     </span>
-                    <span className="text-[10px] text-copper-700 font-bold bg-paper-200 px-2 py-0.5 rounded border border-steel-300">
+                    <span className="text-[10px] text-copper-700 dark:text-copper-400 font-bold bg-paper-200 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-steel-300 dark:border-slate-700">
                       {latitude.toFixed(4)}° N, {longitude.toFixed(4)}° E
                     </span>
                   </div>
-                  <div className="h-48 sm:h-56 rounded-lg overflow-hidden border-2 border-steel-400 shadow-inner relative">
+                  <div className="h-52 sm:h-60 rounded-2xl overflow-hidden border-2 border-steel-400 dark:border-slate-700 shadow-inner relative">
                     <LeafletMap
                       center={[latitude, longitude]}
                       zoom={15}
@@ -852,8 +980,8 @@ export const CitizenDashboard: React.FC = () => {
                       onLocationSelect={handleMapLocationSelect}
                       height="100%"
                     />
-                    <div className="absolute bottom-2 left-2 right-2 bg-paper-50/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-mono text-steel-700 border border-steel-300 pointer-events-none text-center shadow-sm">
-                      {language === 'hi' ? 'मानचित्र पर टैप करके या पिन खींचकर सटीक पता सेट करें' : language === 'mr' ? 'नकाशावर टॅप करून अचूक जागा निवडा' : 'Tap anywhere on map or drag pin to auto-fill street address'}
+                    <div className="absolute bottom-2 left-2 right-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-[10px] font-mono text-steel-700 dark:text-slate-300 border border-steel-300 dark:border-slate-700 pointer-events-none text-center shadow-sm">
+                      {language === 'hi' ? '✓ मानचित्र पर पिन देखकर पुष्टि करें। टैप या ड्रैग करके गेट सटीक करें।' : language === 'mr' ? '✓ नकाशावर पिन तपासा. अचूक जागेसाठी ड्रॅग करा.' : '✓ Pin confirms pickup doorstep. Tap anywhere or drag pin to fine-tune.'}
                     </div>
                   </div>
                 </div>

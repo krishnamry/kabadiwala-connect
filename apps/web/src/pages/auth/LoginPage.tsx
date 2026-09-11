@@ -200,15 +200,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         <div 
           className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-2xl flex items-center justify-center text-white shadow-md mb-2"
           style={{
-            background: `linear-gradient(135deg, ${currentThemeConfig.primary}, ${currentThemeConfig.primaryLight})`
+            background: `linear-gradient(135deg, var(--color-primary), var(--color-primary-light))`
           }}
         >
           <span className="font-display font-black text-xl sm:text-2xl">धा</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-display font-black text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-display font-black text-slate-900 dark:text-white tracking-tight">
           {t('welcomeApp', 'Kabadiwala Connect')}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium max-w-md mx-auto">
           {t('loginSubtitleApp', 'Smart Informal Waste & EPR Traceability Platform. Select your portal to continue.')}
         </p>
         {onChangeLanguage && (
@@ -216,9 +216,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
             <button
               type="button"
               onClick={onChangeLanguage}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 border border-slate-300 text-xs font-semibold shadow-2xs transition-transform active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold shadow-2xs transition-transform active:scale-95"
             >
-              <Globe className="w-3.5 h-3.5 text-emerald-600" />
+              <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>
                 {language === 'hi'
                   ? 'भाषा: हिन्दी (बदलें)'
@@ -232,7 +232,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       </div>
 
       {/* M3 Segmented Role Selector Tabs */}
-      <div className="bg-slate-200/70 p-1 rounded-2xl sm:rounded-full grid grid-cols-2 sm:grid-cols-4 gap-1 mb-4 sm:mb-6 shadow-inner">
+      <div className="bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-2xl sm:rounded-full grid grid-cols-2 sm:grid-cols-4 gap-1 mb-4 sm:mb-6 shadow-inner">
         {rolesList.map(r => {
           const cfg = roleConfig[r];
           const Icon = cfg.icon;
@@ -245,14 +245,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
               onClick={() => handleRoleSelect(r)}
               className={`py-2.5 px-3 rounded-xl sm:rounded-full flex items-center justify-center space-x-2 transition-all font-semibold text-xs sm:text-sm ${
                 isSelected
-                  ? 'bg-white text-slate-900 shadow-sm font-bold scale-[1.01]'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm font-bold scale-[1.01]'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800'
               }`}
             >
               <span
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{
-                  backgroundColor: isSelected ? currentThemeConfig.primary : '#94A3B8'
+                  backgroundColor: isSelected ? 'var(--color-primary)' : '#94A3B8'
                 }}
               />
               <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-70'}`} />
@@ -265,30 +265,30 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       </div>
 
       {/* Main Authentication Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-m3-2 overflow-hidden transition-all">
+      <div className="bg-white dark:bg-[#131D31] rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-m3-2 overflow-hidden transition-all">
         
         {/* Active Role Banner */}
         <div 
-          className="px-5 sm:px-8 py-4 border-b border-slate-100 flex items-center justify-between"
-          style={{ backgroundColor: currentThemeConfig.primaryContainer }}
+          className="px-5 sm:px-8 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
+          style={{ backgroundColor: 'var(--color-primary-container)' }}
         >
           <div className="flex items-center space-x-3">
             <div 
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm"
-              style={{ backgroundColor: currentThemeConfig.primary }}
+              style={{ backgroundColor: 'var(--color-primary)' }}
             >
               <currentConfig.icon className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                   {currentConfig.badge}
                 </span>
-                <span className="text-[11px] font-medium px-2 py-0.2 rounded-full bg-white/80 text-slate-700">
+                <span className="text-[11px] font-medium px-2 py-0.2 rounded-full bg-white/80 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/50 dark:border-slate-700">
                   {currentConfig.demoName.split(' ')[0]}
                 </span>
               </div>
-              <h2 className="text-base sm:text-lg font-display font-black text-slate-900 leading-tight">
+              <h2 className="text-base sm:text-lg font-display font-black text-slate-900 dark:text-white leading-tight">
                 {language === 'hi' ? currentConfig.titleHi : language === 'mr' ? currentConfig.titleMr : currentConfig.titleEn}
               </h2>
             </div>
@@ -311,7 +311,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
             onClick={handleInstantDemoLogin}
             disabled={loading}
             className="w-full py-3.5 sm:py-4 px-5 rounded-full text-white font-display font-bold text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-m3-1 hover:shadow-m3-2 active:scale-98 transition-all group"
-            style={{ backgroundColor: currentThemeConfig.primary }}
+            style={{ backgroundColor: 'var(--color-primary)' }}
           >
             <Sparkles className="w-5 h-5 text-amber-300 group-hover:scale-110 transition-transform shrink-0" />
             <span className="truncate">
@@ -322,7 +322,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
 
           {/* Divider */}
           <div className="flex items-center my-3">
-            <div className="flex-1 border-t border-slate-200"></div>
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
             <span className="px-3 text-[11px] uppercase text-slate-400 font-semibold tracking-wider">
               {t('orCredentials', 'Or Login with Phone & PIN')}
             </span>
@@ -339,7 +339,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
           <form onSubmit={handleSubmit} className="space-y-3.5">
             {selectedRole === 'RECYCLER' ? (
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
                   {t('cpcbRegNumber', 'CPCB Facility Reg Number')}
                 </label>
                 <div className="relative">
@@ -349,14 +349,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
                     required
                     value={facilityReg}
                     onChange={e => setFacilityReg(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:outline-none transition-all shadow-sm"
-                    style={{ '--tw-ring-color': currentThemeConfig.primary } as any}
+                    className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none transition-all shadow-sm"
+                    style={{ '--tw-ring-color': 'var(--color-primary)' } as any}
                   />
                 </div>
               </div>
             ) : (
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
                   {t('mobileNumber', 'Mobile Phone Number')}
                 </label>
                 <div className="relative">
@@ -366,15 +366,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
                     required
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:outline-none transition-all shadow-sm"
-                    style={{ '--tw-ring-color': currentThemeConfig.primary } as any}
+                    className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none transition-all shadow-sm"
+                    style={{ '--tw-ring-color': 'var(--color-primary)' } as any}
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
                 {t('password', 'Security PIN / Password')}
               </label>
               <div className="relative">
@@ -384,8 +384,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:outline-none transition-all shadow-sm"
-                  style={{ '--tw-ring-color': currentThemeConfig.primary } as any}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none transition-all shadow-sm"
+                  style={{ '--tw-ring-color': 'var(--color-primary)' } as any}
                 />
               </div>
             </div>
@@ -393,7 +393,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 px-5 rounded-full text-sm font-bold flex items-center justify-center space-x-2 shadow-sm active:scale-98 transition-all"
+              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white py-3 px-5 rounded-full text-sm font-bold flex items-center justify-center space-x-2 shadow-sm active:scale-98 transition-all"
             >
               <span>{t('submitLogin', 'Sign In with Password')}</span>
               <ArrowRight className="w-4 h-4" />
@@ -401,11 +401,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
           </form>
 
           {/* Collapsible / Clean Portal Capabilities */}
-          <div className="pt-2 border-t border-slate-100">
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={() => setShowFeatures(!showFeatures)}
-              className="w-full flex items-center justify-between text-xs font-semibold text-slate-500 hover:text-slate-800 py-1 transition-colors"
+              className="w-full flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white py-1 transition-colors"
             >
               <div className="flex items-center space-x-1.5">
                 <Info className="w-3.5 h-3.5 text-slate-400" />

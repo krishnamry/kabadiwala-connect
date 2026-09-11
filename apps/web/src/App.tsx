@@ -20,20 +20,14 @@ const MainContent: React.FC = () => {
   const { language, t } = useLanguage();
   const isNative = Capacitor.isNativePlatform();
 
-  // On native Android APK, first ask language preference, then proceed to login!
+  // On both Web and native Android APK, first ask language preference, then proceed to login!
   const [currentView, setCurrentView] = useState<string>(() => {
-    if (isNative) {
-      const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
-      return hasChosenLanguage ? 'login' : 'language-select';
-    }
-    return 'home';
+    const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
+    return hasChosenLanguage ? 'login' : 'language-select';
   });
 
   // Track previous view for seamless Back navigation from Settings and Profile pages
-  const [previousView, setPreviousView] = useState<string>(() => {
-    if (isNative) return 'login';
-    return 'home';
-  });
+  const [previousView, setPreviousView] = useState<string>('login');
 
   const handleNavigate = (newView: string) => {
     if (newView === 'settings' || newView === 'profile') {
@@ -45,7 +39,7 @@ const MainContent: React.FC = () => {
   };
 
   const handleBack = () => {
-    const fallback = user ? user.role.toLowerCase() : (isNative ? 'login' : 'home');
+    const fallback = user ? user.role.toLowerCase() : 'login';
     setCurrentView(previousView || fallback);
   };
 
@@ -58,13 +52,13 @@ const MainContent: React.FC = () => {
         else if (user.role === 'RECYCLER') setCurrentView('recycler');
         else if (user.role === 'ADMIN') setCurrentView('admin');
       }
-    } else if (isNative) {
+    } else {
       const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
-      if (currentView !== 'settings' && currentView !== 'profile') {
+      if (currentView !== 'settings' && currentView !== 'profile' && currentView !== 'login' && currentView !== 'language-select') {
         setCurrentView(hasChosenLanguage ? 'login' : 'language-select');
       }
     }
-  }, [user?.role, user?.id, isNative]);
+  }, [user?.role, user?.id]);
 
   const renderActiveView = () => {
     if (loading) {
@@ -145,7 +139,7 @@ const MainContent: React.FC = () => {
   const isFullscreenSubpage = currentView === 'language-select' || currentView === 'settings' || currentView === 'profile';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors duration-200 w-full max-w-full overflow-x-hidden">
       {!isFullscreenSubpage && (
         <Navbar
           currentTab={currentView}
