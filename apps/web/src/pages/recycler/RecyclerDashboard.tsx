@@ -428,20 +428,21 @@ export const RecyclerDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-xl font-display font-black text-steel-900">
+              <h2 className="text-2xl sm:text-3xl font-display font-black text-slate-900 tracking-tight">
                 {t('incomingLotsTitle', 'Incoming Collector Lots & Bidding Market')}
               </h2>
-              <p className="text-xs text-steel-600 font-medium">
+              <p className="text-sm sm:text-base text-slate-600 font-medium mt-1">
                 {t('incomingLotsDesc', 'Bid for digital lots submitted by verified door-to-door collectors across India. Valid bids must be ≥ 50% of asking price.')}
               </p>
             </div>
-            <span className="text-xs font-mono text-copper-700 bg-copper-50 px-3 py-1.5 rounded-lg border border-copper-300 font-bold self-start sm:self-auto">
-              {language === 'hi' ? 'लाइव फीड: ' : language === 'mr' ? 'थेट फीड: ' : 'Live Feed: '} {incomingLots.filter(l => l.status === 'AVAILABLE' || l.status === 'REQUESTED' || l.status === 'BIDDING').length} {language === 'hi' ? 'खुले लॉट' : language === 'mr' ? 'खुले लॉट' : 'Open Lots'}
+            <span className="text-xs sm:text-sm font-body font-bold text-emerald-800 bg-emerald-50/90 px-4 py-2 rounded-full border border-emerald-200/80 shadow-sm flex items-center gap-2 self-start sm:self-auto">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span>{language === 'hi' ? 'लाइव फीड: ' : language === 'mr' ? 'थेट फीड: ' : 'Live Feed: '} {incomingLots.filter(l => l.status === 'AVAILABLE' || l.status === 'REQUESTED' || l.status === 'BIDDING').length} {language === 'hi' ? 'खुले लॉट' : language === 'mr' ? 'खुले लॉट' : 'Open Lots'}</span>
             </span>
           </div>
 
           {/* Quick Filter Tabs for Recycler Market */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             {[
               { id: 'ALL', label: t('allLots', 'All Lots'), count: incomingLots.length },
               { id: 'OPEN', label: t('openForBids', 'Open for Bids'), count: incomingLots.filter(l => l.status === 'AVAILABLE' || l.status === 'REQUESTED' || l.status === 'BIDDING').length },
@@ -453,10 +454,10 @@ export const RecyclerDashboard: React.FC = () => {
                 key={f.id}
                 type="button"
                 onClick={() => setMarketFilter(f.id as any)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm ${
                   marketFilter === f.id
-                    ? 'bg-copper-600 text-white shadow-tactile border border-copper-700'
-                    : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
+                    ? 'm3-tab-pill-active font-extrabold shadow-sm'
+                    : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200/80 border border-slate-200/60'
                 }`}
               >
                 {f.label} ({f.count})
@@ -465,14 +466,14 @@ export const RecyclerDashboard: React.FC = () => {
           </div>
 
           {bidSuccess && (
-            <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-xl text-forest-800 text-xs font-medium flex items-center justify-between shadow-sm animate-fade-in">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-forest-600 shrink-0" />
-                <span>{bidSuccess}</span>
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-900 text-sm font-medium flex items-center justify-between shadow-m3-1 animate-fade-in">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span className="font-semibold">{bidSuccess}</span>
               </div>
               <button
                 onClick={() => setBidSuccess(null)}
-                className="p-1 text-forest-700 hover:text-forest-900 rounded"
+                className="p-1 text-emerald-700 hover:text-emerald-900 rounded-lg"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -496,13 +497,13 @@ export const RecyclerDashboard: React.FC = () => {
               return true;
             })
             .length === 0 ? (
-            <div className="text-center py-12 bg-paper-100 rounded-xl border-2 border-dashed border-steel-300 space-y-3">
-              <Gavel className="w-10 h-10 text-steel-400 mx-auto" />
-              <p className="text-xs text-steel-600 font-bold">{t('no digital lots found matching this filter.', 'No digital lots found matching this filter.')}</p>
+            <div className="text-center py-14 bg-slate-50/90 rounded-[28px] border-2 border-dashed border-slate-300/80 space-y-3">
+              <Gavel className="w-12 h-12 text-slate-400 mx-auto" />
+              <p className="text-sm text-slate-600 font-bold">{t('no digital lots found matching this filter.', 'No digital lots found matching this filter.')}</p>
               <button
                 type="button"
                 onClick={() => setMarketFilter('ALL')}
-                className="btn-dhatu-primary px-4 py-2 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow-sm"
+                className="btn-primary-m3 px-5 py-2.5 rounded-full text-sm font-bold inline-flex items-center gap-2 shadow-m3-1"
               >
                 <span>{t('show all lots', 'Show All Lots')} ({incomingLots.length})</span>
               </button>
@@ -537,99 +538,101 @@ export const RecyclerDashboard: React.FC = () => {
                   return (
                     <div
                       key={lot.id}
-                      className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm flex flex-col justify-between space-y-4 hover:border-copper-500 transition-colors bg-paper-50"
+                      className="android17-card p-6 sm:p-7 border border-slate-200/80 shadow-m3-1 hover:shadow-m3-3 transition-all flex flex-col justify-between space-y-5 bg-white"
                     >
-                      <div>
-                        <div className="flex items-center justify-between border-b border-steel-200 pb-2 mb-3">
-                          <span className="font-mono text-xs font-bold text-copper-700">#{lot.lotCode}</span>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                          <span className="text-xs sm:text-sm font-bold text-slate-900 bg-slate-100 px-3.5 py-1 rounded-full border border-slate-200/60 tracking-wide">
+                            #{lot.lotCode}
+                          </span>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                            className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
                               lot.status === 'HANDOVER_PENDING'
-                                ? 'bg-forest-500/10 text-forest-600 border border-forest-500/30'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300/60'
                                 : lot.status === 'CONFIRMED'
-                                ? 'bg-steel-200 text-steel-700 border border-steel-400'
+                                ? 'bg-slate-100 text-slate-700 border border-slate-300'
                                 : lot.status === 'REJECTED'
-                                ? 'bg-signal-500/10 text-signal-500 border border-signal-500/30'
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
                                 : lot.status === 'BIDDING'
-                                ? 'bg-brass-100 text-brass-800 border border-brass-400 animate-pulse'
-                                : 'bg-copper-100 text-copper-800 border border-copper-300'
+                                ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
+                                : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                             }`}
                           >
                             {lot.status === 'BIDDING' ? t('BIDDING OPEN') : lot.status === 'AVAILABLE' ? t('OPEN FOR BIDS') : lot.status === 'REQUESTED' ? t('COLLECTOR TENDER') : t(lot.status)}
                           </span>
                         </div>
 
-                        <h3 className="font-display font-bold text-steel-900 text-base leading-snug">
+                        <h3 className="font-display font-black text-slate-950 text-xl sm:text-2xl leading-snug">
                           {preserveEnglishItemName(lot.category)}
                         </h3>
 
                         {/* Custom Mixed Lot Material Composition */}
                         {lot.isCustomLot && lot.items && lot.items.length > 0 && (
-                          <div className="mt-2.5 p-2 bg-paper-200/80 rounded border border-steel-300 font-mono text-xs space-y-1.5">
-                            <div className="flex items-center justify-between text-[10px] uppercase font-bold text-copper-800 pb-1 border-b border-steel-200">
-                              <span className="flex items-center gap-1">
-                                <Layers className="w-3 h-3 text-copper-600" />
+                          <div className="p-4 bg-slate-50/90 rounded-2xl border border-slate-200/80 space-y-2.5 font-body">
+                            <div className="flex items-center justify-between text-xs sm:text-sm uppercase font-bold text-emerald-800 pb-2 border-b border-slate-200/80">
+                              <span className="flex items-center gap-1.5">
+                                <Layers className="w-4 h-4 text-emerald-600" />
                                 <span>{t('customMixedLot', 'Custom Mixed Lot')} ({lot.items.length} {t('items', 'materials')})</span>
                               </span>
-                              <span>{t('blendedRate', 'Blended')}: ₹{lot.recyclerOfferedRate}/kg</span>
+                              <span className="text-emerald-800 font-extrabold font-display text-sm">₹{lot.recyclerOfferedRate}/kg</span>
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                               {lot.items.map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-[11px] bg-white px-2 py-0.5 rounded border border-steel-200">
-                                  <span className="text-steel-800 font-medium truncate pr-2">• {preserveEnglishItemName(item.category)}</span>
-                                  <span className="text-copper-700 font-bold shrink-0">{item.weightKg} kg (₹{item.ratePerKg}/kg)</span>
+                                <div key={idx} className="flex items-center justify-between text-xs sm:text-sm bg-white px-3 py-2 rounded-xl border border-slate-200/70 shadow-2xs">
+                                  <span className="text-slate-800 font-semibold truncate pr-2">• {preserveEnglishItemName(item.category)}</span>
+                                  <span className="text-slate-900 font-bold shrink-0">{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span></span>
                                 </div>
                               ))}
                             </div>
                           </div>
                         )}
 
-                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs bg-paper-100 p-2.5 rounded border border-paper-300 font-mono">
+                        <div className="grid grid-cols-2 gap-3 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80 font-body">
                           <div>
-                            <span className="text-steel-500 text-[10px] block">{t('collectorName', 'COLLECTOR')}</span>
-                            <span className="font-bold text-steel-800 truncate block">{lot.collectorName}</span>
+                            <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('collectorName', 'COLLECTOR')}</span>
+                            <span className="font-bold text-slate-800 text-sm sm:text-base truncate block mt-0.5">{lot.collectorName}</span>
                           </div>
                           <div>
-                            <span className="text-steel-500 text-[10px] block">{t('weight', 'EST. WEIGHT')}</span>
-                            <span className="font-bold text-steel-900">{lot.approxWeightKg} kg</span>
+                            <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('weight', 'EST. WEIGHT')}</span>
+                            <span className="font-display font-black text-slate-900 text-lg sm:text-xl block mt-0.5">{lot.approxWeightKg} kg</span>
                           </div>
                           <div>
-                            <span className="text-steel-500 text-[10px] block">{t('askingPrice', 'ASKING PRICE')}</span>
-                            <span className="font-bold text-steel-900">₹{ask.toLocaleString('en-IN')}</span>
+                            <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('askingPrice', 'ASKING PRICE')}</span>
+                            <span className="font-display font-black text-slate-900 text-lg sm:text-xl block mt-0.5">₹{ask.toLocaleString('en-IN')}</span>
                           </div>
                           <div>
-                            <span className="text-steel-500 text-[10px] block">{t('minBid', 'MIN BID (50%)')}</span>
-                            <span className="font-bold text-copper-700">₹{minBid.toLocaleString('en-IN')}</span>
+                            <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('minBid', 'MIN BID (50%)')}</span>
+                            <span className="font-display font-black text-emerald-700 text-lg sm:text-xl block mt-0.5">₹{minBid.toLocaleString('en-IN')}</span>
                           </div>
                         </div>
 
                         {/* Live bidding stats bar */}
-                        <div className="mt-2.5 p-2 bg-paper-200 rounded border border-steel-300 text-xs font-mono flex items-center justify-between">
+                        <div className="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200/60 font-body flex items-center justify-between">
                           <div>
-                            <span className="text-[10px] text-steel-500 block">{t('current top bid', 'CURRENT TOP BID')}</span>
-                            <span className="font-bold text-forest-700">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800 block">{t('current top bid', 'CURRENT TOP BID')}</span>
+                            <span className="font-display font-black text-emerald-800 text-base sm:text-lg">
                               {lot.highestBid ? formatCurrency(lot.highestBid) : t('No bids yet', 'No bids yet')}
                             </span>
                           </div>
                           <div className="text-right">
-                            <span className="text-[10px] text-steel-500 block">{t('bids received', 'BIDS RECEIVED')}</span>
-                            <span className="font-bold text-steel-700">{lot.bids?.length || 0}</span>
+                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">{t('bids received', 'BIDS RECEIVED')}</span>
+                            <span className="font-display font-black text-slate-800 text-base sm:text-lg">{lot.bids?.length || 0}</span>
                           </div>
                         </div>
 
                         {myBid && (
-                          <div className="mt-2 text-[11px] p-2 rounded bg-copper-50 border border-copper-200 text-copper-800 flex items-center justify-between">
-                            <span>{t('your bid:', 'Your Bid:')} <strong>{formatCurrency(myBid.bidAmount)}</strong></span>
-                            <span className="font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-copper-200">{t(myBid.status)}</span>
+                          <div className="text-xs sm:text-sm p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between font-body">
+                            <span>{t('your bid:', 'Your Bid:')} <strong className="font-display font-black text-base">{formatCurrency(myBid.bidAmount)}</strong></span>
+                            <span className="font-bold text-xs uppercase px-2.5 py-1 rounded-full bg-amber-200 text-amber-900">{t(myBid.status)}</span>
                           </div>
                         )}
 
                         {/* Handover Location & GPS */}
-                        <div className="mt-2 text-[11px] text-steel-700 bg-paper-100 p-2 rounded border border-steel-300 space-y-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <div className="flex items-center gap-1 min-w-0 truncate font-mono">
-                              <MapPin className="w-3.5 h-3.5 text-copper-600 shrink-0" />
-                              <span className="truncate font-bold text-copper-800" title={lot.locationAddress || lot.locationZone || `${lot.gpsLat}, ${lot.gpsLng}`}>
+                        <div className="text-xs sm:text-sm text-slate-700 bg-slate-50/90 p-3.5 rounded-2xl border border-slate-200/80 space-y-1.5 font-body">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 min-w-0 truncate">
+                              <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                              <span className="truncate font-bold text-slate-900" title={lot.locationAddress || lot.locationZone || `${lot.gpsLat}, ${lot.gpsLng}`}>
                                 {lot.locationZone || lot.locationAddress || `GPS: ${lot.gpsLat?.toFixed(2)}°, ${lot.gpsLng?.toFixed(2)}°`}
                               </span>
                             </div>
@@ -637,60 +640,60 @@ export const RecyclerDashboard: React.FC = () => {
                               href={getDirectionsUrl(lot.gpsLat, lot.gpsLng)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-copper-700 hover:text-copper-900 font-bold shrink-0 flex items-center gap-0.5 underline text-[10px]"
+                              className="text-emerald-700 hover:text-emerald-900 font-bold shrink-0 flex items-center gap-1 underline text-xs"
                             >
                               <span>Map</span>
-                              <ExternalLink className="w-3 h-3" />
+                              <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           </div>
                           {lot.locationAddress && (
-                            <p className="text-[10px] text-steel-600 truncate font-sans" title={lot.locationAddress}>
+                            <p className="text-xs text-slate-600 truncate" title={lot.locationAddress}>
                               {lot.locationAddress}
                             </p>
                           )}
                         </div>
 
-                        <div className="mt-1.5 text-[10px] text-steel-500 flex items-center justify-between font-mono">
+                        <div className="text-xs text-slate-500 flex items-center justify-between font-body">
                           <span>GPS: {lot.gpsLat?.toFixed(4)}°, {lot.gpsLng?.toFixed(4)}°</span>
                           <span>{lot.createdAt}</span>
                         </div>
                       </div>
 
                       {isBiddable ? (
-                        <div className="space-y-2 pt-2 border-t border-steel-200">
+                        <div className="space-y-3 pt-3 border-t border-slate-100">
                           <button
                             onClick={() => openBidModal(lot)}
-                            className="w-full min-h-[44px] btn-dhatu-primary py-2.5 text-xs font-bold rounded-lg flex items-center justify-center space-x-1.5 shadow-sm active:scale-98 transition-transform"
+                            className="w-full btn-primary-m3 py-3.5 text-sm sm:text-base font-bold rounded-full flex items-center justify-center space-x-2 shadow-m3-1 active:scale-98 transition-transform"
                           >
-                            <Gavel className="w-3.5 h-3.5" />
+                            <Gavel className="w-4 h-4" />
                             <span>
                               {myBid
                                 ? `${t('Update Bid', 'Update Bid')} (${t('Current', 'Current')}: ${formatCurrency(myBid.bidAmount)})`
                                 : `${t('Place Bid', 'Place Bid')} (Min ${formatCurrency(minBid)})`}
                             </span>
                           </button>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-2 gap-2.5">
                             <button
                               onClick={() => handleLotDecision(lot.id, 'ACCEPT')}
-                              className="bg-paper-200 hover:bg-forest-500/10 text-forest-700 border border-steel-300 py-2 text-[11px] font-bold rounded flex items-center justify-center space-x-1 transition-colors"
+                              className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 py-2.5 text-xs sm:text-sm font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors"
                               title="Accept immediately at full asking price"
                             >
-                              <CheckCircle2 className="w-3 h-3 text-forest-600" />
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                               <span>{t('acceptAsk', 'Accept Ask')}</span>
                             </button>
                             <button
                               onClick={() => handleLotDecision(lot.id, 'REJECT')}
-                              className="bg-paper-200 hover:bg-signal-500/10 text-signal-500 border border-steel-300 py-2 text-[11px] font-bold rounded flex items-center justify-center space-x-1 transition-colors"
+                              className="bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 py-2.5 text-xs sm:text-sm font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors"
                             >
-                              <XCircle className="w-3 h-3" />
+                              <XCircle className="w-4 h-4 text-rose-600" />
                               <span>{t('decline', 'Decline')}</span>
                             </button>
                           </div>
                         </div>
                       ) : lot.status === 'HANDOVER_PENDING' ? (
-                        <div className="pt-2 border-t border-steel-200 space-y-2">
-                          <div className="p-2 bg-forest-50 border border-forest-300 rounded text-xs font-bold text-forest-700 flex items-center gap-1.5">
-                            <Check className="w-4 h-4 text-forest-600 shrink-0" />
+                        <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                          <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-2xl text-xs sm:text-sm font-bold text-emerald-800 flex items-center gap-2">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                             <span>{t('bidAcceptedMsg', 'Bid Accepted! Ready for physical QR scan.')}</span>
                           </div>
                           <button
@@ -699,14 +702,14 @@ export const RecyclerDashboard: React.FC = () => {
                               setActualWeight(lot.approxWeightKg);
                               setActiveTab('handover');
                             }}
-                            className="w-full py-1.5 bg-paper-200 hover:bg-copper-100 text-copper-800 border border-copper-300 text-xs font-bold rounded transition-colors"
+                            className="w-full btn-primary-m3 py-3 text-xs sm:text-sm font-bold rounded-full transition-all"
                           >
                             {t('Go to QR Handover Verification →', 'Go to QR Handover Verification →')}
                           </button>
                         </div>
                       ) : (
-                        <div className="pt-2 border-t border-steel-200 text-xs text-steel-500 flex items-center justify-between">
-                          <span>{t('status', 'Status')}: {t(lot.status)}</span>
+                        <div className="pt-3 border-t border-slate-100 text-xs sm:text-sm text-slate-500 flex items-center justify-between font-body">
+                          <span>{t('status', 'Status')}: <strong className="text-slate-800">{t(lot.status)}</strong></span>
                           {lot.confirmedAt && <span>{t('confirmed', 'Confirmed')}</span>}
                         </div>
                       )}
@@ -726,44 +729,44 @@ export const RecyclerDashboard: React.FC = () => {
 
         return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-6">
+          <div className="android17-card p-6 sm:p-8 space-y-6 bg-white border border-slate-200/80 shadow-m3-1">
             <div>
-              <span className="stamp-seal stamp-verified text-xs">TRACEABILITY CLOSURE</span>
-              <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+              <span className="stamp-seal stamp-verified text-xs rounded-full px-3 py-1 font-bold">TRACEABILITY CLOSURE</span>
+              <h2 className="text-2xl sm:text-3xl font-display font-black text-slate-900 mt-2">
                 Digital Handover Confirmation
               </h2>
-              <p className="text-xs text-steel-600">
+              <p className="text-sm sm:text-base text-slate-600 font-medium mt-1">
                 Scan the collector's digital QR ticket or type the lot reference code. This closes the formal chain of custody from household scrap to authorized smelter.
               </p>
             </div>
 
             {handoverSuccess && (
-              <div className="p-4 bg-forest-500/10 border-2 border-forest-500 rounded-lg text-forest-700 text-xs font-medium space-y-2">
-                <div className="font-bold flex items-center gap-1 text-forest-800">
-                  <CheckCircle2 className="w-4 h-4" /> Handover Successfully Closed
+              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-900 text-sm font-medium space-y-2 animate-fade-in shadow-m3-1">
+                <div className="font-bold flex items-center gap-2 text-emerald-950">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" /> Handover Successfully Closed
                 </div>
                 <p>{handoverSuccess}</p>
               </div>
             )}
 
-            <form onSubmit={handleConfirmHandover} className="space-y-4">
+            <form onSubmit={handleConfirmHandover} className="space-y-5">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-steel-700 mb-1">
+                <label className="block text-xs uppercase font-bold tracking-wider text-slate-700 mb-1.5">
                   Lot Reference Code or QR String
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-2.5">
                   <input
                     type="text"
                     value={handoverCode}
                     onChange={e => setHandoverCode(e.target.value)}
                     placeholder="e.g. KC-LOT-9821 or KBD-EWASTE-9821-IN"
-                    className="flex-1 px-3 py-2 text-sm font-mono uppercase bg-white border-2 border-steel-300 rounded focus:border-copper-600 focus:outline-none"
+                    className="flex-1 px-4 py-3 text-sm sm:text-base font-body uppercase bg-slate-50 border border-slate-300 rounded-2xl focus:bg-white focus:border-emerald-600 focus:outline-none font-bold text-slate-900"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setHandoverCode('KC-LOT-9821')}
-                    className="px-3 py-2 bg-paper-200 hover:bg-paper-300 text-steel-700 text-xs font-bold rounded border border-steel-400"
+                    className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold rounded-2xl border border-slate-200"
                   >
                     Load Sample
                   </button>
@@ -771,14 +774,14 @@ export const RecyclerDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-steel-700 mb-1">
+                <label className="block text-xs uppercase font-bold tracking-wider text-slate-700 mb-1.5">
                   Physical Scale Weighbridge Reading (kg)
                 </label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setActualWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
-                    className="w-12 h-12 rounded bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center font-bold text-steel-800"
+                    className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-300 flex items-center justify-center font-black text-2xl text-slate-800 active:scale-95 transition-all"
                   >
                     -
                   </button>
@@ -787,13 +790,13 @@ export const RecyclerDashboard: React.FC = () => {
                     step="0.1"
                     value={actualWeight}
                     onChange={e => setActualWeight(parseFloat(e.target.value) || 0)}
-                    className="flex-1 px-3 py-2.5 text-center text-lg font-mono font-bold bg-white border-2 border-steel-300 rounded focus:border-copper-600 focus:outline-none"
+                    className="flex-1 px-4 py-3 text-center text-2xl font-display font-black bg-slate-50 border border-slate-300 rounded-2xl focus:bg-white focus:border-emerald-600 focus:outline-none text-slate-900"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setActualWeight(w => Math.round((w + 0.5) * 10) / 10)}
-                    className="w-12 h-12 rounded bg-paper-200 hover:bg-paper-300 border-2 border-steel-400 flex items-center justify-center font-bold text-steel-800"
+                    className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-300 flex items-center justify-center font-black text-2xl text-slate-800 active:scale-95 transition-all"
                   >
                     +
                   </button>
@@ -803,31 +806,31 @@ export const RecyclerDashboard: React.FC = () => {
               {/* Layer 3 Weighbridge & Scale Calibration Verification Card */}
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block text-[10px] uppercase font-mono text-steel-600 font-bold mb-1">
+                  <label className="block text-xs uppercase font-semibold text-slate-600 mb-1">
                     CPCB Scale Calibration ID
                   </label>
                   <input
                     type="text"
                     value={scaleCalibrationId}
                     onChange={e => setScaleCalibrationId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono uppercase bg-white border-2 border-steel-300 rounded focus:border-copper-600 focus:outline-none font-bold"
+                    className="w-full px-4 py-2.5 text-xs sm:text-sm font-body uppercase bg-slate-50 border border-slate-300 rounded-2xl focus:bg-white focus:border-emerald-600 focus:outline-none font-bold text-slate-900"
                     placeholder="WB-OKHLA-SCALE-04"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase font-mono text-steel-600 font-bold mb-1">
+                  <label className="block text-xs uppercase font-semibold text-slate-600 mb-1">
                     Tare / Container Weight
                   </label>
-                  <div className="w-full px-3 py-2 text-xs font-mono bg-paper-200 border-2 border-steel-300 rounded text-steel-700 flex justify-between items-center">
-                    <span>0.0 kg (Calibrated Zero)</span>
-                    <span className="text-[10px] text-forest-700 font-bold">±0.5% Tol</span>
+                  <div className="w-full px-4 py-2.5 text-xs sm:text-sm font-body bg-slate-100 border border-slate-300 rounded-2xl text-slate-700 flex justify-between items-center font-semibold">
+                    <span>0.0 kg (Zero)</span>
+                    <span className="text-xs text-emerald-700 font-bold">±0.5% Tol</span>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-steel-700 mb-1">
+                  <label className="block text-xs uppercase font-bold tracking-wider text-slate-700 mb-1.5">
                     Authorized Operator PIN
                   </label>
                   <input
@@ -835,113 +838,113 @@ export const RecyclerDashboard: React.FC = () => {
                     value={operatorPin}
                     onChange={e => setOperatorPin(e.target.value)}
                     placeholder="OP-OKHLA-981"
-                    className="w-full px-3 py-2 text-xs font-mono font-bold uppercase bg-white border-2 border-steel-300 rounded focus:border-copper-600 focus:outline-none"
+                    className="w-full px-4 py-2.5 text-xs sm:text-sm font-body font-bold uppercase bg-slate-50 border border-slate-300 rounded-2xl focus:bg-white focus:border-emerald-600 focus:outline-none text-slate-900"
                     required
                   />
                 </div>
               </div>
 
-              <div className="p-3 bg-brass-100 rounded border border-brass-400 text-xs text-steel-800 space-y-1">
-                <div className="font-bold flex items-center justify-between text-brass-900">
-                  <span className="flex items-center gap-1">
-                    <ShieldCheck className="w-4 h-4 text-brass-700" /> Layer 3: Industrial Traceability Closure
+              <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-200/80 text-xs sm:text-sm text-slate-800 space-y-1.5 font-body">
+                <div className="font-bold flex items-center justify-between text-amber-950">
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-amber-700" /> Layer 3: Industrial Traceability Closure
                   </span>
-                  <span className="font-mono text-[10px] bg-forest-100 text-forest-800 px-2 py-0.5 rounded border border-forest-300 font-bold">
+                  <span className="text-xs bg-emerald-100 text-emerald-900 px-2.5 py-0.5 rounded-full border border-emerald-300 font-bold">
                     CPCB Calibrated
                   </span>
                 </div>
                 <p>
-                  Weighbridge Operator <span className="font-mono font-bold">{operatorPin}</span> certifies physical intake of {actualWeight} kg from Collector Suresh Kumar (Aadhaar verified: XXXX-XXXX-8921). Handover confirmation generates CPCB Form-2 tamper-evident compliance audit hash.
+                  Weighbridge Operator <span className="font-bold">{operatorPin}</span> certifies physical intake of {actualWeight} kg from Collector Suresh Kumar (Aadhaar verified: XXXX-XXXX-8921). Handover confirmation generates CPCB Form-2 tamper-evident compliance audit hash.
                 </p>
               </div>
 
               <button
                 type="submit"
-                className="w-full btn-dhatu-primary py-3 rounded-lg text-sm font-bold flex items-center justify-center space-x-2"
+                className="w-full btn-primary-m3 py-4 rounded-full text-base font-bold flex items-center justify-center space-x-2 shadow-m3-2 active:scale-98 transition-transform"
               >
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-5 h-5" />
                 <span>Verify & Confirm Handover Receipt</span>
               </button>
             </form>
           </div>
 
           {/* QR Verification Visualizer */}
-          <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-4 flex flex-col justify-between">
+          <div className="android17-card p-6 sm:p-8 space-y-5 flex flex-col justify-between bg-white border border-slate-200/80 shadow-m3-1">
             <div>
-              <div className="flex justify-between items-start border-b border-steel-300 pb-3">
+              <div className="flex justify-between items-start border-b border-slate-100 pb-3">
                 <div>
-                  <span className="font-display font-black text-lg text-steel-900">
+                  <h3 className="font-display font-black text-xl sm:text-2xl text-slate-900">
                     CPCB Electronic Handover Stamp
-                  </span>
-                  <p className="text-xs text-steel-600">
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
                     {previewLot ? `Active lot record: #${previewLot.lotCode}` : 'Sample active handover ticket in transit'}
                   </p>
                 </div>
-                <div className={`stamp-seal text-xs ${previewLot?.status === 'CONFIRMED' ? 'stamp-verified' : 'stamp-pending'}`}>
+                <div className={`stamp-seal text-xs rounded-full px-3 py-1 font-bold ${previewLot?.status === 'CONFIRMED' ? 'stamp-verified' : 'stamp-pending'}`}>
                   {previewLot ? previewLot.status : 'IN TRANSIT'}
                 </div>
               </div>
 
-              <div className="my-6 p-4 bg-white rounded border border-steel-300 flex flex-col items-center justify-center space-y-3">
-                <div className="w-36 h-36 bg-paper-200 border-2 border-steel-800 p-2 flex items-center justify-center rounded">
-                  <QrCode className="w-28 h-28 text-steel-900" />
+              <div className="my-6 p-6 bg-slate-50/90 rounded-[28px] border border-slate-200/80 flex flex-col items-center justify-center space-y-3">
+                <div className="w-36 h-36 bg-white border border-slate-300 p-2 flex items-center justify-center rounded-2xl shadow-sm">
+                  <QrCode className="w-28 h-28 text-slate-900" />
                 </div>
-                <div className="text-center font-mono text-xs text-steel-700">
-                  <div className="font-bold">{previewLot ? previewLot.lotCode : 'KC-LOT-9821'}</div>
-                  <div className="text-[10px] text-steel-500">
+                <div className="text-center font-body text-sm text-slate-800">
+                  <div className="font-bold text-base text-slate-900">{previewLot ? previewLot.lotCode : 'KC-LOT-9821'}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">
                     {previewLot ? `QR: ${previewLot.qrCode}` : 'SHA256: e3b0c44298fc1c149afbf4c8...'}
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2 text-xs font-mono text-steel-800 bg-paper-100 p-3 rounded border border-paper-300">
+              <div className="space-y-3 text-xs sm:text-sm font-body text-slate-800 bg-slate-50/90 p-4 sm:p-5 rounded-2xl border border-slate-200/80">
                 <div className="flex justify-between">
-                  <span className="text-steel-500">Item:</span>
-                  <span className="font-bold">
+                  <span className="text-slate-500 font-medium">Item:</span>
+                  <span className="font-bold text-slate-900">
                     {previewLot ? preserveEnglishItemName(previewLot.category) : 'High-grade Server PCBs'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-steel-500">Estimated Weight:</span>
-                  <span className="font-bold">
+                  <span className="text-slate-500 font-medium">Estimated Weight:</span>
+                  <span className="font-display font-black text-slate-900 text-sm sm:text-base">
                     {previewLot ? `${previewLot.approxWeightKg} kg` : '18.5 kg'}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-steel-500">
+                  <span className="text-slate-500 font-medium">
                     {previewLot?.isCustomLot ? 'Blended Rate:' : 'Agreed Rate:'}
                   </span>
-                  <span className="font-bold text-copper-600">
+                  <span className="font-display font-black text-emerald-700 text-sm sm:text-base">
                     ₹{previewLot ? previewLot.recyclerOfferedRate : 640} / kg
                   </span>
                 </div>
 
                 {/* Custom Mixed Lot Material Manifest in QR Ticket */}
                 {previewLot?.isCustomLot && previewLot.items && previewLot.items.length > 0 && (
-                  <div className="pt-2 border-t border-paper-300 space-y-1">
-                    <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-copper-800">
-                      <Layers className="w-3 h-3 text-copper-600" />
+                  <div className="pt-3 border-t border-slate-200/80 space-y-2">
+                    <div className="flex items-center gap-1.5 text-xs uppercase font-bold text-emerald-800">
+                      <Layers className="w-4 h-4 text-emerald-600" />
                       <span>Composite Manifest ({previewLot.items.length} items):</span>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {previewLot.items.map((item: EWasteLotItem, idx: number) => (
-                        <div key={idx} className="flex justify-between items-center text-[11px] bg-white px-2 py-0.5 rounded border border-steel-200">
-                          <span className="truncate pr-1">• {preserveEnglishItemName(item.category)}</span>
-                          <span className="font-bold text-copper-700 shrink-0">{item.weightKg} kg (₹{item.ratePerKg}/kg)</span>
+                        <div key={idx} className="flex justify-between items-center text-xs sm:text-sm bg-white px-3 py-1.5 rounded-xl border border-slate-200/70 shadow-2xs">
+                          <span className="truncate pr-1 font-semibold text-slate-800">• {preserveEnglishItemName(item.category)}</span>
+                          <span className="font-bold text-slate-900 shrink-0">{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span></span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <div className="flex justify-between">
-                  <span className="text-steel-500">Handover Location:</span>
-                  <span>Okhla Ph-II Gate 3</span>
+                <div className="flex justify-between pt-1">
+                  <span className="text-slate-500 font-medium">Handover Location:</span>
+                  <span className="font-semibold text-slate-800">Okhla Ph-II Gate 3</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-[11px] text-steel-500 italic text-center">
+            <div className="text-xs sm:text-sm text-slate-500 italic text-center mt-2">
               "No formal e-waste moves without a verified digital lot record." — SIH26229 Problem Guideline
             </div>
           </div>
@@ -1328,44 +1331,44 @@ export const RecyclerDashboard: React.FC = () => {
           onClick={() => setBiddingLot(null)}
         >
           <div
-            className="bg-paper-50 rounded-2xl border-2 border-copper-600 max-w-md w-full p-6 shadow-tactile-lg space-y-5 text-steel-900 overflow-y-auto max-h-[90vh] relative"
+            className="bg-white rounded-[32px] border border-slate-200/80 max-w-lg w-full p-6 sm:p-8 shadow-m3-4 space-y-6 text-slate-900 overflow-y-auto max-h-[90vh] relative"
             onClick={e => e.stopPropagation()}
           >
             {/* Close button */}
             <button
               onClick={() => setBiddingLot(null)}
-              className="absolute top-4 right-4 p-2 rounded-full text-steel-500 hover:text-steel-900 hover:bg-paper-200 transition-colors"
+              className="absolute top-5 right-5 p-2 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Header */}
-            <div className="space-y-1">
-              <span className="stamp-seal stamp-verified text-[10px]">RECYCLER BIDDING</span>
-              <h3 className="text-lg font-display font-black text-steel-950 mt-1">
+            <div className="space-y-1.5">
+              <span className="stamp-seal stamp-verified text-xs rounded-full px-3 py-1 font-bold">RECYCLER BIDDING</span>
+              <h3 className="text-xl sm:text-2xl font-display font-black text-slate-950 mt-1">
                 Submit Bid for Lot #{biddingLot.lotCode}
               </h3>
-              <p className="text-xs text-steel-600 font-medium">
+              <p className="text-sm text-slate-600 font-medium">
                 {preserveEnglishItemName(biddingLot.category)} • {biddingLot.approxWeightKg} kg
               </p>
             </div>
 
             {/* Custom Mixed Lot Manifest in Bidding Modal */}
             {biddingLot.isCustomLot && biddingLot.items && biddingLot.items.length > 0 && (
-              <div className="p-2.5 bg-paper-100 rounded-lg border border-steel-300 font-mono text-xs space-y-1">
-                <div className="flex items-center justify-between text-[10px] uppercase font-bold text-copper-800 pb-1 border-b border-steel-200">
-                  <span className="flex items-center gap-1">
-                    <Layers className="w-3 h-3 text-copper-600" />
+              <div className="p-4 bg-slate-50/90 rounded-2xl border border-slate-200/80 font-body text-xs sm:text-sm space-y-2">
+                <div className="flex items-center justify-between text-xs uppercase font-bold text-emerald-800 pb-2 border-b border-slate-200/80">
+                  <span className="flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-emerald-600" />
                     <span>Material Manifest ({biddingLot.items.length} materials)</span>
                   </span>
-                  <span>Blended: ₹{biddingLot.recyclerOfferedRate}/kg</span>
+                  <span className="font-extrabold font-display text-sm">Blended: ₹{biddingLot.recyclerOfferedRate}/kg</span>
                 </div>
-                <div className="space-y-1 pt-1">
+                <div className="space-y-1.5 pt-1">
                   {biddingLot.items.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-[11px] text-steel-800">
-                      <span className="truncate pr-1">• {preserveEnglishItemName(item.category)}</span>
-                      <span className="font-bold text-copper-700 shrink-0">{item.weightKg} kg (₹{item.ratePerKg}/kg)</span>
+                    <div key={idx} className="flex justify-between items-center text-xs sm:text-sm bg-white px-3 py-1.5 rounded-xl border border-slate-200/70 shadow-2xs">
+                      <span className="truncate pr-1 font-semibold text-slate-800">• {preserveEnglishItemName(item.category)}</span>
+                      <span className="font-bold text-slate-900 shrink-0">{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span></span>
                     </div>
                   ))}
                 </div>
@@ -1388,40 +1391,40 @@ export const RecyclerDashboard: React.FC = () => {
               const suggestedTotalFromRate = Math.round(effectiveTotal * weight);
 
               return (
-                <form onSubmit={handleSubmitBid} noValidate className="space-y-4">
+                <form onSubmit={handleSubmitBid} noValidate className="space-y-5">
                   {/* Asking & Minimum summary card */}
-                  <div className="grid grid-cols-2 gap-2 bg-paper-100 p-3 rounded-xl border border-steel-300 font-mono text-xs">
-                    <div className="bg-paper-50 p-2.5 rounded border border-steel-200">
-                      <span className="text-[10px] text-steel-500 block">COLLECTOR ASK</span>
-                      <span className="font-bold text-steel-900 text-sm">₹{ask.toLocaleString('en-IN')}</span>
-                      <span className="text-[10px] text-steel-500 block">₹{baseRate}/kg</span>
+                  <div className="grid grid-cols-2 gap-3 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80 font-body">
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                      <span className="text-xs text-slate-500 font-semibold block uppercase">COLLECTOR ASK</span>
+                      <span className="font-display font-black text-slate-900 text-lg sm:text-xl block mt-0.5">₹{ask.toLocaleString('en-IN')}</span>
+                      <span className="text-xs text-slate-600 font-medium block mt-0.5">₹{baseRate}/kg</span>
                     </div>
-                    <div className="bg-forest-50 p-2.5 rounded border border-forest-300">
-                      <span className="text-[10px] text-forest-700 block font-bold">MIN VALID BID (50%)</span>
-                      <span className="font-bold text-forest-800 text-sm">₹{minBid.toLocaleString('en-IN')}</span>
-                      <span className="text-[10px] text-forest-700 font-semibold block">₹{minRate}/kg</span>
+                    <div className="bg-emerald-50/80 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+                      <span className="text-xs text-emerald-800 font-bold block uppercase">MIN VALID BID (50%)</span>
+                      <span className="font-display font-black text-emerald-700 text-lg sm:text-xl block mt-0.5">₹{minBid.toLocaleString('en-IN')}</span>
+                      <span className="text-xs text-emerald-700 font-semibold block mt-0.5">₹{minRate}/kg</span>
                     </div>
                   </div>
 
                   {biddingLot.highestBid ? (
-                    <div className="p-2.5 bg-paper-200 rounded-lg border border-steel-300 text-xs font-mono flex items-center justify-between">
-                      <span className="text-steel-600">Current Highest Bid:</span>
-                      <span className="font-bold text-forest-700">₹{Number(biddingLot.highestBid).toLocaleString('en-IN')} (₹{Math.round(Number(biddingLot.highestBid) / weight)}/kg)</span>
+                    <div className="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200/60 text-xs sm:text-sm font-body flex items-center justify-between">
+                      <span className="text-slate-600 font-medium">Current Highest Bid:</span>
+                      <span className="font-display font-black text-emerald-700 text-base">₹{Number(biddingLot.highestBid).toLocaleString('en-IN')} <span className="text-xs font-semibold">(₹{Math.round(Number(biddingLot.highestBid) / weight)}/kg)</span></span>
                     </div>
                   ) : null}
 
                   {/* Mode switch: Total vs Rate per Kg */}
-                  <div className="flex bg-paper-200 p-1 rounded-lg border border-steel-300 text-xs font-bold">
+                  <div className="flex bg-slate-100/90 p-1.5 rounded-full border border-slate-200/80 text-xs sm:text-sm font-bold">
                     <button
                       type="button"
                       onClick={() => {
                         setBidMode('total');
                         setBidError(null);
                       }}
-                      className={`flex-1 py-1.5 px-2 rounded text-center transition-all ${
+                      className={`flex-1 py-2 px-3 rounded-full text-center transition-all ${
                         bidMode === 'total'
-                          ? 'bg-copper-700 text-paper-50 shadow-tactile'
-                          : 'text-steel-700 hover:text-steel-900'
+                          ? 'm3-tab-pill-active font-extrabold shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       Bid by Total (₹)
@@ -1432,10 +1435,10 @@ export const RecyclerDashboard: React.FC = () => {
                         setBidMode('rate');
                         setBidError(null);
                       }}
-                      className={`flex-1 py-1.5 px-2 rounded text-center transition-all ${
+                      className={`flex-1 py-2 px-3 rounded-full text-center transition-all ${
                         bidMode === 'rate'
-                          ? 'bg-copper-700 text-paper-50 shadow-tactile'
-                          : 'text-steel-700 hover:text-steel-900'
+                          ? 'm3-tab-pill-active font-extrabold shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       Bid by Rate (₹/kg)
@@ -1444,10 +1447,10 @@ export const RecyclerDashboard: React.FC = () => {
 
                   {/* Quick percentage shortcuts */}
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-steel-700 mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                       Quick Bid Presets
                     </label>
-                    <div className="grid grid-cols-4 gap-1.5 text-xs font-mono">
+                    <div className="grid grid-cols-4 gap-2 text-xs sm:text-sm font-body">
                       {[
                         { label: '50% MIN', val: minBid },
                         { label: '70%', val: Math.round(ask * 0.7) },
@@ -1466,15 +1469,15 @@ export const RecyclerDashboard: React.FC = () => {
                               setBidError(null);
                               triggerHaptic(15);
                             }}
-                            className={`p-2 rounded border text-center transition-all ${
+                            className={`p-2.5 rounded-2xl border text-center transition-all ${
                               isSelected
-                                ? 'bg-copper-700 text-paper-50 border-copper-700 font-bold shadow-tactile'
-                                : 'bg-paper-200 hover:bg-paper-300 text-steel-800 border-steel-300'
+                                ? 'bg-emerald-800 text-white border-emerald-800 font-bold shadow-m3-1'
+                                : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                             }`}
                           >
-                            <span className="block text-[10px] opacity-80">{preset.label}</span>
-                            ₹{preset.val.toLocaleString('en-IN')}
-                            <span className="block text-[9px] opacity-75">₹{presetRate}/kg</span>
+                            <span className="block text-[10px] uppercase tracking-wide opacity-80">{preset.label}</span>
+                            <span className="block font-display font-bold text-sm mt-0.5">₹{preset.val.toLocaleString('en-IN')}</span>
+                            <span className="block text-[10px] opacity-75">₹{presetRate}/kg</span>
                           </button>
                         );
                       })}
@@ -1483,17 +1486,17 @@ export const RecyclerDashboard: React.FC = () => {
 
                   {/* Custom Bid Input depending on Mode */}
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-bold uppercase tracking-wider text-steel-700">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-700">
                         {bidMode === 'total' ? 'Your Total Bid (₹)' : `Your Offer Rate (₹/kg for ${weight} kg)`}
                       </label>
-                      <span className="text-[11px] font-mono text-copper-700 font-bold">
+                      <span className="text-xs sm:text-sm text-emerald-800 font-bold">
                         {bidMode === 'total' ? `₹${effectiveRate}/kg` : `Total: ₹${effectiveTotal.toLocaleString('en-IN')}`}
                       </span>
                     </div>
 
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-bold text-steel-600">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-display font-black text-slate-600">
                         ₹
                       </span>
                       {bidMode === 'total' ? (
@@ -1503,8 +1506,8 @@ export const RecyclerDashboard: React.FC = () => {
                           min="1"
                           value={bidAmountInput || ''}
                           onChange={e => handleTotalInputChange(Number(e.target.value), biddingLot)}
-                          className={`w-full pl-8 pr-4 py-3 bg-paper-50 border-2 rounded-lg font-mono text-lg font-bold focus:outline-none ${
-                            isBelowMin && effectiveTotal > 0 ? 'border-signal-500 text-signal-600' : 'border-steel-400 focus:border-copper-600 text-steel-900'
+                          className={`w-full pl-9 pr-4 py-3.5 bg-slate-50 border-2 rounded-2xl font-display text-xl sm:text-2xl font-black focus:outline-none focus:bg-white ${
+                            isBelowMin && effectiveTotal > 0 ? 'border-rose-500 text-rose-600' : 'border-slate-300 focus:border-emerald-600 text-slate-900'
                           }`}
                           placeholder={`Min ₹${minBid}`}
                           required
@@ -1516,8 +1519,8 @@ export const RecyclerDashboard: React.FC = () => {
                           min="1"
                           value={bidRateInput || ''}
                           onChange={e => handleRateInputChange(Number(e.target.value), biddingLot)}
-                          className={`w-full pl-8 pr-4 py-3 bg-paper-50 border-2 rounded-lg font-mono text-lg font-bold focus:outline-none ${
-                            effectiveRate < minRate && effectiveRate > 0 ? 'border-signal-500 text-signal-600' : 'border-steel-400 focus:border-copper-600 text-steel-900'
+                          className={`w-full pl-9 pr-4 py-3.5 bg-slate-50 border-2 rounded-2xl font-display text-xl sm:text-2xl font-black focus:outline-none focus:bg-white ${
+                            effectiveRate < minRate && effectiveRate > 0 ? 'border-rose-500 text-rose-600' : 'border-slate-300 focus:border-emerald-600 text-slate-900'
                           }`}
                           placeholder={`Min ₹${minRate}/kg`}
                           required
@@ -1527,7 +1530,7 @@ export const RecyclerDashboard: React.FC = () => {
 
                     {/* Rate helper / conversion pill if user entered per-kg rate while in total mode */}
                     {looksLikeRate && (
-                      <div className="mt-2 p-2 bg-brass-50 border border-brass-300 rounded text-[11px] text-brass-800 flex items-center justify-between animate-fade-in">
+                      <div className="mt-2.5 p-3 bg-amber-50 border border-amber-300 rounded-2xl text-xs text-amber-900 flex items-center justify-between animate-fade-in">
                         <span>💡 Did you mean <strong>₹{effectiveTotal}/kg</strong> (Total: ₹{suggestedTotalFromRate.toLocaleString('en-IN')})?</span>
                         <button
                           type="button"
@@ -1536,41 +1539,41 @@ export const RecyclerDashboard: React.FC = () => {
                             setBidMode('rate');
                             triggerHaptic(15);
                           }}
-                          className="px-2 py-0.5 bg-brass-700 text-paper-50 rounded font-bold hover:bg-brass-800 transition-colors ml-2 shrink-0"
+                          className="px-3 py-1 bg-amber-700 text-white rounded-full font-bold hover:bg-amber-800 transition-colors ml-2 shrink-0 text-xs"
                         >
                           Apply as ₹/kg
                         </button>
                       </div>
                     )}
 
-                    <div className="mt-1 flex items-center justify-between text-[11px] text-steel-600 font-mono">
-                      <span>Effective Rate: <strong>₹{effectiveRate}/kg</strong></span>
-                      <span>Min required: <strong>₹{minBid.toLocaleString('en-IN')} (₹{minRate}/kg)</strong></span>
+                    <div className="mt-2 flex items-center justify-between text-xs text-slate-600 font-body">
+                      <span>Effective Rate: <strong className="text-slate-900">₹{effectiveRate}/kg</strong></span>
+                      <span>Min required: <strong className="text-emerald-700">₹{minBid.toLocaleString('en-IN')} (₹{minRate}/kg)</strong></span>
                     </div>
                   </div>
 
                   {/* Error display */}
                   {bidError && (
-                    <div className="p-3 bg-signal-500/10 border border-signal-500 rounded-lg text-signal-600 text-xs font-semibold flex items-center gap-2">
+                    <div className="p-3.5 bg-rose-50 border border-rose-300 rounded-2xl text-rose-700 text-xs sm:text-sm font-semibold flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 shrink-0" />
                       <span>{bidError}</span>
                     </div>
                   )}
 
                   {/* Submit Button */}
-                  <div className="pt-2 space-y-2">
+                  <div className="pt-2 space-y-2.5">
                     <button
                       type="submit"
                       disabled={isBelowMin || !effectiveTotal}
-                      className="w-full min-h-[48px] py-3 bg-copper-700 hover:bg-copper-800 disabled:opacity-50 disabled:cursor-not-allowed text-paper-50 font-bold rounded-lg shadow-tactile text-sm flex items-center justify-center gap-2 active:translate-y-0.5 transition-all"
+                      className="w-full btn-primary-m3 py-4 rounded-full text-base font-bold shadow-m3-2 flex items-center justify-center gap-2 active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Gavel className="w-4 h-4" />
+                      <Gavel className="w-5 h-5" />
                       <span>Submit Bid of ₹{effectiveTotal.toLocaleString('en-IN')} (₹{effectiveRate}/kg)</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setBiddingLot(null)}
-                      className="w-full min-h-[44px] py-2 bg-paper-200 hover:bg-paper-300 text-steel-700 font-semibold rounded-lg border border-steel-300 text-xs transition-colors"
+                      className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full text-sm transition-colors"
                     >
                       Cancel
                     </button>

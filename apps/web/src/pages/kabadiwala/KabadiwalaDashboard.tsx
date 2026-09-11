@@ -932,43 +932,43 @@ export const KabadiwalaDashboard: React.FC = () => {
       {activeTab === 'lots' && (
         <div className="space-y-6">
           {/* Sub-view Switcher: Create Lot vs My Created Lots */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-m3-1">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white p-3.5 rounded-[24px] border border-slate-200/80 shadow-m3-1">
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => setLotsSubView('create')}
-                className={`px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 transition-all ${
+                className={`px-6 py-3 rounded-full font-bold text-sm sm:text-base flex items-center gap-2.5 transition-all active:scale-95 ${
                   lotsSubView === 'create'
-                    ? 'bg-emerald-700 text-white shadow-sm'
+                    ? 'm3-tab-pill-active shadow-sm'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>{t('createDigitalLot', 'Create Digital Lot')}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setLotsSubView('mylots')}
-                className={`px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 transition-all ${
+                className={`px-6 py-3 rounded-full font-bold text-sm sm:text-base flex items-center gap-2.5 transition-all active:scale-95 ${
                   lotsSubView === 'mylots'
-                    ? 'bg-emerald-700 text-white shadow-sm'
+                    ? 'm3-tab-pill-active shadow-sm'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>{t('myCreatedLots', 'My Created Lots')} ({myLots.length})</span>
                 {myLots.some(l => (l.bids && l.bids.length > 0)) && (
-                  <span className="bg-amber-400 text-slate-950 text-xs font-mono font-extrabold px-2 py-0.5 rounded-full animate-pulse">
+                  <span className="bg-amber-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow-sm animate-pulse">
                     {myLots.reduce((sum, l) => sum + (l.bids?.length || 0), 0)} {t('bidsReceived', 'Bids')}
                   </span>
                 )}
               </button>
             </div>
 
-            <div className="text-xs font-semibold text-slate-600 flex items-center gap-2 px-2">
+            <div className="text-xs sm:text-sm font-semibold text-slate-600 flex items-center gap-2 px-2">
               <span className="hidden sm:inline">{t('biddingRule', 'Recycler Bidding Rule:')}</span>
-              <span className="bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 font-bold text-emerald-800">
+              <span className="bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200/80 font-bold text-emerald-800 text-xs sm:text-sm">
                 {t('minAskRule', 'Min 50% of Ask Value')}
               </span>
             </div>
@@ -982,10 +982,10 @@ export const KabadiwalaDashboard: React.FC = () => {
             return (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
-              <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-m3-1 space-y-6">
+              <div className="lg:col-span-7 bg-white rounded-[28px] p-6 sm:p-8 border border-slate-200/80 shadow-m3-1 space-y-6">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="rounded-full px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold">{t('lotCreationBadge', 'Lot Creation')}</span>
+                    <span className="rounded-full px-3.5 py-1 chip-primary-m3 text-xs font-bold shadow-xs">{t('lotCreationBadge', 'Lot Creation')}</span>
                     <VoiceAssistButton
                       text={lotTypeMode === 'custom' 
                         ? `Custom mixed lot mode. Add multiple scrap materials to bundle into one consignment. Total weight ${customTotalWeight} kilograms.`
@@ -1002,10 +1002,10 @@ export const KabadiwalaDashboard: React.FC = () => {
                       size="sm"
                     />
                   </div>
-                  <h2 className="text-2xl font-display font-black text-slate-900 mt-2">
+                  <h2 className="text-2xl sm:text-3xl font-display font-black text-slate-900 mt-2">
                     {t('digitalLotCreatorTitle', 'Digital E-Waste Lot Creator')}
                   </h2>
-                  <p className="text-sm text-slate-600 font-normal mt-1">
+                  <p className="text-sm sm:text-base text-slate-600 font-normal mt-1">
                     {lotTypeMode === 'custom'
                       ? 'Bundle multiple scrap materials into a single certified lot with itemized rates and automatic valuation.'
                       : 'Photograph material, select e-waste category, specify weight, and generate a verified digital lot.'}
@@ -1013,48 +1013,48 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
 
                 {lotCreatedSuccess && (
-                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-sm text-emerald-900 space-y-1">
+                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-sm sm:text-base text-emerald-900 space-y-1">
                     <div className="font-bold flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-700" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />
                       <span>{t('lotCreatedSuccessTitle', 'Lot Registered Successfully!')}</span>
                     </div>
-                    <p>{lotCreatedSuccess}</p>
+                    <p className="text-sm">{lotCreatedSuccess}</p>
                   </div>
                 )}
 
-                <form onSubmit={handleCreateLot} className="space-y-5">
+                <form onSubmit={handleCreateLot} className="space-y-6">
 
                   {/* Lot Mode Toggle: Single vs Custom Mixed */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                       {t('lotTypeSelection', '1. Select Lot Configuration')}
                     </label>
-                    <div className="bg-slate-100 p-1.5 rounded-2xl border border-slate-200 grid grid-cols-2 gap-2 shadow-sm">
+                    <div className="bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200 grid grid-cols-2 gap-2 shadow-inner">
                       <button
                         type="button"
                         onClick={() => setLotTypeMode('single')}
-                        className={`py-2.5 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                        className={`py-3 px-4 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 ${
                           lotTypeMode === 'single'
-                            ? 'bg-white text-emerald-900 shadow-sm border border-slate-200/80'
+                            ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80 font-black'
                             : 'text-slate-600 hover:text-slate-900'
                         }`}
                       >
-                        <Package className="w-4 h-4 shrink-0" />
+                        <Package className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         <span>{t('singleMaterialLot', 'Single Material Lot')}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setLotTypeMode('custom')}
-                        className={`py-2.5 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                        className={`py-3 px-4 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 ${
                           lotTypeMode === 'custom'
-                            ? 'bg-white text-emerald-900 shadow-sm border border-slate-200/80'
+                            ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80 font-black'
                             : 'text-slate-600 hover:text-slate-900'
                         }`}
                       >
-                        <Layers className="w-4 h-4 shrink-0" />
+                        <Layers className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         <span>{t('customMixedLot', 'Custom Mixed Lot')}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold">
-                          {customLotItems.length} items
+                        <span className="text-xs px-2.5 py-0.5 rounded-full chip-primary-m3 font-bold">
+                          {customLotItems.length}
                         </span>
                       </button>
                     </div>
@@ -1062,7 +1062,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                   
                   {/* Photo Upload / Capture Simulator with Real AI Classification */}
                   <div>
-                    <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                       {t('uploadPhotoLabel', '2. Upload or Capture Photograph')}
                     </label>
                     <input
@@ -1074,32 +1074,32 @@ export const KabadiwalaDashboard: React.FC = () => {
                     />
                     <label
                       htmlFor="lot-camera-input"
-                      className="cursor-pointer border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-3xl p-6 bg-slate-50/70 hover:bg-emerald-50/30 flex flex-col items-center justify-center space-y-3 text-center transition-all block shadow-sm"
+                      className="cursor-pointer border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-[28px] p-7 bg-slate-50/70 hover:bg-emerald-50/30 flex flex-col items-center justify-center space-y-3 text-center transition-all block shadow-sm"
                     >
-                      <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto shadow-sm">
-                        <Camera className="w-7 h-7" />
+                      <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto shadow-sm">
+                        <Camera className="w-8 h-8" />
                       </div>
                       {lotPhotoClassifying ? (
-                        <div className="text-emerald-800 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
+                        <div className="text-emerald-800 font-bold text-sm sm:text-base flex items-center justify-center gap-2 animate-pulse">
                           <RefreshCw className="w-4 h-4 animate-spin" />
                           <span>AI Scanning Scrap Material...</span>
                         </div>
                       ) : lotMlResult ? (
                         <div className="space-y-1.5">
-                          <div className="text-emerald-900 font-bold text-sm flex items-center justify-center gap-1.5">
+                          <div className="text-emerald-900 font-bold text-sm sm:text-base flex items-center justify-center gap-1.5">
                             <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                             <span>AI Detected: {preserveEnglishItemName(lotMlResult.category)} ({Math.round(lotMlResult.confidence * 100)}% match)</span>
                           </div>
-                          <p className="text-xs text-slate-600 font-normal">{lotMlResult.advice}</p>
+                          <p className="text-xs sm:text-sm text-slate-600 font-normal">{lotMlResult.advice}</p>
                         </div>
                       ) : lotPhotoTaken ? (
-                        <div className="text-emerald-800 font-bold text-sm flex items-center justify-center gap-1.5">
+                        <div className="text-emerald-800 font-bold text-sm sm:text-base flex items-center justify-center gap-1.5">
                           <CheckCircle2 className="w-5 h-5" /> {t('photoCapturedMsg', 'Photo Captured & Verified (1080p)')}
                         </div>
                       ) : (
                         <div>
-                          <span className="text-sm font-bold text-slate-900 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
-                          <span className="text-xs text-slate-500 mt-1 block">
+                          <span className="text-base sm:text-lg font-bold text-slate-900 block">{t('tapToSnapPhoto', 'Open Camera or Snap Photo')}</span>
+                          <span className="text-xs sm:text-sm text-slate-500 mt-1 block">
                             {lotTypeMode === 'custom' ? 'Snap photo of mixed consignment or composite scrap batch' : 'AI automatically detects CRTs, LCDs, PCBs, Cables, Batteries'}
                           </span>
                         </div>
@@ -1111,13 +1111,13 @@ export const KabadiwalaDashboard: React.FC = () => {
                     <>
                       {/* Category Selector */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        <label className="block text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                           3. {t('selectScrapCategory', 'Select Item Category')}
                         </label>
                         <select
                           value={lotCategory}
                           onChange={e => setLotCategory(e.target.value)}
-                          className="w-full px-4 py-3 text-sm font-semibold bg-white border border-slate-200/90 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
+                          className="w-full px-4 py-3.5 text-sm sm:text-base font-semibold bg-white border border-slate-300 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
                         >
                           {priceBoardData.map(p => (
                             <option key={p.category} value={p.category}>
@@ -1130,10 +1130,10 @@ export const KabadiwalaDashboard: React.FC = () => {
                       {/* Weight Stepper (Low-Literacy Friendly +/- Buttons) */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                          <label className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">
                             {t('approxWeightLabel', '4. Enter Approx Weight (Kilograms)')}
                           </label>
-                          <span className="text-xs text-slate-500 font-semibold">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
+                          <span className="text-xs sm:text-sm text-slate-500 font-semibold">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -1149,7 +1149,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                             <span className="text-3xl sm:text-4xl font-display font-black text-slate-900">
                               {lotWeight}
                             </span>
-                            <span className="text-sm font-bold text-slate-500 ml-2 uppercase">kg</span>
+                            <span className="text-base font-bold text-slate-500 ml-2 uppercase">kg</span>
                           </div>
 
                           <button
@@ -1165,29 +1165,29 @@ export const KabadiwalaDashboard: React.FC = () => {
                   ) : (
                     /* CUSTOM MIXED LOT BUILDER SECTION */
                     <div className="space-y-4 pt-1">
-                      <div className="p-3.5 bg-paper-100 rounded-xl border-2 border-steel-300 space-y-3">
-                        <div className="flex items-center justify-between border-b border-steel-200 pb-2">
-                          <div className="flex items-center gap-1.5">
-                            <Layers className="w-4 h-4 text-copper-700" />
-                            <span className="text-xs font-bold text-steel-900 uppercase tracking-wider">
+                      <div className="p-5 bg-slate-50/90 rounded-[28px] border border-slate-200/80 space-y-4 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                          <div className="flex items-center gap-2">
+                            <Layers className="w-5 h-5 text-slate-700" />
+                            <span className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                               3. Add Material Line Items
                             </span>
                           </div>
-                          <span className="text-[11px] font-mono text-copper-700 font-bold">
+                          <span className="text-xs sm:text-sm chip-primary-m3 px-3 py-1 font-bold">
                             {customLotItems.length} Materials in Lot
                           </span>
                         </div>
 
                         {/* Add Item Form Controls */}
-                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                           <div className="sm:col-span-6">
-                            <label className="block text-[10px] uppercase font-bold text-steel-600 mb-1">
+                            <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">
                               Material Type
                             </label>
                             <select
                               value={newCustomCategory}
                               onChange={e => setNewCustomCategory(e.target.value)}
-                              className="w-full px-2.5 py-2 text-xs font-bold bg-white border border-steel-300 rounded focus:border-copper-600 focus:outline-none"
+                              className="w-full px-3.5 py-2.5 text-sm font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none"
                             >
                               {priceBoardData.map(p => (
                                 <option key={p.category} value={p.category}>
@@ -1198,14 +1198,14 @@ export const KabadiwalaDashboard: React.FC = () => {
                           </div>
 
                           <div className="sm:col-span-3">
-                            <label className="block text-[10px] uppercase font-bold text-steel-600 mb-1">
+                            <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">
                               Weight (kg)
                             </label>
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
                                 onClick={() => setNewCustomWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
-                                className="w-7 h-8 bg-paper-200 hover:bg-paper-300 border border-steel-300 rounded flex items-center justify-center text-xs font-bold"
+                                className="w-9 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
                               >
                                 -
                               </button>
@@ -1215,12 +1215,12 @@ export const KabadiwalaDashboard: React.FC = () => {
                                 min="0.5"
                                 value={newCustomWeight}
                                 onChange={e => setNewCustomWeight(Math.max(0.5, parseFloat(e.target.value) || 0.5))}
-                                className="w-full text-center px-1.5 py-1 text-xs font-mono font-bold bg-white border border-steel-300 rounded"
+                                className="w-full text-center px-2 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg"
                               />
                               <button
                                 type="button"
                                 onClick={() => setNewCustomWeight(w => Math.round((w + 0.5) * 10) / 10)}
-                                className="w-7 h-8 bg-paper-200 hover:bg-paper-300 border border-steel-300 rounded flex items-center justify-center text-xs font-bold"
+                                className="w-9 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
                               >
                                 +
                               </button>
@@ -1231,64 +1231,64 @@ export const KabadiwalaDashboard: React.FC = () => {
                             <button
                               type="button"
                               onClick={handleAddCustomLotItem}
-                              className="w-full py-2 px-2 bg-copper-600 hover:bg-copper-700 text-white rounded text-xs font-bold flex items-center justify-center gap-1 shadow-sm transition-colors"
+                              className="w-full py-2.5 px-3 btn-primary-m3 text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition-transform active:scale-95"
                             >
-                              <Plus className="w-3.5 h-3.5" />
+                              <Plus className="w-4 h-4" />
                               <span>Add Item</span>
                             </button>
                           </div>
                         </div>
 
                         {/* List of Added Custom Materials */}
-                        <div className="space-y-1.5 pt-2">
-                          <span className="text-[10px] font-bold text-steel-500 uppercase tracking-wider block">
+                        <div className="space-y-2 pt-2">
+                          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
                             Included Material Manifest:
                           </span>
 
                           {customLotItems.length === 0 ? (
-                            <div className="text-center py-4 bg-paper-50 rounded border border-dashed border-steel-300 text-xs text-steel-500">
+                            <div className="text-center py-6 bg-white rounded-2xl border border-dashed border-slate-300 text-sm text-slate-500">
                               No items added yet. Choose a material and click "Add Item".
                             </div>
                           ) : (
-                            <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                               {customLotItems.map(item => (
                                 <div
                                   key={item.id}
-                                  className="p-2 bg-white rounded border border-steel-300 flex items-center justify-between text-xs font-mono gap-2 shadow-2xs"
+                                  className="p-3 bg-white rounded-2xl border border-slate-200 flex items-center justify-between text-sm gap-2 shadow-sm"
                                 >
                                   <div className="min-w-0 flex-1">
-                                    <div className="font-bold text-steel-900 truncate font-sans text-xs">
+                                    <div className="font-bold text-slate-900 truncate text-sm sm:text-base">
                                       {preserveEnglishItemName(item.category)}
                                     </div>
-                                    <div className="text-[10px] text-steel-500">
-                                      Benchmark Rate: ₹{item.ratePerKg}/kg
+                                    <div className="text-xs text-slate-500 font-medium">
+                                      Benchmark: ₹{item.ratePerKg}/kg
                                     </div>
                                   </div>
 
-                                  <div className="flex items-center gap-2 shrink-0">
+                                  <div className="flex items-center gap-3 shrink-0">
                                     {/* Weight adjustment buttons */}
-                                    <div className="flex items-center gap-1 bg-paper-100 px-1.5 py-0.5 rounded border border-steel-200">
+                                    <div className="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
                                       <button
                                         type="button"
                                         onClick={() => handleUpdateCustomItemWeight(item.id, -0.5)}
-                                        className="w-4 h-5 text-steel-600 hover:text-steel-900 font-bold"
+                                        className="w-5 h-6 text-slate-600 hover:text-slate-900 font-bold"
                                       >
                                         -
                                       </button>
-                                      <span className="font-bold text-steel-900 text-xs w-10 text-center">
+                                      <span className="font-bold text-slate-900 text-xs sm:text-sm w-12 text-center">
                                         {item.weightKg} kg
                                       </span>
                                       <button
                                         type="button"
                                         onClick={() => handleUpdateCustomItemWeight(item.id, 0.5)}
-                                        className="w-4 h-5 text-steel-600 hover:text-steel-900 font-bold"
+                                        className="w-5 h-6 text-slate-600 hover:text-slate-900 font-bold"
                                       >
                                         +
                                       </button>
                                     </div>
 
                                     {/* Subtotal */}
-                                    <span className="font-black text-forest-700 w-16 text-right">
+                                    <span className="font-display font-extrabold text-emerald-700 text-sm sm:text-base w-20 text-right">
                                       ₹{item.subtotal.toLocaleString('en-IN')}
                                     </span>
 
@@ -1296,7 +1296,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                                     <button
                                       type="button"
                                       onClick={() => handleRemoveCustomLotItem(item.id)}
-                                      className="p-1 text-steel-400 hover:text-signal-500 transition-colors"
+                                      className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
                                       title="Remove item"
                                     >
                                       <Trash2 className="w-4 h-4" />
@@ -1310,18 +1310,18 @@ export const KabadiwalaDashboard: React.FC = () => {
 
                         {/* Mixed Lot Summary Strip */}
                         {customLotItems.length > 0 && (
-                          <div className="pt-2 border-t border-steel-200 grid grid-cols-3 gap-2 text-center text-xs font-mono">
-                            <div className="bg-paper-200/60 p-1.5 rounded">
-                              <span className="text-[10px] text-steel-500 block">TOTAL ITEMS</span>
-                              <span className="font-bold text-steel-900">{customLotItems.length} Types</span>
+                          <div className="pt-3 border-t border-slate-200 grid grid-cols-3 gap-2.5 text-center">
+                            <div className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                              <span className="text-xs text-slate-500 font-semibold block uppercase">TOTAL ITEMS</span>
+                              <span className="font-display font-bold text-slate-900 text-sm sm:text-base">{customLotItems.length} Types</span>
                             </div>
-                            <div className="bg-paper-200/60 p-1.5 rounded">
-                              <span className="text-[10px] text-steel-500 block">TOTAL NET WT</span>
-                              <span className="font-bold text-steel-900">{customTotalWeight} kg</span>
+                            <div className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                              <span className="text-xs text-slate-500 font-semibold block uppercase">TOTAL NET WT</span>
+                              <span className="font-display font-bold text-slate-900 text-sm sm:text-base">{customTotalWeight} kg</span>
                             </div>
-                            <div className="bg-paper-200/60 p-1.5 rounded">
-                              <span className="text-[10px] text-steel-500 block">BLENDED RATE</span>
-                              <span className="font-bold text-copper-700">₹{customBlendedRate}/kg avg</span>
+                            <div className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                              <span className="text-xs text-slate-500 font-semibold block uppercase">BLENDED RATE</span>
+                              <span className="font-display font-bold text-emerald-700 text-sm sm:text-base">₹{customBlendedRate}/kg</span>
                             </div>
                           </div>
                         )}
@@ -1330,61 +1330,61 @@ export const KabadiwalaDashboard: React.FC = () => {
                   )}
 
                   {/* 5. Set Handover / Scrap Yard Location */}
-                  <div className="space-y-2.5 p-3.5 bg-paper-100 rounded-xl border-2 border-steel-300">
+                  <div className="space-y-3 p-5 bg-slate-50/90 rounded-[28px] border border-slate-200/80 shadow-sm">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4 text-copper-600 shrink-0" />
-                        <label className="text-xs font-bold text-steel-800 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-5 h-5 text-slate-700 shrink-0" />
+                        <label className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">
                           {t('lotLocationLabel', '5. Set Handover / Scrap Yard Location')}
                         </label>
                       </div>
-                      <span className="text-[10px] font-mono text-steel-600 font-bold uppercase bg-white px-2 py-0.5 rounded border border-steel-300">
+                      <span className="text-xs font-bold uppercase bg-white px-3 py-1 rounded-full border border-slate-200 text-slate-700 shadow-2xs">
                         {lotLocationMode === 'gps' ? '🛰️ GPS Lock' : lotLocationMode === 'preset' ? '🏭 Scrap Hub' : '✏️ Custom'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-steel-600">
+                    <p className="text-xs sm:text-sm text-slate-600">
                       {t('lotLocationDesc', 'Specify where the recycler will inspect and pick up this lot.')}
                     </p>
 
                     {/* 3 Location Mode Switcher Buttons */}
-                    <div className="grid grid-cols-3 gap-1.5 pt-1">
+                    <div className="grid grid-cols-3 gap-2 pt-1">
                       <button
                         type="button"
                         onClick={handleDetectLotGps}
                         disabled={isDetectingLotLocation}
-                        className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all border ${
+                        className={`py-2.5 px-3 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all ${
                           lotLocationMode === 'gps'
-                            ? 'bg-copper-600 text-white border-copper-700 shadow-sm'
-                            : 'bg-white text-steel-700 border-steel-300 hover:bg-paper-200'
+                            ? 'm3-tab-pill-active shadow-sm'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                         }`}
                       >
-                        <Navigation className={`w-3.5 h-3.5 ${isDetectingLotLocation ? 'animate-spin' : ''}`} />
+                        <Navigation className={`w-4 h-4 ${isDetectingLotLocation ? 'animate-spin' : ''}`} />
                         <span>{isDetectingLotLocation ? t('detectingLocation', 'Detecting...') : t('detectLiveGps', 'Live GPS')}</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setLotLocationMode('preset')}
-                        className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all border ${
+                        className={`py-2.5 px-3 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all ${
                           lotLocationMode === 'preset'
-                            ? 'bg-copper-600 text-white border-copper-700 shadow-sm'
-                            : 'bg-white text-steel-700 border-steel-300 hover:bg-paper-200'
+                            ? 'm3-tab-pill-active shadow-sm'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                         }`}
                       >
-                        <Building2 className="w-3.5 h-3.5" />
+                        <Building2 className="w-4 h-4" />
                         <span>{t('quickPresets', 'Scrap Hubs')}</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setLotLocationMode('custom')}
-                        className={`py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 transition-all border ${
+                        className={`py-2.5 px-3 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all ${
                           lotLocationMode === 'custom'
-                            ? 'bg-copper-600 text-white border-copper-700 shadow-sm'
-                            : 'bg-white text-steel-700 border-steel-300 hover:bg-paper-200'
+                            ? 'm3-tab-pill-active shadow-sm'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
                         }`}
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Edit3 className="w-4 h-4" />
                         <span>{t('customAddress', 'Custom')}</span>
                       </button>
                     </div>
@@ -1395,7 +1395,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                         <select
                           value={selectedHubPreset}
                           onChange={e => handleSelectHubPreset(e.target.value)}
-                          className="w-full px-3 py-2 text-xs font-bold bg-white border border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                          className="w-full px-4 py-3 text-sm font-bold bg-white border border-slate-300 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
                         >
                           {SCRAP_HUB_PRESETS.map(hub => (
                             <option key={hub.id} value={hub.id}>
@@ -1417,22 +1417,22 @@ export const KabadiwalaDashboard: React.FC = () => {
                             setLotLocationZone(e.target.value.split(',')[0] || 'Custom Yard');
                           }}
                           placeholder={t('customAddressPlaceholder', 'Enter yard address, shop number, or landmark...')}
-                          className="w-full px-3 py-2 text-xs bg-white border border-steel-300 rounded-lg focus:border-copper-600 focus:outline-none"
+                          className="w-full px-4 py-3 text-sm bg-white border border-slate-300 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
                         />
                       </div>
                     )}
 
                     {/* Active Location Display Badge & Coordinates */}
-                    <div className="p-2.5 bg-white rounded-lg border border-steel-300 flex items-start justify-between gap-2 text-xs font-mono">
-                      <div className="space-y-0.5 min-w-0">
-                        <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-copper-700">
-                          <MapPin className="w-3 h-3 text-copper-600 shrink-0" />
+                    <div className="p-3.5 bg-white rounded-2xl border border-slate-200 flex items-start justify-between gap-2 text-sm shadow-2xs">
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-1.5 text-xs uppercase font-bold text-slate-600">
+                          <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>{lotLocationZone || 'Active Handover Yard'}</span>
                         </div>
-                        <p className="text-steel-800 text-xs truncate font-sans font-medium" title={lotLocationAddress}>
+                        <p className="text-slate-800 text-sm truncate font-medium" title={lotLocationAddress}>
                           {lotLocationAddress}
                         </p>
-                        <span className="text-[10px] text-steel-500 block">
+                        <span className="text-xs text-slate-500 block">
                           Coordinates: {lotCoords[0].toFixed(4)}° N, {lotCoords[1].toFixed(4)}° E
                         </span>
                       </div>
@@ -1440,24 +1440,24 @@ export const KabadiwalaDashboard: React.FC = () => {
                         href={getDirectionsUrl(lotCoords[0], lotCoords[1])}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="shrink-0 text-[10px] font-bold text-copper-700 hover:text-copper-900 flex items-center gap-0.5 underline pt-1"
+                        className="shrink-0 text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 underline pt-1"
                       >
                         <span>Map</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     </div>
                   </div>
 
                   {/* Real-time AI Valuation Card */}
-                  <div className="bg-forest-500/10 border-2 border-forest-600 rounded-lg p-4 flex items-center justify-between">
+                  <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/15 border-2 border-emerald-500/40 rounded-[28px] p-5 sm:p-6 flex items-center justify-between shadow-sm">
                     <div>
-                      <span className="text-[10px] uppercase font-mono font-bold text-forest-800 tracking-wider block">
+                      <span className="text-xs sm:text-sm uppercase font-bold text-emerald-900 tracking-wider block">
                         {lotTypeMode === 'custom' ? 'Composite Lot Total Valuation' : t('instantAiValue', 'Instant AI Value Estimate')}
                       </span>
-                      <span className="text-2xl sm:text-3xl font-mono-num font-black text-forest-700">
+                      <span className="text-3xl sm:text-4xl font-display font-black text-emerald-800">
                         {formatCurrency(aiValuation)}
                       </span>
-                      <span className="text-[11px] text-steel-600 block">
+                      <span className="text-xs sm:text-sm text-slate-600 font-medium block mt-0.5">
                         {lotTypeMode === 'custom' ? (
                           <>
                             Net: {customTotalWeight} kg • Avg Rate: ₹{customBlendedRate}/kg • Min Bid: ₹{Math.round(aiValuation * 0.5).toLocaleString('en-IN')} (50%)
@@ -1488,9 +1488,9 @@ export const KabadiwalaDashboard: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="w-full btn-dhatu-primary py-3.5 rounded-lg text-sm font-bold flex items-center justify-center space-x-2 shadow-tactile"
+                    className="w-full btn-primary-m3 py-4 rounded-full text-base sm:text-lg font-display font-bold flex items-center justify-center space-x-2 shadow-m3-2 hover:shadow-m3-3 transition-transform active:scale-98"
                   >
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-5 h-5" />
                     <span>
                       {lotTypeMode === 'custom'
                         ? (language === 'hi' ? 'कस्टम मिक्स्ड लॉट बनाएं और रीसायकलर को भेजें' : language === 'mr' ? 'कस्टम मिक्स्ड लॉट तयार करा आणि पाठवा' : 'Generate Custom Mixed Lot & Broadcast')
@@ -1502,64 +1502,65 @@ export const KabadiwalaDashboard: React.FC = () => {
               </div>
 
               {/* Right Column: Active Digital Lot Voucher Preview */}
+              {/* Right Column: Active Digital Lot Voucher Preview */}
               <div className="lg:col-span-5 space-y-4">
-                <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 shadow-sm space-y-4">
-                  <div className="flex justify-between items-start border-b border-steel-300 pb-3">
+                <div className="android17-card p-6 sm:p-7 space-y-5 border border-slate-200/80 shadow-m3-1">
+                  <div className="flex justify-between items-start border-b border-slate-200 pb-3.5">
                     <div>
-                      <span className="stamp-seal stamp-verified text-[11px]">
+                      <span className="stamp-seal stamp-verified text-xs">
                         {lotTypeMode === 'custom' ? 'CPCB CUSTOM MIXED VOUCHER' : 'CPCB LOT VOUCHER'}
                       </span>
-                      <div className="font-display font-black text-xl text-steel-900 mt-1">
+                      <div className="font-display font-black text-2xl text-slate-900 mt-1.5 tracking-tight">
                         {handoverLotCode}
                       </div>
-                      <span className="text-[11px] text-steel-500 font-mono">Collector: Suresh Kumar</span>
+                      <span className="text-xs sm:text-sm text-slate-600 font-semibold block mt-0.5">Collector: Suresh Kumar</span>
                     </div>
-                    <div className="w-16 h-16 bg-white border border-steel-300 p-1 rounded flex items-center justify-center">
-                      <QrCode className="w-14 h-14 text-steel-900" />
+                    <div className="w-18 h-18 bg-white border border-slate-200 p-2 rounded-2xl flex items-center justify-center shadow-xs">
+                      <QrCode className="w-14 h-14 text-slate-900" />
                     </div>
                   </div>
 
-                  <div className="space-y-2 text-xs font-mono text-steel-800 bg-paper-100 p-3 rounded border border-paper-300">
-                    <div className="flex justify-between">
-                      <span className="text-steel-500">Material Category:</span>
-                      <span className="font-bold">
+                  <div className="space-y-3 text-sm text-slate-800 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/70">
+                    <div className="flex justify-between items-center text-sm sm:text-base">
+                      <span className="text-slate-500 font-medium">Material Category:</span>
+                      <span className="font-bold text-slate-900">
                         {lotTypeMode === 'custom' ? `Custom Mixed (${customLotItems.length} Materials)` : `${lotCategory.slice(0, 22)}...`}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-steel-500">Approx Weight:</span>
-                      <span className="font-bold">
+                    <div className="flex justify-between items-center text-sm sm:text-base">
+                      <span className="text-slate-500 font-medium">Approx Weight:</span>
+                      <span className="font-bold text-slate-900">
                         {lotTypeMode === 'custom' ? `${customTotalWeight} kg` : `${lotWeight} kg`}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-steel-500">
+                    <div className="flex justify-between items-center text-sm sm:text-base">
+                      <span className="text-slate-500 font-medium">
                         {lotTypeMode === 'custom' ? 'Blended Benchmark Rate:' : 'Benchmark Rate:'}
                       </span>
-                      <span className="font-bold text-copper-600">
+                      <span className="font-bold text-emerald-700">
                         ₹{lotTypeMode === 'custom' ? customBlendedRate : (lotWeight > 0 ? Math.round(aiValuation / lotWeight) : 0)}/kg
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-steel-500">Estimated Value:</span>
-                      <span className="font-bold text-forest-700">{formatCurrency(aiValuation)}</span>
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-200">
+                      <span className="text-slate-500 font-medium text-sm sm:text-base">Estimated Value:</span>
+                      <span className="font-display font-black text-xl sm:text-2xl text-emerald-700">{formatCurrency(aiValuation)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-steel-500">Min Acceptable Bid (50%):</span>
-                      <span className="font-bold text-copper-700">{formatCurrency(Math.round(aiValuation * 0.5))}</span>
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
+                      <span className="text-slate-500 font-medium">Min Acceptable Bid (50%):</span>
+                      <span className="font-bold text-amber-700">{formatCurrency(Math.round(aiValuation * 0.5))}</span>
                     </div>
 
                     {/* Custom Lot Manifest preview in Voucher */}
                     {lotTypeMode === 'custom' && customLotItems.length > 0 && (
-                      <div className="pt-2 border-t border-paper-300 space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-steel-600 block">
+                      <div className="pt-2.5 border-t border-slate-200 space-y-1.5">
+                        <span className="text-xs uppercase font-bold text-slate-600 block tracking-wider">
                           Manifest Breakdown:
                         </span>
                         <div className="space-y-1">
                           {customLotItems.map(item => (
-                            <div key={item.id} className="flex justify-between text-[11px] text-steel-700">
+                            <div key={item.id} className="flex justify-between text-xs sm:text-sm text-slate-700">
                               <span className="truncate pr-1">• {item.category.split(' ')[0]}</span>
-                              <span className="font-bold text-copper-800 shrink-0">
+                              <span className="font-bold text-slate-900 shrink-0">
                                 {item.weightKg} kg (₹{item.subtotal.toLocaleString('en-IN')})
                               </span>
                             </div>
@@ -1568,24 +1569,24 @@ export const KabadiwalaDashboard: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="flex justify-between items-start pt-1.5 border-t border-paper-300 text-[11px]">
-                      <span className="text-steel-500 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-copper-600 shrink-0" />
+                    <div className="flex justify-between items-start pt-2 border-t border-slate-200 text-xs sm:text-sm">
+                      <span className="text-slate-500 flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>{t('handoverLocation', 'Handover Location')}:</span>
                       </span>
-                      <span className="font-bold text-copper-700 text-right max-w-[180px] truncate" title={lotLocationAddress}>
+                      <span className="font-bold text-slate-800 text-right max-w-[180px] truncate" title={lotLocationAddress}>
                         {lotLocationZone || lotLocationAddress}
                       </span>
                     </div>
-                    <div className="flex justify-between text-[10px] text-steel-500">
+                    <div className="flex justify-between text-xs text-slate-500">
                       <span>GPS Coordinates:</span>
                       <span>{lotCoords[0].toFixed(4)}°, {lotCoords[1].toFixed(4)}°</span>
                     </div>
                   </div>
 
-                  <div className="text-[11px] text-steel-600 p-2.5 bg-paper-200 rounded border border-steel-300 space-y-1">
-                    <div className="font-bold text-steel-800 flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-forest-600" />
+                  <div className="text-xs sm:text-sm text-slate-600 p-3.5 bg-slate-100/90 rounded-2xl border border-slate-200 space-y-1">
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
                       <span>Traceability Record Sealed</span>
                     </div>
                     <p>
@@ -1595,32 +1596,32 @@ export const KabadiwalaDashboard: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3 pt-1">
                     <button
                       type="button"
                       onClick={() => setLotsSubView('mylots')}
-                      className="w-full bg-copper-600 hover:bg-copper-700 text-white py-2 rounded text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm"
+                      className="w-full btn-primary-m3 py-3 rounded-full text-sm font-bold flex items-center justify-center space-x-1.5 shadow-sm active:scale-95 transition-transform"
                     >
-                      <Eye className="w-3.5 h-3.5" />
+                      <Eye className="w-4 h-4" />
                       <span>View My Lots</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveTab('handover')}
-                      className="w-full bg-paper-200 hover:bg-paper-300 text-steel-900 border-2 border-steel-400 py-2 rounded text-xs font-bold flex items-center justify-center space-x-1.5"
+                      className="w-full bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 py-3 rounded-full text-sm font-bold flex items-center justify-center space-x-1.5 shadow-sm active:scale-95 transition-transform"
                     >
                       <span>Open QR</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
                 {/* Quick Segregation Tip */}
-                <div className="p-4 bg-paper-100 rounded-xl border border-steel-300 space-y-1 text-xs">
-                  <span className="font-bold text-copper-700 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" /> {language === 'hi' ? 'कमाई बढ़ाने का सुझाव:' : language === 'mr' ? 'कमाई वाढवण्यासाठी टीप:' : 'High-Value Separation Tip:'}
+                <div className="p-4 bg-amber-50/80 rounded-2xl border border-amber-200/70 space-y-1.5 text-xs sm:text-sm">
+                  <span className="font-bold text-amber-900 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-amber-700" /> {language === 'hi' ? 'कमाई बढ़ाने का सुझाव:' : language === 'mr' ? 'कमाई वाढवण्यासाठी टीप:' : 'High-Value Separation Tip:'}
                   </span>
-                  <p className="text-steel-600">
+                  <p className="text-slate-700">
                     {language === 'hi' ? 'सर्किट बोर्ड से एल्यूमीनियम हीट सिंक को हाथ से अलग करके बेचें। इससे बोर्ड को ग्रेड-ए (₹640/kg) दाम मिलता है।' : language === 'mr' ? 'सर्किट बोर्डमधून अ‍ॅल्युमिनियम हीट सिंक हाताने वेगळे करून विका. यामुळे बोर्डाला ग्रेड-ए (₹६४०/कि.ग्रा.) भाव मिळतो.' : 'Detach aluminium heat sinks from circuit boards by hand before selling. Intact Grade-A boards command premium ₹640/kg.'}
                   </p>
                 </div>
@@ -1630,28 +1631,28 @@ export const KabadiwalaDashboard: React.FC = () => {
             );
           })() : (
             /* MY CREATED LOTS VIEW WITH BIDDING & ACCEPTANCE */
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-steel-300 pb-3">
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
                 <div>
-                  <h3 className="text-lg font-display font-black text-steel-900">
+                  <h3 className="text-2xl sm:text-3xl font-display font-black text-slate-900">
                     {t('myCreatedLotsTitle', 'My Registered Digital Lots & Live Bids')}
                   </h3>
-                  <p className="text-xs text-steel-600">
+                  <p className="text-sm sm:text-base text-slate-600 mt-0.5 font-normal">
                     {t('myCreatedLotsDesc', 'All lots created by you, open recycler tenders, and price negotiation bids.')}
                   </p>
                 </div>
 
                 {/* Status Filter Buttons */}
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {(['ALL', 'AVAILABLE', 'BIDDING', 'HANDOVER_PENDING', 'CONFIRMED'] as const).map(f => (
                     <button
                       key={f}
                       type="button"
                       onClick={() => setLotFilter(f)}
-                      className={`px-2.5 py-1 rounded text-[11px] font-bold transition-colors ${
+                      className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all active:scale-95 ${
                         lotFilter === f
-                          ? 'bg-copper-600 text-white shadow-sm'
-                          : 'bg-paper-200 text-steel-700 hover:bg-paper-300 border border-steel-300'
+                          ? 'm3-tab-pill-active shadow-sm'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                       }`}
                     >
                       {f === 'ALL' ? t('allLots', 'All Lots') : t(f, f.replace('_', ' '))}
@@ -1672,20 +1673,20 @@ export const KabadiwalaDashboard: React.FC = () => {
                   return true;
                 })
                 .length === 0 ? (
-                <div className="text-center py-12 bg-paper-50 rounded-xl border-2 border-dashed border-steel-300 space-y-3">
-                  <FileText className="w-10 h-10 text-steel-400 mx-auto" />
-                  <p className="text-xs text-steel-600 font-bold">No digital lots found in this category.</p>
+                <div className="text-center py-16 bg-white rounded-[28px] border-2 border-dashed border-slate-300 space-y-4 shadow-sm">
+                  <FileText className="w-12 h-12 text-slate-400 mx-auto" />
+                  <p className="text-sm sm:text-base text-slate-700 font-bold">No digital lots found in this category.</p>
                   <button
                     type="button"
                     onClick={() => setLotsSubView('create')}
-                    className="btn-dhatu-primary px-4 py-2 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow-sm"
+                    className="btn-primary-m3 px-6 py-3 rounded-full text-sm font-bold inline-flex items-center gap-2 shadow-sm"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-4 h-4" />
                     <span>Create a New Lot Now</span>
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {myLots
                     .filter(l => {
                       if (lotFilter === 'ALL') return true;
@@ -1704,27 +1705,29 @@ export const KabadiwalaDashboard: React.FC = () => {
                       return (
                         <div
                           key={lot.id}
-                          className="receipt-stub rounded-xl p-5 border-2 border-steel-400 shadow-sm flex flex-col justify-between space-y-4 hover:border-copper-600 transition-all bg-paper-50"
+                          className="android17-card p-6 sm:p-7 flex flex-col justify-between space-y-5 border border-slate-200/80 shadow-m3-1 hover:shadow-m3-3 transition-all"
                         >
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between border-b border-steel-300 pb-2">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-mono text-xs font-bold text-copper-700">{lot.lotCode}</span>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                              <div className="flex items-center gap-2">
+                                <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs sm:text-sm font-bold tracking-wide">
+                                  #{lot.lotCode}
+                                </span>
                                 {lot.isOfflineQueued && (
-                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
                                     Offline Queued
                                   </span>
                                 )}
                               </div>
                               <span
-                                className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${
+                                className={`text-xs font-bold px-3 py-1 rounded-full shadow-xs ${
                                   lot.status === 'CONFIRMED'
-                                    ? 'bg-forest-500/20 text-forest-700 border border-forest-500'
+                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                     : lot.status === 'HANDOVER_PENDING'
-                                    ? 'bg-copper-500/10 text-copper-700 border border-copper-500'
+                                    ? 'bg-amber-100 text-amber-800 border border-amber-300'
                                     : lot.status === 'BIDDING' || hasBids
-                                    ? 'bg-brass-100 text-brass-800 border border-brass-500 animate-pulse'
-                                    : 'bg-steel-200 text-steel-800 border border-steel-400'
+                                    ? 'bg-amber-200 text-amber-900 border border-amber-400 animate-pulse'
+                                    : 'bg-slate-100 text-slate-700 border border-slate-300'
                                 }`}
                               >
                                 {lot.status === 'BIDDING' || hasBids ? `${t('BIDDING')} (${bidsCount} ${t('bidsReceived', 'Bids')})` : t(lot.status)}
@@ -1732,30 +1735,30 @@ export const KabadiwalaDashboard: React.FC = () => {
                             </div>
 
                             <div>
-                              <h4 className="font-display font-bold text-steel-900 text-sm leading-snug">
+                              <h4 className="font-display font-black text-slate-900 text-lg sm:text-xl leading-snug">
                                 {preserveEnglishItemName(lot.category)}
                               </h4>
-                              <span className="text-[11px] text-steel-500 font-mono block">Logged at: {lot.createdAt}</span>
+                              <span className="text-xs sm:text-sm text-slate-500 font-medium block mt-0.5">Logged: {lot.createdAt}</span>
 
                               {/* Layer 2 Verification Seals */}
-                              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-forest-50 text-forest-700 border border-forest-300 flex items-center gap-1">
-                                  <ShieldCheck className="w-3 h-3 text-forest-600" />
+                              <div className="flex flex-wrap items-center gap-2 pt-2">
+                                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1 shadow-2xs">
+                                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                                   <span>{t('layer 2: ai verified', 'Layer 2: AI Verified')}</span>
                                 </span>
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-steel-100 text-steel-700 border border-steel-300">
+                                <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                                   GPS: {lot.gpsLat?.toFixed(2)}°, {lot.gpsLng?.toFixed(2)}°
                                 </span>
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-copper-50 text-copper-700 border border-copper-200">
+                                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                                   KYC: KC-COL-8921
                                 </span>
                               </div>
 
                               {/* Handover Location Banner */}
-                              <div className="mt-2 text-[11px] text-steel-800 bg-paper-100 p-2 rounded-lg border border-steel-300 flex items-center justify-between gap-1.5 font-mono">
-                                <div className="flex items-center gap-1.5 min-w-0 truncate">
-                                  <MapPin className="w-3.5 h-3.5 text-copper-600 shrink-0" />
-                                  <span className="truncate" title={lot.locationAddress || lot.locationZone || `${lot.gpsLat?.toFixed(4)}°, ${lot.gpsLng?.toFixed(4)}°`}>
+                              <div className="mt-3 text-xs sm:text-sm text-slate-700 bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between gap-2 shadow-2xs">
+                                <div className="flex items-center gap-2 min-w-0 truncate">
+                                  <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                                  <span className="truncate font-medium" title={lot.locationAddress || lot.locationZone || `${lot.gpsLat?.toFixed(4)}°, ${lot.gpsLng?.toFixed(4)}°`}>
                                     {lot.locationZone || lot.locationAddress || `GPS: ${lot.gpsLat?.toFixed(2)}°, ${lot.gpsLng?.toFixed(2)}°`}
                                   </span>
                                 </div>
@@ -1763,28 +1766,28 @@ export const KabadiwalaDashboard: React.FC = () => {
                                   href={getDirectionsUrl(lot.gpsLat, lot.gpsLng)}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-copper-700 hover:text-copper-900 font-bold shrink-0 flex items-center gap-0.5 underline text-[10px]"
+                                  className="text-emerald-700 hover:text-emerald-900 font-bold shrink-0 flex items-center gap-1 underline text-xs"
                                 >
                                   <span>Map</span>
-                                  <ExternalLink className="w-3 h-3" />
+                                  <ExternalLink className="w-3.5 h-3.5" />
                                 </a>
                               </div>
 
                               {/* Custom Mixed Lot Manifest Breakdown */}
                               {lot.isCustomLot && lot.items && lot.items.length > 0 && (
-                                <div className="mt-2.5 space-y-1 bg-white p-2.5 rounded-lg border border-steel-300 font-mono text-xs">
-                                  <div className="flex items-center justify-between text-[10px] uppercase font-bold text-copper-800 pb-1 border-b border-steel-200">
-                                    <span className="flex items-center gap-1">
-                                      <Layers className="w-3 h-3 text-copper-600" />
+                                <div className="mt-3 space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs sm:text-sm shadow-2xs">
+                                  <div className="flex items-center justify-between text-xs uppercase font-bold text-slate-700 pb-1.5 border-b border-slate-200 tracking-wider">
+                                    <span className="flex items-center gap-1.5">
+                                      <Layers className="w-4 h-4 text-slate-600" />
                                       <span>{t('customMixedLot', 'Mixed Manifest')} ({lot.items.length} {t('items', 'types')})</span>
                                     </span>
-                                    <span>{t('blendedRate', 'Blended')} ₹{lot.recyclerOfferedRate}/kg</span>
+                                    <span className="text-emerald-700">{t('blendedRate', 'Blended')} ₹{lot.recyclerOfferedRate}/kg</span>
                                   </div>
                                   <div className="space-y-1 pt-1">
                                     {lot.items.map((item, idx) => (
-                                      <div key={idx} className="flex justify-between items-center text-[11px] text-steel-800">
-                                        <span className="truncate pr-1">• {preserveEnglishItemName(item.category)}</span>
-                                        <span className="font-bold text-copper-700 shrink-0">
+                                      <div key={idx} className="flex justify-between items-center text-xs sm:text-sm text-slate-800">
+                                        <span className="truncate pr-2 font-medium">• {preserveEnglishItemName(item.category)}</span>
+                                        <span className="font-bold text-slate-900 shrink-0">
                                           {item.weightKg} kg (₹{item.ratePerKg}/kg)
                                         </span>
                                       </div>
@@ -1795,69 +1798,69 @@ export const KabadiwalaDashboard: React.FC = () => {
                             </div>
 
                             {/* Specs Grid */}
-                            <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-paper-100 p-3 rounded-lg border border-paper-300">
+                            <div className="grid grid-cols-2 gap-3 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80 text-sm shadow-2xs">
                               <div>
-                                <span className="text-steel-500 text-[10px] block uppercase">{t('weight', 'Weight')}</span>
-                                <span className="font-black text-steel-900">{lot.approxWeightKg} kg</span>
+                                <span className="text-slate-500 text-xs font-semibold block uppercase tracking-wider">{t('weight', 'Weight')}</span>
+                                <span className="text-xl sm:text-2xl font-display font-black text-slate-900">{lot.approxWeightKg} kg</span>
                               </div>
                               <div>
-                                <span className="text-steel-500 text-[10px] block uppercase">{t('askingPrice', 'Asking Price')}</span>
-                                <span className="font-black text-forest-700">{formatCurrency(ask)}</span>
+                                <span className="text-slate-500 text-xs font-semibold block uppercase tracking-wider">{t('askingPrice', 'Asking Price')}</span>
+                                <span className="text-xl sm:text-2xl font-display font-black text-emerald-700">{formatCurrency(ask)}</span>
                               </div>
-                              <div className="col-span-2 pt-1 border-t border-paper-300 flex items-center justify-between text-[10px]">
-                                <span className="text-steel-500">{t('minAskRule', 'Min Valid Bid (50%):')}</span>
-                                <span className="font-bold text-copper-700">{formatCurrency(minBid)}</span>
+                              <div className="col-span-2 pt-2 border-t border-slate-200 flex items-center justify-between text-xs sm:text-sm">
+                                <span className="text-slate-500 font-medium">{t('minAskRule', 'Min Valid Bid (50%):')}</span>
+                                <span className="font-bold text-amber-700">{formatCurrency(minBid)}</span>
                               </div>
                               {lot.highestBid && (
-                                <div className="col-span-2 flex items-center justify-between text-[11px] bg-forest-500/10 p-1.5 rounded border border-forest-500/30">
-                                  <span className="text-forest-800 font-bold">{t('highestOffer:', 'Highest Offer:')}</span>
-                                  <span className="font-black text-forest-700 font-mono-num">{formatCurrency(lot.highestBid)}</span>
+                                <div className="col-span-2 flex items-center justify-between text-xs sm:text-sm bg-emerald-100/70 p-2.5 rounded-xl border border-emerald-300/60">
+                                  <span className="text-emerald-900 font-bold">{t('highestOffer:', 'Highest Offer:')}</span>
+                                  <span className="text-base sm:text-lg font-display font-black text-emerald-800">{formatCurrency(lot.highestBid)}</span>
                                 </div>
                               )}
                             </div>
 
                             {/* Recycler Bids Section */}
-                            <div className="space-y-2">
-                              <span className="text-[11px] font-bold text-steel-700 uppercase tracking-wider block">
+                            <div className="space-y-2.5">
+                              <span className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider block">
                                 {t('bidsReceived', 'Recycler Bids')} ({bidsCount})
                               </span>
 
                               {hasBids ? (
-                                <div className="space-y-2">
+                                <div className="space-y-2.5">
                                   {lot.bids!.map(bid => (
                                     <div
                                       key={bid.id}
-                                      className={`p-2.5 rounded-lg border text-xs font-mono flex flex-col gap-1.5 ${
+                                      className={`p-3.5 rounded-2xl border text-sm flex flex-col gap-2 shadow-2xs ${
                                         bid.status === 'ACCEPTED'
-                                          ? 'bg-forest-500/15 border-forest-500 text-forest-900'
+                                          ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950'
                                           : bid.status === 'REJECTED'
-                                          ? 'bg-paper-200 border-steel-300 text-steel-400 opacity-60'
-                                          : 'bg-paper-100 border-steel-300 text-steel-800'
+                                          ? 'bg-slate-100 border-slate-200 text-slate-400 opacity-60'
+                                          : 'bg-white border-slate-200 text-slate-800'
                                       }`}
                                     >
                                       <div className="flex justify-between items-start">
-                                        <span className="font-bold">{bid.recyclerName}</span>
-                                        <span className="font-black text-forest-700 text-sm">{formatCurrency(bid.bidAmount)}</span>
+                                        <span className="font-bold text-sm sm:text-base text-slate-900">{bid.recyclerName}</span>
+                                        <span className="font-display font-black text-emerald-700 text-base sm:text-lg">{formatCurrency(bid.bidAmount)}</span>
                                       </div>
-                                      <div className="flex justify-between items-center text-[10px] text-steel-500">
+                                      <div className="flex justify-between items-center text-xs text-slate-500 font-medium">
                                         <span>Rate: ₹{bid.bidPerKg}/kg ({Math.round((bid.bidAmount / ask) * 100)}% of Ask)</span>
                                         <span>{bid.createdAt}</span>
                                       </div>
 
                                       {bid.status === 'PENDING' && (
-                                        <div className="grid grid-cols-2 gap-1.5 pt-1">
+                                        <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-100">
                                           <button
                                             type="button"
                                             onClick={() => handleAcceptBid(lot.id, bid.id)}
-                                            className="btn-dhatu-primary py-1 text-[11px] font-bold rounded flex items-center justify-center gap-1 shadow-sm"
+                                            className="btn-primary-m3 py-2 px-3 text-xs sm:text-sm font-bold rounded-full flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-transform"
                                           >
-                                            <Check className="w-3 h-3" />
+                                            <Check className="w-3.5 h-3.5" />
                                             <span>{t('acceptBid', 'Accept Bid')}</span>
                                           </button>
                                           <button
                                             type="button"
                                             onClick={() => handleRejectBid(lot.id, bid.id)}
-                                            className="bg-paper-200 hover:bg-signal-500/10 text-steel-700 hover:text-signal-600 border border-steel-300 py-1 text-[11px] font-bold rounded"
+                                            className="bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 py-2 px-3 text-xs sm:text-sm font-bold rounded-full transition-colors active:scale-95"
                                           >
                                             {t('decline', 'Decline')}
                                           </button>
@@ -1865,22 +1868,22 @@ export const KabadiwalaDashboard: React.FC = () => {
                                       )}
 
                                       {bid.status === 'ACCEPTED' && (
-                                        <div className="text-forest-700 font-bold text-[10px] flex items-center gap-1">
-                                          <CheckCircle className="w-3 h-3" /> {language === 'hi' ? 'स्वीकृत विजेता बोली' : language === 'mr' ? 'स्वीकारलेली अंतिम बोली' : 'Winning Accepted Bid'}
+                                        <div className="text-emerald-700 font-bold text-xs sm:text-sm flex items-center gap-1.5">
+                                          <CheckCircle className="w-4 h-4" /> {language === 'hi' ? 'स्वीकृत विजेता बोली' : language === 'mr' ? 'स्वीकारलेली अंतिम बोली' : 'Winning Accepted Bid'}
                                         </div>
                                       )}
                                     </div>
                                   ))}
                                 </div>
                               ) : (
-                                <div className="p-2.5 bg-paper-100 rounded-lg border border-steel-300 text-[11px] text-steel-600 space-y-1.5">
+                                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-600 space-y-2">
                                   <p>{t('awaitingBids', 'Awaiting bids from nearby authorized aggregators.')}</p>
                                   <button
                                     type="button"
                                     onClick={() => handleSimulateBid(lot)}
-                                    className="text-[10px] font-bold text-copper-700 hover:text-copper-900 underline flex items-center gap-1"
+                                    className="text-xs sm:text-sm font-bold text-emerald-700 hover:text-emerald-900 underline flex items-center gap-1"
                                   >
-                                    <Sparkles className="w-3 h-3" /> {language === 'hi' ? 'रीसायकलर बोली सिमुलेट करें' : language === 'mr' ? 'रीसायकलर बोली सिम्युलेट करा' : 'Simulate Recycler Bid'} ({formatCurrency(Math.round(ask * 0.88))})
+                                    <Sparkles className="w-4 h-4" /> {language === 'hi' ? 'रीसायकलर बोली सिमुलेट करें' : language === 'mr' ? 'रीसायकलर बोली सिम्युलेट करा' : 'Simulate Recycler Bid'} ({formatCurrency(Math.round(ask * 0.88))})
                                   </button>
                                 </div>
                               )}
@@ -1888,17 +1891,17 @@ export const KabadiwalaDashboard: React.FC = () => {
                           </div>
 
                           {/* Card Bottom Actions */}
-                          <div className="pt-2 border-t border-steel-200 flex items-center gap-2">
+                          <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => {
                                 setHandoverLotCode(lot.lotCode);
                                 setActiveTab('handover');
                               }}
-                              className="flex-1 btn-dhatu-brass py-2 rounded text-xs font-bold flex items-center justify-center gap-1 shadow-sm"
+                              className="w-full btn-primary-m3 py-3 rounded-full text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform"
                             >
-                              <QrCode className="w-3.5 h-3.5" />
-                              <span>{t('openQr', 'Open QR')}</span>
+                              <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <span>{t('openQr', 'Open QR & Handover')}</span>
                             </button>
                           </div>
                         </div>
@@ -2824,60 +2827,60 @@ export const KabadiwalaDashboard: React.FC = () => {
           onClick={() => setCreatedLotModal(null)}
         >
           <div
-            className="bg-paper-50 rounded-2xl border-2 border-copper-600 max-w-md w-full p-6 shadow-tactile-lg space-y-5 text-steel-900 overflow-y-auto max-h-[90vh] relative"
+            className="bg-white rounded-[32px] border border-slate-200 max-w-md w-full p-6 sm:p-7 shadow-m3-4 space-y-5 text-slate-900 overflow-y-auto max-h-[90vh] relative"
             onClick={e => e.stopPropagation()}
           >
             {/* Close icon button */}
             <button
               onClick={() => setCreatedLotModal(null)}
-              className="absolute top-4 right-4 p-2 rounded-full text-steel-500 hover:text-steel-900 hover:bg-paper-200 transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Header with success badge */}
-            <div className="text-center space-y-2 pt-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-forest-500/10 text-forest-600 border-2 border-forest-500 mx-auto shadow-sm">
-                <CheckCircle2 className="w-8 h-8" />
+            <div className="text-center space-y-2 pt-1">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 mx-auto shadow-sm">
+                <CheckCircle2 className="w-9 h-9" />
               </div>
-              <h3 className="text-xl font-display font-black text-steel-950">
+              <h3 className="text-2xl font-display font-black text-slate-900">
                 Lot Created Successfully!
               </h3>
-              <p className="text-xs text-steel-600 font-medium max-w-xs mx-auto">
-                Your digital scrap lot has been registered in local storage and is now broadcasted for authorized recyclers to bid.
+              <p className="text-sm text-slate-600 font-normal max-w-xs mx-auto">
+                Your digital scrap lot has been registered and broadcasted to authorized recyclers for bidding.
               </p>
             </div>
 
             {/* Lot Details Summary Card */}
-            <div className="bg-paper-100 rounded-xl border border-steel-300 p-4 space-y-3 font-mono">
-              <div className="flex items-center justify-between pb-2 border-b border-steel-200">
-                <span className="text-[11px] uppercase text-steel-500 tracking-wider">Lot Reference</span>
-                <span className="font-bold text-copper-700 text-sm">#{createdLotModal.lotCode}</span>
+            <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-3 font-body">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">Lot Reference</span>
+                <span className="font-display font-black text-emerald-700 text-base sm:text-lg">#{createdLotModal.lotCode}</span>
               </div>
 
-              <div className="space-y-1">
-                <div className="text-[10px] uppercase text-steel-500">Category (English)</div>
-                <div className="text-xs font-bold text-steel-900 font-sans">
+              <div className="space-y-0.5">
+                <div className="text-xs uppercase font-semibold text-slate-500">Category</div>
+                <div className="text-sm sm:text-base font-bold text-slate-900">
                   {preserveEnglishItemName(createdLotModal.category)}
                 </div>
               </div>
 
               {/* Custom Mixed Lot Manifest Breakdown in Modal */}
               {createdLotModal.isCustomLot && createdLotModal.items && createdLotModal.items.length > 0 && (
-                <div className="p-2.5 bg-paper-50 rounded-lg border border-steel-300 space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-[10px] uppercase font-bold text-copper-800 pb-1 border-b border-steel-200">
+                <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between text-xs uppercase font-bold text-slate-700 pb-1 border-b border-slate-200">
                     <span className="flex items-center gap-1">
-                      <Layers className="w-3 h-3 text-copper-600" />
+                      <Layers className="w-3.5 h-3.5 text-slate-600" />
                       <span>Mixed Manifest ({createdLotModal.items.length} materials)</span>
                     </span>
-                    <span>Avg ₹{createdLotModal.recyclerOfferedRate}/kg</span>
+                    <span className="text-emerald-700">Avg ₹{createdLotModal.recyclerOfferedRate}/kg</span>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 pt-0.5">
                     {createdLotModal.items.map((it, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-[11px] text-steel-800">
+                      <div key={idx} className="flex justify-between items-center text-xs sm:text-sm text-slate-800">
                         <span className="truncate pr-1">• {preserveEnglishItemName(it.category)}</span>
-                        <span className="font-bold text-copper-700 shrink-0">
+                        <span className="font-bold text-slate-900 shrink-0">
                           {it.weightKg} kg (₹{it.ratePerKg}/kg)
                         </span>
                       </div>
@@ -2886,54 +2889,54 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <div className="bg-paper-50 p-2 rounded border border-steel-200">
-                  <span className="text-[10px] text-steel-500 block">EST. WEIGHT</span>
-                  <span className="font-bold text-steel-900 text-sm">{createdLotModal.approxWeightKg} kg</span>
+              <div className="grid grid-cols-2 gap-2.5 pt-1 text-sm">
+                <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="text-xs font-semibold text-slate-500 block uppercase">EST. WEIGHT</span>
+                  <span className="font-display font-black text-slate-900 text-base sm:text-lg">{createdLotModal.approxWeightKg} kg</span>
                 </div>
-                <div className="bg-paper-50 p-2 rounded border border-steel-200">
-                  <span className="text-[10px] text-steel-500 block">BASE RATE</span>
-                  <span className="font-bold text-copper-700 text-sm">₹{createdLotModal.recyclerOfferedRate}/kg</span>
+                <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="text-xs font-semibold text-slate-500 block uppercase">BASE RATE</span>
+                  <span className="font-display font-black text-emerald-700 text-base sm:text-lg">₹{createdLotModal.recyclerOfferedRate}/kg</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <div className="bg-brass-50 border border-brass-300 p-2 rounded">
-                  <span className="text-[10px] text-brass-700 block font-bold">ASKING PRICE</span>
-                  <span className="font-bold text-steel-950 text-base">
+              <div className="grid grid-cols-2 gap-2.5 pt-1 text-sm">
+                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl shadow-2xs">
+                  <span className="text-xs font-bold text-emerald-800 block uppercase">ASKING PRICE</span>
+                  <span className="font-display font-black text-emerald-900 text-lg sm:text-xl">
                     ₹{(createdLotModal.askingPrice || createdLotModal.estimatedValue).toLocaleString('en-IN')}
                   </span>
                 </div>
-                <div className="bg-forest-50 border border-forest-300 p-2 rounded">
-                  <span className="text-[10px] text-forest-700 block font-bold">MIN VALID BID (50%)</span>
-                  <span className="font-bold text-forest-800 text-base">
+                <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl shadow-2xs">
+                  <span className="text-xs font-bold text-amber-800 block uppercase">MIN BID (50%)</span>
+                  <span className="font-display font-black text-amber-900 text-lg sm:text-xl">
                     ₹{(createdLotModal.minBidAmount || Math.round((createdLotModal.askingPrice || createdLotModal.estimatedValue) * 0.5)).toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
 
-              <div className="text-[11px] text-steel-600 font-sans flex items-center gap-1.5 pt-1 text-center justify-center">
-                <span className="w-2 h-2 rounded-full bg-forest-500 animate-pulse inline-block" />
+              <div className="text-xs text-slate-600 flex items-center gap-1.5 pt-1 text-center justify-center">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
                 <span>Bidding rule: Bids below <strong>50% of asking price</strong> are rejected.</span>
               </div>
             </div>
 
             {/* Quick Handover Code & QR Teaser */}
-            <div className="p-3 bg-paper-200 rounded-lg border border-steel-300 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <QrCode className="w-8 h-8 text-steel-700 shrink-0" />
+            <div className="p-3.5 bg-slate-100/90 rounded-2xl border border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <QrCode className="w-8 h-8 text-slate-800 shrink-0" />
                 <div>
-                  <div className="text-[11px] font-bold text-steel-800">Digital Handover Voucher</div>
-                  <div className="text-[10px] text-steel-600 font-mono">Ready for recycler scan at depot</div>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900">Digital Handover Voucher</div>
+                  <div className="text-xs text-slate-500">Ready for recycler scan at depot</div>
                 </div>
               </div>
-              <span className="px-2 py-1 bg-forest-600 text-paper-50 rounded text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-2.5 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wider shadow-xs">
                 Live
               </span>
             </div>
 
-            {/* Action Buttons - min-h-[48px] for Android portrait usage */}
-            <div className="space-y-2 pt-1">
+            {/* Action Buttons */}
+            <div className="space-y-2.5 pt-1">
               <button
                 onClick={() => {
                   setCreatedLotModal(null);
@@ -2941,7 +2944,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                   setLotsSubView('mylots');
                   triggerHaptic(25);
                 }}
-                className="w-full min-h-[48px] py-2.5 px-4 bg-copper-700 hover:bg-copper-800 text-paper-50 font-bold rounded-lg shadow-tactile text-sm flex items-center justify-center gap-2 active:translate-y-0.5 transition-all"
+                className="w-full min-h-[48px] py-3.5 px-4 btn-primary-m3 font-bold rounded-full shadow-m3-2 text-sm sm:text-base flex items-center justify-center gap-2 active:scale-95 transition-transform"
               >
                 <span>📦 View in My Lots & Live Bids</span>
                 <ArrowRight className="w-4 h-4" />
@@ -2949,9 +2952,9 @@ export const KabadiwalaDashboard: React.FC = () => {
 
               <button
                 onClick={() => setCreatedLotModal(null)}
-                className="w-full min-h-[48px] py-2.5 px-4 bg-paper-200 hover:bg-paper-300 text-steel-800 font-semibold rounded-lg border border-steel-400 text-sm transition-colors"
+                className="w-full min-h-[48px] py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-full border border-slate-300 text-sm sm:text-base transition-colors shadow-2xs active:scale-95"
               >
-                Done / Create Another Lot
+                Done
               </button>
             </div>
           </div>
