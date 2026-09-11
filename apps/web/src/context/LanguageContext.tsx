@@ -104,6 +104,13 @@ const translations: Record<Language, Record<string, string>> = {
     listen: 'Listen aloud',
     stop: 'Stop audio',
     initializing: 'Initializing Dhatu Ecosystem...',
+    personalDetails: 'Personal Details',
+    personalDetailsDesc: 'Name, contact & pickup address',
+    securityAccess: 'Security & Access',
+    securityAccessDesc: 'PIN, biometrics & 2FA protection',
+    helpSupport: 'Help & Support',
+    helpSupportDesc: '24/7 Helpline, WhatsApp & nodal officer',
+    settingsDesc: 'Themes, display, voice & data',
 
     // Portals & Roles
     portalCitizen: 'Citizen Portal',
@@ -446,9 +453,16 @@ const translations: Record<Language, Record<string, string>> = {
     signOut: 'लॉगआउट करें',
     langSelect: 'भाषा बदलें',
     selectLanguage: 'भाषा चुनें',
-    listen: 'बोलकर सुनें',
-    stop: 'आवाज़ रोकें',
-    initializing: 'धातु इकोसिस्टम प्रारंभ हो रहा है...',
+    listen: 'आवाज़ सुनें',
+    stop: 'ऑडियो रोकें',
+    initializing: 'धातु सिस्टम प्रारंभ हो रहा है...',
+    personalDetails: 'व्यक्तिगत विवरण',
+    personalDetailsDesc: 'नाम, संपर्क एवं पिकअप पता',
+    securityAccess: 'सुरक्षा एवं नियंत्रण',
+    securityAccessDesc: 'पिन, बायोमेट्रिक्स एवं 2FA सुरक्षा',
+    helpSupport: 'सहायता एवं संपर्क',
+    helpSupportDesc: '24/7 हेल्पलाइन, व्हाट्सऐप एवं नोडल अधिकारी',
+    settingsDesc: 'थीम, डिस्प्ले, आवाज़ एवं डेटा',
 
     // Portals & Roles
     portalCitizen: 'नागरिक पोर्टल',
@@ -794,6 +808,13 @@ const translations: Record<Language, Record<string, string>> = {
     listen: 'ऐका',
     stop: 'आवाज थांबवा',
     initializing: 'धातु परिसंस्था सुरू होत आहे...',
+    personalDetails: 'वैयक्तिक तपशील',
+    personalDetailsDesc: 'नाव, संपर्क व संकलन पत्ता',
+    securityAccess: 'सुरक्षा व नियंत्रण',
+    securityAccessDesc: 'पिन, बायोमेट्रिक्स व 2FA सुरक्षा',
+    helpSupport: 'मदत व संपर्क',
+    helpSupportDesc: '24/7 हेल्पलाइन, व्हॉट्सअॅप व नोडल अधिकारी',
+    settingsDesc: 'थीम, डिस्प्ले, आवाज व डेटा',
 
     // Portals & Roles
     portalCitizen: 'नागरिक पोर्टल',

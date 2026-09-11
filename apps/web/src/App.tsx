@@ -20,16 +20,24 @@ const MainContent: React.FC = () => {
   const { language, t } = useLanguage();
   const isNative = Capacitor.isNativePlatform();
 
-  // On both Web and native Android APK, first ask language preference, then proceed to login!
+  // Release v1.0.2 onboarding key: prompts every user for language preference upon opening after release, then proceeds to login!
+  const ONBOARDING_KEY = 'dhatu_onboarded_v1_0_2';
+
   const [currentView, setCurrentView] = useState<string>(() => {
-    const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
+    const hasChosenLanguage = localStorage.getItem(ONBOARDING_KEY) === 'true';
     return hasChosenLanguage ? 'login' : 'language-select';
   });
+
+  // Track sub-section when navigating to profile (personal, security, support)
+  const [profileInitialSection, setProfileInitialSection] = useState<'personal' | 'security' | 'support'>('personal');
 
   // Track previous view for seamless Back navigation from Settings and Profile pages
   const [previousView, setPreviousView] = useState<string>('login');
 
-  const handleNavigate = (newView: string) => {
+  const handleNavigate = (newView: string, section?: 'personal' | 'security' | 'support') => {
+    if (section) {
+      setProfileInitialSection(section);
+    }
     if (newView === 'settings' || newView === 'profile') {
       if (currentView !== 'settings' && currentView !== 'profile') {
         setPreviousView(currentView);
@@ -53,7 +61,7 @@ const MainContent: React.FC = () => {
         else if (user.role === 'ADMIN') setCurrentView('admin');
       }
     } else {
-      const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
+      const hasChosenLanguage = localStorage.getItem(ONBOARDING_KEY) === 'true';
       if (currentView !== 'settings' && currentView !== 'profile' && currentView !== 'login' && currentView !== 'language-select') {
         setCurrentView(hasChosenLanguage ? 'login' : 'language-select');
       }
@@ -95,6 +103,7 @@ const MainContent: React.FC = () => {
         <ProfilePage
           onBack={handleBack}
           onOpenSettings={() => handleNavigate('settings')}
+          initialTab={profileInitialSection}
         />
       );
     }
@@ -139,11 +148,11 @@ const MainContent: React.FC = () => {
   const isFullscreenSubpage = currentView === 'language-select' || currentView === 'settings' || currentView === 'profile';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors duration-200 w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors duration-200 w-full">
       {!isFullscreenSubpage && (
         <Navbar
           currentTab={currentView}
-          onTabChange={(tab: string) => handleNavigate(tab)}
+          onTabChange={(tab: string, section?: 'personal' | 'security' | 'support') => handleNavigate(tab, section)}
         />
       )}
 

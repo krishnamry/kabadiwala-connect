@@ -38,20 +38,29 @@ import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 interface ProfilePageProps {
   onBack: () => void;
   onOpenSettings?: () => void;
+  initialTab?: ProfileTab;
 }
 
 type ProfileTab = 'personal' | 'security' | 'support';
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({
   onBack,
-  onOpenSettings
+  onOpenSettings,
+  initialTab
 }) => {
   const { user, updateProfile, logout } = useAuth();
   const { language, t } = useLanguage();
   const { currentThemeConfig } = useTheme();
 
   // Sub-section tab: personal | security | support
-  const [activeSubTab, setActiveSubTab] = useState<ProfileTab>('personal');
+  const [activeSubTab, setActiveSubTab] = useState<ProfileTab>(initialTab || 'personal');
+
+  // Sync if initialTab changes externally (e.g. from navbar dropdown)
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveSubTab(initialTab);
+    }
+  }, [initialTab]);
 
   // Personal details state
   const [name, setName] = useState(user?.name || '');
@@ -244,7 +253,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 font-body transition-colors duration-200 w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 font-body transition-colors duration-200 w-full">
       {/* Top Header Bar with Android Status Bar Safe Inset */}
       <div 
         className="sticky top-0 z-40 bg-white/98 dark:bg-[#131D31]/98 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-sm w-full"

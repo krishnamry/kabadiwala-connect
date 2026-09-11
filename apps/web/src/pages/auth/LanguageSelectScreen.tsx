@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage, Language } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { triggerHaptic } from '../../lib/haptics';
-import { ArrowRight, Check, Volume2, Globe } from 'lucide-react';
+import { ArrowRight, Check, Volume2, Globe, Loader2 } from 'lucide-react';
 
 interface LanguageSelectScreenProps {
   onComplete: () => void;
@@ -48,11 +48,20 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
   const { language, setLanguage, speak, stopSpeaking, isSpeaking } = useLanguage();
   const { currentThemeConfig } = useTheme();
   const [selectedLang, setSelectedLang] = useState<Language>(language || 'en');
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
   const handleSelect = (code: Language) => {
     triggerHaptic(20);
     setSelectedLang(code);
     setLanguage(code);
+    localStorage.setItem('dhatu_language_onboarded', 'true');
+    localStorage.setItem('dhatu_onboarded_v1_0_2', 'true');
+    setIsAdvancing(true);
+
+    // Auto advance after brief visual confirmation
+    setTimeout(() => {
+      onComplete();
+    }, 350);
   };
 
   const handlePlayAudioSample = (e: React.MouseEvent, opt: LanguageOption) => {
@@ -68,6 +77,7 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
   const handleContinue = () => {
     triggerHaptic(25);
     localStorage.setItem('dhatu_language_onboarded', 'true');
+    localStorage.setItem('dhatu_onboarded_v1_0_2', 'true');
     setLanguage(selectedLang);
     onComplete();
   };
@@ -106,23 +116,18 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
           return (
             <div
               key={opt.code}
-              role="button"
-              tabIndex={0}
-              onClick={() => handleSelect(opt.code)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleSelect(opt.code);
-                }
-              }}
-              className={`w-full text-left p-4 rounded-[24px] border-2 transition-all cursor-pointer flex items-center justify-between gap-3 shadow-sm ${
+              className={`w-full text-left p-3.5 sm:p-4 rounded-[24px] border-2 transition-all flex items-center justify-between gap-3 shadow-sm ${
                 isSelected
                   ? 'bg-white dark:bg-slate-800/90 border-emerald-600 dark:border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
                   : 'bg-white/80 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
               }`}
             >
-              {/* Left Details */}
-              <div className="flex items-center gap-3.5 min-w-0">
+              {/* Primary Option Click Area */}
+              <button
+                type="button"
+                onClick={() => handleSelect(opt.code)}
+                className="flex items-center gap-3.5 min-w-0 flex-1 text-left cursor-pointer focus:outline-hidden"
+              >
                 {/* Radio Indicator */}
                 <div
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
@@ -134,7 +139,7 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
                   {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                 </div>
 
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-display font-black text-lg text-slate-900 dark:text-white">
                       {opt.nameNative}
@@ -152,7 +157,7 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
                     {opt.tagline}
                   </p>
                 </div>
-              </div>
+              </button>
 
               {/* Right Voice Listen Preview Button */}
               <button
@@ -173,16 +178,34 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
         <button
           type="button"
           onClick={handleContinue}
-          className="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-display font-bold text-base shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+          disabled={isAdvancing}
+          className={`w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-display font-bold text-base shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+            isAdvancing ? 'opacity-90 cursor-wait' : ''
+          }`}
         >
-          <span>
-            {selectedLang === 'hi'
-              ? 'आगे बढ़ें (Continue)'
-              : selectedLang === 'mr'
-              ? 'पुढे जा (Continue)'
-              : 'Continue to Sign In'}
-          </span>
-          <ArrowRight className="w-5 h-5" />
+          {isAdvancing ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>
+                {selectedLang === 'hi'
+                  ? 'शुरू कर रहे हैं...'
+                  : selectedLang === 'mr'
+                  ? 'सुरू करत आहे...'
+                  : 'Opening Sign In...'}
+              </span>
+            </>
+          ) : (
+            <>
+              <span>
+                {selectedLang === 'hi'
+                  ? 'आगे बढ़ें (Continue)'
+                  : selectedLang === 'mr'
+                  ? 'पुढे जा (Continue)'
+                  : 'Continue to Sign In'}
+              </span>
+              <ArrowRight className="w-5 h-5" />
+            </>
+          )}
         </button>
 
         <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-3 font-mono">
