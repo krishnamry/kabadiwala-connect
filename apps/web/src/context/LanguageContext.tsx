@@ -110,6 +110,9 @@ const translations: Record<Language, Record<string, string>> = {
     securityAccessDesc: 'PIN, biometrics & 2FA protection',
     helpSupport: 'Help & Support',
     helpSupportDesc: '24/7 Helpline, WhatsApp & nodal officer',
+    supportTitle: 'Help & Customer Support',
+    inDevelopment: 'Feature In Active Development',
+    supportDesc: 'An integrated real-time ticketing console and AI dispute mediator are actively being built for upcoming releases. Direct helpline channels, email desks, and emergency WhatsApp support are operational below.',
     settingsDesc: 'Themes, display, voice & data',
 
     // Portals & Roles
@@ -462,6 +465,9 @@ const translations: Record<Language, Record<string, string>> = {
     securityAccessDesc: 'पिन, बायोमेट्रिक्स एवं 2FA सुरक्षा',
     helpSupport: 'सहायता एवं संपर्क',
     helpSupportDesc: '24/7 हेल्पलाइन, व्हाट्सऐप एवं नोडल अधिकारी',
+    supportTitle: 'सहायता एवं ग्राहक सेवा',
+    inDevelopment: 'सुविधा सक्रिय विकास में है',
+    supportDesc: 'आगामी रिलीज़ के लिए एक एकीकृत रियल-टाइम टिकटिंग कंसोल और एआई विवाद मध्यस्थ सक्रिय रूप से बनाए जा रहे हैं। सीधे हेल्पलाइन चैनल, ईमेल डेस्क और आपातकालीन व्हाट्सऐप सहायता नीचे चालू हैं।',
     settingsDesc: 'थीम, डिस्प्ले, आवाज़ एवं डेटा',
 
     // Portals & Roles
@@ -814,6 +820,9 @@ const translations: Record<Language, Record<string, string>> = {
     securityAccessDesc: 'पिन, बायोमेट्रिक्स व 2FA सुरक्षा',
     helpSupport: 'मदत व संपर्क',
     helpSupportDesc: '24/7 हेल्पलाइन, व्हॉट्सअॅप व नोडल अधिकारी',
+    supportTitle: 'मदत व ग्राहक सेवा',
+    inDevelopment: 'वैशिष्ट्य सक्रिय विकासात आहे',
+    supportDesc: 'पुढील आवृत्तीसाठी एकात्मिक रिअल-टाइम तिकीट प्रणाली व एआय वाद निवारक सक्रियपणे विकसित केले जात आहे. थेट हेल्पलाइन, ईमेल डेस्क आणि व्हॉट्सअॅप सहाय्य खाली सुरू आहे.',
     settingsDesc: 'थीम, डिस्प्ले, आवाज व डेटा',
 
     // Portals & Roles

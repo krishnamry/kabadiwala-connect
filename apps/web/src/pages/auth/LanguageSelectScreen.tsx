@@ -125,6 +125,7 @@ export const LanguageSelectScreen: React.FC<LanguageSelectScreenProps> = ({ onCo
               {/* Primary Option Click Area */}
               <button
                 type="button"
+                data-lang={opt.code}
                 onClick={() => handleSelect(opt.code)}
                 className="flex items-center gap-3.5 min-w-0 flex-1 text-left cursor-pointer focus:outline-hidden"
               >
