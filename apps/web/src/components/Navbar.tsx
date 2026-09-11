@@ -4,6 +4,8 @@ import { useLanguage, Language } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Capacitor } from '@capacitor/core';
 import { ThemeSelector } from './ThemeSelector';
+import { SettingsModal } from './SettingsModal';
+import { ProfileModal } from './ProfileModal';
 import { Role } from '../types';
 import {
   User,
@@ -16,7 +18,8 @@ import {
   Volume2,
   Lock,
   ArrowRight,
-  Languages
+  Languages,
+  Settings
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -30,6 +33,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
   const { currentThemeConfig } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const isNative = Capacitor.isNativePlatform();
 
@@ -135,6 +140,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
             {/* Theme Selector */}
             <ThemeSelector />
 
+            {/* App Settings Button */}
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#1A263D] hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all active:scale-95"
+              title={t('settingsBtn', 'Settings (Themes, Display, Voice, Data)')}
+              aria-label="Settings"
+            >
+              <Settings className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+            </button>
+
             {/* Smart Vernacular Language Selector */}
             <div className="relative">
               <button
@@ -209,6 +225,26 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                       <div className="mt-2">{getRoleBadge(user.role)}</div>
                     </div>
 
+                    {/* Personal Profile & Settings Shortcuts */}
+                    <div className="px-2 pt-2 pb-1 border-b border-slate-100 space-y-0.5">
+                      <button
+                        type="button"
+                        onClick={() => { setProfileOpen(true); setDropdownOpen(false); }}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center gap-2 text-slate-800 font-bold text-xs transition-colors"
+                      >
+                        <User className="w-4 h-4 text-emerald-600" />
+                        <span>{t('myProfile', 'My Profile & Security')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setSettingsOpen(true); setDropdownOpen(false); }}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 flex items-center gap-2 text-slate-800 font-bold text-xs transition-colors"
+                      >
+                        <Settings className="w-4 h-4 text-slate-600" />
+                        <span>{t('appSettings', 'App Settings & Themes')}</span>
+                      </button>
+                    </div>
+
                     <div className="px-4 pt-3 pb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                       {t('switchRole', 'Switch Role Portal')}
                     </div>
@@ -267,6 +303,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onOpenProfile={() => setProfileOpen(true)}
+      />
+
+      {/* Profile Modal */}
+      <ProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
     </header>
   );
 };

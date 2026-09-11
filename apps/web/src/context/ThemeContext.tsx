@@ -86,26 +86,45 @@ export const THEMES: ThemeConfig[] = [
   }
 ];
 
+export type ColorMode = 'light' | 'dark' | 'system';
+
 interface ThemeContextType {
   theme: ThemeId;
   setTheme: (theme: ThemeId) => void;
+  colorMode: ColorMode;
+  setColorMode: (mode: ColorMode) => void;
+  resolvedMode: 'light' | 'dark';
   availableThemes: ThemeConfig[];
   currentThemeConfig: ThemeConfig;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-function applyThemeVariables(cfg: ThemeConfig) {
+function applyThemeVariables(cfg: ThemeConfig, isDark: boolean) {
   const root = document.documentElement;
   root.setAttribute('data-theme', cfg.id);
-  root.style.setProperty('--color-primary', cfg.primary);
-  root.style.setProperty('--color-primary-hover', cfg.primaryHover);
-  root.style.setProperty('--color-primary-container', cfg.primaryContainer);
-  root.style.setProperty('--color-on-primary-container', cfg.onPrimaryContainer);
-  root.style.setProperty('--color-primary-light', cfg.primaryLight);
-  root.style.setProperty('--color-primary-focus', `${cfg.primary}33`);
-  root.style.setProperty('--gradient-hero', `linear-gradient(135deg, ${cfg.primary}EE 0%, #0F172A 100%)`);
-  root.style.setProperty('--gradient-hero-subtle', `linear-gradient(135deg, ${cfg.primaryContainer} 0%, #FFFFFF 100%)`);
+  
+  if (isDark) {
+    root.classList.add('dark');
+    root.style.setProperty('--color-primary', cfg.primaryLight);
+    root.style.setProperty('--color-primary-hover', cfg.primary);
+    root.style.setProperty('--color-primary-container', '#1E293B');
+    root.style.setProperty('--color-on-primary-container', '#E2E8F0');
+    root.style.setProperty('--color-primary-light', cfg.accent);
+    root.style.setProperty('--color-primary-focus', `${cfg.primaryLight}44`);
+    root.style.setProperty('--gradient-hero', `linear-gradient(135deg, #0F172A 0%, #1E293B 100%)`);
+    root.style.setProperty('--gradient-hero-subtle', `linear-gradient(135deg, #1E293B 0%, #0F172A 100%)`);
+  } else {
+    root.classList.remove('dark');
+    root.style.setProperty('--color-primary', cfg.primary);
+    root.style.setProperty('--color-primary-hover', cfg.primaryHover);
+    root.style.setProperty('--color-primary-container', cfg.primaryContainer);
+    root.style.setProperty('--color-on-primary-container', cfg.onPrimaryContainer);
+    root.style.setProperty('--color-primary-light', cfg.primaryLight);
+    root.style.setProperty('--color-primary-focus', `${cfg.primary}33`);
+    root.style.setProperty('--gradient-hero', `linear-gradient(135deg, ${cfg.primary}EE 0%, #0F172A 100%)`);
+    root.style.setProperty('--gradient-hero-subtle', `linear-gradient(135deg, ${cfg.primaryContainer} 0%, #FFFFFF 100%)`);
+  }
 }
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -114,17 +133,62 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return (saved && THEMES.some(t => t.id === saved)) ? saved : 'emerald';
   });
 
+  const [colorMode, setColorModeState] = useState<ColorMode>(() => {
+    const savedMode = localStorage.getItem('dhatu_color_mode') as ColorMode;
+    return (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system') ? savedMode : 'system';
+  });
+
+  const [systemIsDark, setSystemIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  const resolvedMode: 'light' | 'dark' = colorMode === 'system' ? (systemIsDark ? 'dark' : 'light') : colorMode;
   const currentThemeConfig = THEMES.find(t => t.id === theme) || THEMES[0];
 
+  // Listen to system theme changes
   useEffect(() => {
-    applyThemeVariables(currentThemeConfig);
-  }, [theme, currentThemeConfig]);
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const listener = (e: MediaQueryListEvent) => {
+      setSystemIsDark(e.matches);
+    };
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, []);
+
+  // Apply variables whenever theme or resolved mode changes
+  useEffect(() => {
+    const isDark = resolvedMode === 'dark';
+    applyThemeVariables(currentThemeConfig, isDark);
+
+    // Synchronize native Android Status Bar
+    if (Capacitor.isNativePlatform()) {
+      import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+        StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light }).catch(() => {});
+        StatusBar.setBackgroundColor({ color: isDark ? '#0B1120' : '#FFFFFF' }).catch(() => {});
+      }).catch(() => {});
+    }
+  }, [theme, resolvedMode, currentThemeConfig]);
 
   const setTheme = (newTheme: ThemeId) => {
     setThemeState(newTheme);
     localStorage.setItem('dhatu_theme', newTheme);
     const cfg = THEMES.find(t => t.id === newTheme) || THEMES[0];
-    applyThemeVariables(cfg);
+    applyThemeVariables(cfg, resolvedMode === 'dark');
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+      } catch {}
+    }
+  };
+
+  const setColorMode = (newMode: ColorMode) => {
+    setColorModeState(newMode);
+    localStorage.setItem('dhatu_color_mode', newMode);
 
     if (Capacitor.isNativePlatform()) {
       try {
@@ -138,6 +202,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         theme,
         setTheme,
+        colorMode,
+        setColorMode,
+        resolvedMode,
         availableThemes: THEMES,
         currentThemeConfig
       }}

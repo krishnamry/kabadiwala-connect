@@ -274,7 +274,7 @@ export const AdminDashboard: React.FC = () => {
                 {(stats.totalKg / 1000).toFixed(2)} MT
               </div>
               <span className="text-xs text-forest-600 font-bold block mt-1">
-                {language === 'hi' ? '२८,४५० किग्रा कचरा लैंडफिल से बचाया' : language === 'mr' ? '२८,४५० कि.ग्रा. कचरा डेपोत जाण्यापासून वाचवला' : '28,450 kg kept out of landfills'}
+                {language === 'hi' ? '28,450 किग्रा कचरा लैंडफिल से बचाया' : language === 'mr' ? '28,450 कि.ग्रा. कचरा डेपोत जाण्यापासून वाचवला' : '28,450 kg kept out of landfills'}
               </span>
             </div>
 
@@ -294,7 +294,7 @@ export const AdminDashboard: React.FC = () => {
                 {stats.totalPickups}
               </div>
               <span className="text-xs text-steel-500 font-bold block mt-1">
-                {language === 'hi' ? '१००% जीपीएस एवं समय मुहर सहित' : language === 'mr' ? '१००% जीपीएस आणि वेळ नोंदीसह' : '100% with GPS & timestamp'}
+                {language === 'hi' ? '100% जीपीएस एवं समय मुहर सहित' : language === 'mr' ? '100% जीपीएस आणि वेळ नोंदीसह' : '100% with GPS & timestamp'}
               </span>
             </div>
 

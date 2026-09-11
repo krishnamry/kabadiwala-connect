@@ -10,6 +10,7 @@ import { KabadiwalaDashboard } from './pages/kabadiwala/KabadiwalaDashboard';
 import { RecyclerDashboard } from './pages/recycler/RecyclerDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { LoginPage } from './pages/auth/LoginPage';
+import { LanguageSelectScreen } from './pages/auth/LanguageSelectScreen';
 import { Role } from './types';
 
 const MainContent: React.FC = () => {
@@ -17,9 +18,12 @@ const MainContent: React.FC = () => {
   const { language, t } = useLanguage();
   const isNative = Capacitor.isNativePlatform();
 
-  // On native Android APK, start directly on login page for an authentic app experience!
+  // On native Android APK, first ask language preference, then proceed to login!
   const [currentView, setCurrentView] = useState<string>(() => {
-    if (isNative) return 'login';
+    if (isNative) {
+      const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
+      return hasChosenLanguage ? 'login' : 'language-select';
+    }
     return 'home';
   });
 
@@ -31,7 +35,8 @@ const MainContent: React.FC = () => {
       else if (user.role === 'RECYCLER') setCurrentView('recycler');
       else if (user.role === 'ADMIN') setCurrentView('admin');
     } else if (isNative) {
-      setCurrentView('login');
+      const hasChosenLanguage = localStorage.getItem('dhatu_language_onboarded') === 'true';
+      setCurrentView(hasChosenLanguage ? 'login' : 'language-select');
     }
   }, [user?.role, user?.id, isNative]);
 
@@ -48,9 +53,18 @@ const MainContent: React.FC = () => {
       );
     }
 
+    if (currentView === 'language-select') {
+      return (
+        <LanguageSelectScreen
+          onComplete={() => setCurrentView('login')}
+        />
+      );
+    }
+
     if (currentView === 'login') {
       return (
         <LoginPage
+          onChangeLanguage={() => setCurrentView('language-select')}
           onSuccess={(role: Role) => {
             if (role === 'CITIZEN') setCurrentView('citizen');
             else if (role === 'KABADIWALA') setCurrentView('kabadiwala');
@@ -85,11 +99,13 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-800 font-body antialiased">
-      <Navbar
-        currentTab={currentView}
-        onTabChange={(tab: string) => setCurrentView(tab)}
-      />
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors">
+      {currentView !== 'language-select' && (
+        <Navbar
+          currentTab={currentView}
+          onTabChange={(tab: string) => setCurrentView(tab)}
+        />
+      )}
 
       <main className="flex-1">
         {renderActiveView()}

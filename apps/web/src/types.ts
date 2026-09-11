@@ -7,6 +7,8 @@ export interface User {
   name: string;
   phone: string;
   role: Role;
+  email?: string;
+  address?: string;
   createdAt?: string;
   kabadiwala?: KabadiwalaProfile | null;
   recycler?: RecyclerProfile | null;

@@ -223,7 +223,7 @@ export const CitizenDashboard: React.FC = () => {
 
   const handleWeightChange = (index: number, weight: number) => {
     const updated = [...items];
-    updated[index] = { ...updated[index], estWeightKg: Math.max(0.5, weight) };
+    updated[index] = { ...updated[index], estWeightKg: Math.max(0.01, Math.round(weight * 100) / 100) };
     setItems(updated);
   };
 
@@ -666,7 +666,7 @@ export const CitizenDashboard: React.FC = () => {
                           {language === 'hi' ? 'भौतिक हस्तांतरण प्राधिकरण कोड' : language === 'mr' ? 'प्रत्यक्ष हस्तांतरण प्रमाणीकरण कोड' : 'Physical Handover Authorization Code'}
                         </span>
                         <p className="text-[11px] text-steel-600">
-                          {language === 'hi' ? 'वजन सत्यापन एवं आधिकारिक हस्तांतरण हेतु कबाड़ीवाले के आने पर यह ४-अंकीय कोड साझा करें।' : language === 'mr' ? 'वजन तपासणी व प्रमाणित हस्तांतरणासाठी संग्राहक आल्यावर हा ४-अंकी कोड सांगा.' : 'Share this 4-digit code with the collector upon arrival to verify physical weighing & authorized handover.'}
+                          {language === 'hi' ? 'वजन सत्यापन एवं आधिकारिक हस्तांतरण हेतु कबाड़ीवाले के आने पर यह 4-अंकीय कोड साझा करें।' : language === 'mr' ? 'वजन तपासणी व प्रमाणित हस्तांतरणासाठी संग्राहक आल्यावर हा 4-अंकी कोड सांगा.' : 'Share this 4-digit code with the collector upon arrival to verify physical weighing & authorized handover.'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -956,10 +956,14 @@ export const CitizenDashboard: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <input
                           type="number"
-                          step="0.5"
+                          step="any"
+                          min="0.01"
                           value={item.estWeightKg}
-                          onChange={e => handleWeightChange(index, parseFloat(e.target.value) || 0.5)}
-                          className="w-20 px-2 py-1.5 text-xs font-mono font-bold bg-paper-100 border border-steel-300 rounded text-right"
+                          onChange={e => {
+                            const val = parseFloat(e.target.value);
+                            handleWeightChange(index, isNaN(val) ? 0.01 : val);
+                          }}
+                          className="w-20 px-2 py-1.5 text-xs font-mono font-bold bg-paper-100 dark:bg-slate-800 border border-steel-300 dark:border-slate-700 rounded text-right text-steel-900 dark:text-slate-100"
                         />
                         <span className="text-xs text-steel-500 font-mono">kg</span>
 

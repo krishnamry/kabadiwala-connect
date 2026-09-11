@@ -12,6 +12,7 @@ interface AuthContextType {
   logout: () => void;
   quickDemoLogin: (role: Role) => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateProfile: (data: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -125,6 +126,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const updateProfile = (data: Partial<User>) => {
+    if (!user) return;
+    const updatedUser = { ...user, ...data };
+    setUser(updatedUser);
+    storage.setCurrentUser(updatedUser);
+    storage.saveUser(updatedUser);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -135,7 +144,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         register,
         logout,
         quickDemoLogin,
-        refreshUser
+        refreshUser,
+        updateProfile
       }}
     >
       {children}

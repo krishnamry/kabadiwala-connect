@@ -65,8 +65,8 @@ export const SCRAP_HUB_PRESETS: ScrapHubPreset[] = [
   {
     id: 'mayapuri',
     nameEn: 'Mayapuri Scrap Yard (Phase II, West Delhi)',
-    nameHi: 'मायापुरी कबाड़ मंडी (फेज २, पश्चिम दिल्ली)',
-    nameMr: 'मायापुरी भंगार बाजार (फेज २, नवी दिल्ली)',
+    nameHi: 'मायापुरी कबाड़ मंडी (फेज 2, पश्चिम दिल्ली)',
+    nameMr: 'मायापुरी भंगार बाजार (फेज 2, नवी दिल्ली)',
     address: 'Suresh Scrap Yard, Near Gate 3, Mayapuri Industrial Area Phase II, New Delhi',
     zone: 'Mayapuri Scrap Cluster, Delhi',
     lat: 28.6369,
@@ -75,8 +75,8 @@ export const SCRAP_HUB_PRESETS: ScrapHubPreset[] = [
   {
     id: 'okhla',
     nameEn: 'Okhla Industrial Scrap Yard (Phase 1, South Delhi)',
-    nameHi: 'ओखला औद्योगिक कबाड़ क्षेत्र (फेज १, दक्षिण दिल्ली)',
-    nameMr: 'ओखला औद्योगिक भंगार क्षेत्र (फेज १, नवी दिल्ली)',
+    nameHi: 'ओखला औद्योगिक कबाड़ क्षेत्र (फेज 1, दक्षिण दिल्ली)',
+    nameMr: 'ओखला औद्योगिक भंगार क्षेत्र (फेज 1, नवी दिल्ली)',
     address: 'Plot 42, Container Road, Okhla Industrial Area Phase-1, New Delhi',
     zone: 'Okhla Scrap Zone, Delhi',
     lat: 28.5284,
@@ -472,11 +472,26 @@ export const KabadiwalaDashboard: React.FC = () => {
     hapticSuccess();
   };
 
-  // Adjust weight of custom lot item (+ / - 0.5 kg)
+  // Adjust weight of custom lot item (+ / - delta kg)
   const handleUpdateCustomItemWeight = (id: string, deltaKg: number) => {
     setCustomLotItems(prev => prev.map(item => {
       if (item.id === id) {
-        const nextWeight = Math.max(0.5, Math.round((item.weightKg + deltaKg) * 10) / 10);
+        const nextWeight = Math.max(0.01, Math.round((item.weightKg + deltaKg) * 100) / 100);
+        return {
+          ...item,
+          weightKg: nextWeight,
+          subtotal: Math.round(item.ratePerKg * nextWeight)
+        };
+      }
+      return item;
+    }));
+  };
+
+  // Directly set custom lot item weight
+  const handleSetCustomItemWeight = (id: string, weight: number) => {
+    setCustomLotItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const nextWeight = Math.max(0.01, Math.round(weight * 100) / 100);
         return {
           ...item,
           weightKg: nextWeight,
@@ -776,7 +791,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 <MapPin className="w-4 h-4 text-emerald-300" />
                 <span>{t('operatingZone', 'Operating Zone: Pan-India Active Network')}</span>
               </span>
-              <span className="text-emerald-300 font-bold">★ 4.9 {language === 'hi' ? 'रेटिंग (१४२ कार्य)' : language === 'mr' ? 'रेटिंग (१४२ कामे)' : 'Rating (142 Jobs)'}</span>
+              <span className="text-emerald-300 font-bold">★ 4.9 {language === 'hi' ? 'रेटिंग (142 कार्य)' : language === 'mr' ? 'रेटिंग (142 कामे)' : 'Rating (142 Jobs)'}</span>
             </div>
           </div>
 
@@ -1127,34 +1142,42 @@ export const KabadiwalaDashboard: React.FC = () => {
                         </select>
                       </div>
 
-                      {/* Weight Stepper (Low-Literacy Friendly +/- Buttons) */}
+                      {/* Weight Stepper & Direct Custom Input */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
                           <label className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">
                             {t('approxWeightLabel', '4. Enter Approx Weight (Kilograms)')}
                           </label>
-                          <span className="text-xs sm:text-sm text-slate-500 font-semibold">{t('minWeightNote', 'Minimum 0.5 kg')}</span>
+                          <span className="text-xs sm:text-sm text-slate-500 font-semibold">{t('minWeightNote', 'Custom weight (min 0.01 kg)')}</span>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <button
                             type="button"
-                            onClick={() => setLotWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
+                            onClick={() => setLotWeight(w => Math.max(0.01, Math.round((w - 0.5) * 100) / 100))}
                             className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-emerald-100 border border-slate-200 flex items-center justify-center text-slate-800 hover:text-emerald-900 active:scale-95 transition-transform shadow-sm"
                           >
                             <Minus className="w-6 h-6" />
                           </button>
 
-                          <div className="flex-1 bg-white border border-slate-200/90 rounded-2xl p-3.5 text-center shadow-sm">
-                            <span className="text-3xl sm:text-4xl font-display font-black text-slate-900">
-                              {lotWeight}
-                            </span>
-                            <span className="text-base font-bold text-slate-500 ml-2 uppercase">kg</span>
+                          <div className="flex-1 bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 text-center shadow-sm flex items-center justify-center gap-2">
+                            <input
+                              type="number"
+                              step="any"
+                              min="0.01"
+                              value={lotWeight}
+                              onChange={e => {
+                                const val = parseFloat(e.target.value);
+                                setLotWeight(isNaN(val) ? 0.01 : Math.max(0.01, Math.round(val * 100) / 100));
+                              }}
+                              className="w-28 sm:w-36 text-center text-3xl sm:text-4xl font-display font-black text-slate-900 bg-transparent focus:outline-none"
+                            />
+                            <span className="text-base font-bold text-slate-500 uppercase">kg</span>
                           </div>
 
                           <button
                             type="button"
-                            onClick={() => setLotWeight(w => Math.round((w + 0.5) * 10) / 10)}
+                            onClick={() => setLotWeight(w => Math.round((w + 0.5) * 100) / 100)}
                             className="w-14 h-14 rounded-2xl bg-slate-100 hover:bg-emerald-100 border border-slate-200 flex items-center justify-center text-slate-800 hover:text-emerald-900 active:scale-95 transition-transform shadow-sm"
                           >
                             <Plus className="w-6 h-6" />
@@ -1204,22 +1227,25 @@ export const KabadiwalaDashboard: React.FC = () => {
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
-                                onClick={() => setNewCustomWeight(w => Math.max(0.5, Math.round((w - 0.5) * 10) / 10))}
+                                onClick={() => setNewCustomWeight(w => Math.max(0.01, Math.round((w - 0.1) * 10) / 10))}
                                 className="w-9 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
                               >
                                 -
                               </button>
                               <input
                                 type="number"
-                                step="0.1"
-                                min="0.5"
+                                step="any"
+                                min="0.01"
                                 value={newCustomWeight}
-                                onChange={e => setNewCustomWeight(Math.max(0.5, parseFloat(e.target.value) || 0.5))}
+                                onChange={e => {
+                                  const val = parseFloat(e.target.value);
+                                  setNewCustomWeight(isNaN(val) ? 0.01 : Math.max(0.01, Math.round(val * 100) / 100));
+                                }}
                                 className="w-full text-center px-2 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg"
                               />
                               <button
                                 type="button"
-                                onClick={() => setNewCustomWeight(w => Math.round((w + 0.5) * 10) / 10)}
+                                onClick={() => setNewCustomWeight(w => Math.round((w + 0.1) * 10) / 10)}
                                 className="w-9 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
                               >
                                 +
@@ -1266,22 +1292,31 @@ export const KabadiwalaDashboard: React.FC = () => {
                                   </div>
 
                                   <div className="flex items-center gap-3 shrink-0">
-                                    {/* Weight adjustment buttons */}
-                                    <div className="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">
+                                    {/* Weight adjustment input & buttons */}
+                                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
                                       <button
                                         type="button"
-                                        onClick={() => handleUpdateCustomItemWeight(item.id, -0.5)}
-                                        className="w-5 h-6 text-slate-600 hover:text-slate-900 font-bold"
+                                        onClick={() => handleUpdateCustomItemWeight(item.id, -0.1)}
+                                        className="w-5 h-6 text-slate-600 dark:text-slate-300 hover:text-slate-900 font-bold"
                                       >
                                         -
                                       </button>
-                                      <span className="font-bold text-slate-900 text-xs sm:text-sm w-12 text-center">
-                                        {item.weightKg} kg
-                                      </span>
+                                      <input
+                                        type="number"
+                                        step="any"
+                                        min="0.01"
+                                        value={item.weightKg}
+                                        onChange={e => {
+                                          const val = parseFloat(e.target.value);
+                                          handleSetCustomItemWeight(item.id, isNaN(val) ? 0.01 : val);
+                                        }}
+                                        className="w-14 text-center font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm bg-transparent focus:outline-none"
+                                      />
+                                      <span className="text-[10px] text-slate-500 font-bold -ml-1">kg</span>
                                       <button
                                         type="button"
-                                        onClick={() => handleUpdateCustomItemWeight(item.id, 0.5)}
-                                        className="w-5 h-6 text-slate-600 hover:text-slate-900 font-bold"
+                                        onClick={() => handleUpdateCustomItemWeight(item.id, 0.1)}
+                                        className="w-5 h-6 text-slate-600 dark:text-slate-300 hover:text-slate-900 font-bold"
                                       >
                                         +
                                       </button>
@@ -1622,7 +1657,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                     <Sparkles className="w-4 h-4 text-amber-700" /> {language === 'hi' ? 'कमाई बढ़ाने का सुझाव:' : language === 'mr' ? 'कमाई वाढवण्यासाठी टीप:' : 'High-Value Separation Tip:'}
                   </span>
                   <p className="text-slate-700">
-                    {language === 'hi' ? 'सर्किट बोर्ड से एल्यूमीनियम हीट सिंक को हाथ से अलग करके बेचें। इससे बोर्ड को ग्रेड-ए (₹640/kg) दाम मिलता है।' : language === 'mr' ? 'सर्किट बोर्डमधून अ‍ॅल्युमिनियम हीट सिंक हाताने वेगळे करून विका. यामुळे बोर्डाला ग्रेड-ए (₹६४०/कि.ग्रा.) भाव मिळतो.' : 'Detach aluminium heat sinks from circuit boards by hand before selling. Intact Grade-A boards command premium ₹640/kg.'}
+                    {language === 'hi' ? 'सर्किट बोर्ड से एल्यूमीनियम हीट सिंक को हाथ से अलग करके बेचें। इससे बोर्ड को ग्रेड-ए (₹640/kg) दाम मिलता है।' : language === 'mr' ? 'सर्किट बोर्डमधून अ‍ॅल्युमिनियम हीट सिंक हाताने वेगळे करून विका. यामुळे बोर्डाला ग्रेड-ए (₹640/कि.ग्रा.) भाव मिळतो.' : 'Detach aluminium heat sinks from circuit boards by hand before selling. Intact Grade-A boards command premium ₹640/kg.'}
                   </p>
                 </div>
               </div>
@@ -1937,7 +1972,7 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
 
             <span className="text-xs font-mono text-steel-600 bg-paper-200 px-3 py-1.5 rounded border border-steel-300 self-start sm:self-auto">
-              {language === 'hi' ? 'अंतिम अपडेट: आज सुबह 09:00 AM' : language === 'mr' ? 'शेवटचे अपडेट: आज सकाळी ०९:००' : 'Last updated: Today 09:00 AM'}
+              {language === 'hi' ? 'अंतिम अपडेट: आज सुबह 09:00 AM' : language === 'mr' ? 'शेवटचे अपडेट: आज सकाळी 09:00' : 'Last updated: Today 09:00 AM'}
             </span>
           </div>
 
@@ -2520,25 +2555,34 @@ export const KabadiwalaDashboard: React.FC = () => {
                         <span className="text-xs font-bold text-steel-800 block">{preserveEnglishItemName(item.category)}</span>
                         <span className="text-[10px] text-steel-500">Rate: ₹{item.ratePerKg}/kg</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => {
                             const cur = itemWeights[item.category] || item.estWeightKg;
-                            setItemWeights({ ...itemWeights, [item.category]: Math.max(0.5, cur - 0.5) });
+                            setItemWeights({ ...itemWeights, [item.category]: Math.max(0.01, Math.round((cur - 0.1) * 10) / 10) });
                           }}
                           className="w-8 h-8 rounded bg-paper-200 border border-steel-400 flex items-center justify-center font-bold text-steel-800"
                         >
                           -
                         </button>
-                        <span className="font-mono text-sm font-bold text-steel-900 w-12 text-center">
-                          {itemWeights[item.category] || item.estWeightKg} kg
-                        </span>
+                        <input
+                          type="number"
+                          step="any"
+                          min="0.01"
+                          value={itemWeights[item.category] ?? item.estWeightKg}
+                          onChange={e => {
+                            const val = parseFloat(e.target.value);
+                            setItemWeights({ ...itemWeights, [item.category]: isNaN(val) ? 0.01 : Math.max(0.01, Math.round(val * 100) / 100) });
+                          }}
+                          className="w-16 px-1.5 py-1 text-center font-mono text-sm font-bold bg-white border border-steel-400 rounded text-steel-900"
+                        />
+                        <span className="text-xs text-steel-500 font-mono">kg</span>
                         <button
                           type="button"
                           onClick={() => {
                             const cur = itemWeights[item.category] || item.estWeightKg;
-                            setItemWeights({ ...itemWeights, [item.category]: cur + 0.5 });
+                            setItemWeights({ ...itemWeights, [item.category]: Math.round((cur + 0.1) * 10) / 10 });
                           }}
                           className="w-8 h-8 rounded bg-copper-600 text-white flex items-center justify-center font-bold"
                         >

@@ -18,15 +18,17 @@ import {
   Building2,
   ChevronRight,
   Info,
-  ChevronDown
+  ChevronDown,
+  Globe
 } from 'lucide-react';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
 
 interface LoginPageProps {
   onSuccess: (role: Role) => void;
+  onChangeLanguage?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguage }) => {
   const { login, quickDemoLogin } = useAuth();
   const { language, t } = useLanguage();
   const { currentThemeConfig } = useTheme();
@@ -209,6 +211,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess }) => {
         <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto">
           {t('loginSubtitleApp', 'Smart Informal Waste & EPR Traceability Platform. Select your portal to continue.')}
         </p>
+        {onChangeLanguage && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={onChangeLanguage}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 border border-slate-300 text-xs font-semibold shadow-2xs transition-transform active:scale-95"
+            >
+              <Globe className="w-3.5 h-3.5 text-emerald-600" />
+              <span>
+                {language === 'hi'
+                  ? 'भाषा: हिन्दी (बदलें)'
+                  : language === 'mr'
+                  ? 'भाषा: मराठी (बदला)'
+                  : 'Language: English (Change)'}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* M3 Segmented Role Selector Tabs */}

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { Pickup } from '../types';
-import { getCurrentPosition, reverseGeocode, GeoCoordinates } from '../lib/location';
-import { Navigation, Loader2 } from 'lucide-react';
+import { getCurrentPosition, reverseGeocode, searchAddress, GeoCoordinates } from '../lib/location';
+import { Navigation, Loader2, Search, MapPin, X } from 'lucide-react';
+import { triggerHaptic } from '../lib/haptics';
 
 export interface MapCustomMarker {
   id: string;
@@ -27,8 +28,21 @@ interface LeafletMapProps {
   pinLocation?: [number, number] | null;
   height?: string;
   showLocateButton?: boolean;
+  showSearch?: boolean;
+  showDropPinButton?: boolean;
   userPosition?: [number, number] | null;
 }
+
+const POPULAR_LOCATIONS = [
+  { shortName: 'Okhla Phase II', displayName: 'Okhla Industrial Area Phase II, New Delhi', lat: 28.5355, lng: 77.2732 },
+  { shortName: 'Connaught Place', displayName: 'Connaught Place, New Delhi, Delhi 110001', lat: 28.6315, lng: 77.2167 },
+  { shortName: 'Dharavi Hub', displayName: 'Dharavi E-Waste Recycling Hub, Mumbai, Maharashtra', lat: 19.0434, lng: 72.8567 },
+  { shortName: 'Bandra West', displayName: 'Bandra West, Mumbai, Maharashtra 400050', lat: 19.0596, lng: 72.8295 },
+  { shortName: 'Whitefield', displayName: 'Whitefield Tech Corridor, Bengaluru, Karnataka', lat: 12.9698, lng: 77.7499 },
+  { shortName: 'Koramangala', displayName: 'Koramangala, Bengaluru, Karnataka 560034', lat: 12.9352, lng: 77.6245 },
+  { shortName: 'Sector 62 Noida', displayName: 'Sector 62, Noida, Uttar Pradesh 201309', lat: 28.6280, lng: 77.3649 },
+  { shortName: 'Cyber City Gurugram', displayName: 'DLF Cyber City, Gurugram, Haryana 122002', lat: 28.4952, lng: 77.0895 },
+];
 
 export const LeafletMap: React.FC<LeafletMapProps> = ({
   center = [28.6139, 77.2090], // Default map center
@@ -38,10 +52,12 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
   selectedPickupId,
   onSelectPickup,
   onLocationSelect,
-  selectableLocation = false,
+  selectableLocation = true,
   pinLocation,
   height = '420px',
   showLocateButton = true,
+  showSearch = true,
+  showDropPinButton = true,
   userPosition
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -53,6 +69,13 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
 
   const [isLocating, setIsLocating] = useState(false);
   const [geoNotice, setGeoNotice] = useState<string | null>(null);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Array<{ lat: number; lng: number; displayName: string; shortName: string }>>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize map
   useEffect(() => {
@@ -68,17 +91,18 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
         maxZoom: 19
       }).addTo(map);
 
-      if (selectableLocation && onLocationSelect) {
-        map.on('click', async (e: L.LeafletMouseEvent) => {
-          const { lat, lng } = e.latlng;
-          try {
-            const geo = await reverseGeocode(lat, lng);
-            onLocationSelect(lat, lng, geo.address);
-          } catch {
-            onLocationSelect(lat, lng);
-          }
-        });
-      }
+      // Tap / Click anywhere on map to drop or reposition pin
+      map.on('click', async (e: L.LeafletMouseEvent) => {
+        const { lat, lng } = e.latlng;
+        triggerHaptic(15);
+        try {
+          const geo = await reverseGeocode(lat, lng);
+          setGeoNotice(`📍 Pinned: ${geo.shortAddress}`);
+          if (onLocationSelect) onLocationSelect(lat, lng, geo.address);
+        } catch {
+          if (onLocationSelect) onLocationSelect(lat, lng);
+        }
+      });
 
       mapInstanceRef.current = map;
 
@@ -91,6 +115,92 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
       }, 600);
     }
   }, []);
+
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Debounced search for locations & OSM Geocoding
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults(POPULAR_LOCATIONS);
+      return;
+    }
+
+    const q = searchQuery.toLowerCase().trim();
+    const matchedPopular = POPULAR_LOCATIONS.filter(
+      loc => loc.shortName.toLowerCase().includes(q) || loc.displayName.toLowerCase().includes(q)
+    );
+    setSearchResults(matchedPopular);
+
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        try {
+          const remoteResults = await searchAddress(searchQuery);
+          const combined = [...matchedPopular];
+          for (const item of remoteResults) {
+            const exists = combined.some(
+              c => Math.abs(c.lat - item.lat) < 0.005 && Math.abs(c.lng - item.lng) < 0.005
+            );
+            if (!exists) {
+              combined.push(item);
+            }
+          }
+          setSearchResults(combined);
+        } catch (err) {
+          console.warn('Address search failed:', err);
+        } finally {
+          setIsSearching(false);
+        }
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Handle selecting a search result
+  const handleSelectLocation = (loc: { lat: number; lng: number; displayName: string; shortName?: string }) => {
+    triggerHaptic(20);
+    setSearchOpen(false);
+    setSearchQuery(loc.shortName || loc.displayName.split(',')[0]);
+    const map = mapInstanceRef.current;
+    if (map) {
+      map.flyTo([loc.lat, loc.lng], 16, { duration: 1.0 });
+    }
+    setGeoNotice(`📍 Selected: ${loc.shortName || loc.displayName.split(',')[0]}`);
+    if (onLocationSelect) {
+      onLocationSelect(loc.lat, loc.lng, loc.displayName);
+    }
+    setTimeout(() => setGeoNotice(null), 3500);
+  };
+
+  // Handle dropping pin at current map center
+  const handleDropPinAtCenter = async () => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    triggerHaptic(25);
+    const centerLatLng = map.getCenter();
+    const lat = centerLatLng.lat;
+    const lng = centerLatLng.lng;
+
+    try {
+      const geo = await reverseGeocode(lat, lng);
+      setGeoNotice(`📍 Pin Dropped: ${geo.shortAddress}`);
+      if (onLocationSelect) onLocationSelect(lat, lng, geo.address);
+    } catch {
+      setGeoNotice(`📍 Pin Dropped: ${lat.toFixed(4)}°, ${lng.toFixed(4)}°`);
+      if (onLocationSelect) onLocationSelect(lat, lng);
+    }
+    setTimeout(() => setGeoNotice(null), 3500);
+  };
 
   // Update center
   useEffect(() => {
@@ -352,30 +462,109 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
   }, [pinLocation]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-xl border border-steel-300 shadow-inner z-0" style={{ height }}>
+    <div className="relative w-full overflow-hidden rounded-xl border border-steel-300 dark:border-slate-700 shadow-inner z-0" style={{ height }}>
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Floating GPS Locate Control Button */}
-      {showLocateButton && (
-        <button
-          type="button"
-          onClick={handleLocateMe}
-          disabled={isLocating}
-          title="Detect My Live Location (GPS / IP)"
-          className="absolute top-3 right-3 z-[400] bg-paper-50 hover:bg-paper-100 active:bg-paper-200 text-steel-800 px-3 py-1.5 rounded-lg border-2 border-steel-400 shadow-tactile flex items-center gap-1.5 text-xs font-bold font-mono transition-transform active:scale-95 disabled:opacity-60"
-        >
-          {isLocating ? (
-            <Loader2 className="w-3.5 h-3.5 text-copper-600 animate-spin" />
-          ) : (
-            <Navigation className="w-3.5 h-3.5 text-copper-600" />
+      {/* Floating Search Bar (Top Left) */}
+      {showSearch && (
+        <div ref={searchContainerRef} className="absolute top-3 left-3 z-[400] max-w-[200px] sm:max-w-xs w-full">
+          <div className="relative flex items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-xl border border-steel-300 dark:border-slate-700 shadow-md px-2.5 py-1.5 transition-all focus-within:ring-2 focus-within:ring-copper-500">
+            {isSearching ? (
+              <Loader2 className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400 animate-spin shrink-0 mr-1.5" />
+            ) : (
+              <Search className="w-3.5 h-3.5 text-steel-400 dark:text-slate-400 shrink-0 mr-1.5" />
+            )}
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => {
+                setSearchQuery(e.target.value);
+                setSearchOpen(true);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              placeholder="Search location..."
+              className="w-full bg-transparent text-xs font-mono font-medium text-steel-900 dark:text-slate-100 placeholder:text-steel-400 dark:placeholder:text-slate-500 focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSearchResults(POPULAR_LOCATIONS);
+                }}
+                className="p-0.5 hover:bg-steel-100 dark:hover:bg-slate-800 rounded text-steel-400 dark:text-slate-400"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Autocomplete Dropdown */}
+          {searchOpen && searchResults.length > 0 && (
+            <div className="absolute top-full mt-1.5 left-0 w-64 sm:w-72 max-h-56 overflow-y-auto bg-white dark:bg-slate-900 border border-steel-300 dark:border-slate-700 rounded-xl shadow-xl divide-y divide-steel-100 dark:divide-slate-800 z-[500]">
+              <div className="px-2.5 py-1 text-[10px] font-mono font-bold text-steel-400 dark:text-slate-500 bg-paper-50 dark:bg-slate-950">
+                {searchQuery.trim() ? 'SEARCH RESULTS' : 'POPULAR RECYCLING HUBS'}
+              </div>
+              {searchResults.slice(0, 6).map((loc, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSelectLocation(loc)}
+                  className="w-full text-left px-3 py-2 hover:bg-steel-50 dark:hover:bg-slate-800/80 flex items-start gap-2 transition-colors"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400 shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-bold text-steel-900 dark:text-slate-100 truncate">
+                      {loc.shortName}
+                    </div>
+                    <div className="text-[10px] text-steel-500 dark:text-slate-400 truncate">
+                      {loc.displayName}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           )}
-          <span>{isLocating ? 'Locating...' : 'Locate Me'}</span>
-        </button>
+        </div>
       )}
+
+      {/* Floating Action Controls (Top Right: Drop Pin + Locate Me) */}
+      <div className="absolute top-3 right-3 z-[400] flex items-center gap-1.5">
+        {showDropPinButton && (
+          <button
+            type="button"
+            onClick={handleDropPinAtCenter}
+            title="Drop Pin at Center of Map"
+            className="bg-white/95 dark:bg-slate-900/95 hover:bg-paper-100 dark:hover:bg-slate-800 active:bg-paper-200 text-steel-800 dark:text-slate-100 px-2.5 py-1.5 rounded-lg border border-steel-300 dark:border-slate-700 shadow-tactile flex items-center gap-1 text-xs font-bold font-mono transition-transform active:scale-95"
+          >
+            <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden sm:inline">Drop Pin</span>
+            <span className="sm:hidden">Pin</span>
+          </button>
+        )}
+
+        {showLocateButton && (
+          <button
+            type="button"
+            onClick={handleLocateMe}
+            disabled={isLocating}
+            title="Detect My Live Location (GPS / IP)"
+            className="bg-white/95 dark:bg-slate-900/95 hover:bg-paper-100 dark:hover:bg-slate-800 active:bg-paper-200 text-steel-800 dark:text-slate-100 px-2.5 py-1.5 rounded-lg border border-steel-300 dark:border-slate-700 shadow-tactile flex items-center gap-1 text-xs font-bold font-mono transition-transform active:scale-95 disabled:opacity-60"
+          >
+            {isLocating ? (
+              <Loader2 className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400 animate-spin" />
+            ) : (
+              <Navigation className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400" />
+            )}
+            <span className="hidden sm:inline">{isLocating ? 'Locating...' : 'Locate Me'}</span>
+            <span className="sm:hidden">{isLocating ? '...' : 'GPS'}</span>
+          </button>
+        )}
+      </div>
 
       {/* Geocoded Feedback Banner */}
       {geoNotice && (
-        <div className="absolute top-12 right-3 left-3 z-[400] bg-forest-800 text-paper-50 px-3 py-1.5 rounded-lg text-xs font-mono font-bold shadow-tactile border border-forest-600 flex items-center justify-between animate-fade-in pointer-events-none">
+        <div className="absolute top-12 sm:top-14 right-3 left-3 z-[400] bg-forest-800/95 dark:bg-forest-900/95 text-paper-50 px-3 py-1.5 rounded-lg text-xs font-mono font-bold shadow-tactile border border-forest-600 flex items-center justify-between animate-fade-in pointer-events-none backdrop-blur-sm">
           <span className="truncate">{geoNotice}</span>
         </div>
       )}

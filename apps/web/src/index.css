@@ -236,3 +236,97 @@
   overflow: hidden;
 }
 
+/* ==========================================================================
+   Android 17 & Material 3 Dark Mode Theme Extensions
+   ========================================================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0B1120 !important;
+  color: #F1F5F9 !important;
+}
+
+html.dark .android17-card,
+html.dark .m3-card,
+html.dark .receipt-stub {
+  background-color: #131D31 !important;
+  border-color: rgba(51, 65, 85, 0.6) !important;
+  color: #F8FAFC !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark header {
+  background-color: rgba(11, 17, 32, 0.95) !important;
+  border-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+html.dark nav[aria-label="Citizen Navigation"],
+html.dark nav[aria-label="Collector Navigation"],
+html.dark nav[aria-label="Recycler Navigation"],
+html.dark nav[aria-label="Audit Navigation"],
+html.dark nav[aria-label="Mobile Navigation"] {
+  background-color: rgba(11, 17, 32, 0.95) !important;
+  border-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #1A263D !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748B !important;
+}
+
+html.dark .bg-white {
+  background-color: #131D31 !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/90,
+html.dark .bg-slate-50\/80,
+html.dark .bg-slate-100,
+html.dark .bg-slate-100\/90 {
+  background-color: #1A263D !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-950,
+html.dark .text-steel-900,
+html.dark .text-steel-950 {
+  color: #F8FAFC !important;
+}
+
+html.dark .text-slate-800,
+html.dark .text-steel-800 {
+  color: #E2E8F0 !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-steel-700 {
+  color: #CBD5E1 !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-steel-600 {
+  color: #94A3B8 !important;
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-200\/60,
+html.dark .border-slate-200\/70,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-300,
+html.dark .border-steel-200,
+html.dark .border-steel-300 {
+  border-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+
