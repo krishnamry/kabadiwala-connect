@@ -208,6 +208,15 @@ export const KabadiwalaDashboard: React.FC = () => {
   const [newCustomCategory, setNewCustomCategory] = useState('Engineering E-Plastics (ABS/HIPS)');
   const [newCustomWeight, setNewCustomWeight] = useState(5.0);
 
+  // Custom Typed Product Support for Single and Mixed Lots
+  const [isCustomSingleLot, setIsCustomSingleLot] = useState(false);
+  const [customSingleLotName, setCustomSingleLotName] = useState('');
+  const [customSingleLotRate, setCustomSingleLotRate] = useState(100);
+
+  const [isCustomMixedItem, setIsCustomMixedItem] = useState(false);
+  const [customMixedItemName, setCustomMixedItemName] = useState('');
+  const [customMixedItemRate, setCustomMixedItemRate] = useState(100);
+
   // Dynamic Live Price Board Dataset (Category, buying price, 7-day trend, spoken texts)
   const [liveRates, setLiveRates] = useState<ScrapRate[]>(() => storage.getRates());
 
@@ -428,23 +437,28 @@ export const KabadiwalaDashboard: React.FC = () => {
   // Update AI Valuation when lot weight, category, mode, or custom items change
   useEffect(() => {
     if (lotTypeMode === 'single') {
-      const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
-      const rate = rateItem ? rateItem.ratePerKg : 400;
+      const rate = isCustomSingleLot
+        ? customSingleLotRate
+        : (priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category))?.ratePerKg || 400);
       setAiValuation(Math.round(rate * lotWeight));
     } else {
       const total = customLotItems.reduce((acc, it) => acc + it.subtotal, 0);
       setAiValuation(Math.round(total));
     }
-  }, [lotTypeMode, lotCategory, lotWeight, customLotItems, priceBoardData]);
+  }, [lotTypeMode, lotCategory, lotWeight, customLotItems, priceBoardData, isCustomSingleLot, customSingleLotRate]);
 
   // Add item to custom mixed lot
   const handleAddCustomLotItem = () => {
     if (newCustomWeight <= 0) return;
-    const rateItem = priceBoardData.find(p => p.category.includes(newCustomCategory) || newCustomCategory.includes(p.category));
-    const rate = rateItem ? rateItem.ratePerKg : 400;
+    const catName = isCustomMixedItem
+      ? (customMixedItemName.trim() || 'Custom E-Waste Item')
+      : newCustomCategory;
+    const rate = isCustomMixedItem
+      ? customMixedItemRate
+      : (priceBoardData.find(p => p.category.includes(newCustomCategory) || newCustomCategory.includes(p.category))?.ratePerKg || 400);
     const subtotal = Math.round(rate * newCustomWeight);
 
-    const existingIdx = customLotItems.findIndex(i => i.category === newCustomCategory);
+    const existingIdx = customLotItems.findIndex(i => i.category.toLowerCase() === catName.toLowerCase());
     if (existingIdx >= 0) {
       setCustomLotItems(prev => prev.map((item, idx) => {
         if (idx === existingIdx) {
@@ -462,12 +476,15 @@ export const KabadiwalaDashboard: React.FC = () => {
         ...prev,
         {
           id: `cli-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-          category: newCustomCategory,
+          category: catName,
           weightKg: newCustomWeight,
           ratePerKg: rate,
           subtotal
         }
       ]);
+    }
+    if (isCustomMixedItem) {
+      setCustomMixedItemName('');
     }
     hapticSuccess();
   };
@@ -583,7 +600,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
     if (lotTypeMode === 'custom') {
       if (customLotItems.length === 0) {
-        alert('Please add at least one material to the custom lot.');
+        alert(t('pleaseAddOneMaterial', 'Please add at least one material to the custom lot.'));
         return;
       }
       isCustom = true;
@@ -599,8 +616,14 @@ export const KabadiwalaDashboard: React.FC = () => {
         subtotal: it.subtotal
       }));
     } else {
-      const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
-      offeredRate = rateItem ? rateItem.ratePerKg : 400;
+      if (isCustomSingleLot) {
+        finalCategory = customSingleLotName.trim() || 'Custom E-Waste Lot';
+        offeredRate = customSingleLotRate;
+      } else {
+        const rateItem = priceBoardData.find(p => p.category.includes(lotCategory) || lotCategory.includes(p.category));
+        offeredRate = rateItem ? rateItem.ratePerKg : 400;
+        finalCategory = lotCategory;
+      }
       finalValuation = Math.round(offeredRate * lotWeight);
     }
 
@@ -1126,20 +1149,65 @@ export const KabadiwalaDashboard: React.FC = () => {
                     <>
                       {/* Category Selector */}
                       <div>
-                        <label className="block text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                           3. {t('selectScrapCategory', 'Select Item Category')}
                         </label>
                         <select
-                          value={lotCategory}
-                          onChange={e => setLotCategory(e.target.value)}
-                          className="w-full px-4 py-3.5 text-sm sm:text-base font-semibold bg-white border border-slate-300 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm"
+                          value={isCustomSingleLot ? 'CUSTOM' : lotCategory}
+                          onChange={e => {
+                            if (e.target.value === 'CUSTOM') {
+                              setIsCustomSingleLot(true);
+                            } else {
+                              setIsCustomSingleLot(false);
+                              setLotCategory(e.target.value);
+                            }
+                          }}
+                          className="w-full px-4 py-3.5 text-sm sm:text-base font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-2xl focus:border-emerald-600 focus:outline-none shadow-sm text-slate-900 dark:text-slate-100"
                         >
                           {priceBoardData.map(p => (
                             <option key={p.category} value={p.category}>
-                              {p.category} — ₹{p.ratePerKg}/{t('perKg', 'kg')}
+                              {preserveEnglishItemName(p.category)} — ₹{p.ratePerKg}/{t('perKg', 'kg')}
                             </option>
                           ))}
+                          <option value="CUSTOM">
+                            ➕ {t('otherCustomProduct', 'Other / Custom Product (Type name)')}
+                          </option>
                         </select>
+
+                        {/* Custom Product Inputs for Single Lot */}
+                        {isCustomSingleLot && (
+                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 mt-3 p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-emerald-500/60 animate-fade-in">
+                            <div className="sm:col-span-8">
+                              <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                                {t('enterProductName', 'Type Product Name (e.g. Old Microwave, Inverter)')}
+                              </label>
+                              <input
+                                type="text"
+                                value={customSingleLotName}
+                                placeholder={t('productNamePlaceholder', 'e.g. Inverter, Microwave, Stabilizer, TV...')}
+                                onChange={e => setCustomSingleLotName(e.target.value)}
+                                className="w-full px-3 py-2 text-sm font-bold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none"
+                                required
+                              />
+                            </div>
+                            <div className="sm:col-span-4">
+                              <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                                {t('customRatePerKg', 'Expected Rate (₹/kg)')}
+                              </label>
+                              <div className="flex items-center gap-1">
+                                <span className="text-sm font-bold text-slate-500">₹</span>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={customSingleLotRate}
+                                  onChange={e => setCustomSingleLotRate(parseFloat(e.target.value) || 1)}
+                                  className="w-full px-3 py-2 text-sm font-mono font-bold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-right focus:outline-none"
+                                />
+                                <span className="text-xs text-slate-500 font-mono">/kg</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Weight Stepper & Direct Custom Input */}
@@ -1193,11 +1261,11 @@ export const KabadiwalaDashboard: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <Layers className="w-5 h-5 text-slate-700" />
                             <span className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                              3. Add Material Line Items
+                              3. {t('addMaterialLineItems', 'Add Material Line Items')}
                             </span>
                           </div>
                           <span className="text-xs sm:text-sm chip-primary-m3 px-3 py-1 font-bold">
-                            {customLotItems.length} Materials in Lot
+                            {customLotItems.length} {t('materialsInLot', 'Materials in Lot')}
                           </span>
                         </div>
 
@@ -1205,24 +1273,34 @@ export const KabadiwalaDashboard: React.FC = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                           <div className="sm:col-span-6">
                             <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">
-                              Material Type
+                              {t('materialType', 'Material Type')}
                             </label>
                             <select
-                              value={newCustomCategory}
-                              onChange={e => setNewCustomCategory(e.target.value)}
+                              value={isCustomMixedItem ? 'CUSTOM' : newCustomCategory}
+                              onChange={e => {
+                                if (e.target.value === 'CUSTOM') {
+                                  setIsCustomMixedItem(true);
+                                } else {
+                                  setIsCustomMixedItem(false);
+                                  setNewCustomCategory(e.target.value);
+                                }
+                              }}
                               className="w-full px-3.5 py-2.5 text-sm font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none"
                             >
                               {priceBoardData.map(p => (
                                 <option key={p.category} value={p.category}>
-                                  {p.category} (₹{p.ratePerKg}/kg)
+                                  {preserveEnglishItemName(p.category)} (₹{p.ratePerKg}/kg)
                                 </option>
                               ))}
+                              <option value="CUSTOM">
+                                ➕ {t('otherCustomProduct', 'Other / Custom Product (Type name)')}
+                              </option>
                             </select>
                           </div>
 
                           <div className="sm:col-span-3">
                             <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">
-                              Weight (kg)
+                              {t('weightKg', 'Weight (kg)')}
                             </label>
                             <div className="flex items-center gap-1">
                               <button
@@ -1260,10 +1338,44 @@ export const KabadiwalaDashboard: React.FC = () => {
                               className="w-full py-2.5 px-3 btn-primary-m3 text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition-transform active:scale-95"
                             >
                               <Plus className="w-4 h-4" />
-                              <span>Add Item</span>
+                              <span>{t('addItemToLot', 'Add Item')}</span>
                             </button>
                           </div>
                         </div>
+
+                        {/* Custom Item Controls for Mixed Lot */}
+                        {isCustomMixedItem && (
+                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-3 bg-white dark:bg-slate-900 rounded-xl border border-emerald-500/60 animate-fade-in">
+                            <div className="sm:col-span-8">
+                              <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                                {t('enterProductName', 'Type Product Name (e.g. Old Microwave, Inverter)')}
+                              </label>
+                              <input
+                                type="text"
+                                value={customMixedItemName}
+                                placeholder={t('productNamePlaceholder', 'e.g. Inverter, Microwave, Stabilizer, TV...')}
+                                onChange={e => setCustomMixedItemName(e.target.value)}
+                                className="w-full px-3 py-1.5 text-xs font-mono bg-paper-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none"
+                              />
+                            </div>
+                            <div className="sm:col-span-4">
+                              <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">
+                                {t('customRatePerKg', 'Expected Rate (₹/kg)')}
+                              </label>
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs font-bold text-slate-500">₹</span>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={customMixedItemRate}
+                                  onChange={e => setCustomMixedItemRate(parseFloat(e.target.value) || 1)}
+                                  className="w-full px-2 py-1.5 text-xs font-mono bg-paper-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-right focus:outline-none"
+                                />
+                                <span className="text-[10px] text-slate-500 font-mono">/kg</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* List of Added Custom Materials */}
                         <div className="space-y-2 pt-2">
@@ -1967,12 +2079,12 @@ export const KabadiwalaDashboard: React.FC = () => {
                 {t('mandiPriceBoardTitle', 'Live Material Benchmark Price Board')}
               </h2>
               <p className="text-xs text-steel-600 font-medium">
-                Official CPCB market benchmark rates. Tap the speaker icon beside any item to hear the price aloud.
+                {t('liveBenchmarkSub', 'Official CPCB market benchmark rates. Tap the speaker icon beside any item to hear the price aloud.')}
               </p>
             </div>
 
             <span className="text-xs font-mono text-steel-600 bg-paper-200 px-3 py-1.5 rounded border border-steel-300 self-start sm:self-auto">
-              {language === 'hi' ? 'अंतिम अपडेट: आज सुबह 09:00 AM' : language === 'mr' ? 'शेवटचे अपडेट: आज सकाळी 09:00' : 'Last updated: Today 09:00 AM'}
+              {t('lastUpdatedToday', 'Last updated: Today 09:00 AM')}
             </span>
           </div>
 
@@ -1988,18 +2100,18 @@ export const KabadiwalaDashboard: React.FC = () => {
                       ITEM #{idx + 1}
                     </span>
                     <VoiceAssistButton
-                      text={`${item.category}. Current rate is rupees ${item.ratePerKg} per kilogram. ${item.trend === 'UP' ? 'Price increased by rupees ' + item.delta : 'Price stable'}`}
-                      hindiText={`${item.category}। आज का ताजा मंडी भाव ${item.ratePerKg} रुपये प्रति किलो है। ${item.delta > 0 ? 'दाम ' + item.delta + ' रुपये बढ़ा है।' : ''}`}
-                      marathiText={`${item.category}. आजचा थेट बाजार भाव ${item.ratePerKg} रुपये प्रति किलो आहे. ${item.delta > 0 ? 'भाव ' + item.delta + ' रुपये वाढला आहे.' : ''}`}
+                      text={`${preserveEnglishItemName(item.category)}. Current rate is rupees ${item.ratePerKg} per kilogram. ${item.trend === 'UP' ? 'Price increased by rupees ' + item.delta : 'Price stable'}`}
+                      hindiText={`${preserveEnglishItemName(item.category)}। आज का ताजा मंडी भाव ${item.ratePerKg} रुपये प्रति किलो है। ${item.delta > 0 ? 'दाम ' + item.delta + ' रुपये बढ़ा है।' : 'दाम स्थिर हैं।'}`}
+                      marathiText={`${preserveEnglishItemName(item.category)}. आजचा थेट बाजार भाव ${item.ratePerKg} रुपये प्रति किलो आहे. ${item.delta > 0 ? 'भाव ' + item.delta + ' रुपये वाढला आहे.' : 'भाव स्थिर आहे.'}`}
                       size="sm"
                     />
                   </div>
 
                   <h3 className="font-display font-black text-steel-900 text-sm mt-1 leading-snug">
-                    {item.category}
+                    {preserveEnglishItemName(item.category)}
                   </h3>
                   <p className="text-[11px] text-steel-500 mt-1">
-                    {item.desc}
+                    {language === 'hi' ? item.categoryHi : language === 'mr' ? item.categoryMr : item.desc}
                   </p>
                 </div>
 

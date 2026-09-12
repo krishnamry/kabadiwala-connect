@@ -11,77 +11,386 @@ interface LanguageContextType {
   isSpeaking: boolean;
   formatCurrency: (amount: number) => string;
   preserveEnglishItemName: (name: string) => string;
+  getLocalizedItemName: (name: string) => string;
   translateStatus: (status: string) => string;
 }
 
-// Known scrap item names being sold — MUST ONLY EVER BE SHOWN IN ENGLISH as per requirement
-const KNOWN_ENGLISH_SCRAP_ITEMS: Record<string, string> = {
-  'Printed Circuit Boards (PCBs)': 'Printed Circuit Boards (PCBs)',
-  'High-Grade Server PCBs': 'High-Grade Server PCBs',
-  'High-grade PCB (Motherboards/Servers)': 'High-grade PCB (Motherboards/Servers)',
-  'High-grade PCB (Motherboard/RAM)': 'High-grade PCB (Motherboard/RAM)',
-  'High-grade Printed Circuit Boards (PCBs)': 'High-grade Printed Circuit Boards (PCBs)',
-  'Low-grade PCB (Consumer Electronics)': 'Low-grade PCB (Consumer Electronics)',
-  'Low-grade PCB (Power Supplies/TV)': 'Low-grade PCB (Power Supplies/TV)',
-  'Copper Cables & Insulated Wires': 'Copper Cables & Insulated Wires',
-  'Clean Peeled Copper Wire': 'Clean Peeled Copper Wire',
-  'Clean Copper Wire (Bright Strip)': 'Clean Copper Wire (Bright Strip)',
-  'Copper Wiring (Clean Bright)': 'Copper Wiring (Clean Bright)',
-  'Copper Cables & Winding': 'Copper Cables & Winding',
-  'Copper Wire': 'Copper Wire',
-  'Lithium-ion Batteries': 'Lithium-ion Batteries',
-  'Lithium-ion Battery Packs': 'Lithium-ion Battery Packs',
-  'Lithium-ion Batteries (Laptop/EV)': 'Lithium-ion Batteries (Laptop/EV)',
-  'Li-ion Batteries (Laptops/EV)': 'Li-ion Batteries (Laptops/EV)',
-  'Li-ion Batteries': 'Lithium-ion Batteries',
-  'Lead Acid Batteries': 'Lead Acid Batteries',
-  'Batteries': 'Lithium-ion Batteries',
-  'Electric Motors & Magnets': 'Electric Motors & Magnets',
-  'Electric Motors & Transformer Coils': 'Electric Motors & Transformer Coils',
-  'CRT Monitor Glass Unit': 'CRT Monitor Glass Unit',
-  'CRT Monitor Glass (Treated)': 'CRT Monitor Glass (Treated)',
-  'CRT Glass (Funnel Treated)': 'CRT Glass (Funnel Treated)',
-  'CRT Monitor Glass': 'CRT Monitor Glass Unit',
-  'CRT Screens': 'CRT Monitor Glass Unit',
-  'LCD/LED Display Panels': 'LCD/LED Display Panels',
-  'LCD & LED Display Panels': 'LCD & LED Display Panels',
-  'Engineering E-Plastics (ABS/HIPS)': 'Engineering E-Plastics (ABS/HIPS)',
-  'Engineering Plastics (ABS/HIPS)': 'Engineering Plastics (ABS/HIPS)',
-  'Engineering E-Plastics': 'Engineering E-Plastics (ABS/HIPS)',
-  'Smartphones & Tablets': 'Smartphones & Tablets',
-  'Server Grade Motherboards': 'Server Grade Motherboards',
-  'Telecom Relay Units': 'Telecom Relay Units',
-  'Aluminium Heat Sinks': 'Aluminium Heat Sinks',
-  'Brass Transformers': 'Brass Transformers',
-  'Power Supply Units (SMPS)': 'Power Supply Units (SMPS)',
-  'PCBs': 'Printed Circuit Boards (PCBs)',
-  'PCBs & Logic Boards': 'Printed Circuit Boards & Logic Boards',
-  'Cables': 'Copper Cables & Insulated Wires',
+export interface ScrapItemLocalization {
+  en: string;
+  hi: string;
+  mr: string;
+}
 
-  // Reverse mapping for Hindi & Marathi names to guarantee strict English display
-  'हाई-ग्रेड सर्किट बोर्ड (मदरबोर्ड/रैम)': 'High-grade PCB (Motherboard/RAM)',
-  'हाय-ग्रेड सर्किट बोर्ड (मदरबोर्ड/रॅम)': 'High-grade PCB (Motherboard/RAM)',
-  'साफ तांबा तार (ब्राइट छिला हुआ)': 'Clean Copper Wire (Bright Strip)',
-  'स्वच्छ तांब्याची तार (सोलेली)': 'Clean Copper Wire (Bright Strip)',
-  'लो-ग्रेड सर्किट बोर्ड (पावर सप्लाई/टीवी)': 'Low-grade PCB (Power Supplies/TV)',
-  'लो-ग्रेड सर्किट बोर्ड (टीव्ही/पॉवर सप्लाय)': 'Low-grade PCB (Power Supplies/TV)',
-  'लिथियम-आयन बैटरियां (लैपटॉप/ईवी)': 'Lithium-ion Batteries (Laptop/EV)',
-  'लिथियम-आयन बॅटऱ्या (लॅपटॉप/ईव्ही)': 'Lithium-ion Batteries (Laptop/EV)',
-  'लिथियम-आयन बॅटरी': 'Lithium-ion Batteries',
-  'इलेक्ट्रिक मोटर और चुंबक': 'Electric Motors & Magnets',
-  'इलेक्ट्रिक मोटर आणि चुंबक': 'Electric Motors & Magnets',
-  'इलेक्ट्रिक मोटर्स आणि कॉम्प्रेसर': 'Electric Motors & Magnets',
-  'एलसीडी और एलईडी डिस्प्ले पैनल': 'LCD/LED Display Panels',
-  'एलसीडी आणि एलईडी डिस्प्ले पॅनेल्स': 'LCD/LED Display Panels',
-  'एलसीडी / एलईडी डिस्प्ले स्क्रीन': 'LCD/LED Display Panels',
-  'मिश्रित ई-प्लास्टिक (ABS/HIPS)': 'Engineering E-Plastics (ABS/HIPS)',
-  'प्लॅस्टिक कॅबिनेट आणि कव्हर्स': 'Engineering E-Plastics (ABS/HIPS)',
-  'सीआरटी कांच (लीड उपचारित)': 'CRT Monitor Glass Unit',
-  'सीआरटी काच (लेड प्रक्रिया)': 'CRT Monitor Glass Unit',
-  'सीआरटी मॉनिटर काच': 'CRT Monitor Glass Unit',
-  'सर्किट बोर्ड (मदरबोर्ड)': 'High-grade PCB (Motherboards/Servers)',
-  'तांब्याची वायर आणि केबल्स': 'Copper Cables & Insulated Wires',
-  'साधारण पीसीबी': 'Low-grade PCB (Consumer Electronics)'
+// Authentic Vernacular Scrap Material Dictionaries
+export const SCRAP_ITEM_TRANSLATIONS: Record<string, ScrapItemLocalization> = {
+  // PCBs
+  'printed circuit boards (pcbs)': {
+    en: 'Printed Circuit Boards (PCBs)',
+    hi: 'प्रिंटेड सर्किट बोर्ड (PCBs)',
+    mr: 'प्रिंटेड सर्किट बोर्ड (PCBs)'
+  },
+  'high-grade server pcbs': {
+    en: 'High-Grade Server PCBs',
+    hi: 'उच्च-श्रेणी सर्वर पीसीबी (मदरबोर्ड)',
+    mr: 'उच्च दर्जाचे सर्व्हर पीसीबी (मदरबोर्ड)'
+  },
+  'high-grade printed circuit boards (pcbs)': {
+    en: 'High-grade Printed Circuit Boards (PCBs)',
+    hi: 'उच्च-श्रेणी सर्वर पीसीबी (मदरबोर्ड/रैम)',
+    mr: 'उच्च दर्जाचे सर्व्हर पीसीबी (मदरबोर्ड/रॅम)'
+  },
+  'high-grade pcb (motherboard/ram)': {
+    en: 'High-grade PCB (Motherboard/RAM)',
+    hi: 'उच्च-श्रेणी पीसीबी (मदरबोर्ड/रैम)',
+    mr: 'उच्च दर्जाचे पीसीबी (मदरबोर्ड/रॅम)'
+  },
+  'high-grade pcb (motherboards/servers)': {
+    en: 'High-grade PCB (Motherboards/Servers)',
+    hi: 'सर्वर पीसीबी (मदरबोर्ड/सर्वर)',
+    mr: 'सर्व्हर पीसीबी (मदरबोर्ड/सर्व्हर)'
+  },
+  'low-grade printed circuit boards (pcbs)': {
+    en: 'Low-grade Printed Circuit Boards (PCBs)',
+    hi: 'घरेलू इलेक्ट्रॉनिक्स पीसीबी',
+    mr: 'घरगुती इलेक्ट्रॉनिक्स पीसीबी'
+  },
+  'low-grade pcb (consumer electronics)': {
+    en: 'Low-grade PCB (Consumer Electronics)',
+    hi: 'घरेलू इलेक्ट्रॉनिक्स पीसीबी (टीवी/ऑडियो)',
+    mr: 'घरगुती इलेक्ट्रॉनिक्स पीसीबी (टीव्ही/ऑडिओ)'
+  },
+  'low-grade pcb (power supplies/tv)': {
+    en: 'Low-grade PCB (Power Supplies/TV)',
+    hi: 'साधारण पीसीबी (पावर सप्लाई/टीवी)',
+    mr: 'साधारण पीसीबी (पॉवर सप्लाय/टीव्ही)'
+  },
+  'pcbs': {
+    en: 'Printed Circuit Boards (PCBs)',
+    hi: 'प्रिंटेड सर्किट बोर्ड (PCBs)',
+    mr: 'प्रिंटेड सर्किट बोर्ड (PCBs)'
+  },
+  'pcbs & logic boards': {
+    en: 'Printed Circuit Boards & Logic Boards',
+    hi: 'सर्किट बोर्ड एवं लॉजिक बोर्ड',
+    mr: 'सर्किट बोर्ड व लॉजिक बोर्ड'
+  },
+  // Copper
+  'copper cables & insulated wires': {
+    en: 'Copper Cables & Insulated Wires',
+    hi: 'तांबे के तार एवं इंसुलेटेड केबल',
+    mr: 'तांब्याची वायर व इन्सुलेटेड केबल्स'
+  },
+  'clean peeled copper wire': {
+    en: 'Clean Peeled Copper Wire',
+    hi: 'छिला हुआ शुद्ध तांबा तार (ब्राइट)',
+    mr: 'सोललेली शुद्ध तांब्याची वायर'
+  },
+  'clean copper wire (bright strip)': {
+    en: 'Clean Copper Wire (Bright Strip)',
+    hi: 'साफ तांबा तार (ब्राइट स्ट्रिप)',
+    mr: 'स्वच्छ तांब्याची तार (सोलेली)'
+  },
+  'copper wiring (clean bright)': {
+    en: 'Copper Wiring (Clean Bright)',
+    hi: 'शुद्ध तांबा वायरिंग (ब्राइट)',
+    mr: 'शुद्ध तांब्याची वायरिंग (चमकदार)'
+  },
+  'copper cables & winding': {
+    en: 'Copper Cables & Winding',
+    hi: 'तांबे के केबल एवं वाइंडिंग तार',
+    mr: 'तांब्याचे केबल्स व वाइंडिंग वायर'
+  },
+  'copper wire': {
+    en: 'Copper Wire',
+    hi: 'तांबे का तार',
+    mr: 'तांब्याची वायर'
+  },
+  'cables': {
+    en: 'Copper Cables & Wires',
+    hi: 'तांबे के केबल एवं तार',
+    mr: 'तांब्याचे केबल्स व वायर'
+  },
+  // Batteries
+  'lithium-ion batteries': {
+    en: 'Lithium-ion Batteries',
+    hi: 'लिथियम-आयन बैटरी (लैपटॉप/मोबाइल)',
+    mr: 'लिथियम-आयन बॅटरी (लॅपटॉप/मोबाईल)'
+  },
+  'lithium-ion battery packs': {
+    en: 'Lithium-ion Battery Packs',
+    hi: 'लिथियम-आयन बैटरी पैक',
+    mr: 'लिथियम-आयन बॅटरी पॅक्स'
+  },
+  'lithium-ion batteries (laptop/ev)': {
+    en: 'Lithium-ion Batteries (Laptop/EV)',
+    hi: 'लिथियम-आयन बैटरी (लैपटॉप/ईवी)',
+    mr: 'लिथियम-आयन बॅटऱ्या (लॅपटॉप/ईव्ही)'
+  },
+  'li-ion batteries (laptops/ev)': {
+    en: 'Li-ion Batteries (Laptops/EV)',
+    hi: 'लिथियम-आयन बैटरी (लैपटॉप/ईवी)',
+    mr: 'लिथियम-आयन बॅटरी (लॅपटॉप/ईव्ही)'
+  },
+  'li-ion batteries': {
+    en: 'Lithium-ion Batteries',
+    hi: 'लिथियम-आयन बैटरी',
+    mr: 'लिथियम-आयन बॅटरी'
+  },
+  'batteries': {
+    en: 'Lithium-ion Batteries',
+    hi: 'लिथियम-आयन बैटरी',
+    mr: 'लिथियम-आयन बॅटरी'
+  },
+  'lead acid batteries': {
+    en: 'Lead Acid Batteries',
+    hi: 'लेड एसिड इन्वर्टर बैटरी',
+    mr: 'लेड अ‍ॅसिड इन्व्हर्टर बॅटरी'
+  },
+  // Motors & Compressors
+  'electric motors & compressors': {
+    en: 'Electric Motors & Compressors',
+    hi: 'इलेक्ट्रिक मोटर एवं कंप्रेसर',
+    mr: 'इलेक्ट्रिक मोटर्स व कॉम्प्रेसर'
+  },
+  'electric motors & magnets': {
+    en: 'Electric Motors & Magnets',
+    hi: 'इलेक्ट्रिक मोटर एवं चुंबक',
+    mr: 'इलेक्ट्रिक मोटर्स आणि चुंबक'
+  },
+  'electric motors & transformer coils': {
+    en: 'Electric Motors & Transformer Coils',
+    hi: 'इलेक्ट्रिक मोटर एवं ट्रांसफॉर्मर कॉइल',
+    mr: 'इलेक्ट्रिक मोटर्स व ट्रान्सफॉर्मर कॉइल'
+  },
+  // Displays & Glass
+  'lcd/led display panels': {
+    en: 'LCD/LED Display Panels',
+    hi: 'एलसीडी/एलईडी डिस्प्ले स्क्रीन',
+    mr: 'एलसीडी/एलईडी डिस्प्ले स्क्रीन'
+  },
+  'lcd & led display panels': {
+    en: 'LCD & LED Display Panels',
+    hi: 'एलसीडी और एलईडी डिस्प्ले पैनल',
+    mr: 'एलसीडी आणि एलईडी डिस्प्ले पॅनेल्स'
+  },
+  'crt monitor glass unit': {
+    en: 'CRT Monitor Glass Unit',
+    hi: 'सीआरटी मॉनिटर ग्लास (शीशा)',
+    mr: 'सीआरटी मॉनिटर काच युनिट'
+  },
+  'crt monitor glass (treated)': {
+    en: 'CRT Monitor Glass (Treated)',
+    hi: 'सीआरटी कांच (उपचारित शीशा)',
+    mr: 'सीआरटी काच (प्रक्रिया केलेले)'
+  },
+  'crt glass (funnel treated)': {
+    en: 'CRT Glass (Funnel Treated)',
+    hi: 'सीआरटी कांच (फनल शीशा)',
+    mr: 'सीआरटी काच (फनेल प्रक्रिया)'
+  },
+  'crt monitor glass': {
+    en: 'CRT Monitor Glass Unit',
+    hi: 'सीआरटी मॉनिटर ग्लास',
+    mr: 'सीआरटी मॉनिटर काच'
+  },
+  'crt screens': {
+    en: 'CRT Monitor Screens',
+    hi: 'सीआरटी मॉनिटर स्क्रीन',
+    mr: 'सीआरटी मॉनिटर स्क्रीन'
+  },
+  // Plastics
+  'engineering e-plastics (abs/hips)': {
+    en: 'Engineering E-Plastics (ABS/HIPS)',
+    hi: 'इंजीनियरिंग ई-प्लास्टिक (ABS/HIPS कैबिनेट)',
+    mr: 'अभियांत्रिकी ई-प्लास्टिक (ABS/HIPS कव्हर्स)'
+  },
+  'engineering plastics (abs/hips)': {
+    en: 'Engineering Plastics (ABS/HIPS)',
+    hi: 'इंजीनियरिंग प्लास्टिक (ABS/HIPS)',
+    mr: 'अभियांत्रिकी प्लास्टिक (ABS/HIPS)'
+  },
+  'engineering e-plastics': {
+    en: 'Engineering E-Plastics (ABS/HIPS)',
+    hi: 'इंजीनियरिंग ई-प्लास्टिक',
+    mr: 'अभियांत्रिकी ई-प्लास्टिक'
+  },
+  // Devices & Sub-assemblies
+  'smartphones & tablets': {
+    en: 'Smartphones & Tablets',
+    hi: 'स्मार्टफोन एवं टैबलेट',
+    mr: 'स्मार्टफोन व टॅबलेट'
+  },
+  'server grade motherboards': {
+    en: 'Server Grade Motherboards',
+    hi: 'सर्वर ग्रेड मदरबोर्ड',
+    mr: 'सर्व्हर ग्रेड मदरबोर्ड'
+  },
+  'telecom relay units': {
+    en: 'Telecom Relay Units',
+    hi: 'टेलीकॉम रिले यूनिट्स',
+    mr: 'टेलिकॉम रिले युनिट्स'
+  },
+  'aluminium heat sinks': {
+    en: 'Aluminium Heat Sinks',
+    hi: 'एल्यूमीनियम हीट सिंक',
+    mr: 'अ‍ॅल्युमिनियम हीट सिंक'
+  },
+  'brass transformers': {
+    en: 'Brass Transformers',
+    hi: 'पीतल/तांबा ट्रांसफॉर्मर',
+    mr: 'पितळ/तांबे ट्रान्सफॉर्मर'
+  },
+  'power supply units (smps)': {
+    en: 'Power Supply Units (SMPS)',
+    hi: 'पावर सप्लाई यूनिट (SMPS)',
+    mr: 'पॉवर सप्लाय युनिट (SMPS)'
+  },
+  'smps': {
+    en: 'Power Supply Units (SMPS)',
+    hi: 'पावर सप्लाई यूनिट (SMPS)',
+    mr: 'पॉवर सप्लाय युनिट (SMPS)'
+  },
+  'custom mixed lot': {
+    en: 'Custom Mixed Lot',
+    hi: 'मिश्रित ई-कचरा लॉट',
+    mr: 'मिश्र ई-कचरा लॉट'
+  },
+  // Inverters, UPS, Appliances & Consumer Electronics
+  'inverters & ups': {
+    en: 'Inverters & UPS Units',
+    hi: 'इनवर्टर एवं यूपीएस यूनिट',
+    mr: 'इन्व्हर्टर आणि यूपीएस युनिट्स'
+  },
+  'inverter': {
+    en: 'Inverters & UPS',
+    hi: 'इनवर्टर एवं यूपीएस',
+    mr: 'इन्व्हर्टर व यूपीएस'
+  },
+  'ups': {
+    en: 'UPS Units',
+    hi: 'यूपीएस यूनिट',
+    mr: 'यूपीएस युनिट'
+  },
+  'voltage stabilizers': {
+    en: 'Voltage Stabilizers',
+    hi: 'वोल्टेज स्टेबलाइज़र',
+    mr: 'व्होल्टेज स्टॅबिलायझर'
+  },
+  'stabilizers': {
+    en: 'Voltage Stabilizers',
+    hi: 'वोल्टेज स्टेबलाइज़र',
+    mr: 'व्होल्टेज स्टॅबिलायझर'
+  },
+  'microwaves & ovens': {
+    en: 'Microwaves & Ovens',
+    hi: 'माइक्रोवेव एवं ओवन',
+    mr: 'मायक्रोवेव्ह आणि ओव्हन'
+  },
+  'old microwave': {
+    en: 'Old Microwave Oven',
+    hi: 'पुराना माइक्रोवेव ओवन',
+    mr: 'जुना मायक्रोवेव्ह ओव्हन'
+  },
+  'microwave': {
+    en: 'Microwave Oven',
+    hi: 'माइक्रोवेव ओवन',
+    mr: 'मायक्रोवेव्ह ओव्हन'
+  },
+  'crt televisions': {
+    en: 'CRT Televisions',
+    hi: 'सीआरटी टेलीविजन (पुराना टीवी)',
+    mr: 'सीआरटी टेलिव्हिजन (जुना टीव्ही)'
+  },
+  'crt tv': {
+    en: 'CRT Television',
+    hi: 'सीआरटी टीवी',
+    mr: 'सीआरटी टीव्ही'
+  },
+  'washing machines & fridges': {
+    en: 'Washing Machines & Fridges',
+    hi: 'वाशिंग मशीन एवं फ्रिज',
+    mr: 'वॉशिंग मशीन आणि फ्रीज'
+  },
+  'washing machine': {
+    en: 'Washing Machine Scrap',
+    hi: 'वाशिंग मशीन स्क्रैप',
+    mr: 'वॉशिंग मशीन स्क्रॅप'
+  },
+  'refrigerator': {
+    en: 'Refrigerator Compressor & Scrap',
+    hi: 'फ्रिज कंप्रेसर एवं स्क्रैप',
+    mr: 'फ्रीज कॉम्प्रेसर आणि स्क्रॅप'
+  },
+  'air conditioners & ac units': {
+    en: 'Air Conditioners & AC Units',
+    hi: 'एयर कंडीशनर (AC) एवं तांबा कॉइल',
+    mr: 'एअर कंडिशनर (AC) व तांबे कॉइल'
+  },
+  'air conditioner': {
+    en: 'Air Conditioner Unit',
+    hi: 'एयर कंडीशनर यूनिट',
+    mr: 'एअर कंडिशनर युनिट'
+  },
+  'printers & scanners': {
+    en: 'Printers & Scanners',
+    hi: 'प्रिंटर एवं स्कैनर',
+    mr: 'प्रिंटर आणि स्कॅनर'
+  },
+  'printer': {
+    en: 'Printers & Cartridges',
+    hi: 'प्रिंटर एवं कार्ट्रिज',
+    mr: 'प्रिंटर आणि कार्ट्रिज'
+  },
+  'desktop cpu towers': {
+    en: 'Desktop CPU Towers',
+    hi: 'कंप्यूटर सीपीयू कैबिनेट (डेस्कटॉप)',
+    mr: 'संगणक सीपीयू कॅबिनेट (डेस्कटॉप)'
+  },
+  'cpu': {
+    en: 'Desktop CPU Towers',
+    hi: 'कंप्यूटर सीपीयू',
+    mr: 'संगणक सीपीयू'
+  },
+  'laptops & notebooks': {
+    en: 'Laptops & Notebooks',
+    hi: 'लैपटॉप एवं नोटबुक',
+    mr: 'लॅपटॉप आणि नोटबुक'
+  },
+  'laptop': {
+    en: 'Laptop Scrap',
+    hi: 'पुराना लैपटॉप',
+    mr: 'जुना लॅपटॉप'
+  },
+  'mobile phones': {
+    en: 'Mobile Phones & Smartphones',
+    hi: 'मोबाइल फोन एवं स्मार्टफोन',
+    mr: 'मोबाईल फोन आणि स्मार्टफोन'
+  },
+  'medical equipment & pcbs': {
+    en: 'Medical Equipment & PCBs',
+    hi: 'चिकित्सा उपकरण एवं पीसीबी',
+    mr: 'वैद्यकीय उपकरणे व पीसीबी'
+  },
+  'sound systems & speakers': {
+    en: 'Sound Systems & Speakers',
+    hi: 'साउंड सिस्टम एवं स्पीकर',
+    mr: 'साउंड सिस्टम आणि स्पीकर्स'
+  },
+  'mixed electrical wires': {
+    en: 'Mixed Electrical Wires',
+    hi: 'मिश्रित बिजली के तार',
+    mr: 'मिश्र विजेच्या तारा'
+  },
+  'other / custom product': {
+    en: 'Other / Custom Product',
+    hi: 'अन्य / कस्टम उत्पाद',
+    mr: 'इतर / सानुकूल उत्पादन'
+  },
+  'custom e-waste': {
+    en: 'Custom E-Waste Item',
+    hi: 'कस्टम ई-कचरा उत्पाद',
+    mr: 'सानुकूल ई-कचरा वस्तू'
+  }
 };
 
 // Comprehensive, authentic multi-language dictionaries
@@ -433,12 +742,183 @@ const translations: Record<Language, Record<string, string>> = {
     verifiedRecycler: 'AUTHORIZED RECYCLER',
     verifiedAdmin: 'REGULATORY AUTHORITY',
 
+    // Custom Product & Multi-item Keys
+    otherCustomProduct: 'Other / Custom Product (Type name)',
+    enterProductName: 'Type Product Name (e.g. Old Microwave, Inverter)',
+    productNamePlaceholder: 'e.g. Inverter, Microwave, Stabilizer, TV...',
+    customRatePerKg: 'Expected Rate (₹/kg)',
+    addCustomItem: 'Add Custom Item',
+    pickupAddressPlaceholder: 'House/flat no., street name, locality, landmark, pincode...',
+    fetchingLocation: 'Fetching...',
+    fetchLocation: 'Fetch Location',
+    locatingGps: 'Locating...',
+    gpsBtn: 'GPS',
+    locateBtn: 'Locate',
+    pinConfirmsDoorstep: '✓ Pin confirms pickup doorstep. Tap anywhere or drag pin to fine-tune.',
+    doorstepMapConfirm: 'Doorstep Location Map Confirmation',
+    schedulePickupSlot: 'Schedule Pickup Slot',
+    slotToday: 'Today',
+    slotWithin2Hrs: 'Within 2 hrs',
+    slotTomorrow: 'Tomorrow',
+    slotWeekend: 'Weekend',
+    slotSat11AM: 'Saturday 11 AM',
+    addMaterialLineItems: 'Add Material Line Items',
+    materialsInLot: 'Materials in Lot',
+    materialType: 'Material Type',
+    weightKg: 'Weight (kg)',
+    customLotName: 'Custom Lot / Item Name',
+    liveBenchmarkSub: 'Official CPCB market benchmark rates. Tap the speaker icon beside any item to hear the price aloud.',
+    lastUpdatedToday: 'Last updated: Today 09:00 AM',
+    currentPriceNotice: 'Live rates pulled from CPCB registered aggregators across India',
+    treeDonationNotice: 'Funds 5 native tree saplings in national reforestation green corridors.',
+    aiDetected: 'AI Detected:',
+    confidenceMatch: 'confidence',
+    priceStable: 'Price stable',
+    priceIncreasedBy: 'Price increased by',
+    rupeesPerKg: 'Rupees per kg',
+    expectedRateNote: 'Expected or benchmark rate per kilogram',
+    addItemToLot: 'Add Item to Lot',
+
     // Feedback & System Messages
     pleaseAddOneItem: 'Please add at least one e-waste item.',
     failedToCancelPickup: 'Failed to cancel pickup:',
     receiptPdfDownloaded: 'Receipt PDF downloaded! (CPCB EPR Compliant)',
     pleaseAddOneMaterial: 'Please add at least one material to the custom lot.',
-    speechNotSupported: 'Speech synthesis is not supported in this browser.'
+    speechNotSupported: 'Speech synthesis is not supported in this browser.',
+
+    // Additional Navigation & Settings
+    settingsBtn: 'Settings (Themes, Display, Voice, Data)',
+    settingsTitle: 'App Settings',
+    settingsSubtitle: 'Personalize themes, display modes, voice & regional preferences',
+    myProfile: 'My Profile & Security',
+    mNavEpr: 'EPR',
+    welcomeApp: 'Kabadiwala Connect',
+    loginSubtitleApp: 'Smart Informal Waste & EPR Traceability Platform. Select your portal to continue.',
+    portalCapabilities: 'Portal Features & Information',
+
+    // Citizen Dashboard Pickups & Doorstep
+    tabRequestPickup: 'Request Doorstep Pickup',
+    tabGreenImpact: 'Green Impact & Carbon',
+    'indicative payout:': 'Indicative Payout:',
+    'HANDOVER COMPLETED': 'HANDOVER COMPLETED',
+    'COLLECTOR DISPATCHED': 'COLLECTOR DISPATCHED',
+    'LIVE ETA ESTIMATE': 'LIVE ETA ESTIMATE',
+    'layer 1 verification: citizen handover otp': 'LAYER 1 VERIFICATION • DOORSTEP SCRAP HANDOVER',
+    'SECURE OTP': 'SECURE OTP',
+    'layer 1 verified: physical doorstep handover confirmed': 'Layer 1 Verified: Physical Doorstep Handover Confirmed',
+    manualOrGps: 'Type address, paste link, or use map',
+    gmapsLinkOpt: 'Google Maps Link',
+    optional: 'optional',
+    pasteLinkOrCoords: 'paste maps.app.goo.gl or coordinates',
+
+    // Kabadiwala & Bidding
+    bidsReceived: 'Bids',
+    minAskRule: 'Min 50% of Ask Value',
+    BIDDING: 'BIDDING OPEN',
+    'layer 2: ai verified': 'Layer 2: AI Verified',
+    items: 'types',
+    blendedRate: 'Blended',
+    askingPrice: 'Asking Price',
+    'highestOffer:': 'Highest Offer:',
+    acceptBid: 'Accept Bid',
+    awaitingBids: 'Awaiting bids from nearby authorized aggregators.',
+
+    // Profile & Security
+    profileSaved: 'Personal details successfully updated!',
+    pinLengthError: 'New PIN must be exactly 4 numeric digits.',
+    pinMismatchError: 'New PIN and confirm PIN do not match.',
+    pinSuccess: '4-digit security PIN updated successfully!',
+    otherSessionsLoggedOut: 'All other active sessions on Web and Android have been invalidated.',
+    eprTraceabilityTitle: 'EPR Traceability & Environmental Impact',
+    eprTraceabilityDesc: 'Cryptographic SHA-256 material audit records and CPCB disposal certificate.',
+    wasteDiverted: 'Waste Diverted',
+    safeProcessing: 'Safe formal channel processing',
+    co2ePrevented: 'CO2e Prevented',
+    zeroBurning: 'Zero open burning emissions',
+    csrEquivalent: 'CSR Equivalent',
+    carbonOffset: 'Lifetime carbon offset matched',
+    downloadJsonCert: 'Download JSON Certificate',
+    tollFreeHelpline: 'TOLL-FREE HELPLINE (24/7)',
+    tollFreeDesc: 'Free call from any Indian mobile/landline',
+    emailAssistance: 'DIRECT EMAIL ASSISTANCE',
+    emailDesc: 'Response SLA: < 2 business hours',
+    whatsappSupport: 'WHATSAPP BOT & CHAT',
+    whatsappDesc: 'Instant ticket raise & photo upload',
+    nodalOfficer: 'NODAL ESCALATION OFFICER',
+    nodalOfficerDesc: 'Ministry of Mines / CPCB Grievances',
+    faqsTitle: 'FREQUENTLY ASKED QUESTIONS',
+    personalInfoTitle: 'Personal Information & Location',
+    personalInfoDesc: 'Verified mobile, official name, email, and confirmed pickup doorstep address.',
+    fullName: 'Full Legal Name',
+    registeredMobile: 'Registered Mobile',
+    otpVerified: 'OTP Verified',
+    emailAddress: 'Email Address',
+    pickupWorkshopAddress: 'Pickup / Workshop Street Address',
+    typeAddressHint: 'Type address, add link, or tap map',
+    addressPlaceholder: 'House/unit no., street, locality, landmark, pincode...',
+    locating: 'Locating...',
+    savePersonalDetails: 'Save Personal Details',
+    accountSecurity: 'Account Security & Credentials',
+    accountSecurityDesc: 'Change your 4-digit rapid security PIN and manage biometric credentials.',
+    currentPin: 'Current PIN',
+    newPin: 'New 4-Digit PIN',
+    confirmPin: 'Confirm New PIN',
+    updatePinBtn: 'Update Security PIN',
+    biometricUnlock: 'Biometric Unlock',
+    biometricDesc: 'Use device fingerprint or face recognition for fast terminal access',
+    twoFactorAuth: 'Two-Factor Authentication (2FA)',
+    twoFactorDesc: 'Require SMS OTP verification for sensitive batch transfers and rate edits',
+    logoutOtherDevices: 'Log Out All Other Devices',
+    signOutActiveTerminal: 'Sign Out from Active Terminal',
+    regulatoryStandards: 'Regulatory Standards:',
+
+    // Recycler Dashboard
+    totalProcessed: 'Total Processed',
+    'q2-2026 batch': 'Q2-2026 Batch',
+    pendingLots: 'Pending Lots',
+    'from active collectors': 'Active Collectors',
+    anomalies: 'Anomalies',
+    'review required': 'Review Required',
+    'no digital lots found matching this filter.': 'No digital lots found matching this filter.',
+    'show all lots': 'Show All Lots',
+    'BIDDING OPEN': 'BIDDING OPEN',
+    'OPEN FOR BIDS': 'OPEN FOR BIDS',
+    'COLLECTOR TENDER': 'COLLECTOR TENDER',
+    minBid: 'MIN BID (50%)',
+    'current top bid': 'CURRENT TOP BID',
+    'No bids yet': 'No bids yet',
+    'bids received': 'BIDS RECEIVED',
+    'your bid:': 'Your Bid:',
+    'Update Bid': 'Update Bid',
+    Current: 'Current',
+    'Place Bid': 'Place Bid',
+    'Go to QR Handover Verification →': 'Go to QR Handover Verification →',
+
+    // Settings
+    cacheCleared: 'Local cache refreshed and datasets reset successfully.',
+    displayAndThemes: 'Display Mode & Themes',
+    displayThemesDesc: 'Choose light, dark, or automatic device theme, and select your Material 3 color palette.',
+    chooseAppearance: '1. Choose Appearance Mode',
+    accentPalette: '2. Material 3 Accent Color Palette',
+    languageAndAccessibility: 'Language & Accessibility',
+    languageAccessDesc: 'Set interface language, spoken audio assistance rate, and vibration feedback.',
+    applicationLanguage: 'Application Language',
+    hapticFeedback: 'Haptic Touch Feedback',
+    hapticFeedbackDesc: 'Tactile pulses on buttons & actions',
+    testVoice: 'Test Voice Assistance',
+    testVoiceDesc: 'Spoken Hindi/Marathi audio preview',
+    playAudio: 'Play Audio',
+    dataStorageCompliance: 'Data, Storage & Compliance',
+    dataStorageDesc: 'Offline local storage cache management and regulatory CPCB audit specs.',
+    resetOfflineData: 'Reset Local Offline Datasets',
+    resetOfflineDesc: 'Clears demo modifications and resets all offline lots, bookings, and ledger state to official CPCB benchmark seeds.',
+    resetDataBtn: 'Reset Local Data',
+    deviceSystemMode: 'Device System',
+    deviceSystemDesc: 'Matches device preference (defaults to light mode)',
+    lightModeLabel: 'Light',
+    lightModeDesc: 'High clarity, bright daylight surface',
+    darkModeLabel: 'Dark',
+    darkModeDesc: 'High contrast deep slate for night use'
   },
 
   hi: {
@@ -788,12 +1268,183 @@ const translations: Record<Language, Record<string, string>> = {
     verifiedRecycler: 'अधिकृत रीसायकलर',
     verifiedAdmin: 'नियामक प्राधिकरण',
 
+    // Custom Product & Multi-item Keys
+    otherCustomProduct: 'अन्य / खुद का उत्पाद नाम लिखें (कस्टम आइटम)',
+    enterProductName: 'उत्पाद का नाम लिखें (जैसे: पुराना माइक्रोवेव, इनवर्टर)',
+    productNamePlaceholder: 'जैसे: इनवर्टर, माइक्रोवेव, स्टेबलाइज़र, टीवी...',
+    customRatePerKg: 'अपेक्षित दर (₹/kg)',
+    addCustomItem: 'कस्टम उत्पाद जोड़ें',
+    pickupAddressPlaceholder: 'मकान/फ्लैट नं., सड़क का नाम, इलाका, लैंडमार्क, पिनकोड...',
+    fetchingLocation: 'स्थान खोज रहे हैं...',
+    fetchLocation: 'पता से स्थान लाएं',
+    locatingGps: 'GPS खोज रहे हैं...',
+    gpsBtn: 'GPS',
+    locateBtn: 'स्थान दिखाएं',
+    pinConfirmsDoorstep: '✓ मानचित्र पर पिन देखकर पुष्टि करें। टैप या ड्रैग करके गेट सटीक करें।',
+    doorstepMapConfirm: 'मानचित्र पर सटीक गेट चुनें (पिन पुष्टी)',
+    schedulePickupSlot: 'पिकअप का समय चुनें',
+    slotToday: 'आज',
+    slotWithin2Hrs: '2 घंटे के भीतर',
+    slotTomorrow: 'कल',
+    slotWeekend: 'शनिवार / सप्ताहांत',
+    slotSat11AM: 'शनिवार सुबह 11 बजे',
+    addMaterialLineItems: 'सामग्री सूची में आइटम जोड़ें',
+    materialsInLot: 'लॉट में सामग्रियां',
+    materialType: 'सामग्री का प्रकार',
+    weightKg: 'वजन (किग्रा)',
+    customLotName: 'कस्टम लॉट / उत्पाद का नाम',
+    liveBenchmarkSub: 'आधिकारिक सीपीसीबी बाजार मानक दरें। किसी भी वस्तु के पास स्पीकर आइकन दबाकर मूल्य सुनें।',
+    lastUpdatedToday: 'अंतिम अपडेट: आज सुबह 09:00 AM',
+    currentPriceNotice: 'अखिल भारतीय सीपीसीबी अधिकृत एग्रीगेटर्स से प्राप्त लाइव दरें',
+    treeDonationNotice: 'राष्ट्रीय हरित गलियारों में 5 देशी पौधों के रोपण में योगदान।',
+    aiDetected: 'AI द्वारा पहचाना गया:',
+    confidenceMatch: 'सटीकता',
+    priceStable: 'दाम स्थिर',
+    priceIncreasedBy: 'दाम में वृद्धि',
+    rupeesPerKg: 'रुपये प्रति किलो',
+    expectedRateNote: 'प्रति किलो अपेक्षित या अनुमानित दर',
+    addItemToLot: 'लॉट में आइटम जोड़ें',
+
     // Feedback & System Messages
     pleaseAddOneItem: 'कृपया कम से कम एक ई-कचरा सामग्री जोड़ें।',
     failedToCancelPickup: 'पिकअप रद्द करने में विफल:',
     receiptPdfDownloaded: 'रसीद पीडीएफ डाउनलोड हुई! (सीपीसीबी ईपीआर अनुपालन)',
     pleaseAddOneMaterial: 'कृपया कस्टम लॉट में कम से कम एक सामग्री जोड़ें।',
-    speechNotSupported: 'इस ब्राउज़र में वाक् संश्लेषण (Speech synthesis) समर्थित नहीं है।'
+    speechNotSupported: 'इस ब्राउज़र में वाक् संश्लेषण (Speech synthesis) समर्थित नहीं है।',
+
+    // Additional Navigation & Settings
+    settingsBtn: 'सेटिंग्स (थीम, डिस्प्ले, आवाज़, डेटा)',
+    settingsTitle: 'ऐप सेटिंग्स',
+    settingsSubtitle: 'थीम, डिस्प्ले मोड, आवाज़ और क्षेत्रीय प्राथमिकताएं अनुकूलित करें',
+    myProfile: 'मेरी प्रोफाइल एवं सुरक्षा',
+    mNavEpr: 'ईपीआर',
+    welcomeApp: 'कबाड़ीवाला कनेक्ट',
+    loginSubtitleApp: 'स्मार्ट अनौपचारिक ई-कचरा व ईपीआर ट्रेसेबिलिटी प्लेटफॉर्म। जारी रखने के लिए अपना पोर्टल चुनें।',
+    portalCapabilities: 'पोर्टल सुविधाएं एवं जानकारी',
+
+    // Citizen Dashboard Pickups & Doorstep
+    tabRequestPickup: 'घर बैठे पिकअप का अनुरोध करें',
+    tabGreenImpact: 'पर्यावरण प्रभाव एवं कार्बन बचत',
+    'indicative payout:': 'अनुमानित भुगतान:',
+    'HANDOVER COMPLETED': 'हस्तांतरण संपन्न',
+    'COLLECTOR DISPATCHED': 'कबाड़ीवाला रवाना हुआ',
+    'LIVE ETA ESTIMATE': 'लाइव आगमन समय (ETA)',
+    'layer 1 verification: citizen handover otp': 'स्तर 1 सत्यापन • घर बैठे कबाड़ हस्तांतरण',
+    'SECURE OTP': 'सुरक्षित ओटीपी',
+    'layer 1 verified: physical doorstep handover confirmed': 'स्तर 1 सत्यापित: भौतिक हस्तांतरण की पुष्टि हुई',
+    manualOrGps: 'पता लिखें, लिंक पेस्ट करें, या मैप का उपयोग करें',
+    gmapsLinkOpt: 'गूगल मैप्स लिंक',
+    optional: 'वैकल्पिक',
+    pasteLinkOrCoords: 'maps.app.goo.gl या निर्देशांक पेस्ट करें',
+
+    // Kabadiwala & Bidding
+    bidsReceived: 'बोलियां',
+    minAskRule: 'मांग मूल्य का न्यूनतम 50%',
+    BIDDING: 'बोली चालू',
+    'layer 2: ai verified': 'स्तर 2: एआई सत्यापित',
+    items: 'प्रकार',
+    blendedRate: 'मिश्रित दर',
+    askingPrice: 'मांग मूल्य',
+    'highestOffer:': 'उच्चतम बोली दर:',
+    acceptBid: 'बोली स्वीकार करें',
+    awaitingBids: 'निकटवर्ती अधिकृत एग्रीगेटर्स से बोलियों की प्रतीक्षा है।',
+
+    // Profile & Security
+    profileSaved: 'व्यक्तिगत विवरण सफलतापूर्वक अपडेट हो गया!',
+    pinLengthError: 'नया पिन ठीक 4 अंकों का होना चाहिए।',
+    pinMismatchError: 'नया पिन और पुष्टि पिन मेल नहीं खाते।',
+    pinSuccess: '4-अंकीय सुरक्षा पिन सफलतापूर्वक अपडेट हुआ!',
+    otherSessionsLoggedOut: 'वेब और एंड्रॉयड पर अन्य सभी सक्रिय सत्र समाप्त कर दिए गए हैं।',
+    eprTraceabilityTitle: 'ईपीआर ट्रेसेबिलिटी एवं पर्यावरणीय प्रभाव',
+    eprTraceabilityDesc: 'क्रिप्टोग्राफिक SHA-256 ऑडिट रिकॉर्ड और सीपीसीबी निस्तारण प्रमाणपत्र।',
+    wasteDiverted: 'डायवर्ट किया गया कचरा',
+    safeProcessing: 'सुरक्षित औपचारिक चैनल प्रसंस्करण',
+    co2ePrevented: 'रोकी गई CO2e',
+    zeroBurning: 'शून्य खुले में जलाने का उत्सर्जन',
+    csrEquivalent: 'सीएसआर समकक्ष',
+    carbonOffset: 'आजीवन कार्बन ऑफसेट संतुलित',
+    downloadJsonCert: 'JSON प्रमाणपत्र डाउनलोड करें',
+    tollFreeHelpline: 'टोल-फ्री हेल्पलाइन (24/7)',
+    tollFreeDesc: 'किसी भी भारतीय मोबाइल/लैंडलाइन से निःशुल्क कॉल',
+    emailAssistance: 'सीधी ईमेल सहायता',
+    emailDesc: 'प्रतिक्रिया समय: 2 व्यावसायिक घंटे से कम',
+    whatsappSupport: 'व्हाट्सऐप बॉट एवं चैट',
+    whatsappDesc: 'तुरंत शिकायत दर्ज करें एवं फोटो भेजें',
+    nodalOfficer: 'नोडल शिकायत निवारण अधिकारी',
+    nodalOfficerDesc: 'खान मंत्रालय / सीपीसीबी शिकायतें',
+    faqsTitle: 'अक्सर पूछे जाने वाले प्रश्न (FAQ)',
+    personalInfoTitle: 'व्यक्तिगत जानकारी एवं पता',
+    personalInfoDesc: 'सत्यापित मोबाइल, आधिकारिक नाम, ईमेल एवं पिकअप का निश्चित पता।',
+    fullName: 'पूरा आधिकारिक नाम',
+    registeredMobile: 'पंजीकृत मोबाइल',
+    otpVerified: 'ओटीपी सत्यापित',
+    emailAddress: 'ईमेल पता',
+    pickupWorkshopAddress: 'पिकअप / वर्कशॉप का पता',
+    typeAddressHint: 'पता लिखें, लिंक जोड़ें या मैप चुनें',
+    addressPlaceholder: 'मकान/दुकान नं., सड़क, इलाका, लैंडमार्क, पिनकोड...',
+    locating: 'खोज रहे हैं...',
+    savePersonalDetails: 'व्यक्तिगत विवरण सहेजें',
+    accountSecurity: 'खाता सुरक्षा एवं क्रेडेंशियल्स',
+    accountSecurityDesc: 'अपना 4-अंकीय त्वरित सुरक्षा पिन बदलें और बायोमेट्रिक प्रबंधित करें।',
+    currentPin: 'वर्तमान पिन',
+    newPin: 'नया 4-अंकीय पिन',
+    confirmPin: 'नए पिन की पुष्टि करें',
+    updatePinBtn: 'सुरक्षा पिन अपडेट करें',
+    biometricUnlock: 'बायोमेट्रिक अनलॉक',
+    biometricDesc: 'त्वरित टर्मिनल उपयोग के लिए फिंगरप्रिंट या फेस अनलॉक का उपयोग करें',
+    twoFactorAuth: 'टू-फैक्टर प्रमाणीकरण (2FA)',
+    twoFactorDesc: 'संवेदनशील लॉट ट्रांसफर एवं दरों के संपादन हेतु एसएमएस ओटीपी सत्यापन अनिवार्य करें',
+    logoutOtherDevices: 'अन्य सभी डिवाइस से लॉगआउट करें',
+    signOutActiveTerminal: 'सक्रिय टर्मिनल से लॉगआउट करें',
+    regulatoryStandards: 'नियामक मानक:',
+
+    // Recycler Dashboard
+    totalProcessed: 'कुल प्रसंस्कृत',
+    'q2-2026 batch': 'तिमाही 2-2026 बैच',
+    pendingLots: 'लंबित लॉट',
+    'from active collectors': 'सक्रिय कबाड़ीवाले',
+    anomalies: 'विसंगतियाँ',
+    'review required': 'समीक्षा आवश्यक',
+    'no digital lots found matching this filter.': 'इस फिल्टर से मेल खाने वाला कोई डिजिटल लॉट नहीं मिला।',
+    'show all lots': 'सभी लॉट देखें',
+    'BIDDING OPEN': 'बोली प्रक्रिया चालू',
+    'OPEN FOR BIDS': 'बोली हेतु उपलब्ध',
+    'COLLECTOR TENDER': 'कबाड़ीवाला निविदा',
+    minBid: 'न्यूनतम बोली (50%)',
+    'current top bid': 'वर्तमान उच्चतम बोली',
+    'No bids yet': 'अभी तक कोई बोली नहीं',
+    'bids received': 'प्राप्त बोलियां',
+    'your bid:': 'आपकी बोली:',
+    'Update Bid': 'बोली अपडेट करें',
+    Current: 'वर्तमान',
+    'Place Bid': 'बोली लगाएं',
+    'Go to QR Handover Verification →': 'क्यूआर हस्तांतरण सत्यापन पर जाएं →',
+
+    // Settings
+    cacheCleared: 'लोकल कैश रीफ्रेश हो गया और डेटासेट सफलतापूर्वक रीसेट हुआ।',
+    displayAndThemes: 'डिस्प्ले मोड एवं थीम',
+    displayThemesDesc: 'लाइट, डार्क या ऑटोमैटिक थीम चुनें और मटेरियल 3 रंग पैलेट चुनें।',
+    chooseAppearance: '1. रूप-रंग (थीम) चुनें',
+    accentPalette: '2. मटेरियल 3 रंग पैलेट',
+    languageAndAccessibility: 'भाषा एवं सुगमता',
+    languageAccessDesc: 'इंटरफ़ेस भाषा, आवाज़ सहायता और कंपन फीडबैक सेट करें।',
+    applicationLanguage: 'एप्लिकेशन भाषा',
+    hapticFeedback: 'हैप्टिक टच फीडबैक',
+    hapticFeedbackDesc: 'बटन दबाने पर स्पर्शनीय कंपन',
+    testVoice: 'आवाज़ सहायता जांचें',
+    testVoiceDesc: 'हिन्दी/मराठी में बोलकर ऑडियो सुनें',
+    playAudio: 'आवाज़ सुनें',
+    dataStorageCompliance: 'डेटा, स्टोरेज एवं अनुपालन',
+    dataStorageDesc: 'ऑफलाइन स्थानीय स्टोरेज प्रबंधन एवं सीपीसीबी ऑडिट विनिर्देश।',
+    resetOfflineData: 'स्थानीय ऑफलाइन डेटा रीसेट करें',
+    resetOfflineDesc: 'डेमो परिवर्तनों को साफ़ करता है और सभी ऑफलाइन लॉट, बुकिंग और लेजर स्थिति को आधिकारिक सीपीसीबी बेंचमार्क पर रीसेट करता है।',
+    resetDataBtn: 'स्थानीय डेटा रीसेट करें',
+    deviceSystemMode: 'डिवाइस सिस्टम',
+    deviceSystemDesc: 'डिवाइस की प्राथमिकता के अनुसार (लाइट मोड)',
+    lightModeLabel: 'लाइट मोड',
+    lightModeDesc: 'दिन के उपयोग के लिए स्पष्ट और चमकदार सतह',
+    darkModeLabel: 'डार्क मोड',
+    darkModeDesc: 'रात के समय आंखों की सुरक्षा के लिए उच्च कंट्रास्ट डार्क मोड'
   },
 
   mr: {
@@ -1143,12 +1794,183 @@ const translations: Record<Language, Record<string, string>> = {
     verifiedRecycler: 'अधिकृत रीसायकलर',
     verifiedAdmin: 'नियामक प्राधिकरण',
 
+    // Custom Product & Multi-item Keys
+    otherCustomProduct: 'इतर / स्वतःचे उत्पादन नाव टाईप करा (कस्टम आयटम)',
+    enterProductName: 'उत्पादनाचे नाव टाईप करा (उदा: जुना मायक्रोवेव्ह, इन्व्हर्टर)',
+    productNamePlaceholder: 'उदा: इन्व्हर्टर, मायक्रोवेव्ह, स्टॅबिलायझर, टीव्ही...',
+    customRatePerKg: 'अपेक्षित दर (₹/kg)',
+    addCustomItem: 'सानुकूल उत्पादन जोडा',
+    pickupAddressPlaceholder: 'घर/फ्लॅट क्र., रस्त्याचे नाव, परिसर, लँडमार्क, पिनकोड...',
+    fetchingLocation: 'स्थान शोधत आहे...',
+    fetchLocation: 'पत्यावरून स्थान शोधा',
+    locatingGps: 'GPS शोधत आहे...',
+    gpsBtn: 'GPS',
+    locateBtn: 'स्थान दाखवा',
+    pinConfirmsDoorstep: '✓ नकाशावर पिन तपासा. अचूक जागेसाठी ड्रॅग करा.',
+    doorstepMapConfirm: 'नकाशावर अचूक जागा निवडा (पिन पुष्टी)',
+    schedulePickupSlot: 'पिकअप वेळ निवडा',
+    slotToday: 'आज',
+    slotWithin2Hrs: '2 तासांच्या आत',
+    slotTomorrow: 'उद्या',
+    slotWeekend: 'शनिवार / वीकेंड',
+    slotSat11AM: 'शनिवारी सकाळी 11 वाजता',
+    addMaterialLineItems: 'साहित्याची यादी जोडा',
+    materialsInLot: 'लॉटमधील साहित्य',
+    materialType: 'साहित्याचा प्रकार',
+    weightKg: 'वजन (कि.ग्रा.)',
+    customLotName: 'सानुकूल लॉट / उत्पादनाचे नाव',
+    liveBenchmarkSub: 'अधिकृत सीपीसीबी बाजार भाव दर. वस्तूच्या बाजूला असलेले स्पीकर चिन्ह दाबून भाव ऐका.',
+    lastUpdatedToday: 'शेवटचे अपडेट: आज सकाळी 09:00',
+    currentPriceNotice: 'देशभरातील सीपीसीबी नोंदणीकृत केंद्रांकडून प्राप्त थेट दर',
+    treeDonationNotice: 'राष्ट्रीय वनीकरण मोहिमेत 5 देशी वृक्षांची लागवड करण्यासाठी मदत.',
+    aiDetected: 'AI द्वारे ओळखले गेले:',
+    confidenceMatch: 'अचूकता',
+    priceStable: 'भाव स्थिर',
+    priceIncreasedBy: 'भावात वाढ',
+    rupeesPerKg: 'रुपये प्रति किलो',
+    expectedRateNote: 'प्रति किलो अपेक्षित किंवा अंदाजे दर',
+    addItemToLot: 'लॉटमध्ये साहित्य जोडा',
+
     // Feedback & System Messages
     pleaseAddOneItem: 'कृपया किमान एक ई-कचरा वस्तू जोडा.',
     failedToCancelPickup: 'संकलन रद्द करणे अयशस्वी:',
     receiptPdfDownloaded: 'पावती पीडीएफ डाउनलोड झाली! (सीपीसीबी ईपीआर प्रमाणित)',
     pleaseAddOneMaterial: 'कृपया कस्टम लॉटमध्ये किमान एक सामग्री जोडा.',
-    speechNotSupported: 'या ब्राउझरमध्ये आवाज संश्लेषण (Speech synthesis) उपलब्ध नाही.'
+    speechNotSupported: 'या ब्राउझरमध्ये आवाज संश्लेषण (Speech synthesis) उपलब्ध नाही.',
+
+    // Additional Navigation & Settings
+    settingsBtn: 'सेटिंग्ज (थीम, डिस्प्ले, आवाज, डेटा)',
+    settingsTitle: 'अ‍ॅप सेटिंग्ज',
+    settingsSubtitle: 'थीम, डिस्प्ले मोड, आवाज आणि प्रादेशिक प्राधान्ये सानुकूलित करा',
+    myProfile: 'माझी प्रोफाइल आणि सुरक्षा',
+    mNavEpr: 'ईपीआर',
+    welcomeApp: 'कबाडीवाला कनेक्ट',
+    loginSubtitleApp: 'स्मार्ट अनौपचारिक कचरा व ईपीआर ट्रेसिबिलिटी प्लॅटफॉर्म. पुढे जाण्यासाठी आपले पोर्टल निवडा.',
+    portalCapabilities: 'पोर्टल वैशिष्ट्ये आणि माहिती',
+
+    // Citizen Dashboard Pickups & Doorstep
+    tabRequestPickup: 'घरावरून संकलन विनंती करा',
+    tabGreenImpact: 'पर्यावरणीय प्रभाव आणि कार्बन बचत',
+    'indicative payout:': 'अंदाजे रक्कम:',
+    'HANDOVER COMPLETED': 'हस्तांतरण पूर्ण झाले',
+    'COLLECTOR DISPATCHED': 'संग्राहक रवाना झाला',
+    'LIVE ETA ESTIMATE': 'थेट आगमन वेळ (ETA)',
+    'layer 1 verification: citizen handover otp': 'स्तर 1 पडताळणी • घरावरील भंगार हस्तांतरण',
+    'SECURE OTP': 'सुरक्षित ओटीपी',
+    'layer 1 verified: physical doorstep handover confirmed': 'स्तर 1 प्रमाणित: प्रत्यक्ष हस्तांतरणाची पुष्टी झाली',
+    manualOrGps: 'पत्ता लिहा, लिंक पेस्ट करा, किंवा नकाशा वापरा',
+    gmapsLinkOpt: 'गुगल मॅप्स लिंक',
+    optional: 'पर्यायी',
+    pasteLinkOrCoords: 'maps.app.goo.gl किंवा अक्षांश-रेखांश पेस्ट करा',
+
+    // Kabadiwala & Bidding
+    bidsReceived: 'बोली',
+    minAskRule: 'मागणी मूल्याच्या किमान 50%',
+    BIDDING: 'बोली सुरू',
+    'layer 2: ai verified': 'स्तर 2: एआय प्रमाणित',
+    items: 'प्रकार',
+    blendedRate: 'एकत्रित दर',
+    askingPrice: 'मागणी किंमत',
+    'highestOffer:': 'सर्वोच्च बोली दर:',
+    acceptBid: 'बोली स्वीकारा',
+    awaitingBids: 'जवळच्या अधिकृत रीसायकलर्सकडून बोलीची प्रतीक्षा आहे.',
+
+    // Profile & Security
+    profileSaved: 'वैयक्तिक माहिती यशस्वीरित्या अद्यतनित झाली!',
+    pinLengthError: 'नवीन पिन नेमका 4 अंकांचा असावा.',
+    pinMismatchError: 'नवीन पिन आणि पुष्टी पिन जुळत नाहीत.',
+    pinSuccess: '4-अंकी सुरक्षा पिन यशस्वीरित्या अद्यतनित झाला!',
+    otherSessionsLoggedOut: 'वेब आणि अँड्रॉइडवरील इतर सर्व सक्रिय सत्रे समाप्त केली गेली आहेत.',
+    eprTraceabilityTitle: 'ईपीआर ट्रेसिबिलिटी आणि पर्यावरणीय प्रभाव',
+    eprTraceabilityDesc: 'क्रिप्टोग्राफिक SHA-256 ऑडिट नोंदी आणि सीपीसीबी विल्हेवाट प्रमाणपत्र.',
+    wasteDiverted: 'कचरा प्रक्रिया',
+    safeProcessing: 'सुरक्षित अधिकृत प्रक्रिया',
+    co2ePrevented: 'रोखलेले CO2e',
+    zeroBurning: 'शून्य उघड्यावर जाळणे',
+    csrEquivalent: 'सीएसआर समतुल्य',
+    carbonOffset: 'कार्बन समतोल साधला',
+    downloadJsonCert: 'JSON प्रमाणपत्र डाउनलोड करा',
+    tollFreeHelpline: 'टोल-फ्री हेल्पलाइन (24/7)',
+    tollFreeDesc: 'कोणत्याही भारतीय मोबाइल/लँडलाइनवरून मोफत कॉल',
+    emailAssistance: 'थेट ईमेल मदत',
+    emailDesc: 'प्रतिसाद वेळ: २ व्यवसाय तासांच्या आत',
+    whatsappSupport: 'व्हॉट्सअ‍ॅप बॉट आणि चॅट',
+    whatsappDesc: 'त्वरित तक्रार नोंदणी व फोटो पाठवा',
+    nodalOfficer: 'नोडल तक्रार निवारण अधिकारी',
+    nodalOfficerDesc: 'खाण मंत्रालय / सीपीसीबी तक्रारी',
+    faqsTitle: 'नेहमी विचारले जाणारे प्रश्न (FAQ)',
+    personalInfoTitle: 'वैयक्तिक माहिती आणि पत्ता',
+    personalInfoDesc: 'पडताळणी झालेला मोबाईल, अधिकृत नाव, ईमेल आणि खात्रीशीर संकलन पत्ता.',
+    fullName: 'पूर्ण अधिकृत नाव',
+    registeredMobile: 'नोंदणीकृत मोबाइल',
+    otpVerified: 'ओटीपी पडताळणी पूर्ण',
+    emailAddress: 'ईमेल पत्ता',
+    pickupWorkshopAddress: 'संकलन / वर्कशॉप पत्ता',
+    typeAddressHint: 'पत्ता लिहा, लिंक टाका किंवा नकाशा वापरा',
+    addressPlaceholder: 'घर/दुकान क्र., रस्ता, परिसर, लँडमार्क, पिनकोड...',
+    locating: 'शोधत आहे...',
+    savePersonalDetails: 'वैयक्तिक माहिती जतन करा',
+    accountSecurity: 'खाते सुरक्षा आणि क्रेडेंशियल्स',
+    accountSecurityDesc: 'तुमचा 4-अंकी सुरक्षा पिन बदला आणि बायोमेट्रिक व्यवस्थापित करा.',
+    currentPin: 'सध्याचा पिन',
+    newPin: 'नवीन 4-अंकी पिन',
+    confirmPin: 'नवीन पिनची पुष्टी करा',
+    updatePinBtn: 'सुरक्षा पिन अद्यतन करा',
+    biometricUnlock: 'बायोमेट्रिक अनलॉक',
+    biometricDesc: 'जलद प्रवेशासाठी फिंगरप्रिंट किंवा फेस अनलॉक वापरा',
+    twoFactorAuth: 'टू-फॅक्टर प्रमाणीकरण (2FA)',
+    twoFactorDesc: 'संवेदनशील लॉट हस्तांतरण व दर बदलांसाठी एसएमएस ओटीपी पडताळणी आवश्यक करा',
+    logoutOtherDevices: 'इतर सर्व डिव्हाइसेसमधून लॉगआउट करा',
+    signOutActiveTerminal: 'सक्रिय टर्मिनलवरून बाहेर पडा',
+    regulatoryStandards: 'नियामक मानके:',
+
+    // Recycler Dashboard
+    totalProcessed: 'एकूण प्रक्रिया केलेले',
+    'q2-2026 batch': 'त्रैमासिक 2-2026 बॅच',
+    pendingLots: 'प्रलंबित लॉट',
+    'from active collectors': 'सक्रिय संग्राहक',
+    anomalies: 'विसंगती',
+    'review required': 'पुनरावलोकन आवश्यक',
+    'no digital lots found matching this filter.': 'या फिल्टरशी जुळणारा कोणताही डिजिटल लॉट आढळला नाही.',
+    'show all lots': 'सर्व लॉट पहा',
+    'BIDDING OPEN': 'लिलाव / बोली सुरू',
+    'OPEN FOR BIDS': 'बोलीसाठी उपलब्ध',
+    'COLLECTOR TENDER': 'संग्राहक निविदा',
+    minBid: 'किमान बोली (50%)',
+    'current top bid': 'सध्याची सर्वोच्च बोली',
+    'No bids yet': 'अद्याप कोणतीही बोली नाही',
+    'bids received': 'प्राप्त बोली',
+    'your bid:': 'तुमची बोली:',
+    'Update Bid': 'बोली अद्यतन करा',
+    Current: 'सध्याची',
+    'Place Bid': 'बोली लावा',
+    'Go to QR Handover Verification →': 'क्यूआर हस्तांतरण पडताळणीकडे जा →',
+
+    // Settings
+    cacheCleared: 'लोकल कॅश रीफ्रेश झाले आणि डेटासेट यशस्वीरित्या रीसेट झाले.',
+    displayAndThemes: 'डिस्प्ले मोड आणि थीम',
+    displayThemesDesc: 'लाइट, डार्क किंवा ऑटोमॅटिक थीम निवडा आणि मटेरियल 3 रंग पॅलेट निवडा.',
+    chooseAppearance: '1. देखावा (थीम) निवडा',
+    accentPalette: '2. मटेरियल 3 रंग पॅलेट',
+    languageAndAccessibility: 'भाषा आणि सुलभता',
+    languageAccessDesc: 'इंटरफेस भाषा, आवाज मदत आणि कंपन फीडबॅक सेट करा.',
+    applicationLanguage: 'अनुप्रयोग भाषा',
+    hapticFeedback: 'हॅप्टिक टच फीडबॅक',
+    hapticFeedbackDesc: 'बटण दाबल्यावर होणारे हलके कंपन',
+    testVoice: 'आवाज मदत तपासा',
+    testVoiceDesc: 'मराठी/हिंदीमध्ये बोलून ऑडिओ ऐका',
+    playAudio: 'आवाज ऐका',
+    dataStorageCompliance: 'डेटा, स्टोरेज आणि नियम पालन',
+    dataStorageDesc: 'ऑफलाइन स्थानिक स्टोरेज व्यवस्थापन आणि सीपीसीबी ऑडिट तपशील.',
+    resetOfflineData: 'स्थानिक ऑफलाइन डेटा रीसेट करा',
+    resetOfflineDesc: 'डेमो बदल साफ करतो आणि सर्व ऑफलाइन लॉट, बुकिंग आणि लेजर अधिकृत सीपीसीबी बेंचमार्कवर रीसेट करतो.',
+    resetDataBtn: 'स्थानिक डेटा रीसेट करा',
+    deviceSystemMode: 'डिव्हाइस प्रणाली',
+    deviceSystemDesc: 'डिव्हाइसच्या प्राधान्यानुसार (लाइट मोड)',
+    lightModeLabel: 'लाइट मोड',
+    lightModeDesc: 'दिवसा वापरण्यासाठी स्पष्ट आणि चमकदार पृष्ठभाग',
+    darkModeLabel: 'डार्क मोड',
+    darkModeDesc: 'रात्री डोळ्यांच्या आरामासाठी हाय-कॉन्ट्रास्ट डार्क मोड'
   }
 };
 
@@ -1284,10 +2106,28 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [isSpeaking, setIsSpeaking] = useState(false);
   const synthRef = useRef<SpeechSynthesis | null>(typeof window !== 'undefined' ? window.speechSynthesis : null);
 
+  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('dhatu_language', lang);
   };
+
+  // Voice synthesis pre-warm & voice caching for instant audio on Android/iOS/Web
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const warmup = () => {
+        window.speechSynthesis.getVoices();
+      };
+      warmup();
+      window.speechSynthesis.onvoiceschanged = warmup;
+      return () => {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.onvoiceschanged = null;
+        }
+      };
+    }
+  }, []);
 
   /**
    * Smart Translation Engine (t)
@@ -1366,56 +2206,142 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   /**
    * Smart Speech Synthesis:
    * Selects best voice, smoothly handles fallback for languages without native browser TTS voices (e.g. Marathi),
-   * and auto-translates text if vernacular text wasn't provided.
+   * pre-processes currency and units into spoken words, and ensures reliable playback on Android WebView and browsers.
    */
   const speak = (text: string, langOverride?: Language) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
+    
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {
+      console.warn('SpeechSynthesis cancel error:', e);
+    }
 
     const targetLang = langOverride || language;
     let spokenText = text;
 
-    // Auto-translate English if speaking in hi or mr
-    if (targetLang !== 'en') {
+    // Auto-translate English if speaking in hi or mr and not already Devanagari script
+    const hasDevanagari = /[\u0900-\u097F]/.test(spokenText);
+    if (targetLang !== 'en' && !hasDevanagari) {
       spokenText = t(text, text);
     }
 
+    // Preprocess text for natural speech cadence and correct Indian pronunciation
+    if (targetLang === 'hi') {
+      spokenText = spokenText
+        .replace(/₹\s*/g, ' रुपये ')
+        .replace(/\/\s*kg\b/gi, ' प्रति किलो ')
+        .replace(/\bkg\b/gi, ' किलो ')
+        .replace(/(\d+)\s*%/g, '$1 प्रतिशत')
+        .replace(/(\d+)\s*[-—]\s*(\d+)/g, '$1 से $2')
+        .replace(/\bpcbs\b/gi, ' पीसीबी ')
+        .replace(/\bpcb\b/gi, ' पीसीबी ')
+        .replace(/\bcrt\b/gi, ' सीआरटी ')
+        .replace(/\blcd\b/gi, ' एलसीडी ')
+        .replace(/\bled\b/gi, ' एलईडी ')
+        .replace(/\bram\b/gi, ' रैम ')
+        .replace(/\bcpu\b/gi, ' सीपीयू ')
+        .replace(/•|\*|#|~|\[|\]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    } else if (targetLang === 'mr') {
+      spokenText = spokenText
+        .replace(/₹\s*/g, ' रुपये ')
+        .replace(/\/\s*kg\b/gi, ' प्रति किलो ')
+        .replace(/\bkg\b/gi, ' किलो ')
+        .replace(/(\d+)\s*%/g, '$1 टक्के')
+        .replace(/(\d+)\s*[-—]\s*(\d+)/g, '$1 ते $2')
+        .replace(/\bpcbs\b/gi, ' पीसीबी ')
+        .replace(/\bpcb\b/gi, ' पीसीबी ')
+        .replace(/\bcrt\b/gi, ' सीआरटी ')
+        .replace(/\blcd\b/gi, ' एलसीडी ')
+        .replace(/\bled\b/gi, ' एलईडी ')
+        .replace(/\bram\b/gi, ' रॅम ')
+        .replace(/\bcpu\b/gi, ' सीपीयू ')
+        .replace(/•|\*|#|~|\[|\]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    } else {
+      spokenText = spokenText
+        .replace(/₹\s*/g, ' Rupees ')
+        .replace(/\/\s*kg\b/gi, ' per kilogram ')
+        .replace(/\bkg\b/gi, ' kilograms ')
+        .replace(/•|\*|#|~|\[|\]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
     const utterance = new SpeechSynthesisUtterance(spokenText);
+    activeUtteranceRef.current = utterance;
     const voices = window.speechSynthesis.getVoices();
+
+    const findVoice = (prefix: string, namePart: string) => {
+      return voices.find(v => {
+        const l = (v.lang || '').toLowerCase().replace('_', '-');
+        const n = (v.name || '').toLowerCase();
+        return l.startsWith(prefix.toLowerCase()) || n.includes(namePart.toLowerCase());
+      });
+    };
 
     if (targetLang === 'hi') {
       utterance.lang = 'hi-IN';
-      const hiVoice = voices.find(v => v.lang === 'hi-IN' || v.lang.startsWith('hi'));
+      const hiVoice = findVoice('hi', 'hindi');
       if (hiVoice) utterance.voice = hiVoice;
       utterance.rate = 0.90;
+      utterance.pitch = 1.0;
     } else if (targetLang === 'mr') {
-      utterance.lang = 'mr-IN';
-      const mrVoice = voices.find(v => v.lang === 'mr-IN' || v.lang.startsWith('mr'));
+      const mrVoice = findVoice('mr', 'marathi');
       if (mrVoice) {
         utterance.voice = mrVoice;
+        utterance.lang = 'mr-IN';
       } else {
-        // High-fidelity phonetic fallback for systems without native Marathi voice
-        const hiFallbackVoice = voices.find(v => v.lang === 'hi-IN' || v.lang.startsWith('hi'));
+        // High-fidelity Devanagari fallback: Android WebView typically lacks dedicated mr-IN voice.
+        // Falling back to the Indian Devanagari voice with hi-IN language tag allows it to fluently
+        // read Marathi Devanagari phonetically without triggering Android TTS language-unsupported error!
+        const hiFallbackVoice = findVoice('hi', 'hindi');
         if (hiFallbackVoice) utterance.voice = hiFallbackVoice;
+        utterance.lang = 'hi-IN';
       }
       utterance.rate = 0.88;
+      utterance.pitch = 1.0;
     } else {
       utterance.lang = 'en-IN';
-      const enVoice = voices.find(v => v.lang === 'en-IN' || v.lang.includes('India') || v.lang.startsWith('en'));
+      const enVoice = findVoice('en-in', 'india') || findVoice('en', 'english');
       if (enVoice) utterance.voice = enVoice;
       utterance.rate = 0.95;
     }
 
     utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onend = () => {
+      activeUtteranceRef.current = null;
+      setIsSpeaking(false);
+    };
+    utterance.onerror = (e) => {
+      console.warn('TTS playback notification:', e);
+      activeUtteranceRef.current = null;
+      setIsSpeaking(false);
+    };
 
-    window.speechSynthesis.speak(utterance);
+    setTimeout(() => {
+      try {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn('SpeechSynthesis speak error:', err);
+      }
+    }, 25);
   };
 
   const stopSpeaking = () => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {
+        console.warn('Stop speech error', e);
+      }
+      activeUtteranceRef.current = null;
       setIsSpeaking(false);
     }
   };
@@ -1431,22 +2357,39 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   /**
-   * Preserves scrap items being traded/sold STRICTLY IN ENGLISH.
-   * Requirement: "when i click on any language i want everything to be in that language except stuff being sold which must only be shown in english"
+   * Translates scrap material names into authentic Hindi, Marathi, or English.
+   * Named preserveEnglishItemName for backwards compatibility across all dashboards,
+   * with getLocalizedItemName as modern alias.
+   * Custom user-typed products (e.g. "Old Microwave", "Inverter") are preserved cleanly.
    */
-  const preserveEnglishItemName = (name: string): string => {
+  const getLocalizedItemName = (name: string): string => {
     if (!name) return '';
     const trimmed = name.trim();
-    if (KNOWN_ENGLISH_SCRAP_ITEMS[trimmed]) return KNOWN_ENGLISH_SCRAP_ITEMS[trimmed];
-
-    // Case-insensitive / normalized lookup
     const lower = trimmed.toLowerCase();
-    for (const [key, canonical] of Object.entries(KNOWN_ENGLISH_SCRAP_ITEMS)) {
-      if (key.toLowerCase() === lower) return canonical;
+
+    // 1. Direct match in SCRAP_ITEM_TRANSLATIONS
+    if (SCRAP_ITEM_TRANSLATIONS[lower]) {
+      return SCRAP_ITEM_TRANSLATIONS[lower][language] || SCRAP_ITEM_TRANSLATIONS[lower].en || trimmed;
     }
 
+    // 2. Substring or partial normalized match
+    for (const [key, item] of Object.entries(SCRAP_ITEM_TRANSLATIONS)) {
+      if (lower.includes(key) || key.includes(lower)) {
+        return item[language] || item.en || trimmed;
+      }
+    }
+
+    // 3. Fallback to general translation dictionary if key exists
+    const directTranslation = translations[language]?.[trimmed] || translations[language]?.[lower];
+    if (directTranslation) {
+      return directTranslation;
+    }
+
+    // 4. Return custom user-typed product name as-is (e.g. "Old Microwave", "Inverter")
     return trimmed;
   };
+
+  const preserveEnglishItemName = getLocalizedItemName;
 
   return (
     <LanguageContext.Provider
@@ -1459,6 +2402,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         isSpeaking,
         formatCurrency,
         preserveEnglishItemName,
+        getLocalizedItemName,
         translateStatus
       }}
     >

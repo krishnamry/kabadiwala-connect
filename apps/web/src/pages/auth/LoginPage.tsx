@@ -46,12 +46,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     titleHi: string;
     titleMr: string;
     subtitle: string;
+    subtitleHi: string;
+    subtitleMr: string;
     badge: string;
+    badgeHi: string;
+    badgeMr: string;
     demoName: string;
     demoPhone: string;
     defaultPhone: string;
     icon: React.ElementType;
     features: string[];
+    featuresHi: string[];
+    featuresMr: string[];
     voiceText: string;
     voiceHi: string;
     voiceMr: string;
@@ -61,7 +67,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       titleHi: 'नागरिक एवं उपभोक्ता',
       titleMr: 'नागरिक व ग्राहक',
       subtitle: 'Schedule doorstep pickup for old electronics, view indicative market rates, track collector with live ETA, and earn green tree credits.',
+      subtitleHi: 'पुराने ई-कचरे के घर बैठे पिकअप का अनुरोध करें, अनुमानित मूल्य देखें, कबाड़ीवाले को लाइव मैप पर ट्रैक करें और पौधे लगाने हेतु क्रेडिट पाएं।',
+      subtitleMr: 'जुन्या ई-कचऱ्यासाठी घरावरून संकलन विनंती करा, अंदाजे दर पहा, संग्राहकाला थेट नकाशावर ट्रॅक करा आणि वृक्षारोपण क्रेडिट मिळवा.',
       badge: 'CITIZEN PORTAL',
+      badgeHi: 'नागरिक पोर्टल',
+      badgeMr: 'नागरिक पोर्टल',
       demoName: 'Ramesh Sharma',
       demoPhone: '9811100001',
       defaultPhone: '9811100001',
@@ -73,6 +83,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         'Digital handover receipt & CSR green credits',
         'CPCB Certificate of Safe Disposal download'
       ],
+      featuresHi: [
+        'फोटो अपलोड के साथ घर बैठे पिकअप अनुरोध',
+        'बुकिंग से पहले अनुमानित बाजार मूल्य दायरा',
+        'लाइव कबाड़ीवाला जीपीएस लोकेशन एवं आगमन समय',
+        'डिजिटल हस्तांतरण रसीद एवं सीएसआर ग्रीन क्रेडिट',
+        'सीपीसीबी सुरक्षित निपटान प्रमाणपत्र डाउनलोड'
+      ],
+      featuresMr: [
+        'फोटो अपलोडसह घरावरून संकलन विनंती',
+        'बुकिंगपूर्वी अंदाजे बाजार भाव श्रेणी',
+        'थेट संग्राहक जीपीएस स्थान आणि आगमन वेळ',
+        'डिजिटल हस्तांतरण पावती आणि सीएसआर ग्रीन क्रेडिट',
+        'सीपीसीबी सुरक्षित विल्हेवाट प्रमाणपत्र डाउनलोड'
+      ],
       voiceText: 'Citizen Login. Book doorstep pickup for electronic waste and track collector Ramesh.',
       voiceHi: 'नागरिक लॉगिन। पुराने ई-कचरे के पिकअप का अनुरोध करें और कबाड़ीवाले को ट्रैक करें।',
       voiceMr: 'नागरिक लॉगिन. जुन्या इलेक्ट्रॉनिक्स भंगारासाठी पिकअप बुक करा.'
@@ -82,7 +106,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       titleHi: 'कबाड़ीवाला (संग्राहक)',
       titleMr: 'भंगार संग्राहक',
       subtitle: 'Voice-first portal with large touch buttons. Digital lot creation, live spoken price board, QR handover, and running cash passbook.',
+      subtitleHi: 'बड़े बटनों और बोलती आवाज़ वाला पोर्टल। डिजिटल लॉट निर्माण, बोलता हुआ दाम पत्रक, क्यूआर हस्तांतरण और नकद खाता बही।',
+      subtitleMr: 'मोठ्या बटनांसह बोलणारा डॅशबोर्ड. डिजिटल लॉट निर्मिती, बोलणारा भाव फलक, क्यूआर हस्तांतरण आणि रोख पासबुक.',
       badge: 'COLLECTOR PORTAL',
+      badgeHi: 'कबाड़ीवाला पोर्टल',
+      badgeMr: 'संग्राहक पोर्टल',
       demoName: 'Suresh Kumar',
       demoPhone: '9876543210',
       defaultPhone: '9876543210',
@@ -94,6 +122,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         'Digital verifiable QR handover ticket generator',
         'Running passbook ledger with cash reconciliation'
       ],
+      featuresHi: [
+        'लाइव ऑडियो के साथ बोलता हुआ मंडी दाम पत्रक (हिन्दी/मराठी)',
+        '+/- वजन स्टेपर और जीपीएस टैग के साथ डिजिटल लॉट निर्माण',
+        'आस-पास के सीपीसीबी अधिकृत रीसायकलर्स की सूची व रैंकिंग',
+        'सत्यापित डिजिटल क्यूआर कोड हस्तांतरण टिकट',
+        'नकद मिलान के साथ चालू पासबुक खाता बही'
+      ],
+      featuresMr: [
+        'थेट ऑडिओसह बोलणारा बाजार भाव फलक (मराठी/हिंदी)',
+        '+/- वजन स्टेपर व जीपीएस टॅगसह डिजिटल लॉट निर्मिती',
+        'जवळच्या अधिकृत सीपीसीबी रीसायकलर्सची यादी व क्रमवारी',
+        'प्रमाणित डिजिटल क्यूआर हस्तांतरण तिकीट निर्मिती',
+        'रोख ताळमेळासह चालू पासबुक वही'
+      ],
       voiceText: 'Kabadiwala Collector Login. Voice-first passbook for Suresh Kumar with live price board.',
       voiceHi: 'कबाड़ीवाला लॉगिन। बोलता हुआ दाम पत्रक, आसान लॉट निर्माण और नकद खाता बही।',
       voiceMr: 'भंगार संग्राहक लॉगिन. बोलणारा भाव फलक आणि सोपे पासबुक.'
@@ -103,7 +145,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       titleHi: 'अधिकृत रीसायकलर',
       titleMr: 'अधिकृत रीसायकलर',
       subtitle: 'CPCB & State PCB registered facility portal. Receive collector lots, verify scale weight, confirm QR handovers, and export EPR compliance reports.',
+      subtitleHi: 'सीपीसीबी पंजीकृत संयंत्र पोर्टल। कबाड़ीवालों के लॉट प्राप्त करें, वजन सत्यापित करें, क्यूआर हस्तांतरण पुष्ट करें और ईपीआर रिपोर्ट निकालें।',
+      subtitleMr: 'सीपीसीबी नोंदणीकृत प्रकल्प पोर्टल. संग्राहकांचे लॉट स्वीकारा, वजन तपासा, क्यूआर हस्तांतरण निश्चित करा आणि ईपीआर अहवाल मिळवा.',
       badge: 'RECYCLER PORTAL',
+      badgeHi: 'रीसायकलर पोर्टल',
+      badgeMr: 'रीसायकलर पोर्टल',
       demoName: 'EcoRecycle Aggregators Ltd',
       demoPhone: '9822200002',
       defaultPhone: '9822200002',
@@ -115,6 +161,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         'Statistical anomaly flags on abnormal weights/values',
         'Exportable CPCB Form-2 & Form-6 regulatory filing reports'
       ],
+      featuresHi: [
+        'आने वाले लॉट अनुरोधों की समीक्षा (स्वीकार/अस्वीकार/काउंटर)',
+        'औपचारिक ट्रेसेबिलिटी श्रृंखला को पूर्ण करने वाला क्यूआर स्कैनर',
+        'कबाड़ीवालों के बोर्ड पर प्रसारित होने वाला लाइव दर निर्धारण कंसोल',
+        'असामान्य वजन या मूल्य पर सांख्यिकीय विसंगति अलर्ट',
+        'सीपीसीबी फॉर्म-2 एवं फॉर्म-6 विनियामक अनुपालन रिपोर्ट'
+      ],
+      featuresMr: [
+        'येणाऱ्या लॉट विनंत्यांची तपासणी (स्वीकारा/नाकारा/काउंटर)',
+        'अधिकृत ट्रेसिबिलिटी साखळी पूर्ण करणारा क्यूआर स्कॅनर',
+        'संग्राहकांच्या फलकावर थेट दर प्रसारित करणारा कंसोल',
+        'असामान्य वजन किंवा मूल्यावर त्रुटी सूचना',
+        'सीपीसीबी फॉर्म-२ व फॉर्म-६ अधिकृत अहवाल'
+      ],
       voiceText: 'Authorized Recycler Portal. Intake electronic waste lots and close traceability loops.',
       voiceHi: 'अधिकृत रीसायकलर पोर्टल। कबाड़ीवालों के लॉट स्वीकारें और ईपीआर रिपोर्ट निकालें।',
       voiceMr: 'अधिकृत रीसायकलर पोर्टल. ई-कचरा लॉट स्वीकारा आणि ईपीआर अहवाल मिळवा.'
@@ -124,7 +184,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       titleHi: 'प्रशासन एवं ऑडिट',
       titleMr: 'प्रशासन व तपासणी',
       subtitle: 'Central regulatory dashboard for Municipal Urban Local Bodies (ULBs). Complete traceability datasets, unit-economics calculator, and KYC verification.',
+      subtitleHi: 'शहरी स्थानीय निकायों (ULB) हेतु केंद्रीय विनियामक डैशबोर्ड। पूर्ण ट्रेसेबिलिटी डेटासेट, यूनिट-इकोनॉमिक्स कैलकुलेटर और केवाईसी सत्यापन।',
+      subtitleMr: 'महानगरपालिका व स्थानिक स्वराज्य संस्थांसाठी केंद्रीय नियामक डॅशबोर्ड. संपूर्ण ट्रेसिबिलिटी डेटासेट, अर्थशास्त्र कॅल्क्युलेटर आणि केवायसी पडताळणी.',
       badge: 'REGULATORY AUDIT',
+      badgeHi: 'नियामक ऑडिट',
+      badgeMr: 'नियामक तपासणी',
       demoName: 'NDMC Waste & Mines Cell',
       demoPhone: '9999900000',
       defaultPhone: '9999900000',
@@ -135,6 +199,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         'Interactive Unit-Economics Calculator (+34% collector earnings boost)',
         'Collector Aadhaar KYC verification & CPCB badge approval',
         'Central CPCB portal API data export adhering to 2022 Rules'
+      ],
+      featuresHi: [
+        'शहर भर के ई-कचरा आंकड़े एवं पर्यावरणीय प्रभाव विश्लेषण',
+        'SHA-256 हैश के साथ संपूर्ण 4-स्तरीय सामग्री ट्रेसेबिलिटी डेटा',
+        'कबाड़ीवालों की आय में +34% वृद्धि वाला यूनिट-इकोनॉमिक्स कैलकुलेटर',
+        'कबाड़ीवाला आधार केवाईसी सत्यापन एवं सीपीसीबी बैज अनुमोदन',
+        '2022 नियमों के अनुरूप केंद्रीय सीपीसीबी पोर्टल डेटा निर्यात'
+      ],
+      featuresMr: [
+        'शहरभरातील ई-कचरा आकडेवारी आणि पर्यावरणीय प्रभाव विश्लेषण',
+        'SHA-256 हॅशसह संपूर्ण ४-स्तरीय सामग्री मागोवा डेटासेट',
+        'संग्राहकांच्या उत्पन्नात +३४% वाढ दर्शवणारे अर्थशास्त्र कॅल्क्युलेटर',
+        'संग्राहक आधार केवायसी पडताळणी आणि सीपीसीबी बॅज मंजुरी',
+        '२०२२ नियमांनुसार केंद्रीय सीपीसीबी पोर्टल डेटा निर्यात'
       ],
       voiceText: 'Administration and CPCB audit dashboard. Municipal monitoring and unit-economics.',
       voiceHi: 'प्रशासन कंसोल। शहर भर के ई-कचरा आंकड़े और औपचारिकीकरण रिपोर्ट।',
@@ -282,7 +360,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                  {currentConfig.badge}
+                  {language === 'hi' ? currentConfig.badgeHi : language === 'mr' ? currentConfig.badgeMr : currentConfig.badge}
                 </span>
                 <span className="text-[11px] font-medium px-2 py-0.2 rounded-full bg-white/80 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/50 dark:border-slate-700">
                   {currentConfig.demoName.split(' ')[0]}
@@ -415,10 +493,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
             </button>
 
             {showFeatures && (
-              <div className="mt-2.5 p-3.5 bg-slate-50 rounded-2xl border border-slate-150 space-y-2 animate-fade-in text-xs text-slate-600">
-                <p className="font-medium">{currentConfig.subtitle}</p>
+              <div className="mt-2.5 p-3.5 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-150 dark:border-slate-800 space-y-2 animate-fade-in text-xs text-slate-600 dark:text-slate-300">
+                <p className="font-medium">
+                  {language === 'hi' ? currentConfig.subtitleHi : language === 'mr' ? currentConfig.subtitleMr : currentConfig.subtitle}
+                </p>
                 <ul className="space-y-1.5 pt-1">
-                  {currentConfig.features.map((feat, idx) => (
+                  {(language === 'hi' ? currentConfig.featuresHi : language === 'mr' ? currentConfig.featuresMr : currentConfig.features).map((feat, idx) => (
                     <li key={idx} className="flex items-center space-x-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>{feat}</span>
@@ -432,8 +512,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         </div>
 
         {/* Security / Compliance Micro-Footer */}
-        <div className="px-5 py-2.5 bg-slate-50 text-[11px] font-medium text-slate-400 text-center border-t border-slate-100">
-          CPCB EPR Formal Compliance Certified • SIH26229
+        <div className="px-5 py-2.5 bg-slate-50 dark:bg-slate-800 text-[11px] font-medium text-slate-400 text-center border-t border-slate-100 dark:border-slate-800">
+          {language === 'hi' 
+            ? 'सीपीसीबी ईपीआर औपचारिक अनुपालन प्रमाणित • SIH26229' 
+            : language === 'mr' 
+            ? 'सीपीसीबी ईपीआर अधिकृत नियम पालन प्रमाणित • SIH26229' 
+            : 'CPCB EPR Formal Compliance Certified • SIH26229'}
         </div>
 
       </div>

@@ -57,21 +57,21 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const colorModes: Array<{ id: ColorMode; label: string; icon: React.FC<{ className?: string }>; desc: string }> = [
     {
       id: 'system',
-      label: 'Device System',
+      label: t('deviceSystemMode', 'Device System'),
       icon: Smartphone,
-      desc: 'Matches device preference (defaults to light mode)'
+      desc: t('deviceSystemDesc', 'Matches device preference (defaults to light mode)')
     },
     {
       id: 'light',
-      label: 'Light',
+      label: t('lightModeLabel', 'Light'),
       icon: Sun,
-      desc: 'High clarity, bright daylight surface'
+      desc: t('lightModeDesc', 'High clarity, bright daylight surface')
     },
     {
       id: 'dark',
-      label: 'Dark',
+      label: t('darkModeLabel', 'Dark'),
       icon: Moon,
-      desc: 'High contrast deep slate for night use'
+      desc: t('darkModeDesc', 'High contrast deep slate for night use')
     }
   ];
 
@@ -138,10 +138,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-display font-black text-slate-900 dark:text-white">
-                Display Mode & Themes
+                {t('displayAndThemes', 'Display Mode & Themes')}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                Choose light, dark, or automatic device theme, and select your Material 3 color palette.
+                {t('displayThemesDesc', 'Choose light, dark, or automatic device theme, and select your Material 3 color palette.')}
               </p>
             </div>
           </div>
@@ -149,7 +149,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           {/* Color Mode Switcher */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-3">
-              1. Choose Appearance Mode
+              {t('chooseAppearance', '1. Choose Appearance Mode')}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {colorModes.map(m => {
@@ -196,7 +196,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           {/* Material 3 Color Theme Palettes */}
           <div className="pt-2">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-3">
-              2. Material 3 Accent Color Palette
+              {t('accentPalette', '2. Material 3 Accent Color Palette')}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {THEMES.map(tOption => {
@@ -250,10 +250,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-display font-black text-slate-900 dark:text-white">
-                Language & Accessibility
+                {t('languageAndAccessibility', 'Language & Accessibility')}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                Set interface language, spoken audio assistance rate, and vibration feedback.
+                {t('languageAccessDesc', 'Set interface language, spoken audio assistance rate, and vibration feedback.')}
               </p>
             </div>
           </div>
@@ -261,7 +261,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           {/* Language Cards */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-3">
-              Application Language
+              {t('applicationLanguage', 'Application Language')}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
@@ -308,10 +308,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </div>
                 <div>
                   <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                    Haptic Touch Feedback
+                    {t('hapticFeedback', 'Haptic Touch Feedback')}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Tactile pulses on buttons & actions
+                    {t('hapticFeedbackDesc', 'Tactile pulses on buttons & actions')}
                   </div>
                 </div>
               </div>
@@ -337,10 +337,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </div>
                 <div>
                   <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-                    Test Voice Assistance
+                    {t('testVoice', 'Test Voice Assistance')}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Spoken Hindi/Marathi audio preview
+                    {t('testVoiceDesc', 'Spoken Hindi/Marathi audio preview')}
                   </div>
                 </div>
               </div>
@@ -358,7 +358,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 }}
                 className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold shadow-sm transition-transform active:scale-95"
               >
-                Play Audio
+                {t('playAudio', 'Play Audio')}
               </button>
             </div>
           </div>
@@ -372,10 +372,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-display font-black text-slate-900 dark:text-white">
-                Data, Storage & Compliance
+                {t('dataStorageCompliance', 'Data, Storage & Compliance')}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                Offline local storage cache management and regulatory CPCB audit specs.
+                {t('dataStorageDesc', 'Offline local storage cache management and regulatory CPCB audit specs.')}
               </p>
             </div>
           </div>
@@ -384,10 +384,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div>
               <div className="font-display font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                 <RotateCcw className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>Reset Local Offline Datasets</span>
+                <span>{t('resetOfflineData', 'Reset Local Offline Datasets')}</span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-lg">
-                Clears demo modifications and resets all offline lots, bookings, and ledger state to official CPCB benchmark seeds.
+                {t('resetOfflineDesc', 'Clears demo modifications and resets all offline lots, bookings, and ledger state to official CPCB benchmark seeds.')}
               </p>
             </div>
             <button
@@ -395,7 +395,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               onClick={handleClearCache}
               className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm transition-transform active:scale-95 shrink-0"
             >
-              Reset Local Data
+              {t('resetDataBtn', 'Reset Local Data')}
             </button>
           </div>
 
@@ -409,7 +409,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           {/* Compliance Info Banner */}
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 space-y-1 font-mono">
             <div className="font-bold text-slate-700 dark:text-slate-300">
-              Regulatory Standards:
+              {t('regulatoryStandards', 'Regulatory Standards:')}
             </div>
             <div>• CPCB E-Waste (Management) Rules 2022 (Form-2 & Form-6 Compliance)</div>
             <div>• Smart India Hackathon SIH26229 — Ministry of Mines</div>

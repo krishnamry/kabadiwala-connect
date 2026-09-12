@@ -327,7 +327,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             }`}
           >
             <UserIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span className="truncate">Personal Details</span>
+            <span className="truncate">{t('personalDetails', 'Personal Details')}</span>
           </button>
 
           <button
@@ -343,7 +343,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             }`}
           >
             <Lock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-            <span className="truncate">Security & Access</span>
+            <span className="truncate">{t('securityAccess', 'Security & Access')}</span>
           </button>
 
           <button
@@ -359,7 +359,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             }`}
           >
             <Headphones className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-            <span className="truncate">Help & Support</span>
+            <span className="truncate">{t('helpSupport', 'Help & Support')}</span>
           </button>
         </div>
 
@@ -375,16 +375,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
                 <div>
                   <h2 className="text-lg sm:text-xl font-display font-black text-slate-900 dark:text-white">
-                    Personal Information & Location
+                    {t('personalInfoTitle', 'Personal Information & Location')}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                    Verified mobile, official name, email, and confirmed pickup doorstep address.
+                    {t('personalInfoDesc', 'Verified mobile, official name, email, and confirmed pickup doorstep address.')}
                   </p>
                 </div>
               </div>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>KYC VERIFIED</span>
+                <span>{t('kycVerified', 'KYC VERIFIED')}</span>
               </span>
             </div>
 
@@ -392,7 +392,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    Full Legal Name
+                    {t('fullName', 'Full Legal Name')}
                   </label>
                   <input
                     type="text"
@@ -405,8 +405,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 flex items-center justify-between">
-                    <span>Registered Mobile</span>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ OTP Verified</span>
+                    <span>{t('registeredMobile', 'Registered Mobile')}</span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ {t('otpVerified', 'OTP Verified')}</span>
                   </label>
                   <div className="relative">
                     <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -421,7 +421,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    Email Address
+                    {t('emailAddress', 'Email Address')}
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
@@ -439,8 +439,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <div className="sm:col-span-2 space-y-3">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 flex items-center justify-between">
-                      <span>Pickup / Workshop Street Address</span>
-                      <span className="text-[10px] text-slate-400 font-normal">Type address, add link, or tap map</span>
+                      <span>{t('pickupWorkshopAddress', 'Pickup / Workshop Street Address')}</span>
+                      <span className="text-[10px] text-slate-400 font-normal">{t('typeAddressHint', 'Type address, add link, or tap map')}</span>
                     </label>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <div className="relative flex-1">
@@ -450,7 +450,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           required
                           value={address}
                           onChange={e => setAddress(e.target.value)}
-                          placeholder="House/unit no., street, locality, landmark, pincode..."
+                          placeholder={t('addressPlaceholder', 'House/unit no., street, locality, landmark, pincode...')}
                           className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all shadow-xs"
                         />
                       </div>
@@ -466,7 +466,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                         ) : (
                           <Search className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         )}
-                        <span>{isGeocoding ? 'Locating...' : 'Fetch Location'}</span>
+                        <span>{isGeocoding ? t('locating', 'Locating...') : t('fetchLocation', 'Fetch Location')}</span>
                       </button>
                     </div>
                   </div>
@@ -476,9 +476,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 flex items-center justify-between">
                       <span className="flex items-center gap-1">
                         <Link2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                        <span>Google Maps Link <span className="text-slate-400 font-normal lowercase">(optional)</span></span>
+                        <span>{t('gmapsLinkOpt', 'Google Maps Link')} <span className="text-slate-400 font-normal lowercase">({t('optional', 'optional')})</span></span>
                       </span>
-                      <span className="text-[10px] text-slate-400 font-normal">e.g. maps.app.goo.gl or coordinates</span>
+                      <span className="text-[10px] text-slate-400 font-normal">{t('pasteLinkOrCoords', 'paste maps.app.goo.gl or coordinates')}</span>
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -496,7 +496,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                           className="px-3.5 py-2.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-2xl border border-emerald-300 dark:border-emerald-700 flex items-center gap-1 shrink-0 shadow-2xs"
                         >
                           <Search className="w-3.5 h-3.5" />
-                          <span>Locate</span>
+                          <span>{t('fetchLocation', 'Locate')}</span>
                         </button>
                       )}
                     </div>
@@ -560,7 +560,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm shadow-sm transition-transform active:scale-95 flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save Personal Details</span>
+                  <span>{t('savePersonalDetails', 'Save Personal Details')}</span>
                 </button>
               </div>
             </form>
@@ -580,10 +580,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
                 <div>
                   <h2 className="text-lg sm:text-xl font-display font-black text-slate-900 dark:text-white">
-                    Account Security & Credentials
+                    {t('accountSecurity', 'Account Security & Credentials')}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                    Change your 4-digit rapid security PIN and manage biometric credentials.
+                    {t('accountSecurityDesc', 'Change your 4-digit rapid security PIN and manage biometric credentials.')}
                   </p>
                 </div>
               </div>
@@ -592,7 +592,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                      Current PIN
+                      {t('currentPin', 'Current PIN')}
                     </label>
                     <input
                       type="password"
@@ -606,7 +606,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                      New 4-Digit PIN
+                      {t('newPin', 'New 4-Digit PIN')}
                     </label>
                     <input
                       type="password"
@@ -621,7 +621,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                      Confirm New PIN
+                      {t('confirmPin', 'Confirm New PIN')}
                     </label>
                     <input
                       type="password"
@@ -655,7 +655,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     className="px-5 py-2.5 rounded-full bg-slate-900 dark:bg-amber-600 hover:bg-slate-800 dark:hover:bg-amber-500 active:scale-95 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
                   >
                     <KeyRound className="w-3.5 h-3.5" />
-                    <span>Update Security PIN</span>
+                    <span>{t('updatePinBtn', 'Update Security PIN')}</span>
                   </button>
                 </div>
               </form>
@@ -667,10 +667,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <Fingerprint className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                     <div>
                       <div className="text-sm font-bold text-slate-900 dark:text-white">
-                        Biometric Unlock
+                        {t('biometricUnlock', 'Biometric Unlock')}
                       </div>
                       <div className="text-xs text-slate-500 dark:text-slate-400">
-                        Use device fingerprint or face recognition for fast terminal access
+                        {t('biometricDesc', 'Use device fingerprint or face recognition for fast terminal access')}
                       </div>
                     </div>
                   </div>
@@ -697,10 +697,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     <Smartphone className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                     <div>
                       <div className="text-sm font-bold text-slate-900 dark:text-white">
-                        Two-Factor Authentication (2FA)
+                        {t('twoFactorAuth', 'Two-Factor Authentication (2FA)')}
                       </div>
                       <div className="text-xs text-slate-500 dark:text-slate-400">
-                        Require SMS OTP verification for sensitive batch transfers and rate edits
+                        {t('twoFactorDesc', 'Require SMS OTP verification for sensitive batch transfers and rate edits')}
                       </div>
                     </div>
                   </div>
@@ -730,7 +730,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   onClick={handleLogoutOtherSessions}
                   className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors"
                 >
-                  Log Out All Other Devices
+                  {t('logoutOtherDevices', 'Log Out All Other Devices')}
                 </button>
 
                 <button
@@ -743,7 +743,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   className="px-4 py-2 rounded-xl bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-700 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Sign Out from Active Terminal</span>
+                  <span>{t('signOutActiveTerminal', 'Sign Out from Active Terminal')}</span>
                 </button>
               </div>
 
@@ -762,10 +762,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
                 <div>
                   <h2 className="text-lg sm:text-xl font-display font-black text-slate-900 dark:text-white">
-                    EPR Traceability & Environmental Impact
+                    {t('eprTraceabilityTitle', 'EPR Traceability & Environmental Impact')}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                    Cryptographic SHA-256 material audit records and CPCB disposal certificate.
+                    {t('eprTraceabilityDesc', 'Cryptographic SHA-256 material audit records and CPCB disposal certificate.')}
                   </p>
                 </div>
               </div>
@@ -773,37 +773,37 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50">
                   <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
-                    Waste Diverted
+                    {t('wasteDiverted', 'Waste Diverted')}
                   </div>
                   <div className="text-2xl font-display font-black text-slate-900 dark:text-white mt-1">
                     182.4 kg
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Safe formal channel processing
+                    {t('safeProcessing', 'Safe formal channel processing')}
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-teal-50/50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800/50">
                   <div className="text-xs font-bold text-teal-700 dark:text-teal-300 uppercase tracking-wider">
-                    CO2e Prevented
+                    {t('co2ePrevented', 'CO2e Prevented')}
                   </div>
                   <div className="text-2xl font-display font-black text-slate-900 dark:text-white mt-1">
                     394 kg
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Zero open burning emissions
+                    {t('zeroBurning', 'Zero open burning emissions')}
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50">
                   <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider">
-                    CSR Equivalent
+                    {t('csrEquivalent', 'CSR Equivalent')}
                   </div>
                   <div className="text-2xl font-display font-black text-slate-900 dark:text-white mt-1">
-                    4 Trees
+                    {language === 'hi' ? '4 पेड़' : language === 'mr' ? '4 झाडे' : '4 Trees'}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Lifetime carbon offset matched
+                    {t('carbonOffset', 'Lifetime carbon offset matched')}
                   </div>
                 </div>
               </div>
@@ -814,7 +814,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     Audit Hash: 0x8f4a9b2c7e103984fa55c91b7d82e443
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    Digitally verified by CPCB authorized smelter network under SIH26229.
+                    {language === 'hi'
+                      ? 'SIH26229 के तहत सीपीसीबी अधिकृत स्मेल्टर नेटवर्क द्वारा डिजिटल रूप से सत्यापित।'
+                      : language === 'mr'
+                      ? 'SIH26229 अंतर्गत सीपीसीबी अधिकृत स्मेल्टर नेटवर्कद्वारे डिजिटल पडताळणी.'
+                      : 'Digitally verified by CPCB authorized smelter network under SIH26229.'}
                   </div>
                 </div>
                 <button
@@ -823,7 +827,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs shadow-sm transition-transform active:scale-95 flex items-center gap-1.5 shrink-0"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download JSON Certificate</span>
+                  <span>{t('downloadJsonCert', 'Download JSON Certificate')}</span>
                 </button>
               </div>
             </section>
@@ -869,9 +873,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <Phone className="w-6 h-6" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">TOLL-FREE HELPLINE (24/7)</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('tollFreeHelpline', 'TOLL-FREE HELPLINE (24/7)')}</span>
                   <span className="font-display font-black text-base sm:text-lg text-slate-900 dark:text-white block mt-0.5">1800-266-EWASTE</span>
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">Free call from any Indian mobile/landline</span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">{t('tollFreeDesc', 'Free call from any Indian mobile/landline')}</span>
                 </div>
               </a>
 
@@ -885,9 +889,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <Mail className="w-6 h-6" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">DIRECT EMAIL ASSISTANCE</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('emailAssistance', 'DIRECT EMAIL ASSISTANCE')}</span>
                   <span className="font-display font-bold text-sm sm:text-base text-slate-900 dark:text-white block mt-0.5 truncate">support@kabadiwalaconnect.org</span>
-                  <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold block mt-0.5">Response SLA: &lt; 2 business hours</span>
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold block mt-0.5">{t('emailDesc', 'Response SLA: < 2 business hours')}</span>
                 </div>
               </a>
 
@@ -903,9 +907,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <MessageSquare className="w-6 h-6" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">WHATSAPP CHAT ASSIST</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('whatsappSupport', 'WHATSAPP CHAT ASSIST')}</span>
                   <span className="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white block mt-0.5">+91 98765 43210</span>
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">Chat in Hindi, Marathi, or English</span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold block mt-0.5">{language === 'hi' ? 'हिन्दी, मराठी या अंग्रेज़ी में चैट करें' : language === 'mr' ? 'मराठी, हिंदी किंवा इंग्रजीत चॅट करा' : 'Chat in Hindi, Marathi, or English'}</span>
                 </div>
               </a>
 
@@ -915,9 +919,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">CPCB GRIEVANCE NODAL OFFICER</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('nodalOfficer', 'CPCB GRIEVANCE NODAL OFFICER')}</span>
                   <span className="font-display font-bold text-sm sm:text-base text-slate-900 dark:text-white block mt-0.5 truncate">Shri R. K. Sharma (CPCB)</span>
-                  <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold block mt-0.5">Ministry of Mines / CPCB Helpdesk</span>
+                  <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold block mt-0.5">{t('nodalOfficerDesc', 'Ministry of Mines / CPCB Helpdesk')}</span>
                 </div>
               </div>
             </div>
@@ -927,26 +931,58 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <div className="flex items-center gap-2.5 mb-2">
                 <HelpCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 <h3 className="font-display font-black text-lg text-slate-900 dark:text-white">
-                  Frequently Asked Questions (FAQ)
+                  {t('faqsTitle', 'Frequently Asked Questions (FAQ)')}
                 </h3>
               </div>
 
               {[
                 {
-                  q: 'How are real-time e-waste rates calculated?',
-                  a: 'Rates are derived from London Metal Exchange (LME) secondary metal commodity indices, factored with localized CPCB transportation logistics and grading benchmarks.'
+                  q: language === 'hi'
+                    ? 'रीयल-टाइम ई-कचरा दरों की गणना कैसे की जाती है?'
+                    : language === 'mr'
+                    ? 'रिअल-टाइम ई-कचरा दर कसे मोजले जातात?'
+                    : 'How are real-time e-waste rates calculated?',
+                  a: language === 'hi'
+                    ? 'दरें लंदन मेटल एक्सचेंज (LME) द्वितीयक धातु कमोडिटी सूचकांकों से प्राप्त की जाती हैं, जिनमें स्थानीय सीपीसीबी परिवहन रसद और ग्रेडिंग बेंचमार्क शामिल होते हैं।'
+                    : language === 'mr'
+                    ? 'दर लंडन मेटल एक्सचेंज (LME) दुय्यम धातू निर्देशांक आणि स्थानिक सीपीसीबी वाहतूक व प्रतवारी बेंचमार्कवर आधारित आहेत.'
+                    : 'Rates are derived from London Metal Exchange (LME) secondary metal commodity indices, factored with localized CPCB transportation logistics and grading benchmarks.'
                 },
                 {
-                  q: 'How does doorstep scrap pickup verification operate?',
-                  a: 'A registered, CPCB-verified Kabadiwala visits your confirmed address with certified weighing equipment. Categories and weights are digitally recorded, and instant receipts are issued.'
+                  q: language === 'hi'
+                    ? 'घर-घर स्क्रैप पिकअप सत्यापन कैसे काम करता है?'
+                    : language === 'mr'
+                    ? 'घरोघरी स्क्रॅप संकलन पडताळणी कशी चालते?'
+                    : 'How does doorstep scrap pickup verification operate?',
+                  a: language === 'hi'
+                    ? 'एक पंजीकृत, सीपीसीबी-सत्यापित कबाड़ीवाला प्रमाणित वजन उपकरण के साथ आपके पते पर आता है। श्रेणियों और वज़न को डिजिटल रूप से दर्ज किया जाता है और त्वरित रसीद जारी की जाती है।'
+                    : language === 'mr'
+                    ? 'नोंदणीकृत व सीपीसीबी-प्रमाणित कबाडीवाला प्रमाणित वजन काट्यासह तुमच्या पत्त्यावर येतो. प्रकार आणि वजन डिजिटल पद्धतीने नोंदवले जाते व त्वरित पावती दिली जाते.'
+                    : 'A registered, CPCB-verified Kabadiwala visits your confirmed address with certified weighing equipment. Categories and weights are digitally recorded, and instant receipts are issued.'
                 },
                 {
-                  q: 'What is the CPCB Form-2 EPR Compliance Certificate?',
-                  a: 'It is a cryptographically verifiable electronic waste token proving that material was channeled through authorized smelters, safeguarding against hazardous open burning.'
+                  q: language === 'hi'
+                    ? 'सीपीसीबी फॉर्म-2 ईपीआर अनुपालन प्रमाणपत्र क्या है?'
+                    : language === 'mr'
+                    ? 'सीपीसीबी फॉर्म-२ ईपीआर प्रमाणपत्र काय आहे?'
+                    : 'What is the CPCB Form-2 EPR Compliance Certificate?',
+                  a: language === 'hi'
+                    ? 'यह एक क्रिप्टोग्राफिक रूप से सत्यापन योग्य इलेक्ट्रॉनिक अपशिष्ट टोकन है जो साबित करता है कि सामग्री को अधिकृत स्मेल्टरों के माध्यम से संसाधित किया गया है।'
+                    : language === 'mr'
+                    ? 'हे एक क्रिप्टोग्राफिक इलेक्ट्रॉनिक वेस्ट टोकन आहे जे सिद्ध करते की कचऱ्यावर अधिकृत कारखान्यांमध्ये प्रक्रिया केली गेली आहे.'
+                    : 'It is a cryptographically verifiable electronic waste token proving that material was channeled through authorized smelters, safeguarding against hazardous open burning.'
                 },
                 {
-                  q: 'How can I report an issue with a collector or recycler?',
-                  a: 'You can immediately reach our 24/7 toll-free helpline at 1800-266-EWASTE or send an email to support@kabadiwalaconnect.org with the transaction or lot ID.'
+                  q: language === 'hi'
+                    ? 'मैं किसी कलेक्टर या रीसायकलर के साथ किसी समस्या की रिपोर्ट कैसे कर सकता हूँ?'
+                    : language === 'mr'
+                    ? 'मी संकलक किंवा रीसायकलबाबत तक्रार कशी नोंदवू शकतो?'
+                    : 'How can I report an issue with a collector or recycler?',
+                  a: language === 'hi'
+                    ? 'आप तुरंत हमारे 24/7 टोल-फ्री हेल्पलाइन 1800-266-EWASTE पर संपर्क कर सकते हैं या support@kabadiwalaconnect.org पर ईमेल भेज सकते हैं।'
+                    : language === 'mr'
+                    ? 'तुम्ही आमच्या २४/७ टोल-फ्री हेल्पलाइन १८००-२६६-EWASTE वर त्वरित संपर्क करू शकता किंवा support@kabadiwalaconnect.org वर ईमेल पाठवू शकता.'
+                    : 'You can immediately reach our 24/7 toll-free helpline at 1800-266-EWASTE or send an email to support@kabadiwalaconnect.org with the transaction or lot ID.'
                 }
               ].map((faq, idx) => (
                 <div key={idx} className="border border-slate-200/70 dark:border-slate-700/60 rounded-2xl overflow-hidden">

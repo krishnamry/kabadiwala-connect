@@ -62,8 +62,15 @@ export const CitizenDashboard: React.FC = () => {
   const [scheduledAt, setScheduledAt] = useState(() => new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 16));
   const [notes, setNotes] = useState('');
   
-  // E-waste items list
-  const [items, setItems] = useState<Array<{ category: string; estWeightKg: number; ratePerKg: number; imageUrl?: string }>>([
+  // E-waste items list (multi-item and custom-typed products supported)
+  const [items, setItems] = useState<Array<{
+    category: string;
+    estWeightKg: number;
+    ratePerKg: number;
+    isCustom?: boolean;
+    customName?: string;
+    imageUrl?: string;
+  }>>([
     { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.0, ratePerKg: 640 },
     { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 }
   ]);
@@ -88,8 +95,8 @@ export const CitizenDashboard: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Indicative Price Range Calculation (Section 1.A.2)
-  const indicativeMin = items.reduce((sum, i) => sum + i.estWeightKg * (eWasteRates[i.category] || 100) * 0.9, 0);
-  const indicativeMax = items.reduce((sum, i) => sum + i.estWeightKg * (eWasteRates[i.category] || 100) * 1.15, 0);
+  const indicativeMin = items.reduce((sum, i) => sum + i.estWeightKg * (i.ratePerKg || eWasteRates[i.category] || 100) * 0.9, 0);
+  const indicativeMax = items.reduce((sum, i) => sum + i.estWeightKg * (i.ratePerKg || eWasteRates[i.category] || 100) * 1.15, 0);
 
   const loadData = async () => {
     try {
@@ -278,7 +285,10 @@ export const CitizenDashboard: React.FC = () => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.0, ratePerKg: 640 }]);
+    setItems(prev => [
+      ...prev,
+      { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.0, ratePerKg: 640, isCustom: false, customName: '' }
+    ]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -286,9 +296,24 @@ export const CitizenDashboard: React.FC = () => {
   };
 
   const handleCategoryChange = (index: number, newCategory: string) => {
-    const rate = eWasteRates[newCategory] || 100;
     const updated = [...items];
-    updated[index] = { ...updated[index], category: newCategory, ratePerKg: rate };
+    if (newCategory === 'CUSTOM') {
+      updated[index] = {
+        ...updated[index],
+        isCustom: true,
+        category: updated[index].customName?.trim() || 'Custom E-Waste',
+        ratePerKg: updated[index].ratePerKg || 50
+      };
+    } else {
+      const rate = eWasteRates[newCategory] || 100;
+      updated[index] = {
+        ...updated[index],
+        category: newCategory,
+        ratePerKg: rate,
+        isCustom: false,
+        customName: ''
+      };
+    }
     setItems(updated);
   };
 
@@ -357,7 +382,7 @@ export const CitizenDashboard: React.FC = () => {
   const handleSubmitPickup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) {
-      alert('Please add at least one e-waste item.');
+      alert(t('pleaseAddOneItem', 'Please add at least one e-waste item.'));
       return;
     }
 
@@ -387,7 +412,13 @@ export const CitizenDashboard: React.FC = () => {
       const updatedList = storage.getMyPickups(user?.id, 'CITIZEN');
       setPickups(updatedList);
       setSelectedPickup(newPickup);
-      setSuccessMessage('Pickup request successfully submitted and saved locally! Nearest formalized collector has been alerted.');
+      setSuccessMessage(
+        language === 'hi'
+          ? 'पिकअप अनुरोध सफलतापूर्वक दर्ज किया गया! निकटतम कबाड़ीवाले को सूचित कर दिया गया है।'
+          : language === 'mr'
+          ? 'पिकअप विनंती यशस्वीरित्या नोंदवली गेली! जवळच्या संग्राहकाला सूचना पाठवली आहे.'
+          : 'Pickup request successfully submitted and saved locally! Nearest formalized collector has been alerted.'
+      );
       setActiveTab('pickups');
     } finally {
       setSubmitting(false);
@@ -395,15 +426,26 @@ export const CitizenDashboard: React.FC = () => {
   };
 
   const handleCancelPickup = async (pickupId: string) => {
-    if (!confirm('Are you sure you want to cancel this pickup request?')) return;
+    const confirmMsg = language === 'hi' 
+      ? 'क्या आप वाकई इस पिकअप अनुरोध को रद्द करना चाहते हैं?' 
+      : language === 'mr' 
+      ? 'तुम्हाला खात्री आहे की तुम्ही ही विनंती रद्द करू इच्छिता?' 
+      : 'Are you sure you want to cancel this pickup request?';
+    if (!confirm(confirmMsg)) return;
     try {
       await api.cancelPickup(pickupId);
       const updated = storage.getMyPickups(user?.id, 'CITIZEN');
       setPickups(updated);
       setSelectedPickup(prev => (prev?.id === pickupId ? updated.find(p => p.id === pickupId) || null : prev));
-      setSuccessMessage('Pickup request cancelled successfully.');
+      setSuccessMessage(
+        language === 'hi'
+          ? 'पिकअप अनुरोध सफलतापूर्वक रद्द कर दिया गया।'
+          : language === 'mr'
+          ? 'पिकअप विनंती यशस्वीरित्या रद्द केली गेली.'
+          : 'Pickup request cancelled successfully.'
+      );
     } catch (e: any) {
-      alert('Failed to cancel pickup: ' + (e.message || 'Unknown error'));
+      alert(t('failedToCancelPickup', 'Failed to cancel pickup:') + ' ' + (e.message || ''));
     }
   };
 
@@ -873,7 +915,7 @@ export const CitizenDashboard: React.FC = () => {
                       type="text"
                       value={address}
                       onChange={e => setAddress(e.target.value)}
-                      placeholder="House/flat no., street name, locality, landmark, pincode..."
+                      placeholder={t('pickupAddressPlaceholder', 'House/flat no., street name, locality, landmark, pincode...')}
                       className="flex-1 px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border-2 border-steel-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none shadow-xs"
                       required
                     />
@@ -882,7 +924,7 @@ export const CitizenDashboard: React.FC = () => {
                         type="button"
                         onClick={handleFetchLocationFromAddress}
                         disabled={isGeocodingAddress}
-                        title="Fetch coordinates & confirm on map from filled address"
+                        title={t('fetchLocation', 'Fetch Location')}
                         className="px-3 py-2 bg-paper-200 dark:bg-slate-800 hover:bg-copper-100 dark:hover:bg-slate-700 active:bg-copper-200 text-steel-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-steel-400 dark:border-slate-600 flex items-center gap-1.5 transition-colors disabled:opacity-50 shadow-2xs"
                       >
                         {isGeocodingAddress ? (
@@ -890,14 +932,14 @@ export const CitizenDashboard: React.FC = () => {
                         ) : (
                           <Search className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400" />
                         )}
-                        <span>{isGeocodingAddress ? 'Fetching...' : 'Fetch Location'}</span>
+                        <span>{isGeocodingAddress ? t('fetchingLocation', 'Fetching...') : t('fetchLocation', 'Fetch Location')}</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={handleFetchLiveGPS}
                         disabled={isLocating}
-                        title="Detect Current Live Location (GPS / IP)"
+                        title={t('locatingGps', 'Locating...')}
                         className="px-3 py-2 bg-paper-200 dark:bg-slate-800 hover:bg-copper-100 dark:hover:bg-slate-700 active:bg-copper-200 text-steel-800 dark:text-slate-200 text-xs font-bold rounded-xl border border-steel-400 dark:border-slate-600 flex items-center gap-1.5 transition-colors disabled:opacity-50 shadow-2xs"
                       >
                         {isLocating ? (
@@ -905,7 +947,7 @@ export const CitizenDashboard: React.FC = () => {
                         ) : (
                           <MapPin className="w-3.5 h-3.5 text-copper-600 dark:text-copper-400" />
                         )}
-                        <span>{isLocating ? 'Locating...' : 'GPS'}</span>
+                        <span>{isLocating ? t('locatingGps', 'Locating...') : t('gpsBtn', 'GPS')}</span>
                       </button>
                     </div>
                   </div>
@@ -934,10 +976,10 @@ export const CitizenDashboard: React.FC = () => {
                         onClick={handleFetchLocationFromAddress}
                         disabled={isGeocodingAddress}
                         className="px-3.5 py-2 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-xs font-bold rounded-xl border border-emerald-300 dark:border-emerald-700 flex items-center gap-1 shrink-0 shadow-2xs"
-                        title="Locate from Google Maps link"
+                        title={t('locateBtn', 'Locate')}
                       >
                         <Search className="w-3.5 h-3.5" />
-                        <span>Locate</span>
+                        <span>{t('locateBtn', 'Locate')}</span>
                       </button>
                     )}
                   </div>
@@ -989,17 +1031,17 @@ export const CitizenDashboard: React.FC = () => {
 
               {/* Pickup Schedule Slot Selector */}
               <div>
-                <label className="block text-xs font-bold text-steel-700 uppercase tracking-wider mb-1">
-                  📅 {language === 'hi' ? 'पिकअप का समय चुनें' : language === 'mr' ? 'पिकअप वेळ निवडा' : 'Schedule Pickup Slot'}
+                <label className="block text-xs font-bold text-steel-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                  📅 {t('schedulePickupSlot', 'Schedule Pickup Slot')}
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                   <button
                     type="button"
                     onClick={() => setScheduledAt(new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 16))}
-                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
                   >
-                    <span className="font-bold block">⚡ Today</span>
-                    <span className="text-[10px] text-steel-500">Within 2 hrs</span>
+                    <span className="font-bold block">⚡ {t('slotToday', 'Today')}</span>
+                    <span className="text-[10px] text-steel-500 dark:text-slate-400">{t('slotWithin2Hrs', 'Within 2 hrs')}</span>
                   </button>
                   <button
                     type="button"
@@ -1009,10 +1051,10 @@ export const CitizenDashboard: React.FC = () => {
                       d.setHours(10, 0, 0, 0);
                       setScheduledAt(d.toISOString().slice(0, 16));
                     }}
-                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
                   >
-                    <span className="font-bold block">🌅 Tomorrow</span>
-                    <span className="text-[10px] text-steel-500">10:00 AM</span>
+                    <span className="font-bold block">🌅 {t('slotTomorrow', 'Tomorrow')}</span>
+                    <span className="text-[10px] text-steel-500 dark:text-slate-400">10:00 AM</span>
                   </button>
                   <button
                     type="button"
@@ -1022,10 +1064,10 @@ export const CitizenDashboard: React.FC = () => {
                       d.setHours(16, 0, 0, 0);
                       setScheduledAt(d.toISOString().slice(0, 16));
                     }}
-                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
                   >
-                    <span className="font-bold block">🌆 Tomorrow</span>
-                    <span className="text-[10px] text-steel-500">04:00 PM</span>
+                    <span className="font-bold block">🌆 {t('slotTomorrow', 'Tomorrow')}</span>
+                    <span className="text-[10px] text-steel-500 dark:text-slate-400">04:00 PM</span>
                   </button>
                   <button
                     type="button"
@@ -1036,17 +1078,17 @@ export const CitizenDashboard: React.FC = () => {
                       d.setHours(11, 0, 0, 0);
                       setScheduledAt(d.toISOString().slice(0, 16));
                     }}
-                    className="p-2 text-left rounded border text-xs font-mono bg-paper-100 hover:bg-paper-200 border-steel-300 text-steel-800"
+                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
                   >
-                    <span className="font-bold block">🗓️ Weekend</span>
-                    <span className="text-[10px] text-steel-500">Saturday 11 AM</span>
+                    <span className="font-bold block">🗓️ {t('slotWeekend', 'Weekend')}</span>
+                    <span className="text-[10px] text-steel-500 dark:text-slate-400">{t('slotSat11AM', 'Saturday 11 AM')}</span>
                   </button>
                 </div>
                 <input
                   type="datetime-local"
                   value={scheduledAt}
                   onChange={e => setScheduledAt(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-mono bg-white border-2 border-steel-300 rounded focus:border-copper-600 focus:outline-none"
+                  className="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border-2 border-steel-300 dark:border-slate-700 text-steel-900 dark:text-white rounded-xl focus:border-copper-600 focus:outline-none"
                   required
                 />
               </div>
@@ -1054,13 +1096,13 @@ export const CitizenDashboard: React.FC = () => {
               {/* Items List */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-steel-700 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-steel-700 dark:text-slate-300 uppercase tracking-wider">
                     {t('itemsToRecycle', 'E-Waste Items to Recycle')}
                   </label>
                   <button
                     type="button"
                     onClick={handleAddItem}
-                    className="text-xs text-copper-700 font-bold hover:underline flex items-center gap-1"
+                    className="text-xs text-copper-700 dark:text-copper-400 font-bold hover:underline flex items-center gap-1"
                   >
                     <Plus className="w-3.5 h-3.5" /> {t('addMoreItems', 'Add Item')}
                   </button>
@@ -1068,47 +1110,105 @@ export const CitizenDashboard: React.FC = () => {
 
                 <div className="space-y-2">
                   {items.map((item, index) => (
-                    <div key={index} className="p-3 bg-white rounded-lg border border-steel-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <select
-                        value={item.category}
-                        onChange={e => handleCategoryChange(index, e.target.value)}
-                        className="flex-1 px-2 py-1.5 text-xs font-bold bg-paper-100 border border-steel-300 rounded focus:outline-none"
-                      >
-                        {Object.keys(eWasteRates).map(cat => (
-                          <option key={cat} value={cat}>
-                            {cat} (₹{eWasteRates[cat]}/kg)
+                    <div key={index} className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-steel-300 dark:border-slate-700 flex flex-col gap-2.5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <select
+                          value={item.isCustom ? 'CUSTOM' : item.category}
+                          onChange={e => handleCategoryChange(index, e.target.value)}
+                          className="flex-1 px-2.5 py-2 text-xs font-bold bg-paper-100 dark:bg-slate-900 border border-steel-300 dark:border-slate-700 rounded-lg text-steel-900 dark:text-slate-100 focus:outline-none"
+                        >
+                          {Object.keys(eWasteRates).map(cat => (
+                            <option key={cat} value={cat}>
+                              {preserveEnglishItemName(cat)} (₹{eWasteRates[cat]}/kg)
+                            </option>
+                          ))}
+                          <option value="CUSTOM">
+                            ➕ {t('otherCustomProduct', 'Other / Custom Product (Type name)')}
                           </option>
-                        ))}
-                      </select>
+                        </select>
 
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          step="any"
-                          min="0.01"
-                          value={item.estWeightKg}
-                          onChange={e => {
-                            const val = parseFloat(e.target.value);
-                            handleWeightChange(index, isNaN(val) ? 0.01 : val);
-                          }}
-                          className="w-20 px-2 py-1.5 text-xs font-mono font-bold bg-paper-100 dark:bg-slate-800 border border-steel-300 dark:border-slate-700 rounded text-right text-steel-900 dark:text-slate-100"
-                        />
-                        <span className="text-xs text-steel-500 font-mono">kg</span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            step="any"
+                            min="0.01"
+                            value={item.estWeightKg}
+                            onChange={e => {
+                              const val = parseFloat(e.target.value);
+                              handleWeightChange(index, isNaN(val) ? 0.01 : val);
+                            }}
+                            className="w-20 px-2 py-1.5 text-xs font-mono font-bold bg-paper-100 dark:bg-slate-900 border border-steel-300 dark:border-slate-700 rounded-lg text-right text-steel-900 dark:text-slate-100"
+                          />
+                          <span className="text-xs text-steel-500 font-mono">kg</span>
 
-                        <span className="font-mono text-xs font-bold text-copper-600 w-20 text-right">
-                          ₹{Math.round(item.estWeightKg * (eWasteRates[item.category] || 100))}
-                        </span>
+                          <span className="font-mono text-xs font-bold text-copper-600 dark:text-emerald-400 w-20 text-right">
+                            ₹{Math.round(item.estWeightKg * (item.ratePerKg || eWasteRates[item.category] || 100))}
+                          </span>
 
-                        {items.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveItem(index)}
-                            className="p-1 text-signal-500 hover:text-signal-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+                          {items.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(index)}
+                              className="p-1 text-rose-500 hover:text-rose-700"
+                              title="Remove item"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Custom Typed Product Row */}
+                      {item.isCustom && (
+                        <div className="w-full flex flex-col sm:flex-row gap-2 pt-2 border-t border-dashed border-steel-200 dark:border-slate-700 animate-fade-in">
+                          <div className="flex-1">
+                            <label className="block text-[10px] font-bold uppercase text-steel-600 dark:text-slate-400 mb-1">
+                              {t('enterProductName', 'Type Product Name (e.g. Old Microwave, Inverter)')}
+                            </label>
+                            <input
+                              type="text"
+                              value={item.customName || ''}
+                              placeholder={t('productNamePlaceholder', 'e.g. Inverter, Microwave, Stabilizer, TV...')}
+                              onChange={e => {
+                                const val = e.target.value;
+                                const updated = [...items];
+                                updated[index] = {
+                                  ...updated[index],
+                                  customName: val,
+                                  category: val.trim() ? val.trim() : 'Custom E-Waste'
+                                };
+                                setItems(updated);
+                              }}
+                              className="w-full px-3 py-1.5 text-xs font-mono bg-paper-50 dark:bg-slate-900 border border-emerald-500 rounded-lg text-steel-900 dark:text-white focus:outline-none"
+                              required
+                            />
+                          </div>
+                          <div className="w-full sm:w-36">
+                            <label className="block text-[10px] font-bold uppercase text-steel-600 dark:text-slate-400 mb-1">
+                              {t('customRatePerKg', 'Expected Rate (₹/kg)')}
+                            </label>
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs font-bold text-steel-500">₹</span>
+                              <input
+                                type="number"
+                                min="1"
+                                value={item.ratePerKg}
+                                onChange={e => {
+                                  const val = parseFloat(e.target.value) || 1;
+                                  const updated = [...items];
+                                  updated[index] = {
+                                    ...updated[index],
+                                    ratePerKg: val
+                                  };
+                                  setItems(updated);
+                                }}
+                                className="w-full px-2 py-1.5 text-xs font-mono bg-paper-50 dark:bg-slate-900 border border-steel-300 dark:border-slate-700 rounded-lg text-steel-900 dark:text-white text-right focus:outline-none"
+                              />
+                              <span className="text-[10px] text-steel-500 font-mono">/kg</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1124,7 +1224,7 @@ export const CitizenDashboard: React.FC = () => {
                     {formatCurrency(indicativeMin)} — {formatCurrency(indicativeMax)}
                   </div>
                   <span className="text-[11px] text-steel-600">
-                    Live rates pulled from CPCB registered aggregators across India
+                    {t('currentPriceNotice', 'Live rates pulled from CPCB registered aggregators across India')}
                   </span>
                 </div>
                 <VoiceAssistButton
@@ -1146,7 +1246,7 @@ export const CitizenDashboard: React.FC = () => {
                       {t('donateToCsrLabel', 'Donate Value to Environmental NGO (Plant Trees)')}
                     </span>
                     <span className="text-[11px] text-steel-600">
-                      Funds 5 native tree saplings in national reforestation green corridors.
+                      {t('treeDonationNotice', 'Funds 5 native tree saplings in national reforestation green corridors.')}
                     </span>
                   </div>
                 </div>
