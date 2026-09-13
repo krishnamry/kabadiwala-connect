@@ -135,10 +135,11 @@ const SEED_PICKUPS: Pickup[] = [
     longitude: 77.2400,
     scheduledAt: '2026-09-08 11:30 AM',
     items: [
-      { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.5, ratePerKg: 640 },
-      { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 },
-      { category: 'CRT Monitor Glass Unit', estWeightKg: 12.0, ratePerKg: 12 }
+      { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.5, ratePerKg: 640, quantity: 2 },
+      { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480, quantity: 3 },
+      { category: 'CRT Monitor Glass Unit', estWeightKg: 12.0, ratePerKg: 12, quantity: 1 }
     ],
+    totalItems: 6,
     totalAmount: 4304,
     notes: 'Doorstep pickup requested with live tracking.',
     traceabilityHash: '0x8f4a9b2c7e103984fa55',
@@ -172,9 +173,10 @@ const SEED_PICKUPS: Pickup[] = [
     scheduledAt: '2026-09-01 10:00 AM',
     completedAt: '2026-09-01 10:45 AM',
     items: [
-      { category: 'Lithium-ion Batteries', estWeightKg: 5.0, ratePerKg: 145 },
-      { category: 'LCD/LED Display Panels', estWeightKg: 8.5, ratePerKg: 85 }
+      { category: 'Lithium-ion Batteries', estWeightKg: 5.0, ratePerKg: 145, quantity: 4 },
+      { category: 'LCD/LED Display Panels', estWeightKg: 8.5, ratePerKg: 85, quantity: 2 }
     ],
+    totalItems: 6,
     totalAmount: 1447,
     notes: 'Safe recycling completed. Handover certificate generated.',
     traceabilityHash: '0x3c7e9184a298bf0182dd',
@@ -194,9 +196,10 @@ const SEED_PICKUPS: Pickup[] = [
     longitude: 77.2315,
     scheduledAt: '2026-09-08 02:00 PM',
     items: [
-      { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.5, ratePerKg: 640 },
-      { category: 'Electric Motors & Compressors', estWeightKg: 6.0, ratePerKg: 95 }
+      { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.5, ratePerKg: 640, quantity: 2 },
+      { category: 'Electric Motors & Compressors', estWeightKg: 6.0, ratePerKg: 95, quantity: 2 }
     ],
+    totalItems: 4,
     totalAmount: 2170,
     notes: '2 desktop towers, want fast pickup today.',
     traceabilityHash: '0x7e8b91a20c34567def12',
@@ -215,9 +218,10 @@ const SEED_PICKUPS: Pickup[] = [
     longitude: 77.2380,
     scheduledAt: '2026-09-08 04:30 PM',
     items: [
-      { category: 'Copper Cables & Insulated Wires', estWeightKg: 5.0, ratePerKg: 480 },
-      { category: 'Lithium-ion Batteries', estWeightKg: 3.0, ratePerKg: 145 }
+      { category: 'Copper Cables & Insulated Wires', estWeightKg: 5.0, ratePerKg: 480, quantity: 3 },
+      { category: 'Lithium-ion Batteries', estWeightKg: 3.0, ratePerKg: 145, quantity: 2 }
     ],
+    totalItems: 5,
     totalAmount: 2835,
     notes: 'Office network cabling and laptop battery replacements.',
     traceabilityHash: '0x12a9b34c89df70123ef4',
@@ -236,6 +240,7 @@ const SEED_LOTS: EWasteLot[] = [
     collectorName: 'Suresh Kumar',
     category: 'High-grade Printed Circuit Boards (PCBs)',
     approxWeightKg: 18.5,
+    totalItems: 8,
     estimatedValue: 11840,
     askingPrice: 11840,
     minBidAmount: 5920,
@@ -247,6 +252,9 @@ const SEED_LOTS: EWasteLot[] = [
     locationZone: 'Mayapuri Scrap Cluster, Delhi',
     createdAt: '2026-09-08 09:30 AM',
     qrCode: 'KBD-EWASTE-9821-IN',
+    items: [
+      { id: 'it-101', category: 'High-grade Printed Circuit Boards (PCBs)', weightKg: 18.5, ratePerKg: 640, quantity: 8, subtotal: 11840 }
+    ],
     bids: [
       {
         id: 'bid-01',
@@ -267,6 +275,7 @@ const SEED_LOTS: EWasteLot[] = [
     collectorName: 'Mohan Lal',
     category: 'Copper Cables & Insulated Wires',
     approxWeightKg: 24.0,
+    totalItems: 12,
     estimatedValue: 11520,
     askingPrice: 11520,
     minBidAmount: 5760,
@@ -278,6 +287,9 @@ const SEED_LOTS: EWasteLot[] = [
     locationZone: 'Okhla Scrap Zone, Delhi',
     createdAt: '2026-09-08 10:15 AM',
     qrCode: 'KBD-EWASTE-9824-IN',
+    items: [
+      { id: 'it-102', category: 'Copper Cables & Insulated Wires', weightKg: 24.0, ratePerKg: 480, quantity: 12, subtotal: 11520 }
+    ],
     bids: []
   },
   {
@@ -287,6 +299,7 @@ const SEED_LOTS: EWasteLot[] = [
     collectorName: 'Radhe Shyam',
     category: 'Lithium-ion Batteries',
     approxWeightKg: 32.0,
+    totalItems: 25,
     estimatedValue: 4640,
     askingPrice: 4640,
     minBidAmount: 2320,
@@ -298,6 +311,9 @@ const SEED_LOTS: EWasteLot[] = [
     locationZone: 'Seelampur E-Waste Market, Delhi',
     createdAt: '2026-09-08 11:00 AM',
     qrCode: 'KBD-EWASTE-9830-IN',
+    items: [
+      { id: 'it-103', category: 'Lithium-ion Batteries', weightKg: 32.0, ratePerKg: 145, quantity: 25, subtotal: 4640 }
+    ],
     bids: []
   },
   {
@@ -307,6 +323,7 @@ const SEED_LOTS: EWasteLot[] = [
     collectorName: 'Suresh Kumar',
     category: 'Custom Mixed Lot (3 Materials)',
     approxWeightKg: 27.0,
+    totalItems: 16,
     estimatedValue: 12885,
     askingPrice: 12885,
     minBidAmount: 6443,
@@ -320,9 +337,9 @@ const SEED_LOTS: EWasteLot[] = [
     qrCode: 'KBD-EWASTE-9840-IN',
     isCustomLot: true,
     items: [
-      { category: 'High-grade Printed Circuit Boards (PCBs)', weightKg: 10.0, ratePerKg: 640, subtotal: 6400 },
-      { category: 'Copper Cables & Insulated Wires', weightKg: 12.0, ratePerKg: 480, subtotal: 5760 },
-      { category: 'Lithium-ion Batteries', weightKg: 5.0, ratePerKg: 145, subtotal: 725 }
+      { id: 'it-104-1', category: 'High-grade Printed Circuit Boards (PCBs)', weightKg: 10.0, ratePerKg: 640, quantity: 6, subtotal: 6400 },
+      { id: 'it-104-2', category: 'Copper Cables & Insulated Wires', weightKg: 12.0, ratePerKg: 480, quantity: 4, subtotal: 5760 },
+      { id: 'it-104-3', category: 'Lithium-ion Batteries', weightKg: 5.0, ratePerKg: 145, quantity: 6, subtotal: 725 }
     ],
     bids: []
   }

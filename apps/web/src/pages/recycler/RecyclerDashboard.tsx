@@ -580,7 +580,9 @@ export const RecyclerDashboard: React.FC = () => {
                               {lot.items.map((item, idx) => (
                                 <div key={idx} className="flex items-center justify-between text-xs sm:text-sm bg-white px-3 py-2 rounded-xl border border-slate-200/70 shadow-2xs">
                                   <span className="text-slate-800 font-semibold truncate pr-2">• {preserveEnglishItemName(item.category)}</span>
-                                  <span className="text-slate-900 font-bold shrink-0">{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span></span>
+                                  <span className="text-slate-900 font-bold shrink-0">
+                                    {item.quantity ? `${item.quantity} ${t('pieces', 'pcs')} • ` : ''}{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span>
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -593,16 +595,22 @@ export const RecyclerDashboard: React.FC = () => {
                             <span className="font-bold text-slate-800 text-sm sm:text-base truncate block mt-0.5">{lot.collectorName}</span>
                           </div>
                           <div>
+                            <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('totalItems', 'TOTAL ITEMS')}</span>
+                            <span className="font-display font-black text-slate-900 text-base sm:text-lg block mt-0.5 truncate">
+                              {lot.totalItems || lot.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')}
+                            </span>
+                          </div>
+                          <div>
                             <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('weight', 'EST. WEIGHT')}</span>
-                            <span className="font-display font-black text-slate-900 text-lg sm:text-xl block mt-0.5">{lot.approxWeightKg} kg</span>
+                            <span className="font-display font-black text-slate-900 text-base sm:text-lg block mt-0.5">{lot.approxWeightKg} kg</span>
                           </div>
                           <div>
                             <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('askingPrice', 'ASKING PRICE')}</span>
-                            <span className="font-display font-black text-slate-900 text-lg sm:text-xl block mt-0.5">₹{ask.toLocaleString('en-IN')}</span>
+                            <span className="font-display font-black text-slate-900 text-base sm:text-lg block mt-0.5">₹{ask.toLocaleString('en-IN')}</span>
                           </div>
-                          <div>
-                            <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider block">{t('minBid', 'MIN BID (50%)')}</span>
-                            <span className="font-display font-black text-emerald-700 text-lg sm:text-xl block mt-0.5">₹{minBid.toLocaleString('en-IN')}</span>
+                          <div className="col-span-2 pt-1 border-t border-slate-200/70 flex justify-between items-center">
+                            <span className="text-slate-500 text-xs uppercase font-semibold tracking-wider">{t('minBid', 'MIN BID (50%):')}</span>
+                            <span className="font-display font-black text-emerald-700 text-base sm:text-lg">₹{minBid.toLocaleString('en-IN')}</span>
                           </div>
                         </div>
 
@@ -905,6 +913,12 @@ export const RecyclerDashboard: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="text-slate-500 font-medium">{t('totalItems', 'Total Items')}:</span>
+                  <span className="font-display font-black text-slate-900 text-sm sm:text-base">
+                    {previewLot ? (previewLot.totalItems || previewLot.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1) : 1} {t('pieces', 'pcs')}
+                  </span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-slate-500 font-medium">Estimated Weight:</span>
                   <span className="font-display font-black text-slate-900 text-sm sm:text-base">
                     {previewLot ? `${previewLot.approxWeightKg} kg` : '18.5 kg'}
@@ -930,7 +944,9 @@ export const RecyclerDashboard: React.FC = () => {
                       {previewLot.items.map((item: EWasteLotItem, idx: number) => (
                         <div key={idx} className="flex justify-between items-center text-xs sm:text-sm bg-white px-3 py-1.5 rounded-xl border border-slate-200/70 shadow-2xs">
                           <span className="truncate pr-1 font-semibold text-slate-800">• {preserveEnglishItemName(item.category)}</span>
-                          <span className="font-bold text-slate-900 shrink-0">{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span></span>
+                          <span className="font-bold text-slate-900 shrink-0">
+                            {item.quantity ? `${item.quantity} ${t('pieces', 'pcs')} • ` : ''}{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span>
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -1350,7 +1366,7 @@ export const RecyclerDashboard: React.FC = () => {
                 Submit Bid for Lot #{biddingLot.lotCode}
               </h3>
               <p className="text-sm text-slate-600 font-medium">
-                {preserveEnglishItemName(biddingLot.category)} • {biddingLot.approxWeightKg} kg
+                {preserveEnglishItemName(biddingLot.category)} • {biddingLot.totalItems || biddingLot.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} • {biddingLot.approxWeightKg} kg
               </p>
             </div>
 
@@ -1368,7 +1384,9 @@ export const RecyclerDashboard: React.FC = () => {
                   {biddingLot.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center text-xs sm:text-sm bg-white px-3 py-1.5 rounded-xl border border-slate-200/70 shadow-2xs">
                       <span className="truncate pr-1 font-semibold text-slate-800">• {preserveEnglishItemName(item.category)}</span>
-                      <span className="font-bold text-slate-900 shrink-0">{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span></span>
+                      <span className="font-bold text-slate-900 shrink-0">
+                        {item.quantity ? `${item.quantity} ${t('pieces', 'pcs')} • ` : ''}{item.weightKg} kg <span className="text-emerald-700">(₹{item.ratePerKg}/kg)</span>
+                      </span>
                     </div>
                   ))}
                 </div>

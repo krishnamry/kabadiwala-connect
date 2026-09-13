@@ -62,17 +62,18 @@ export const CitizenDashboard: React.FC = () => {
   const [scheduledAt, setScheduledAt] = useState(() => new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 16));
   const [notes, setNotes] = useState('');
   
-  // E-waste items list (multi-item and custom-typed products supported)
+  // E-waste items list (multi-item, quantity per item and custom-typed products supported)
   const [items, setItems] = useState<Array<{
     category: string;
     estWeightKg: number;
     ratePerKg: number;
+    quantity?: number;
     isCustom?: boolean;
     customName?: string;
     imageUrl?: string;
   }>>([
-    { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.0, ratePerKg: 640 },
-    { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480 }
+    { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 3.0, ratePerKg: 640, quantity: 1 },
+    { category: 'Copper Cables & Insulated Wires', estWeightKg: 4.0, ratePerKg: 480, quantity: 1 }
   ]);
 
   // E-waste Category Rates Benchmark
@@ -93,6 +94,10 @@ export const CitizenDashboard: React.FC = () => {
   const [mlResult, setMlResult] = useState<MLClassificationResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Total Items and Weight Summary
+  const totalItemsCount = items.reduce((sum, i) => sum + (i.quantity || 1), 0);
+  const totalEstWeight = Math.round(items.reduce((sum, i) => sum + i.estWeightKg, 0) * 100) / 100;
 
   // Indicative Price Range Calculation (Section 1.A.2)
   const indicativeMin = items.reduce((sum, i) => sum + i.estWeightKg * (i.ratePerKg || eWasteRates[i.category] || 100) * 0.9, 0);
@@ -287,12 +292,18 @@ export const CitizenDashboard: React.FC = () => {
   const handleAddItem = () => {
     setItems(prev => [
       ...prev,
-      { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.0, ratePerKg: 640, isCustom: false, customName: '' }
+      { category: 'Printed Circuit Boards (PCBs)', estWeightKg: 2.0, ratePerKg: 640, quantity: 1, isCustom: false, customName: '' }
     ]);
   };
 
   const handleRemoveItem = (index: number) => {
     setItems(items.filter((_, i) => i !== index));
+  };
+
+  const handleQuantityChange = (index: number, qty: number) => {
+    const updated = [...items];
+    updated[index] = { ...updated[index], quantity: Math.max(1, Math.floor(qty)) };
+    setItems(updated);
   };
 
   const handleCategoryChange = (index: number, newCategory: string) => {
@@ -371,6 +382,7 @@ export const CitizenDashboard: React.FC = () => {
           category: detectedCat,
           estWeightKg: 2.5,
           ratePerKg: detectedRate,
+          quantity: 1,
           imageUrl: URL.createObjectURL(file)
         }
       ]);
@@ -401,7 +413,8 @@ export const CitizenDashboard: React.FC = () => {
         latitude,
         longitude,
         scheduledAt,
-        items,
+        items: items.map(it => ({ ...it, quantity: it.quantity || 1 })),
+        totalItems: totalItemsCount,
         totalAmount: Math.round((indicativeMin + indicativeMax) / 2),
         notes: notes + (donateToCsr ? ' [CSR DONATION TO GREEN FOUNDATION]' : ''),
         createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -674,7 +687,13 @@ export const CitizenDashboard: React.FC = () => {
                   </h4>
 
                   <div className="mt-2 text-xs text-steel-600 space-y-0.5 font-mono">
-                    <div>{t('itemsToRecycle', 'Items')}: {p.items.map(i => `${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</div>
+                    <div className="flex items-center justify-between text-steel-700 font-bold">
+                      <span>{t('totalItems', 'Total Items')}:</span>
+                      <span className="text-copper-700">
+                        {p.totalItems || p.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({p.items?.length || 1} {t('items', 'types')})
+                      </span>
+                    </div>
+                    <div>{t('itemsToRecycle', 'Items')}: {p.items.map(i => `${preserveEnglishItemName(i.category)} (${i.quantity || 1} ${t('pieces', 'pcs')}, ~${i.estWeightKg}kg)`).join(', ')}</div>
                     <div className="flex justify-between font-bold text-steel-800 pt-1">
                       <span>{t('indicative payout:', 'Indicative Payout:')}</span>
                       <span className="text-copper-700 font-mono-num">₹{p.totalAmount || 620}</span>
@@ -819,15 +838,25 @@ export const CitizenDashboard: React.FC = () => {
 
                 {/* Material Item Breakdown */}
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
-                    {t('itemsToRecycle')}:
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
+                      {t('itemsToRecycle')}:
+                    </span>
+                    <span className="text-xs font-mono font-bold text-copper-700 bg-copper-50 px-2.5 py-0.5 rounded-full border border-copper-200">
+                      {t('totalItems', 'Total Items')}: {selectedPickup.totalItems || selectedPickup.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({selectedPickup.items?.length || 1} {t('items', 'types')})
+                    </span>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono">
                     {selectedPickup.items.map((item, i) => (
-                      <div key={i} className="bg-white p-2.5 rounded border border-steel-300">
-                        <span className="font-bold text-steel-900 block">{preserveEnglishItemName(item.category)}</span>
-                        <span className="text-steel-600">~{item.estWeightKg} kg</span>
-                        <span className="text-copper-700 block font-bold">@ ₹{item.ratePerKg}/kg</span>
+                      <div key={i} className="bg-white p-2.5 rounded border border-steel-300 flex flex-col justify-between">
+                        <div>
+                          <span className="font-bold text-steel-900 block">{preserveEnglishItemName(item.category)}</span>
+                          <div className="text-steel-600 mt-1 flex justify-between">
+                            <span>{item.quantity || 1} {t('pieces', 'pcs')}</span>
+                            <span>~{item.estWeightKg} kg</span>
+                          </div>
+                        </div>
+                        <span className="text-copper-700 block font-bold mt-1">@ ₹{item.ratePerKg}/kg</span>
                       </div>
                     ))}
                   </div>
@@ -1127,21 +1156,53 @@ export const CitizenDashboard: React.FC = () => {
                           </option>
                         </select>
 
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            step="any"
-                            min="0.01"
-                            value={item.estWeightKg}
-                            onChange={e => {
-                              const val = parseFloat(e.target.value);
-                              handleWeightChange(index, isNaN(val) ? 0.01 : val);
-                            }}
-                            className="w-20 px-2 py-1.5 text-xs font-mono font-bold bg-paper-100 dark:bg-slate-900 border border-steel-300 dark:border-slate-700 rounded-lg text-right text-steel-900 dark:text-slate-100"
-                          />
-                          <span className="text-xs text-steel-500 font-mono">kg</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Item Quantity Stepper */}
+                          <div className="flex items-center gap-1 bg-paper-100 dark:bg-slate-900 px-2 py-1 rounded-lg border border-steel-300 dark:border-slate-700" title={t('quantity', 'Quantity (Pieces / Units)')}>
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(index, (item.quantity || 1) - 1)}
+                              className="w-5 h-5 rounded bg-paper-200 dark:bg-slate-800 text-steel-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs hover:bg-paper-300 active:scale-95"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity || 1}
+                              onChange={e => {
+                                const val = parseInt(e.target.value);
+                                handleQuantityChange(index, isNaN(val) ? 1 : val);
+                              }}
+                              className="w-9 text-center text-xs font-mono font-bold bg-transparent text-steel-900 dark:text-slate-100 focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(index, (item.quantity || 1) + 1)}
+                              className="w-5 h-5 rounded bg-paper-200 dark:bg-slate-800 text-steel-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs hover:bg-paper-300 active:scale-95"
+                            >
+                              +
+                            </button>
+                            <span className="text-[10px] text-steel-500 font-medium">{t('pieces', 'pcs')}</span>
+                          </div>
 
-                          <span className="font-mono text-xs font-bold text-copper-600 dark:text-emerald-400 w-20 text-right">
+                          {/* Item Weight */}
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              step="any"
+                              min="0.01"
+                              value={item.estWeightKg}
+                              onChange={e => {
+                                const val = parseFloat(e.target.value);
+                                handleWeightChange(index, isNaN(val) ? 0.01 : val);
+                              }}
+                              className="w-18 px-2 py-1.5 text-xs font-mono font-bold bg-paper-100 dark:bg-slate-900 border border-steel-300 dark:border-slate-700 rounded-lg text-right text-steel-900 dark:text-slate-100"
+                            />
+                            <span className="text-xs text-steel-500 font-mono">kg</span>
+                          </div>
+
+                          <span className="font-mono text-xs font-bold text-copper-600 dark:text-emerald-400 w-16 text-right">
                             ₹{Math.round(item.estWeightKg * (item.ratePerKg || eWasteRates[item.category] || 100))}
                           </span>
 
@@ -1211,6 +1272,26 @@ export const CitizenDashboard: React.FC = () => {
                       )}
                     </div>
                   ))}
+
+                  {/* Total Items & Consignment Summary Card */}
+                  <div className="p-3 bg-paper-100 dark:bg-slate-900 rounded-xl border border-steel-300 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-steel-700 dark:text-slate-300 uppercase tracking-wider">
+                        {t('totalItems', 'Total Items')}:
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-copper-100 dark:bg-emerald-950 text-copper-800 dark:text-emerald-300 border border-copper-300 dark:border-emerald-700 font-mono">
+                        {totalItemsCount} {t('pieces', 'pieces')} ({items.length} {t('items', 'types')})
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs font-mono">
+                      <span className="text-steel-600 dark:text-slate-400">
+                        {t('weight', 'Weight')}: <strong className="text-steel-900 dark:text-white font-bold">~{totalEstWeight} kg</strong>
+                      </span>
+                      <span className="text-copper-700 dark:text-emerald-400 font-bold">
+                        {t('indicativePriceRange', 'Est')}: ₹{Math.round(indicativeMin)} — ₹{Math.round(indicativeMax)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1484,9 +1565,30 @@ export const CitizenDashboard: React.FC = () => {
                 <span className="text-forest-700 font-bold">100% Closed Loop Recycled</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-steel-500">{t('totalItems', 'Total Items')}:</span>
+                <span className="font-bold text-steel-900">
+                  {showReceiptModal.totalItems || showReceiptModal.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({showReceiptModal.items?.length || 1} {t('items', 'types')})
+                </span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-steel-500">Total Scrap Value:</span>
                 <span className="font-bold text-copper-600">₹{showReceiptModal.totalAmount || 598}</span>
               </div>
+              {showReceiptModal.items && showReceiptModal.items.length > 0 && (
+                <div className="pt-2 border-t border-paper-300 space-y-1">
+                  <span className="text-steel-500 text-[10px] uppercase font-bold tracking-wider block">
+                    {t('itemsToRecycle', 'Itemized Manifest')}:
+                  </span>
+                  {showReceiptModal.items.map((it, idx) => (
+                    <div key={idx} className="flex justify-between text-[11px] text-steel-800 bg-white px-2 py-1 rounded border border-paper-200">
+                      <span className="truncate pr-1">• {preserveEnglishItemName(it.category)}</span>
+                      <span className="font-bold shrink-0">
+                        {it.quantity ? `${it.quantity} ${t('pieces', 'pcs')} • ` : ''}{it.actualWeightKg || it.estWeightKg} kg
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="flex justify-between pt-1 border-t border-paper-300 text-[10px] text-steel-500">
                 <span>Cryptographic Hash:</span>
                 <span>{showReceiptModal.traceabilityHash || '0x19283746...'}</span>

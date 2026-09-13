@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
 import { storage, STORAGE_KEYS, PassbookTxn } from '../../lib/storage';
-import { Pickup, EWasteLot, EWasteLotItem, LotBid, SafetyGuidanceCard, ScrapRate, MLClassificationResult } from '../../types';
+import { Pickup, ScrapItem, EWasteLot, EWasteLotItem, LotBid, SafetyGuidanceCard, ScrapRate, MLClassificationResult } from '../../types';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
@@ -155,6 +155,7 @@ export const KabadiwalaDashboard: React.FC = () => {
   const [lotTypeMode, setLotTypeMode] = useState<'single' | 'custom'>('single');
   const [lotCategory, setLotCategory] = useState('High-grade Printed Circuit Boards (PCBs)');
   const [lotWeight, setLotWeight] = useState(12.5);
+  const [lotItemCount, setLotItemCount] = useState(1);
   const [lotPhotoTaken, setLotPhotoTaken] = useState(false);
   const [lotPhotoClassifying, setLotPhotoClassifying] = useState(false);
   const [lotMlResult, setLotMlResult] = useState<MLClassificationResult | null>(null);
@@ -200,13 +201,14 @@ export const KabadiwalaDashboard: React.FC = () => {
   };
 
   // Custom Mixed Lot Line Items State
-  const [customLotItems, setCustomLotItems] = useState<Array<{ id: string; category: string; weightKg: number; ratePerKg: number; subtotal: number }>>([
-    { id: 'cli-1', category: 'High-grade Printed Circuit Boards (PCBs)', weightKg: 8.0, ratePerKg: 640, subtotal: 5120 },
-    { id: 'cli-2', category: 'Copper Cables & Insulated Wires', weightKg: 6.5, ratePerKg: 480, subtotal: 3120 },
-    { id: 'cli-3', category: 'Lithium-ion Batteries', weightKg: 4.0, ratePerKg: 145, subtotal: 580 }
+  const [customLotItems, setCustomLotItems] = useState<Array<{ id: string; category: string; weightKg: number; ratePerKg: number; subtotal: number; quantity?: number }>>([
+    { id: 'cli-1', category: 'High-grade Printed Circuit Boards (PCBs)', weightKg: 8.0, ratePerKg: 640, subtotal: 5120, quantity: 4 },
+    { id: 'cli-2', category: 'Copper Cables & Insulated Wires', weightKg: 6.5, ratePerKg: 480, subtotal: 3120, quantity: 2 },
+    { id: 'cli-3', category: 'Lithium-ion Batteries', weightKg: 4.0, ratePerKg: 145, subtotal: 580, quantity: 8 }
   ]);
   const [newCustomCategory, setNewCustomCategory] = useState('Engineering E-Plastics (ABS/HIPS)');
   const [newCustomWeight, setNewCustomWeight] = useState(5.0);
+  const [newCustomQuantity, setNewCustomQuantity] = useState(1);
 
   // Custom Typed Product Support for Single and Mixed Lots
   const [isCustomSingleLot, setIsCustomSingleLot] = useState(false);
@@ -457,6 +459,7 @@ export const KabadiwalaDashboard: React.FC = () => {
       ? customMixedItemRate
       : (priceBoardData.find(p => p.category.includes(newCustomCategory) || newCustomCategory.includes(p.category))?.ratePerKg || 400);
     const subtotal = Math.round(rate * newCustomWeight);
+    const qty = Math.max(1, Math.floor(newCustomQuantity || 1));
 
     const existingIdx = customLotItems.findIndex(i => i.category.toLowerCase() === catName.toLowerCase());
     if (existingIdx >= 0) {
@@ -466,6 +469,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           return {
             ...item,
             weightKg: updatedWeight,
+            quantity: (item.quantity || 1) + qty,
             subtotal: Math.round(item.ratePerKg * updatedWeight)
           };
         }
@@ -479,10 +483,12 @@ export const KabadiwalaDashboard: React.FC = () => {
           category: catName,
           weightKg: newCustomWeight,
           ratePerKg: rate,
+          quantity: qty,
           subtotal
         }
       ]);
     }
+    setNewCustomQuantity(1);
     if (isCustomMixedItem) {
       setCustomMixedItemName('');
     }
@@ -513,6 +519,34 @@ export const KabadiwalaDashboard: React.FC = () => {
           ...item,
           weightKg: nextWeight,
           subtotal: Math.round(item.ratePerKg * nextWeight)
+        };
+      }
+      return item;
+    }));
+  };
+
+  // Adjust quantity of custom lot item (+ / - delta units)
+  const handleUpdateCustomItemQuantity = (id: string, deltaQty: number) => {
+    setCustomLotItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const nextQty = Math.max(1, (item.quantity || 1) + deltaQty);
+        return {
+          ...item,
+          quantity: nextQty
+        };
+      }
+      return item;
+    }));
+  };
+
+  // Directly set custom lot item quantity
+  const handleSetCustomItemQuantity = (id: string, qty: number) => {
+    setCustomLotItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const nextQty = Math.max(1, Math.floor(qty));
+        return {
+          ...item,
+          quantity: nextQty
         };
       }
       return item;
@@ -613,6 +647,7 @@ export const KabadiwalaDashboard: React.FC = () => {
         category: it.category,
         weightKg: it.weightKg,
         ratePerKg: it.ratePerKg,
+        quantity: it.quantity || 1,
         subtotal: it.subtotal
       }));
     } else {
@@ -627,6 +662,23 @@ export const KabadiwalaDashboard: React.FC = () => {
       finalValuation = Math.round(offeredRate * lotWeight);
     }
 
+    const totalUnitsCount = lotTypeMode === 'custom'
+      ? customLotItems.reduce((sum, it) => sum + (it.quantity || 1), 0)
+      : Math.max(1, Math.floor(lotItemCount || 1));
+
+    if (lotTypeMode !== 'custom') {
+      itemsPayload = [
+        {
+          id: `item-${Date.now()}`,
+          category: finalCategory,
+          weightKg: finalWeight,
+          ratePerKg: offeredRate,
+          quantity: totalUnitsCount,
+          subtotal: finalValuation
+        }
+      ];
+    }
+
     const newLot: EWasteLot = {
       id: `lot-local-${Date.now()}`,
       lotCode: `KC-LOT-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -634,6 +686,7 @@ export const KabadiwalaDashboard: React.FC = () => {
       collectorName: user?.name || 'Suresh Kumar',
       category: finalCategory,
       approxWeightKg: finalWeight,
+      totalItems: totalUnitsCount,
       estimatedValue: finalValuation,
       askingPrice: finalValuation,
       minBidAmount: Math.round(finalValuation * 0.5),
@@ -751,12 +804,19 @@ export const KabadiwalaDashboard: React.FC = () => {
     setCompletingJob(true);
     try {
       const itemsPayload = (activeJob.items || []).map(item => ({
+        ...item,
         category: item.category,
-        actualWeightKg: itemWeights[item.category] ?? item.actualWeightKg ?? item.estWeightKg ?? 5
+        quantity: item.quantity || 1,
+        estWeightKg: item.estWeightKg || 5,
+        actualWeightKg: itemWeights[item.category] ?? item.actualWeightKg ?? item.estWeightKg ?? 5,
+        ratePerKg: item.ratePerKg
       }));
+      const totalUnits = activeJob.totalItems || itemsPayload.reduce((s, it) => s + (it.quantity || 1), 0);
       const res = await api.completePickup(activeJob.id, itemsPayload).catch(() => ({
         pickup: storage.updatePickupStatus(activeJob.id, 'COMPLETED', {
           isVerified: true,
+          items: itemsPayload,
+          totalItems: totalUnits,
           verifiedAt: new Date().toISOString()
         }),
         transaction: null,
@@ -1014,6 +1074,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
           {lotsSubView === 'create' ? (() => {
             const customTotalWeight = Math.round(customLotItems.reduce((sum, item) => sum + item.weightKg, 0) * 10) / 10;
+            const customTotalUnits = customLotItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
             const customTotalValue = Math.round(customLotItems.reduce((sum, item) => sum + item.subtotal, 0));
             const customBlendedRate = customTotalWeight > 0 ? Math.round(customTotalValue / customTotalWeight) : 0;
 
@@ -1252,6 +1313,48 @@ export const KabadiwalaDashboard: React.FC = () => {
                           </button>
                         </div>
                       </div>
+
+                      {/* Total Units / Item Pieces Stepper */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            5. {t('totalUnits', 'Total Items / Pieces')}
+                          </label>
+                          <span className="text-xs text-slate-500 font-semibold">{t('optionalPieceCount', 'Count of individual pieces/units')}</span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setLotItemCount(c => Math.max(1, c - 1))}
+                            className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-800 dark:text-slate-200 hover:text-emerald-900 active:scale-95 transition-transform shadow-sm"
+                          >
+                            <Minus className="w-6 h-6" />
+                          </button>
+
+                          <div className="flex-1 bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 rounded-2xl p-2.5 sm:p-3 text-center shadow-sm flex items-center justify-center gap-2">
+                            <input
+                              type="number"
+                              min="1"
+                              value={lotItemCount}
+                              onChange={e => {
+                                const val = parseInt(e.target.value);
+                                setLotItemCount(isNaN(val) ? 1 : Math.max(1, val));
+                              }}
+                              className="w-28 sm:w-36 text-center text-3xl sm:text-4xl font-display font-black text-slate-900 dark:text-white bg-transparent focus:outline-none"
+                            />
+                            <span className="text-base font-bold text-slate-500 uppercase">{t('pieces', 'pcs')}</span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setLotItemCount(c => c + 1)}
+                            className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-800 dark:text-slate-200 hover:text-emerald-900 active:scale-95 transition-transform shadow-sm"
+                          >
+                            <Plus className="w-6 h-6" />
+                          </button>
+                        </div>
+                      </div>
                     </>
                   ) : (
                     /* CUSTOM MIXED LOT BUILDER SECTION */
@@ -1270,8 +1373,8 @@ export const KabadiwalaDashboard: React.FC = () => {
                         </div>
 
                         {/* Add Item Form Controls */}
-                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                          <div className="sm:col-span-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                          <div className="sm:col-span-4">
                             <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">
                               {t('materialType', 'Material Type')}
                             </label>
@@ -1285,7 +1388,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                                   setNewCustomCategory(e.target.value);
                                 }
                               }}
-                              className="w-full px-3.5 py-2.5 text-sm font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none"
+                              className="w-full px-3 py-2.5 text-sm font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none"
                             >
                               {priceBoardData.map(p => (
                                 <option key={p.category} value={p.category}>
@@ -1306,7 +1409,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => setNewCustomWeight(w => Math.max(0.01, Math.round((w - 0.1) * 10) / 10))}
-                                className="w-9 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
+                                className="w-8 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
                               >
                                 -
                               </button>
@@ -1319,12 +1422,44 @@ export const KabadiwalaDashboard: React.FC = () => {
                                   const val = parseFloat(e.target.value);
                                   setNewCustomWeight(isNaN(val) ? 0.01 : Math.max(0.01, Math.round(val * 100) / 100));
                                 }}
-                                className="w-full text-center px-2 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg"
+                                className="w-full text-center px-1 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg"
                               />
                               <button
                                 type="button"
                                 onClick={() => setNewCustomWeight(w => Math.round((w + 0.1) * 10) / 10)}
-                                className="w-9 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
+                                className="w-8 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs uppercase font-bold text-slate-600 mb-1.5">
+                              {t('qty', 'Qty')} ({t('pieces', 'pcs')})
+                            </label>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setNewCustomQuantity(q => Math.max(1, q - 1))}
+                                className="w-7 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                min="1"
+                                value={newCustomQuantity}
+                                onChange={e => {
+                                  const val = parseInt(e.target.value);
+                                  setNewCustomQuantity(isNaN(val) ? 1 : Math.max(1, val));
+                                }}
+                                className="w-full text-center px-1 py-2 text-sm font-bold bg-white border border-slate-300 rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewCustomQuantity(q => q + 1)}
+                                className="w-7 h-10 bg-slate-200 hover:bg-slate-300 border border-slate-300 rounded-lg flex items-center justify-center text-sm font-bold"
                               >
                                 +
                               </button>
@@ -1403,7 +1538,36 @@ export const KabadiwalaDashboard: React.FC = () => {
                                     </div>
                                   </div>
 
-                                  <div className="flex items-center gap-3 shrink-0">
+                                  <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap justify-end">
+                                    {/* Quantity adjustment */}
+                                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700" title={t('quantity', 'Quantity (pcs)')}>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleUpdateCustomItemQuantity(item.id, -1)}
+                                        className="w-5 h-6 text-slate-600 dark:text-slate-300 hover:text-slate-900 font-bold text-xs"
+                                      >
+                                        -
+                                      </button>
+                                      <input
+                                        type="number"
+                                        min="1"
+                                        value={item.quantity || 1}
+                                        onChange={e => {
+                                          const val = parseInt(e.target.value);
+                                          handleSetCustomItemQuantity(item.id, isNaN(val) ? 1 : val);
+                                        }}
+                                        className="w-8 text-center font-bold text-slate-900 dark:text-slate-100 text-xs bg-transparent focus:outline-none"
+                                      />
+                                      <span className="text-[10px] text-slate-500 font-bold -ml-1">{t('pieces', 'pcs')}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleUpdateCustomItemQuantity(item.id, 1)}
+                                        className="w-5 h-6 text-slate-600 dark:text-slate-300 hover:text-slate-900 font-bold text-xs"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+
                                     {/* Weight adjustment input & buttons */}
                                     <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
                                       <button
@@ -1459,8 +1623,10 @@ export const KabadiwalaDashboard: React.FC = () => {
                         {customLotItems.length > 0 && (
                           <div className="pt-3 border-t border-slate-200 grid grid-cols-3 gap-2.5 text-center">
                             <div className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs">
-                              <span className="text-xs text-slate-500 font-semibold block uppercase">TOTAL ITEMS</span>
-                              <span className="font-display font-bold text-slate-900 text-sm sm:text-base">{customLotItems.length} Types</span>
+                              <span className="text-xs text-slate-500 font-semibold block uppercase">{t('totalItems', 'TOTAL ITEMS')}</span>
+                              <span className="font-display font-bold text-slate-900 text-sm sm:text-base">
+                                {customTotalUnits} {t('pieces', 'pcs')} ({customLotItems.length} {t('items', 'types')})
+                              </span>
                             </div>
                             <div className="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs">
                               <span className="text-xs text-slate-500 font-semibold block uppercase">TOTAL NET WT</span>
@@ -1935,7 +2101,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                                       <div key={idx} className="flex justify-between items-center text-xs sm:text-sm text-slate-800">
                                         <span className="truncate pr-2 font-medium">• {preserveEnglishItemName(item.category)}</span>
                                         <span className="font-bold text-slate-900 shrink-0">
-                                          {item.weightKg} kg (₹{item.ratePerKg}/kg)
+                                          {item.quantity ? `${item.quantity} ${t('pieces', 'pcs')} • ` : ''}{item.weightKg} kg (₹{item.ratePerKg}/kg)
                                         </span>
                                       </div>
                                     ))}
@@ -1945,21 +2111,27 @@ export const KabadiwalaDashboard: React.FC = () => {
                             </div>
 
                             {/* Specs Grid */}
-                            <div className="grid grid-cols-2 gap-3 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/80 text-sm shadow-2xs">
+                            <div className="grid grid-cols-3 gap-2 bg-slate-50/90 p-3.5 rounded-2xl border border-slate-200/80 text-sm shadow-2xs">
                               <div>
-                                <span className="text-slate-500 text-xs font-semibold block uppercase tracking-wider">{t('weight', 'Weight')}</span>
-                                <span className="text-xl sm:text-2xl font-display font-black text-slate-900">{lot.approxWeightKg} kg</span>
+                                <span className="text-slate-500 text-[11px] font-semibold block uppercase tracking-wider">{t('totalItems', 'Total Items')}</span>
+                                <span className="text-base sm:text-lg font-display font-black text-slate-900 block truncate">
+                                  {lot.totalItems || lot.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')}
+                                </span>
                               </div>
                               <div>
-                                <span className="text-slate-500 text-xs font-semibold block uppercase tracking-wider">{t('askingPrice', 'Asking Price')}</span>
-                                <span className="text-xl sm:text-2xl font-display font-black text-emerald-700">{formatCurrency(ask)}</span>
+                                <span className="text-slate-500 text-[11px] font-semibold block uppercase tracking-wider">{t('weight', 'Weight')}</span>
+                                <span className="text-base sm:text-lg font-display font-black text-slate-900 block">{lot.approxWeightKg} kg</span>
                               </div>
-                              <div className="col-span-2 pt-2 border-t border-slate-200 flex items-center justify-between text-xs sm:text-sm">
+                              <div>
+                                <span className="text-slate-500 text-[11px] font-semibold block uppercase tracking-wider">{t('askingPrice', 'Asking Price')}</span>
+                                <span className="text-base sm:text-lg font-display font-black text-emerald-700 block">{formatCurrency(ask)}</span>
+                              </div>
+                              <div className="col-span-3 pt-2 border-t border-slate-200 flex items-center justify-between text-xs sm:text-sm">
                                 <span className="text-slate-500 font-medium">{t('minAskRule', 'Min Valid Bid (50%):')}</span>
                                 <span className="font-bold text-amber-700">{formatCurrency(minBid)}</span>
                               </div>
                               {lot.highestBid && (
-                                <div className="col-span-2 flex items-center justify-between text-xs sm:text-sm bg-emerald-100/70 p-2.5 rounded-xl border border-emerald-300/60">
+                                <div className="col-span-3 flex items-center justify-between text-xs sm:text-sm bg-emerald-100/70 p-2.5 rounded-xl border border-emerald-300/60">
                                   <span className="text-emerald-900 font-bold">{t('highestOffer:', 'Highest Offer:')}</span>
                                   <span className="text-base sm:text-lg font-display font-black text-emerald-800">{formatCurrency(lot.highestBid)}</span>
                                 </div>
@@ -2644,7 +2816,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                   <h3 className="text-lg font-display font-black text-steel-900 mt-1">
                     {activeJob.address}
                   </h3>
-                  <p className="text-xs text-steel-600">Citizen: {activeJob.citizen?.name || 'Ramesh Sharma'}</p>
+                  <p className="text-xs text-steel-600">
+                    Citizen: {activeJob.citizen?.name || 'Ramesh Sharma'} • {t('totalItems', 'Total Items')}: {activeJob.totalItems || activeJob.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({activeJob.items?.length || 1} {t('items', 'types')})
+                  </p>
                 </div>
                 <a
                   href={`tel:${activeJob.citizen?.phone || '9811100001'}`}
@@ -2664,7 +2838,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                   {activeJob.items.map((item, idx) => (
                     <div key={idx} className="bg-white p-3 rounded border border-steel-300 flex items-center justify-between">
                       <div>
-                        <span className="text-xs font-bold text-steel-800 block">{preserveEnglishItemName(item.category)}</span>
+                        <span className="text-xs font-bold text-steel-800 block">
+                          {item.quantity ? `${item.quantity} ${t('pieces', 'pcs')} • ` : ''}{preserveEnglishItemName(item.category)}
+                        </span>
                         <span className="text-[10px] text-steel-500">Rate: ₹{item.ratePerKg}/kg</span>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -2847,7 +3023,8 @@ export const KabadiwalaDashboard: React.FC = () => {
 
                   <div className="mt-2 space-y-1 text-xs text-steel-600">
                     <p>{t('citizenName')}: <strong>{pickup.citizen?.name || 'Ramesh Sharma'}</strong></p>
-                    <p>{t('itemsDeclared')}: <strong>{pickup.items.map(i => `${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</strong></p>
+                    <p>{t('totalItems', 'Total Items')}: <strong>{pickup.totalItems || pickup.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({pickup.items?.length || 1} {t('items', 'types')})</strong></p>
+                    <p>{t('itemsDeclared')}: <strong>{pickup.items.map(i => `${i.quantity ? `${i.quantity} ${t('pieces', 'pcs')} • ` : ''}${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</strong></p>
                   </div>
                 </div>
 
@@ -3037,7 +3214,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                       <div key={idx} className="flex justify-between items-center text-xs sm:text-sm text-slate-800">
                         <span className="truncate pr-1">• {preserveEnglishItemName(it.category)}</span>
                         <span className="font-bold text-slate-900 shrink-0">
-                          {it.weightKg} kg (₹{it.ratePerKg}/kg)
+                          {it.quantity ? `${it.quantity} ${t('pieces', 'pcs')} • ` : ''}{it.weightKg} kg (₹{it.ratePerKg}/kg)
                         </span>
                       </div>
                     ))}
@@ -3045,14 +3222,20 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2.5 pt-1 text-sm">
-                <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
-                  <span className="text-xs font-semibold text-slate-500 block uppercase">EST. WEIGHT</span>
-                  <span className="font-display font-black text-slate-900 text-base sm:text-lg">{createdLotModal.approxWeightKg} kg</span>
+              <div className="grid grid-cols-3 gap-2 pt-1 text-sm">
+                <div className="bg-white p-2.5 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="text-[11px] font-semibold text-slate-500 block uppercase">{t('totalItems', 'TOTAL ITEMS')}</span>
+                  <span className="font-display font-black text-slate-900 text-sm sm:text-base truncate block">
+                    {createdLotModal.totalItems || createdLotModal.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')}
+                  </span>
                 </div>
-                <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
-                  <span className="text-xs font-semibold text-slate-500 block uppercase">BASE RATE</span>
-                  <span className="font-display font-black text-emerald-700 text-base sm:text-lg">₹{createdLotModal.recyclerOfferedRate}/kg</span>
+                <div className="bg-white p-2.5 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="text-[11px] font-semibold text-slate-500 block uppercase">EST. WEIGHT</span>
+                  <span className="font-display font-black text-slate-900 text-sm sm:text-base">{createdLotModal.approxWeightKg} kg</span>
+                </div>
+                <div className="bg-white p-2.5 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="text-[11px] font-semibold text-slate-500 block uppercase">BASE RATE</span>
+                  <span className="font-display font-black text-emerald-700 text-sm sm:text-base">₹{createdLotModal.recyclerOfferedRate}/kg</span>
                 </div>
               </div>
 

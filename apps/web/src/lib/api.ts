@@ -182,7 +182,7 @@ export const api = {
     return updated || storage.getPickupById(id)!;
   },
 
-  completePickup: async (id: string, items: { category: string; actualWeightKg: number }[]): Promise<{ pickup: Pickup; transaction: any; totalAmount: number }> => {
+  completePickup: async (id: string, items: { category: string; actualWeightKg: number; [key: string]: any }[]): Promise<{ pickup: Pickup; transaction: any; totalAmount: number }> => {
     const currentPickup = storage.getPickupById(id);
     const rates = storage.getRates();
     let totalAmount = 0;
@@ -199,8 +199,10 @@ export const api = {
       };
     });
 
+    const totalUnits = currentPickup?.totalItems || updatedItems.reduce((s, it) => s + (it.quantity || 1), 0);
     const updated = storage.updatePickupStatus(id, 'COMPLETED', {
       items: updatedItems,
+      totalItems: totalUnits,
       totalAmount: totalAmount || currentPickup?.totalAmount || 620,
       completedAt: new Date().toISOString()
     });

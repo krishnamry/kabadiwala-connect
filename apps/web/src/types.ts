@@ -52,6 +52,7 @@ export interface ScrapItem {
   estWeightKg: number;
   actualWeightKg?: number | null;
   ratePerKg: number;
+  quantity?: number;
   imageUrl?: string | null;
 }
 
@@ -77,6 +78,7 @@ export interface Pickup {
   scheduledAt: string;
   completedAt?: string | null;
   items: ScrapItem[];
+  totalItems?: number;
   totalAmount?: number | null;
   notes?: string | null;
   createdAt: string;
@@ -103,6 +105,7 @@ export interface EWasteLotItem {
   category: string;
   weightKg: number;
   ratePerKg: number;
+  quantity?: number;
   subtotal?: number;
 }
 
@@ -113,6 +116,7 @@ export interface EWasteLot {
   collectorName: string;
   category: string;
   approxWeightKg: number;
+  totalItems?: number;
   estimatedValue: number;
   askingPrice?: number;
   minBidAmount?: number;

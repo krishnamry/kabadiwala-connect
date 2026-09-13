@@ -43,7 +43,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
           {/* SIH Badge Pill */}
           <div className="inline-flex items-center space-x-2.5 px-4 py-2 rounded-full bg-white text-slate-800 text-xs sm:text-sm font-semibold mb-8 border border-slate-200/90 shadow-m3-1 animate-fade-in">
             <span className="rounded-full px-2.5 py-0.5 chip-primary-m3 text-xs font-bold">SIH26229</span>
-            <span>Ministry of Mines — Informal e-Waste Integration</span>
+            <span>{t('ministryOfMinesTag', 'Ministry of Mines — Informal e-Waste Integration')}</span>
             <VoiceAssistButton
               text="Kabadiwala Connect. Digital formalization platform for informal scrap collectors and CPCB authorized e-waste recyclers."
               hindiText="कबाड़ीवाला कनेक्ट। अनौपचारिक कबाड़ीवालों और अधिकृत ई-कचरा रीसायकलर्स के लिए डिजिटल मंच।"
@@ -181,7 +181,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
               <span className="rounded-full px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold">
-                COMMODITY BENCHMARK
+                {t('commodityBenchmark', 'COMMODITY BENCHMARK')}
               </span>
               <h2 className="text-2xl sm:text-3xl font-display font-black text-slate-900 mt-2">
                 {t('mandiPriceBoardTitle', 'Live Material Benchmark Price Board')}
@@ -197,25 +197,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigatePortal }) =>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-100">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">High-Grade PCBs</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">{t('highGradePCBs', 'High-Grade PCBs')}</span>
               <span className="text-2xl sm:text-3xl font-display font-black text-slate-900 block mt-1">₹640 <span className="text-sm font-normal text-slate-500">/kg</span></span>
               <span className="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-2">▲ +₹25 {t('thisWeek', 'this week')}</span>
             </div>
 
             <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-100">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Clean Copper Wire</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">{t('cleanCopperWire', 'Clean Copper Wire')}</span>
               <span className="text-2xl sm:text-3xl font-display font-black text-slate-900 block mt-1">₹480 <span className="text-sm font-normal text-slate-500">/kg</span></span>
               <span className="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-2">▲ +₹15 {t('thisWeek', 'this week')}</span>
             </div>
 
             <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-100">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Li-ion Batteries</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">{t('lithiumBatteries', 'Li-ion Batteries')}</span>
               <span className="text-2xl sm:text-3xl font-display font-black text-slate-900 block mt-1">₹145 <span className="text-sm font-normal text-slate-500">/kg</span></span>
               <span className="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-2">▲ +₹10 {t('thisWeek', 'this week')}</span>
             </div>
 
             <div className="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-100">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Electric Motors</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">{t('electricMotors', 'Electric Motors')}</span>
               <span className="text-2xl sm:text-3xl font-display font-black text-slate-900 block mt-1">₹95 <span className="text-sm font-normal text-slate-500">/kg</span></span>
               <span className="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-2">▲ +₹5 {t('thisWeek', 'this week')}</span>
             </div>
