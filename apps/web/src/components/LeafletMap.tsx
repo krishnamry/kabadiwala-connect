@@ -87,12 +87,24 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
         attributionControl: true
       }).setView(center, zoom);
 
-      // OpenStreetMap: 100% Free, zero API key required, zero watermarks
-      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // High-performance ESRI World Street Map: Zero API keys, zero watermarks, and no OSM localhost blocking
+      const tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-        subdomains: ['a', 'b', 'c'],
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, METI, TomTom'
       });
+
+      // Automatic fallback to Humanitarian OSM if an individual ESRI tile fails
+      tileLayer.on('tileerror', (error: any) => {
+        const img = error.tile as HTMLImageElement;
+        if (img && !img.dataset.hasFallback) {
+          img.dataset.hasFallback = 'true';
+          const coords = error.coords;
+          if (coords) {
+            img.src = `https://a.tile.openstreetmap.fr/hot/${coords.z}/${coords.x}/${coords.y}.png`;
+          }
+        }
+      });
+
       tileLayer.addTo(map);
 
       // Tap / Click anywhere on map to drop or reposition pin
