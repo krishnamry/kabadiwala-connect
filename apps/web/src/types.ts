@@ -1,4 +1,4 @@
-export type Role = 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN';
+export type Role = 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN' | 'COLLECTOR' | 'REGULATORY' | 'citizen' | 'collector' | 'recycler' | 'regulatory';
 
 export type PickupStatus = 'REQUESTED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
@@ -9,6 +9,8 @@ export interface User {
   role: Role;
   email?: string;
   address?: string;
+  kycStatus?: 'UNVERIFIED' | 'UNDER_REVIEW' | 'VERIFIED' | 'REJECTED';
+  kycDocuments?: any;
   createdAt?: string;
   kabadiwala?: KabadiwalaProfile | null;
   recycler?: RecyclerProfile | null;
@@ -121,15 +123,23 @@ export interface EWasteLot {
   askingPrice?: number;
   minBidAmount?: number;
   recyclerOfferedRate: number;
-  status: 'DRAFT' | 'AVAILABLE' | 'REQUESTED' | 'BIDDING' | 'HANDOVER_PENDING' | 'CONFIRMED' | 'REJECTED';
+  status: 'DRAFT' | 'AVAILABLE' | 'REQUESTED' | 'BIDDING' | 'HANDOVER_PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED';
   bids?: LotBid[];
   highestBid?: number;
   winningBid?: LotBid;
+  winningBidId?: string;
   imageUrl?: string;
   gpsLat: number;
   gpsLng: number;
   locationAddress?: string;
   locationZone?: string;
+  auctionDurationMins?: number;
+  auctionExpiresAt?: string;
+  antiSnipingExtensions?: number;
+  saleTokenNumber?: string;
+  saleTokenId?: string;
+  finalPrice?: number;
+  actualWeightKg?: number;
   createdAt: string;
   confirmedAt?: string;
   recyclerId?: string;
@@ -141,6 +151,84 @@ export interface EWasteLot {
   verifiedAtWeighbridge?: boolean;
   isCustomLot?: boolean;
   items?: EWasteLotItem[];
+}
+
+export interface SaleToken {
+  id: string;
+  tokenNumber: string;
+  lotId: string;
+  collectorId: string;
+  collectorName: string;
+  collectorPhone: string;
+  collectorAadhaarRef?: string;
+  recyclerId: string;
+  recyclerName: string;
+  cpcbRegNumber: string;
+  category: string;
+  cpcbCategoryCode?: string;
+  grossWeightKg: number;
+  tareWeightKg: number;
+  netWeightKg: number;
+  ratePerKg: number;
+  totalAmount: number;
+  paymentMode?: string;
+  weighbridgeGpsLat?: number;
+  weighbridgeGpsLng?: number;
+  weighbridgeId?: string;
+  operatorId?: string;
+  sha256Signature?: string;
+  eprCredits?: number;
+  createdAt: string;
+}
+
+export interface Review {
+  id: string;
+  reviewerId: string;
+  reviewerName?: string;
+  reviewerRole?: string;
+  targetUserId: string;
+  targetUserName?: string;
+  targetRole?: string;
+  saleTokenId?: string;
+  status: 'PENDING_MUTUAL' | 'REVEALED' | 'EXPIRED';
+  revealedAt?: string;
+  ratingOverall: number;
+  ratingScaleAcc?: number;
+  ratingPayoutSpd?: number;
+  ratingPurity?: number;
+  reviewText?: string;
+  isVerifiedTrade?: boolean;
+  createdAt: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  receiverId?: string;
+  senderName?: string;
+  senderRole?: string;
+  contextType: 'LOT' | 'PICKUP';
+  contextId: string;
+  text?: string;
+  audioUrl?: string;
+  imageUrl?: string;
+  isRead?: boolean;
+  createdAt: string;
+}
+
+export interface KycInfo {
+  kycStatus: 'UNVERIFIED' | 'UNDER_REVIEW' | 'VERIFIED' | 'REJECTED';
+  kycDocuments?: {
+    documentType?: string;
+    documentNumber?: string;
+    documentUrl?: string;
+    submittedAt?: string;
+    remarks?: string;
+  };
+  dailyWeightLimitKg: number;
+  maxLotValueInr: number;
+  canInitiateAuctions: boolean;
+  canReceiveDirectEscrow: boolean;
 }
 
 export interface SafetyGuidanceCard {

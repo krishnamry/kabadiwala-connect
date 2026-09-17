@@ -3,13 +3,19 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
 import { storage, STORAGE_KEYS, PassbookTxn } from '../../lib/storage';
-import { Pickup, ScrapItem, EWasteLot, EWasteLotItem, LotBid, SafetyGuidanceCard, ScrapRate, MLClassificationResult } from '../../types';
+import { Pickup, ScrapItem, EWasteLot, EWasteLotItem, LotBid, SafetyGuidanceCard, ScrapRate, MLClassificationResult, KycInfo, SaleToken } from '../../types';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
 import { getCurrentPosition, reverseGeocode, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
+import { LiveBiddingRoom } from './LiveBiddingRoom';
+import { CollectorKycCard } from './CollectorKycCard';
+import { RatingModal } from './RatingModal';
+import { ChatDrawer } from './ChatDrawer';
 import {
   Truck,
+  Gavel,
+  BadgeCheck,
   MapPin,
   Phone,
   CheckCircle2,
@@ -47,7 +53,8 @@ import {
   Layers,
   Trash2,
   Building2,
-  Edit3
+  Edit3,
+  MessageSquare
 } from 'lucide-react';
 
 export interface ScrapHubPreset {
@@ -128,8 +135,29 @@ export const KabadiwalaDashboard: React.FC = () => {
   const { user } = useAuth();
   const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   
-  // Active Tab: lots | priceboard | recyclers | handover | passbook | safety | pickups
-  const [activeTab, setActiveTab] = useState<'lots' | 'priceboard' | 'recyclers' | 'handover' | 'passbook' | 'safety' | 'pickups'>('lots');
+  // Active Tab: lots | bids | priceboard | recyclers | handover | passbook | kyc | safety | pickups
+  const [activeTab, setActiveTab] = useState<'lots' | 'bids' | 'priceboard' | 'recyclers' | 'handover' | 'passbook' | 'kyc' | 'safety' | 'pickups'>('lots');
+
+  // KYC State
+  const [kycInfo, setKycInfo] = useState<KycInfo | null>(null);
+
+  // Contextual Chat State
+  const [activeChatContext, setActiveChatContext] = useState<{
+    type: 'LOT' | 'PICKUP';
+    id: string;
+    title: string;
+    partnerName: string;
+    partnerRole?: string;
+  } | null>(null);
+
+  // Rating Modal State
+  const [ratingModalData, setRatingModalData] = useState<{
+    saleTokenId?: string;
+    partnerId: string;
+    partnerName: string;
+    role: string;
+    lotCode?: string;
+  } | null>(null);
 
   // Sub-view inside 'lots' tab: 'create' or 'mylots'
   const [lotsSubView, setLotsSubView] = useState<'create' | 'mylots'>('create');
@@ -410,9 +438,40 @@ export const KabadiwalaDashboard: React.FC = () => {
     }
   };
 
+  const loadLots = async () => {
+    try {
+      const fetched = await api.getLots();
+      if (fetched && fetched.length > 0) {
+        setMyLots(fetched);
+      }
+    } catch {
+      setMyLots(storage.getMyLots(user?.id));
+    }
+  };
+
+  const loadKyc = async () => {
+    try {
+      const kyc = await api.getKycStatus();
+      setKycInfo(kyc);
+    } catch (err) {
+      console.warn('KYC load error:', err);
+    }
+  };
+
+  const handleSubmitKyc = async (payload: { documentType: string; documentNumber: string; remarks?: string }) => {
+    await api.submitKycDocuments(payload);
+    await loadKyc();
+  };
+
+  const handleSubmitReview = async (payload: any) => {
+    await api.submitReview(payload);
+  };
+
   useEffect(() => {
     loadPickups();
     detectCollectorLocation();
+    loadLots();
+    loadKyc();
 
     // Listen for storage events across tabs or local mutations
     const handleStorageChange = (e: any) => {
@@ -421,7 +480,7 @@ export const KabadiwalaDashboard: React.FC = () => {
         loadPickups();
       }
       if (key === STORAGE_KEYS.LOTS || key === '*') {
-        setMyLots(storage.getMyLots(user?.id));
+        loadLots();
       }
       if (key === STORAGE_KEYS.PASSBOOK_TXNS || key === STORAGE_KEYS.WALLET_BALANCE || key === '*') {
         setPassbookTransactions(storage.getPassbookTransactions());
@@ -723,11 +782,18 @@ export const KabadiwalaDashboard: React.FC = () => {
   };
 
   // Handle Collector Accepting a Recycler Bid
-  const handleAcceptBid = (lotId: string, bidId: string) => {
+  const handleAcceptBid = async (lotId: string, bidId: string) => {
+    try {
+      await api.acceptBid(lotId, bidId);
+    } catch (err) {
+      console.warn('API accept bid error:', err);
+    }
     const updated = storage.acceptLotBid(lotId, bidId);
+    await loadLots();
     setMyLots(storage.getMyLots(user?.id));
     hapticSuccess();
     setJobSuccess(`Bid of ₹${updated.estimatedValue} accepted for Lot #${updated.lotCode}! Delivery handover is now pending.`);
+    setActiveTab('handover');
   };
 
   // Handle Collector Rejecting a Recycler Bid
@@ -954,6 +1020,21 @@ export const KabadiwalaDashboard: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveTab('bids')}
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
+            activeTab === 'bids'
+              ? 'm3-tab-pill-active'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
+          }`}
+        >
+          <Gavel className="w-4 h-4" />
+          <span>2. {t('tabBids', 'Live Bidding Room')}</span>
+          {myLots.filter(l => l.status === 'BIDDING' || (l.bids && l.bids.length > 0)).length > 0 && (
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          )}
+        </button>
+
+        <button
           onClick={() => setActiveTab('priceboard')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
             activeTab === 'priceboard'
@@ -962,7 +1043,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <TrendingUp className="w-4 h-4" />
-          <span>2. {t('tabPriceBoard', 'Spoken Price Board')}</span>
+          <span>3. {t('tabPriceBoard', 'Spoken Price Board')}</span>
         </button>
 
         <button
@@ -974,7 +1055,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <Factory className="w-4 h-4" />
-          <span>3. {t('tabFindRecyclers', 'Nearby Recyclers')}</span>
+          <span>4. {t('tabFindRecyclers', 'Nearby Recyclers')}</span>
         </button>
 
         <button
@@ -986,7 +1067,7 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <QrCode className="w-4 h-4" />
-          <span>4. {t('tabHandover', 'Generate QR')}</span>
+          <span>5. {t('tabHandover', 'Generate QR & Token')}</span>
         </button>
 
         <button
@@ -998,19 +1079,22 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>5. {t('tabPassbook', 'Cash Passbook')}</span>
+          <span>6. {t('tabPassbook', 'Cash Passbook')}</span>
         </button>
 
         <button
-          onClick={() => setActiveTab('safety')}
+          onClick={() => setActiveTab('kyc')}
           className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
-            activeTab === 'safety'
-              ? 'bg-rose-700 text-white shadow-m3-1'
+            activeTab === 'kyc'
+              ? 'm3-tab-pill-active'
               : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
           }`}
         >
-          <AlertTriangle className="w-4 h-4" />
-          <span>6. {t('tabSafety', 'Safety Guidance')}</span>
+          <BadgeCheck className="w-4 h-4" />
+          <span>7. {t('tabKyc', 'CPCB KYC & Badges')}</span>
+          {kycInfo?.kycStatus === 'VERIFIED' && (
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          )}
         </button>
 
         <button
@@ -1022,7 +1106,19 @@ export const KabadiwalaDashboard: React.FC = () => {
           }`}
         >
           <Truck className="w-4 h-4" />
-          <span>7. {t('pickups', 'Citizen Pickups')}</span>
+          <span>8. {t('pickups', 'Citizen Pickups')}</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('safety')}
+          className={`flex-shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-sm flex items-center space-x-2 transition-all ${
+            activeTab === 'safety'
+              ? 'bg-rose-700 text-white shadow-m3-1'
+              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 shadow-sm'
+          }`}
+        >
+          <AlertTriangle className="w-4 h-4" />
+          <span>9. {t('tabSafety', 'Safety Guidance')}</span>
         </button>
       </div>
 
@@ -2210,17 +2306,51 @@ export const KabadiwalaDashboard: React.FC = () => {
                           </div>
 
                           {/* Card Bottom Actions */}
-                          <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
+                          <div className="pt-2 border-t border-slate-200 flex flex-col sm:flex-row items-center gap-2">
                             <button
                               type="button"
                               onClick={() => {
                                 setHandoverLotCode(lot.lotCode);
                                 setActiveTab('handover');
                               }}
-                              className="w-full btn-primary-m3 py-3 rounded-full text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform"
+                              className="flex-1 w-full btn-primary-m3 py-2.5 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-transform"
                             >
-                              <QrCode className="w-4 h-4 sm:w-5 sm:h-5" />
+                              <QrCode className="w-4 h-4" />
                               <span>{t('openQr', 'Open QR & Handover')}</span>
+                            </button>
+                            {lot.status === 'CONFIRMED' && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setRatingModalData({
+                                    partnerId: lot.recyclerId || 'rec_1',
+                                    partnerName: lot.recyclerName || 'EcoRecycle Aggregators Ltd',
+                                    role: 'RECYCLER',
+                                    lotCode: lot.lotCode,
+                                    saleTokenId: lot.saleTokenId
+                                  });
+                                }}
+                                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-500 text-slate-950 py-2.5 px-3.5 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
+                              >
+                                <Award className="w-3.5 h-3.5 text-slate-900" />
+                                <span>Rate Recycler</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveChatContext({
+                                  type: 'LOT',
+                                  id: lot.id,
+                                  title: `${lot.category} (${lot.approxWeightKg}kg)`,
+                                  partnerName: lot.recyclerName || lot.bids?.[0]?.recyclerName || 'EcoRecycle Aggregators Ltd',
+                                  partnerRole: 'RECYCLER'
+                                });
+                              }}
+                              className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 py-2.5 px-3 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-95"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-slate-700" />
+                              <span>Chat</span>
                             </button>
                           </div>
                         </div>
@@ -2233,7 +2363,25 @@ export const KabadiwalaDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: SPOKEN PRICE BOARD WITH TRENDS */}
+      {/* TAB 2: LIVE BIDDING ROOM & AUCTION FLOOR */}
+      {activeTab === 'bids' && (
+        <LiveBiddingRoom
+          lots={myLots}
+          onAcceptBid={handleAcceptBid}
+          onOpenChat={(lot) => {
+            setActiveChatContext({
+              type: 'LOT',
+              id: lot.id,
+              title: `${lot.category} (${lot.approxWeightKg}kg)`,
+              partnerName: lot.recyclerName || lot.bids?.[0]?.recyclerName || 'EcoRecycle Aggregators Ltd',
+              partnerRole: 'RECYCLER'
+            });
+          }}
+          onRefresh={loadLots}
+        />
+      )}
+
+      {/* TAB 3: SPOKEN PRICE BOARD WITH TRENDS */}
       {activeTab === 'priceboard' && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel-300 pb-3">
@@ -2492,19 +2640,25 @@ export const KabadiwalaDashboard: React.FC = () => {
             <div className="grid grid-cols-2 gap-3 text-xs font-mono bg-paper-100 p-3.5 rounded border border-paper-300">
               <div>
                 <span className="text-[10px] text-steel-500 block">COLLECTOR ID</span>
-                <span className="font-bold text-steel-800">KC-COL-8921 (Suresh)</span>
+                <span className="font-bold text-steel-800">{user?.id ? `KC-COL-${user.id.slice(0, 4).toUpperCase()}` : 'KC-COL-8921 (Suresh)'}</span>
               </div>
               <div>
                 <span className="text-[10px] text-steel-500 block">HANDOVER RECIPIENT</span>
-                <span className="font-bold text-steel-800">EcoRecycle (Okhla Ph-II)</span>
+                <span className="font-bold text-steel-800">
+                  {myLots.find(l => l.lotCode === handoverLotCode)?.recyclerName || 'EcoRecycle (Okhla Ph-II)'}
+                </span>
               </div>
               <div>
                 <span className="text-[10px] text-steel-500 block">ESTIMATED VALUE</span>
-                <span className="font-bold text-forest-700">₹8,000 ({language === 'hi' ? 'नकद / UPI' : language === 'mr' ? 'रोख / UPI' : 'Cash / UPI Escrow'})</span>
+                <span className="font-bold text-forest-700">
+                  ₹{(myLots.find(l => l.lotCode === handoverLotCode)?.finalPrice || myLots.find(l => l.lotCode === handoverLotCode)?.askingPrice || 8000).toLocaleString('en-IN')} ({language === 'hi' ? 'नकद / UPI' : language === 'mr' ? 'रोख / UPI' : 'Cash / UPI Escrow'})
+                </span>
               </div>
               <div>
-                <span className="text-[10px] text-steel-500 block">TIMESTAMP</span>
-                <span className="font-bold text-steel-800">08-SEP-2026 11:30 AM</span>
+                <span className="text-[10px] text-steel-500 block">SALE TOKEN</span>
+                <span className="font-bold text-steel-800">
+                  {myLots.find(l => l.lotCode === handoverLotCode)?.saleTokenNumber || 'KBD-SL-20260917-SZ-E92A1F'}
+                </span>
               </div>
             </div>
 
@@ -2513,6 +2667,67 @@ export const KabadiwalaDashboard: React.FC = () => {
               <span>
                 {language === 'hi' ? 'रीसायकलर द्वारा स्कैन करते ही यह रसीद सीपीसीबी ईपीआर पोर्टल पर दर्ज हो जाती है।' : language === 'mr' ? 'रीसायकलरने स्कॅन करताच ही पावती सीपीसीबी पोर्टलवर नोंदवली जाते.' : 'Upon recycler QR scan, this lot is immediately sealed on the CPCB central registry.'}
               </span>
+            </div>
+
+            {/* Universal CPCB Sale Token & Partner Actions */}
+            <div className="p-4 bg-white rounded-xl border-2 border-emerald-300 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-emerald-700" />
+                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">CPCB Universal Sale Token</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  CPCB Rule 13(2) Verified
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-xs font-mono flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-500 block uppercase">Audit Trace Hash</span>
+                  <span className="font-bold text-slate-900">{myLots.find(l => l.lotCode === handoverLotCode)?.saleTokenNumber || 'KBD-SL-20260917-SZ-E92A1F'}</span>
+                </div>
+                <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
+                  🔒 DPDP Shield (Aadhaar Masked)
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const l = myLots.find(lot => lot.lotCode === handoverLotCode);
+                    setRatingModalData({
+                      partnerId: l?.recyclerId || 'rec_1',
+                      partnerName: l?.recyclerName || 'EcoRecycle Aggregators Ltd',
+                      role: 'RECYCLER',
+                      lotCode: handoverLotCode,
+                      saleTokenId: l?.saleTokenId || 'st_seed_1'
+                    });
+                  }}
+                  className="btn-primary-m3 py-2 px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  <span>Rate Recycler</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const l = myLots.find(lot => lot.lotCode === handoverLotCode);
+                    setActiveChatContext({
+                      type: 'LOT',
+                      id: l?.id || 'lot_1',
+                      title: `${l?.category || 'E-Waste Lot'} (${l?.approxWeightKg || 45}kg)`,
+                      partnerName: l?.recyclerName || 'EcoRecycle Aggregators Ltd',
+                      partnerRole: 'RECYCLER'
+                    });
+                  }}
+                  className="bg-paper-200 hover:bg-paper-300 text-steel-800 border border-steel-300 py-2 px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                  <span>Chat Recycler</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2654,7 +2869,16 @@ export const KabadiwalaDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 6: SAFETY GUIDANCE & SEGREGATION CARDS */}
+      {/* TAB 7: CPCB KYC & BADGES */}
+      {activeTab === 'kyc' && (
+        <CollectorKycCard
+          kycInfo={kycInfo}
+          onSubmitKyc={handleSubmitKyc}
+          onRefresh={loadKyc}
+        />
+      )}
+
+      {/* TAB 8: SAFETY GUIDANCE & SEGREGATION CARDS */}
       {activeTab === 'safety' && (
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-steel-300 pb-3">
@@ -3032,51 +3256,82 @@ export const KabadiwalaDashboard: React.FC = () => {
                   <span className="font-mono font-bold text-copper-700 text-sm">
                     {t('estimatedPayout')}: ₹{pickup.totalAmount || 620}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={getDirectionsUrl(pickup.latitude, pickup.longitude, collectorCoords[0], collectorCoords[1])}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
-                      title="Open Google Maps Driving Directions"
-                    >
-                      <Navigation className="w-3.5 h-3.5 text-copper-600" />
-                      <span>Directions</span>
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => handleAcceptPickup(pickup)}
-                      className="btn-dhatu-primary px-4 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow-sm active:scale-98 transition-transform"
-                    >
-                      <Truck className="w-3.5 h-3.5" />
-                      <span>{t('acceptPickup')}</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveChatContext({
+                            type: 'PICKUP',
+                            id: pickup.id,
+                            title: `Pickup: ${pickup.address.slice(0, 24)}...`,
+                            partnerName: pickup.citizen?.name || 'Citizen',
+                            partnerRole: 'CITIZEN'
+                          });
+                        }}
+                        className="px-2.5 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
+                        title="Chat with Citizen"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                        <span>Chat</span>
+                      </button>
+                      <a
+                        href={getDirectionsUrl(pickup.latitude, pickup.longitude, collectorCoords[0], collectorCoords[1])}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
+                        title="Open Google Maps Driving Directions"
+                      >
+                        <Navigation className="w-3.5 h-3.5 text-copper-600" />
+                        <span>Directions</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleAcceptPickup(pickup)}
+                        className="btn-dhatu-primary px-4 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow-sm active:scale-98 transition-transform"
+                      >
+                        <Truck className="w-3.5 h-3.5" />
+                        <span>{t('acceptPickup')}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* MOBILE BOTTOM TAB BAR (Material 3 Expressive Navigation Bar) */}
       <nav
         aria-label="Collector Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0.75rem))]"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] px-1 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0.75rem))]"
       >
-        <div className="flex items-center justify-around gap-1 max-w-md mx-auto">
+        <div className="flex items-center justify-around gap-0.5 max-w-md mx-auto">
           <button
             onClick={() => setActiveTab('lots')}
-            className={`flex-1 min-w-0 py-1 px-1 rounded-2xl flex flex-col items-center justify-center transition-all ${
+            className={`flex-1 min-w-0 py-1 px-0.5 rounded-2xl flex flex-col items-center justify-center transition-all ${
               activeTab === 'lots'
                 ? 'font-bold'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'lots' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
+            <div className={`w-10 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'lots' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
               <Camera className="w-4 h-4" />
             </div>
-            <span className="text-[11px] font-semibold mt-1 truncate max-w-full">{t('mNavLots', 'Lots')}</span>
+            <span className="text-[10px] font-semibold mt-1 truncate max-w-full">{t('mNavLots', 'Lots')}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('bids')}
+            className={`flex-1 min-w-0 py-1 px-0.5 rounded-2xl flex flex-col items-center justify-center transition-all ${
+              activeTab === 'bids'
+                ? 'font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <div className={`w-10 h-7 rounded-full flex items-center justify-center transition-all ${activeTab === 'bids' ? 'm3-nav-pill-active' : 'text-slate-500'}`}>
+              <Gavel className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] font-semibold mt-1 truncate max-w-full">{t('mNavBids', 'Bids')}</span>
           </button>
 
           <button
@@ -3298,6 +3553,35 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* BILATERAL DOUBLE-BLIND RATING MODAL */}
+      {ratingModalData && (
+        <RatingModal
+          saleTokenId={ratingModalData.saleTokenId}
+          partnerId={ratingModalData.partnerId}
+          partnerName={ratingModalData.partnerName}
+          role={ratingModalData.role}
+          lotCode={ratingModalData.lotCode}
+          onClose={() => setRatingModalData(null)}
+          onSubmit={async (data) => {
+            await handleSubmitReview(data);
+            hapticSuccess();
+            setRatingModalData(null);
+          }}
+        />
+      )}
+
+      {/* CONTEXTUAL IN-APP CHAT DRAWER */}
+      {activeChatContext && (
+        <ChatDrawer
+          contextType={activeChatContext.type}
+          contextId={activeChatContext.id}
+          title={activeChatContext.title}
+          partnerName={activeChatContext.partnerName}
+          partnerRole={activeChatContext.partnerRole}
+          onClose={() => setActiveChatContext(null)}
+        />
       )}
 
     </div>

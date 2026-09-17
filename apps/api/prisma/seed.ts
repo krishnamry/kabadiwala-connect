@@ -7,6 +7,12 @@ async function main() {
   console.log('🌱 Starting database seeding for Kabadiwala Connect...');
 
   // Clean existing tables in reverse dependency order
+  await prisma.chatMessage.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.saleToken.deleteMany();
+  await prisma.lotBid.deleteMany();
+  await prisma.eWasteLot.deleteMany();
+  await prisma.recyclerProfile.deleteMany();
   await prisma.transaction.deleteMany();
   await prisma.scrapItem.deleteMany();
   await prisma.pickup.deleteMany();
@@ -50,13 +56,40 @@ async function main() {
     }
   });
 
+  // 2b. Recycler Facility Profile
+  await prisma.recyclerProfile.create({
+    data: {
+      userId: recycler.id,
+      facilityName: 'EcoRecycle Aggregators Ltd',
+      cpcbRegNumber: 'CPCB-EW-2023-DL-0881',
+      statePcb: 'Delhi Pollution Control Committee (DPCC)',
+      latitude: 28.5355,
+      longitude: 77.2600,
+      address: 'Plot 42, Okhla Industrial Area Phase-II, New Delhi - 110020',
+      materialsAccepted: ['Motherboards', 'Smartphones', 'Lithium Batteries', 'Server Racks', 'Display Panels', 'Copper Transformers'],
+      offeredRates: {
+        'Motherboards': 240,
+        'Smartphones': 180,
+        'Lithium Batteries': 110,
+        'Server Racks': 85,
+        'Display Panels': 60,
+        'Copper Transformers': 320
+      },
+      dailyCapacityKg: 5000,
+      pickupAvailable: true,
+      verified: true,
+      rating: 4.85,
+      totalReviewsCount: 38
+    }
+  });
+
   // 3. Seed 5 Kabadiwalas
   const kabadiwalaData = [
-    { name: 'Suresh Kumar', phone: '9876543210', verified: true, score: 4.9, balance: 1420.0, lat: 28.5685, lng: 77.2412, vehicle: 'Electric E-Rickshaw', aadhaar: '9128-4451-8901' },
-    { name: 'Raju Rastogi', phone: '9876543211', verified: true, score: 4.7, balance: 850.0, lat: 28.5490, lng: 77.2020, vehicle: 'Pedal Rickshaw', aadhaar: '3412-8876-1290' },
-    { name: 'Mohammed Irfan', phone: '9876543212', verified: false, score: 4.2, balance: 320.0, lat: 28.6320, lng: 77.2180, vehicle: 'Tata Ace Mini-truck', aadhaar: '7765-1209-4433' },
-    { name: 'Dharmendra Pal', phone: '9876543213', verified: true, score: 4.8, balance: 2150.0, lat: 28.6510, lng: 77.1915, vehicle: 'Cargo Tricycle', aadhaar: '6543-9901-7782' },
-    { name: 'Vikram Singh', phone: '9876543214', verified: false, score: 3.9, balance: 0.0, lat: 28.6360, lng: 77.3650, vehicle: 'Handcart (Thela)', aadhaar: '8901-2234-5511' },
+    { name: 'Suresh Kumar', phone: '9876543210', verified: true, score: 4.9, balance: 1420.0, lat: 28.5685, lng: 77.2412, vehicle: 'Electric E-Rickshaw', aadhaar: '9128-4451-8901', kyc: 'VERIFIED' },
+    { name: 'Raju Rastogi', phone: '9876543211', verified: true, score: 4.7, balance: 850.0, lat: 28.5490, lng: 77.2020, vehicle: 'Pedal Rickshaw', aadhaar: '3412-8876-1290', kyc: 'VERIFIED' },
+    { name: 'Mohammed Irfan', phone: '9876543212', verified: false, score: 4.2, balance: 320.0, lat: 28.6320, lng: 77.2180, vehicle: 'Tata Ace Mini-truck', aadhaar: '7765-1209-4433', kyc: 'UNVERIFIED' },
+    { name: 'Dharmendra Pal', phone: '9876543213', verified: true, score: 4.8, balance: 2150.0, lat: 28.6510, lng: 77.1915, vehicle: 'Cargo Tricycle', aadhaar: '6543-9901-7782', kyc: 'UNDER_REVIEW' },
+    { name: 'Vikram Singh', phone: '9876543214', verified: false, score: 3.9, balance: 0.0, lat: 28.6360, lng: 77.3650, vehicle: 'Handcart (Thela)', aadhaar: '8901-2234-5511', kyc: 'UNVERIFIED' },
   ];
 
   const kabadiwalas: any[] = [];
@@ -67,6 +100,7 @@ async function main() {
         phone: k.phone,
         role: 'KABADIWALA',
         password: hashedPassword,
+        kycStatus: k.kyc,
         kabadiwala: {
           create: {
             verified: k.verified,
@@ -458,6 +492,214 @@ async function main() {
   }
 
   console.log(`✅ Seeded ${pickupCount} realistic Pickups and completed Transactions.`);
+
+  // 6. Seed E-Waste Lots, Bids, Sale Tokens & Reviews
+  const lot1 = await prisma.eWasteLot.create({
+    data: {
+      lotCode: 'LOT-2026-0881',
+      collectorId: suresh.id,
+      collectorName: 'Suresh Kumar',
+      category: 'Motherboards',
+      approxWeightKg: 18.5,
+      totalItems: 14,
+      estimatedValue: 4440,
+      askingPrice: 4800,
+      minBidAmount: 4000,
+      status: 'BIDDING',
+      highestBid: 4625,
+      auctionDurationMins: 60,
+      gpsLat: 28.5685,
+      gpsLng: 77.2412,
+      locationAddress: 'Lajpat Nagar Ring Road Yard, New Delhi',
+      locationZone: 'South Delhi',
+      items: [
+        { category: 'Motherboards', weightKg: 12.5, ratePerKg: 240, quantity: 8, subtotal: 3000 },
+        { category: 'Server PCBs', weightKg: 6.0, ratePerKg: 240, quantity: 6, subtotal: 1440 }
+      ]
+    }
+  });
+
+  await prisma.lotBid.create({
+    data: {
+      lotId: lot1.id,
+      recyclerId: recycler.id,
+      recyclerName: 'EcoRecycle Aggregators Ltd',
+      bidAmount: 4625,
+      bidPerKg: 250,
+      status: 'PENDING',
+      notes: 'CPCB Certified Green recycling with instant payment guarantee'
+    }
+  });
+
+  await prisma.eWasteLot.create({
+    data: {
+      lotCode: 'LOT-2026-0882',
+      collectorId: suresh.id,
+      collectorName: 'Suresh Kumar',
+      category: 'Smartphones',
+      approxWeightKg: 12.0,
+      totalItems: 22,
+      estimatedValue: 2160,
+      askingPrice: 2400,
+      minBidAmount: 2000,
+      status: 'AVAILABLE',
+      auctionDurationMins: 120,
+      gpsLat: 28.5685,
+      gpsLng: 77.2412,
+      locationAddress: 'Mayapuri Phase-1 Shed 4, New Delhi',
+      locationZone: 'West Delhi',
+      items: [
+        { category: 'Smartphones', weightKg: 8.0, ratePerKg: 180, quantity: 15, subtotal: 1440 },
+        { category: 'Tablets', weightKg: 4.0, ratePerKg: 180, quantity: 7, subtotal: 720 }
+      ]
+    }
+  });
+
+  const lot3 = await prisma.eWasteLot.create({
+    data: {
+      lotCode: 'LOT-2026-0883',
+      collectorId: dharmendra.id,
+      collectorName: 'Dharmendra Pal',
+      category: 'Server Racks',
+      approxWeightKg: 45.0,
+      totalItems: 5,
+      estimatedValue: 3825,
+      askingPrice: 4200,
+      minBidAmount: 3500,
+      status: 'BIDDING',
+      highestBid: 4050,
+      auctionDurationMins: 90,
+      gpsLat: 28.6510,
+      gpsLng: 77.1915,
+      locationAddress: 'Okhla Phase-III Industrial Area, New Delhi',
+      locationZone: 'South Delhi'
+    }
+  });
+
+  await prisma.lotBid.create({
+    data: {
+      lotId: lot3.id,
+      recyclerId: recycler.id,
+      recyclerName: 'EcoRecycle Aggregators Ltd',
+      bidAmount: 4050,
+      bidPerKg: 90,
+      status: 'PENDING',
+      notes: 'Ready for immediate weighbridge intake at Okhla facility'
+    }
+  });
+
+  const lot4 = await prisma.eWasteLot.create({
+    data: {
+      lotCode: 'LOT-2026-0880',
+      collectorId: suresh.id,
+      collectorName: 'Suresh Kumar',
+      category: 'Lithium Batteries',
+      approxWeightKg: 25.0,
+      totalItems: 18,
+      estimatedValue: 2750,
+      askingPrice: 2900,
+      recyclerId: recycler.id,
+      recyclerName: 'EcoRecycle Aggregators Ltd',
+      recyclerOfferedRate: 115,
+      status: 'CONFIRMED',
+      highestBid: 2852,
+      verifiedAtWeighbridge: 1,
+      actualWeightKg: 24.8,
+      saleTokenNumber: 'KBD-SL-20260917-SZ-E92A1F',
+      gpsLat: 28.5355,
+      gpsLng: 77.2600,
+      locationAddress: 'Plot 42, Okhla Phase-II, New Delhi',
+      locationZone: 'South Delhi'
+    }
+  });
+
+  const saleToken = await prisma.saleToken.create({
+    data: {
+      tokenNumber: 'KBD-SL-20260917-SZ-E92A1F',
+      lotId: lot4.id,
+      collectorId: suresh.id,
+      collectorName: 'Suresh Kumar',
+      collectorPhone: '9876543210',
+      collectorAadhaarRef: 'UIDAI-SHA256-8901',
+      recyclerId: recycler.id,
+      recyclerName: 'EcoRecycle Aggregators Ltd',
+      cpcbRegNumber: 'CPCB-EW-2023-DL-0881',
+      category: 'Lithium Batteries',
+      cpcbCategoryCode: 'ITEW2',
+      grossWeightKg: 26.2,
+      tareWeightKg: 1.4,
+      netWeightKg: 24.8,
+      ratePerKg: 115.0,
+      totalAmount: 2852.0,
+      weighbridgeId: 'WB-OKHLA-04',
+      operatorId: 'OP-MEHRA-88',
+      eprCredits: 24.8
+    }
+  });
+
+  await prisma.review.create({
+    data: {
+      saleTokenId: saleToken.id,
+      reviewerId: suresh.id,
+      reviewerName: 'Suresh Kumar',
+      reviewerRole: 'COLLECTOR',
+      targetUserId: recycler.id,
+      targetUserName: 'EcoRecycle Aggregators Ltd',
+      targetRole: 'RECYCLER',
+      rating: 5,
+      punctualityRating: 5,
+      pricingFairnessRating: 5,
+      communicationRating: 5,
+      comment: 'Prompt digital weighbridge weighing and instant UPI payout via Escrow!',
+      status: 'REVEALED',
+      revealedAt: new Date().toISOString()
+    }
+  });
+
+  await prisma.review.create({
+    data: {
+      saleTokenId: saleToken.id,
+      reviewerId: recycler.id,
+      reviewerName: 'EcoRecycle Aggregators Ltd',
+      reviewerRole: 'RECYCLER',
+      targetUserId: suresh.id,
+      targetUserName: 'Suresh Kumar',
+      targetRole: 'COLLECTOR',
+      rating: 5,
+      punctualityRating: 5,
+      pricingFairnessRating: 5,
+      communicationRating: 5,
+      comment: 'Excellent segregation. Batteries were clean and sorted into safety bins.',
+      status: 'REVEALED',
+      revealedAt: new Date().toISOString()
+    }
+  });
+
+  await prisma.chatMessage.create({
+    data: {
+      contextType: 'LOT',
+      contextId: lot1.id,
+      senderId: recycler.id,
+      senderName: 'EcoRecycle Facility Desk',
+      senderRole: 'RECYCLER',
+      recipientId: suresh.id,
+      text: 'Namaste Suresh ji. We placed a bid of ₹250/kg on your Motherboard lot. Can you deliver by 4 PM today?'
+    }
+  });
+
+  await prisma.chatMessage.create({
+    data: {
+      contextType: 'LOT',
+      contextId: lot1.id,
+      senderId: suresh.id,
+      senderName: 'Suresh Kumar',
+      senderRole: 'COLLECTOR',
+      recipientId: recycler.id,
+      text: 'Haanji sir, I will deliver with my e-rickshaw right after afternoon collection.'
+    }
+  });
+
+  console.log('✅ Seeded E-Waste Lots, Bids, Universal Sale Token, Reviews & Live Chat.');
   console.log('\n🎉 Database seeding complete!');
   console.log('----------------------------------------------------');
   console.log('Demo Credentials:');

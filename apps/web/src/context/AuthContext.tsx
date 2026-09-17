@@ -98,7 +98,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const quickDemoLogin = async (role: Role) => {
-    const demoPhones: Record<Role, string> = {
+    const canonical = ((): 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN' => {
+      const lower = String(role).toLowerCase();
+      if (lower === 'collector' || lower === 'kabadiwala') return 'KABADIWALA';
+      if (lower === 'regulatory' || lower === 'admin') return 'ADMIN';
+      if (lower === 'recycler') return 'RECYCLER';
+      return 'CITIZEN';
+    })();
+
+    const demoPhones: Record<'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN', string> = {
       CITIZEN: '9811100001',     // Ramesh Sharma
       KABADIWALA: '9876543210',  // Suresh Kumar
       RECYCLER: '9822200002',    // EcoRecycle Aggregators Ltd
@@ -107,14 +115,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setLoading(true);
     try {
-      const res = await api.login({ phone: demoPhones[role], password: 'password123' });
+      const res = await api.login({ phone: demoPhones[canonical], password: 'password123' });
       setAuthToken(res.token);
       setToken(res.token);
       setUser(res.user);
       storage.setCurrentUser(res.user);
     } catch (err) {
       console.warn('API login fallback, using storage user for role:', role);
-      const storedUser = storage.getUserByPhone(demoPhones[role]);
+      const storedUser = storage.getUserByPhone(demoPhones[canonical]);
       if (storedUser) {
         setUser(storedUser);
         setAuthToken('mock-demo-jwt-token');

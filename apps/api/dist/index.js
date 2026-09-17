@@ -17,6 +17,11 @@ const kabadiwala_routes_1 = __importDefault(require("./routes/kabadiwala.routes"
 const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const ml_routes_1 = __importDefault(require("./routes/ml.routes"));
 const geo_routes_1 = __importDefault(require("./routes/geo.routes"));
+const lot_routes_1 = __importDefault(require("./routes/lot.routes"));
+const sale_routes_1 = __importDefault(require("./routes/sale.routes"));
+const review_routes_1 = __importDefault(require("./routes/review.routes"));
+const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
+const kyc_routes_1 = __importDefault(require("./routes/kyc.routes"));
 const errorHandler_1 = require("./middleware/errorHandler");
 const app = (0, express_1.default)();
 // Security: Disable Express fingerprint header
@@ -104,6 +109,11 @@ app.use('/api/kabadiwala', kabadiwala_routes_1.default);
 app.use('/api/admin', admin_routes_1.default);
 app.use('/api/ml', ml_routes_1.default);
 app.use('/api/geo', geo_routes_1.default);
+app.use('/api/lots', lot_routes_1.default);
+app.use('/api/sales', sale_routes_1.default);
+app.use('/api/reviews', review_routes_1.default);
+app.use('/api/chat', chat_routes_1.default);
+app.use('/api/kyc', kyc_routes_1.default);
 // SPA fallback or API root info
 if (staticDir) {
     app.get('*', (req, res, next) => {
@@ -125,7 +135,13 @@ else {
                 rates: '/api/rates',
                 kabadiwala: '/api/kabadiwala',
                 admin: '/api/admin',
-                ml: '/api/ml'
+                ml: '/api/ml',
+                geo: '/api/geo',
+                lots: '/api/lots',
+                sales: '/api/sales',
+                reviews: '/api/reviews',
+                chat: '/api/chat',
+                kyc: '/api/kyc'
             }
         });
     });

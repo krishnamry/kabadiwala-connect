@@ -2,12 +2,19 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 
+export type UserRole = 'CITIZEN' | 'KABADIWALA' | 'ADMIN' | 'RECYCLER' | 'COLLECTOR' | 'REGULATORY' | 'citizen' | 'collector' | 'recycler' | 'regulatory';
+
 export interface AuthenticatedUser {
   id: string;
   name: string;
   phone: string;
-  role: 'CITIZEN' | 'KABADIWALA' | 'ADMIN' | 'RECYCLER';
+  role: UserRole;
 }
+
+export const isRegulatoryUser = (role?: string) => role === 'ADMIN' || role === 'REGULATORY' || role === 'regulatory';
+export const isCollectorUser = (role?: string) => role === 'KABADIWALA' || role === 'COLLECTOR' || role === 'collector';
+export const isRecyclerUser = (role?: string) => role === 'RECYCLER' || role === 'recycler';
+export const isCitizenUser = (role?: string) => role === 'CITIZEN' || role === 'citizen';
 
 declare global {
   namespace Express {
@@ -40,13 +47,23 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const requireRole = (allowedRoles: ('CITIZEN' | 'KABADIWALA' | 'ADMIN' | 'RECYCLER')[]) => {
+export const requireRole = (allowedRoles: (UserRole | string)[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const currentRole = req.user.role;
+    const matches = allowedRoles.some(r => {
+      if (r === currentRole) return true;
+      if ((r === 'ADMIN' || r === 'REGULATORY' || r === 'regulatory') && isRegulatoryUser(currentRole)) return true;
+      if ((r === 'KABADIWALA' || r === 'COLLECTOR' || r === 'collector') && isCollectorUser(currentRole)) return true;
+      if ((r === 'RECYCLER' || r === 'recycler') && isRecyclerUser(currentRole)) return true;
+      if ((r === 'CITIZEN' || r === 'citizen') && isCitizenUser(currentRole)) return true;
+      return false;
+    });
+
+    if (!matches) {
       return res.status(403).json({
         success: false,
         error: `Access forbidden: requires one of [${allowedRoles.join(', ')}] role`

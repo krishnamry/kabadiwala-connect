@@ -12,6 +12,11 @@ import kabadiwalaRoutes from './routes/kabadiwala.routes';
 import adminRoutes from './routes/admin.routes';
 import mlRoutes from './routes/ml.routes';
 import geoRoutes from './routes/geo.routes';
+import lotRoutes from './routes/lot.routes';
+import saleRoutes from './routes/sale.routes';
+import reviewRoutes from './routes/review.routes';
+import chatRoutes from './routes/chat.routes';
+import kycRoutes from './routes/kyc.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -109,6 +114,11 @@ app.use('/api/kabadiwala', kabadiwalaRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ml', mlRoutes);
 app.use('/api/geo', geoRoutes);
+app.use('/api/lots', lotRoutes);
+app.use('/api/sales', saleRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/kyc', kycRoutes);
 
 // SPA fallback or API root info
 if (staticDir) {
@@ -130,7 +140,13 @@ if (staticDir) {
         rates: '/api/rates',
         kabadiwala: '/api/kabadiwala',
         admin: '/api/admin',
-        ml: '/api/ml'
+        ml: '/api/ml',
+        geo: '/api/geo',
+        lots: '/api/lots',
+        sales: '/api/sales',
+        reviews: '/api/reviews',
+        chat: '/api/chat',
+        kyc: '/api/kyc'
       }
     });
   });

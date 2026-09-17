@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import { playVernacularSpeech, stopVernacularSpeech } from '../lib/voiceEngine';
 
 export type Language = 'en' | 'hi' | 'mr';
 
@@ -2249,12 +2250,6 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
    */
   const speak = (text: string, langOverride?: Language) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    
-    try {
-      window.speechSynthesis.cancel();
-    } catch (e) {
-      console.warn('SpeechSynthesis cancel error:', e);
-    }
 
     const targetLang = langOverride || language;
     let spokenText = text;
@@ -2265,124 +2260,16 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
       spokenText = t(text, text);
     }
 
-    // Preprocess text for natural speech cadence and correct Indian pronunciation
-    if (targetLang === 'hi') {
-      spokenText = spokenText
-        .replace(/₹\s*/g, ' रुपये ')
-        .replace(/\/\s*kg\b/gi, ' प्रति किलो ')
-        .replace(/\bkg\b/gi, ' किलो ')
-        .replace(/(\d+)\s*%/g, '$1 प्रतिशत')
-        .replace(/(\d+)\s*[-—]\s*(\d+)/g, '$1 से $2')
-        .replace(/\bpcbs\b/gi, ' पीसीबी ')
-        .replace(/\bpcb\b/gi, ' पीसीबी ')
-        .replace(/\bcrt\b/gi, ' सीआरटी ')
-        .replace(/\blcd\b/gi, ' एलसीडी ')
-        .replace(/\bled\b/gi, ' एलईडी ')
-        .replace(/\bram\b/gi, ' रैम ')
-        .replace(/\bcpu\b/gi, ' सीपीयू ')
-        .replace(/•|\*|#|~|\[|\]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    } else if (targetLang === 'mr') {
-      spokenText = spokenText
-        .replace(/₹\s*/g, ' रुपये ')
-        .replace(/\/\s*kg\b/gi, ' प्रति किलो ')
-        .replace(/\bkg\b/gi, ' किलो ')
-        .replace(/(\d+)\s*%/g, '$1 टक्के')
-        .replace(/(\d+)\s*[-—]\s*(\d+)/g, '$1 ते $2')
-        .replace(/\bpcbs\b/gi, ' पीसीबी ')
-        .replace(/\bpcb\b/gi, ' पीसीबी ')
-        .replace(/\bcrt\b/gi, ' सीआरटी ')
-        .replace(/\blcd\b/gi, ' एलसीडी ')
-        .replace(/\bled\b/gi, ' एलईडी ')
-        .replace(/\bram\b/gi, ' रॅम ')
-        .replace(/\bcpu\b/gi, ' सीपीयू ')
-        .replace(/•|\*|#|~|\[|\]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    } else {
-      spokenText = spokenText
-        .replace(/₹\s*/g, ' Rupees ')
-        .replace(/\/\s*kg\b/gi, ' per kilogram ')
-        .replace(/\bkg\b/gi, ' kilograms ')
-        .replace(/•|\*|#|~|\[|\]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    const utterance = new SpeechSynthesisUtterance(spokenText);
-    activeUtteranceRef.current = utterance;
-    const voices = window.speechSynthesis.getVoices();
-
-    const findVoice = (prefix: string, namePart: string) => {
-      return voices.find(v => {
-        const l = (v.lang || '').toLowerCase().replace('_', '-');
-        const n = (v.name || '').toLowerCase();
-        return l.startsWith(prefix.toLowerCase()) || n.includes(namePart.toLowerCase());
-      });
-    };
-
-    if (targetLang === 'hi') {
-      utterance.lang = 'hi-IN';
-      const hiVoice = findVoice('hi', 'hindi');
-      if (hiVoice) utterance.voice = hiVoice;
-      utterance.rate = 0.90;
-      utterance.pitch = 1.0;
-    } else if (targetLang === 'mr') {
-      const mrVoice = findVoice('mr', 'marathi');
-      if (mrVoice) {
-        utterance.voice = mrVoice;
-        utterance.lang = 'mr-IN';
-      } else {
-        // High-fidelity Devanagari fallback: Android WebView typically lacks dedicated mr-IN voice.
-        // Falling back to the Indian Devanagari voice with hi-IN language tag allows it to fluently
-        // read Marathi Devanagari phonetically without triggering Android TTS language-unsupported error!
-        const hiFallbackVoice = findVoice('hi', 'hindi');
-        if (hiFallbackVoice) utterance.voice = hiFallbackVoice;
-        utterance.lang = 'hi-IN';
-      }
-      utterance.rate = 0.88;
-      utterance.pitch = 1.0;
-    } else {
-      utterance.lang = 'en-IN';
-      const enVoice = findVoice('en-in', 'india') || findVoice('en', 'english');
-      if (enVoice) utterance.voice = enVoice;
-      utterance.rate = 0.95;
-    }
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => {
-      activeUtteranceRef.current = null;
-      setIsSpeaking(false);
-    };
-    utterance.onerror = (e) => {
-      console.warn('TTS playback notification:', e);
-      activeUtteranceRef.current = null;
-      setIsSpeaking(false);
-    };
-
-    setTimeout(() => {
-      try {
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        }
-        window.speechSynthesis.speak(utterance);
-      } catch (err) {
-        console.warn('SpeechSynthesis speak error:', err);
-      }
-    }, 25);
+    playVernacularSpeech(spokenText, targetLang, {
+      onStart: () => setIsSpeaking(true),
+      onEnd: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false)
+    });
   };
 
   const stopSpeaking = () => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-      } catch (e) {
-        console.warn('Stop speech error', e);
-      }
-      activeUtteranceRef.current = null;
-      setIsSpeaking(false);
-    }
+    stopVernacularSpeech();
+    setIsSpeaking(false);
   };
 
   // Indian Number Format formatter (e.g. ₹1,20,000)

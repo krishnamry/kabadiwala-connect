@@ -1,4 +1,4 @@
-import { Pickup, ScrapRate, AdminStats, MLClassificationResult, User } from '../types';
+import { Pickup, ScrapRate, AdminStats, MLClassificationResult, User, EWasteLot, LotBid, SaleToken, Review, ChatMessage, KycInfo, RecyclerProfile } from '../types';
 import { storage } from './storage';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -381,5 +381,295 @@ export const api = {
       filename: file.name,
       dimensions: '1920x1080'
     };
+  },
+
+  // --- EWaste Lots & Live Bidding ---
+  getLots: async (params?: { collectorId?: string; status?: string; category?: string }): Promise<EWasteLot[]> => {
+    try {
+      const qs = new URLSearchParams();
+      if (params?.collectorId) qs.append('collectorId', params.collectorId);
+      if (params?.status) qs.append('status', params.status);
+      if (params?.category) qs.append('category', params.category);
+      const queryString = qs.toString() ? `?${qs.toString()}` : '';
+      const lots = await request<EWasteLot[]>(`/lots${queryString}`);
+      if (lots && lots.length > 0) {
+        lots.forEach(l => storage.saveLot(l));
+        return lots;
+      }
+    } catch {}
+    if (params?.collectorId) {
+      return storage.getMyLots(params.collectorId);
+    }
+    return storage.getLots();
+  },
+
+  getLotById: async (id: string): Promise<EWasteLot> => {
+    try {
+      const lot = await request<EWasteLot>(`/lots/${id}`);
+      if (lot) {
+        storage.saveLot(lot);
+        return lot;
+      }
+    } catch {}
+    const local = storage.getLotById(id);
+    if (local) return local;
+    throw new Error('Lot not found');
+  },
+
+  createLot: async (payload: any): Promise<EWasteLot> => {
+    try {
+      const lot = await request<EWasteLot>('/lots', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      storage.saveLot(lot);
+      return lot;
+    } catch {
+      // Local fallback
+      const ask = Number(payload.askingPrice || payload.estimatedValue || 1500);
+      const newLot: EWasteLot = {
+        id: `lot-${Date.now()}`,
+        lotCode: `KC-LOT-${Math.floor(1000 + Math.random() * 9000)}`,
+        collectorId: payload.collectorId || 'mock-kaba-1',
+        collectorName: payload.collectorName || 'Suresh Kumar',
+        category: payload.category || 'Motherboards',
+        approxWeightKg: Number(payload.approxWeightKg) || 10,
+        totalItems: Number(payload.totalItems) || 1,
+        estimatedValue: Number(payload.estimatedValue) || ask,
+        askingPrice: ask,
+        minBidAmount: payload.minBidAmount || Math.floor(ask * 0.5),
+        recyclerOfferedRate: payload.recyclerOfferedRate || 0,
+        status: 'AVAILABLE',
+        gpsLat: payload.gpsLat || 28.5685,
+        gpsLng: payload.gpsLng || 77.2412,
+        locationAddress: payload.locationAddress || 'Mayapuri Scrap Yard',
+        locationZone: payload.locationZone || 'West Delhi',
+        auctionDurationMins: payload.auctionDurationMins || 60,
+        createdAt: new Date().toISOString(),
+        qrCode: `KBD-EWASTE-${Date.now().toString().slice(-6)}-IN`,
+        traceabilityHash: `0x${Math.random().toString(16).slice(2, 18)}`,
+        items: payload.items || []
+      };
+      storage.saveLot(newLot);
+      return newLot;
+    }
+  },
+
+  placeBid: async (lotId: string, payload: { bidAmount: number; notes?: string; bidPerKg?: number }): Promise<{ lot: EWasteLot; bid: LotBid }> => {
+    try {
+      const res = await request<{ lot: EWasteLot; bid: LotBid }>(`/lots/${lotId}/bid`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      if (res?.lot) {
+        storage.saveLot(res.lot);
+      }
+      return res;
+    } catch {
+      const currentUser = storage.getCurrentUser();
+      return storage.addBidToLot(lotId, {
+        recyclerId: currentUser?.id || 'mock-recycler-1',
+        recyclerName: currentUser?.name || 'EcoRecycle Aggregators Ltd',
+        bidAmount: payload.bidAmount
+      });
+    }
+  },
+
+  acceptBid: async (lotId: string, bidId?: string): Promise<EWasteLot> => {
+    try {
+      const res = await request<EWasteLot>(`/lots/${lotId}/accept-bid`, {
+        method: 'POST',
+        body: JSON.stringify({ bidId })
+      });
+      if (res) {
+        storage.saveLot(res);
+        return res;
+      }
+    } catch {}
+    return storage.acceptLotBid(lotId, bidId || '');
+  },
+
+  cancelLot: async (lotId: string): Promise<EWasteLot> => {
+    try {
+      const res = await request<EWasteLot>(`/lots/${lotId}/cancel`, { method: 'POST' });
+      if (res) {
+        storage.saveLot(res);
+        return res;
+      }
+    } catch {}
+    const updated = storage.updateLotStatus(lotId, 'CANCELLED');
+    return updated || storage.getLotById(lotId)!;
+  },
+
+  // --- Universal Sale Tokens ---
+  mintSaleToken: async (payload: any): Promise<SaleToken> => {
+    try {
+      const token = await request<SaleToken>('/sales/mint', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      return token;
+    } catch {
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const hash6 = Math.random().toString(16).slice(2, 8).toUpperCase();
+      const tokenNumber = `KBD-SL-${dateStr}-DL-${hash6}`;
+      const mockToken: SaleToken = {
+        id: `sale-${Date.now()}`,
+        tokenNumber,
+        lotId: payload.lotId,
+        collectorId: payload.collectorId,
+        collectorName: payload.collectorName || 'Suresh Kumar',
+        collectorPhone: payload.collectorPhone || '9876543210',
+        recyclerId: payload.recyclerId,
+        recyclerName: payload.recyclerName || 'EcoRecycle Aggregators Ltd',
+        cpcbRegNumber: payload.cpcbRegNumber || 'CPCB-EW-2023-DL-0881',
+        category: payload.category || 'Motherboards',
+        cpcbCategoryCode: 'ITEW2',
+        grossWeightKg: payload.grossWeightKg || 25,
+        tareWeightKg: payload.tareWeightKg || 2,
+        netWeightKg: payload.netWeightKg || 23,
+        ratePerKg: payload.ratePerKg || 240,
+        totalAmount: payload.totalAmount || 5520,
+        paymentMode: payload.paymentMode || 'ESCROW_WALLET',
+        eprCredits: payload.netWeightKg || 23,
+        createdAt: new Date().toISOString()
+      };
+      return mockToken;
+    }
+  },
+
+  getSaleTokens: async (params?: { collectorId?: string; recyclerId?: string }): Promise<SaleToken[]> => {
+    try {
+      const qs = new URLSearchParams();
+      if (params?.collectorId) qs.append('collectorId', params.collectorId);
+      if (params?.recyclerId) qs.append('recyclerId', params.recyclerId);
+      const queryString = qs.toString() ? `?${qs.toString()}` : '';
+      return await request<SaleToken[]>(`/sales${queryString}`);
+    } catch {
+      return [];
+    }
+  },
+
+  getSaleTokenByNumber: async (tokenNumber: string): Promise<SaleToken> => {
+    return request<SaleToken>(`/sales/${tokenNumber}`);
+  },
+
+  verifyPublicSaleToken: async (tokenNumber: string): Promise<any> => {
+    return request<any>(`/sales/verify/${tokenNumber}`);
+  },
+
+  // --- Double-Blind Reviews ---
+  submitReview: async (payload: {
+    targetUserId: string;
+    saleTokenId?: string;
+    ratingOverall: number;
+    ratingScaleAcc?: number;
+    ratingPayoutSpd?: number;
+    ratingPurity?: number;
+    reviewText?: string;
+  }): Promise<{ review: Review; bothRevealed: boolean }> => {
+    return request<{ review: Review; bothRevealed: boolean }>('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  getMyReviews: async (): Promise<Review[]> => {
+    try {
+      return await request<Review[]>('/reviews/my');
+    } catch {
+      return [];
+    }
+  },
+
+  getUserReviews: async (userId: string): Promise<Review[]> => {
+    try {
+      return await request<Review[]>(`/reviews/user/${userId}`);
+    } catch {
+      return [];
+    }
+  },
+
+  // --- Contextual Chat & Voice Notes ---
+  getChatMessages: async (contextType: 'LOT' | 'PICKUP', contextId: string): Promise<ChatMessage[]> => {
+    try {
+      return await request<ChatMessage[]>(`/chat/${contextType}/${contextId}`);
+    } catch {
+      return [];
+    }
+  },
+
+  sendChatMessage: async (payload: {
+    contextType: 'LOT' | 'PICKUP';
+    contextId: string;
+    text?: string;
+    audioUrl?: string;
+    imageUrl?: string;
+  }): Promise<ChatMessage> => {
+    return request<ChatMessage>('/chat', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  markChatRead: async (contextType: 'LOT' | 'PICKUP', contextId: string): Promise<{ success: boolean }> => {
+    try {
+      return await request<{ success: boolean }>(`/chat/read/${contextType}/${contextId}`, { method: 'POST' });
+    } catch {
+      return { success: true };
+    }
+  },
+
+  // --- KYC & Verification ---
+  getKycStatus: async (): Promise<KycInfo> => {
+    try {
+      return await request<KycInfo>('/kyc/status');
+    } catch {
+      return {
+        kycStatus: 'VERIFIED',
+        dailyWeightLimitKg: 500,
+        maxLotValueInr: 100000,
+        canInitiateAuctions: true,
+        canReceiveDirectEscrow: true
+      };
+    }
+  },
+
+  submitKycDocuments: async (payload: {
+    documentType: string;
+    documentNumber: string;
+    documentUrl?: string;
+    remarks?: string;
+  }): Promise<{ kycStatus: string }> => {
+    return request<{ kycStatus: string }>('/kyc/submit', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  getPendingKyc: async (): Promise<any[]> => {
+    try {
+      return await request<any[]>('/kyc/pending');
+    } catch {
+      return [];
+    }
+  },
+
+  verifyKyc: async (userId: string, status: 'VERIFIED' | 'REJECTED', remarks?: string): Promise<any> => {
+    return request<any>(`/kyc/verify/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify({ status, remarks })
+    });
+  },
+
+  // --- Recyclers ---
+  getRecyclers: async (): Promise<RecyclerProfile[]> => {
+    try {
+      return await request<RecyclerProfile[]>('/rates/recyclers');
+    } catch {
+      const currentUser = storage.getCurrentUser();
+      if (currentUser?.recycler) return [currentUser.recycler];
+      return [];
+    }
   }
 };

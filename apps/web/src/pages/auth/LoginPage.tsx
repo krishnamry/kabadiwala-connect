@@ -41,7 +41,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
   const [error, setError] = useState<string | null>(null);
   const [showFeatures, setShowFeatures] = useState(false);
 
-  const roleConfig: Record<Role, {
+  type LoginRole = 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN';
+
+  const roleConfig: Record<LoginRole, {
+    tabLabelEn: string;
+    tabLabelHi: string;
+    tabLabelMr: string;
     titleEn: string;
     titleHi: string;
     titleMr: string;
@@ -63,6 +68,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     voiceMr: string;
   }> = {
     CITIZEN: {
+      tabLabelEn: 'Citizen',
+      tabLabelHi: 'नागरिक',
+      tabLabelMr: 'नागरिक',
       titleEn: 'Citizen & Household',
       titleHi: 'नागरिक एवं उपभोक्ता',
       titleMr: 'नागरिक व ग्राहक',
@@ -102,6 +110,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       voiceMr: 'नागरिक लॉगिन. जुन्या इलेक्ट्रॉनिक्स भंगारासाठी पिकअप बुक करा.'
     },
     KABADIWALA: {
+      tabLabelEn: 'Collector',
+      tabLabelHi: 'संग्राहक',
+      tabLabelMr: 'संग्राहक',
       titleEn: 'Doorstep Collector',
       titleHi: 'कबाड़ीवाला (संग्राहक)',
       titleMr: 'भंगार संग्राहक',
@@ -141,6 +152,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       voiceMr: 'भंगार संग्राहक लॉगिन. बोलणारा भाव फलक आणि सोपे पासबुक.'
     },
     RECYCLER: {
+      tabLabelEn: 'Recycler',
+      tabLabelHi: 'रीसायकलर',
+      tabLabelMr: 'रीसायकलर',
       titleEn: 'Authorized Recycler',
       titleHi: 'अधिकृत रीसायकलर',
       titleMr: 'अधिकृत रीसायकलर',
@@ -180,6 +194,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
       voiceMr: 'अधिकृत रीसायकलर पोर्टल. ई-कचरा लॉट स्वीकारा आणि ईपीआर अहवाल मिळवा.'
     },
     ADMIN: {
+      tabLabelEn: 'Regulatory',
+      tabLabelHi: 'नियामक (ऑडिट)',
+      tabLabelMr: 'नियामक',
       titleEn: 'Regulatory & Audit',
       titleHi: 'प्रशासन एवं ऑडिट',
       titleMr: 'प्रशासन व तपासणी',
@@ -220,11 +237,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     }
   };
 
-  const currentConfig = roleConfig[selectedRole];
+  const currentConfig = roleConfig[(selectedRole as LoginRole) in roleConfig ? (selectedRole as LoginRole) : 'CITIZEN'];
 
   const handleRoleSelect = (r: Role) => {
     setSelectedRole(r);
-    setPhone(roleConfig[r].defaultPhone);
+    const lookupKey = (r as LoginRole) in roleConfig ? (r as LoginRole) : 'CITIZEN';
+    setPhone(roleConfig[lookupKey].defaultPhone);
     setError(null);
     if (Capacitor.isNativePlatform()) {
       try {
@@ -268,7 +286,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     }
   };
 
-  const rolesList: Role[] = ['CITIZEN', 'KABADIWALA', 'RECYCLER', 'ADMIN'];
+  const rolesList: LoginRole[] = ['CITIZEN', 'KABADIWALA', 'RECYCLER', 'ADMIN'];
 
   return (
     <div className="min-h-[82vh] py-3 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-4xl mx-auto flex flex-col justify-center">
@@ -335,7 +353,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
               />
               <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-70'}`} />
               <span className="truncate">
-                {language === 'hi' ? cfg.titleHi : language === 'mr' ? cfg.titleMr : cfg.titleEn.split(' ')[0]}
+                {language === 'hi' ? cfg.tabLabelHi : language === 'mr' ? cfg.tabLabelMr : cfg.tabLabelEn}
               </span>
             </button>
           );
