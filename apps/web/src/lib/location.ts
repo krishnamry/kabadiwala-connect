@@ -25,8 +25,13 @@ export interface GeocodedAddress {
   displayName: string;
 }
 
-// In-memory cache for reverse geocoding to prevent duplicate OSM Nominatim calls
+// In-memory caches to prevent duplicate requests and adhere to usage guidelines
 const reverseGeoCache = new Map<string, GeocodedAddress>();
+const searchGeoCache = new Map<string, Array<{ lat: number; lng: number; displayName: string; shortName: string }>>();
+
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) 
+  ? import.meta.env.VITE_API_URL 
+  : '/api';
 
 /**
  * Calculates great-circle distance between two points using Haversine formula
@@ -108,7 +113,13 @@ export async function getCurrentPosition(): Promise<GeoCoordinates> {
 }
 
 /**
- * Reverse geocodes coordinates to a human-readable Indian street address via OSM Nominatim API
+ * Reverse geocodes coordinates to a human-readable Indian street address.
+ * Multi-tier pipeline:
+ *  1. Local In-Memory Cache (0ms)
+ *  2. Backend /api/geo/reverse proxy (OSM compliant with custom User-Agent and server-side cache)
+ *  3. Free client-side reverse geocoder (BigDataCloud client API - CORS enabled, no rate-limit blocks)
+ *  4. Direct OSM Nominatim fallback
+ *  5. Graceful coordinate fallback
  */
 export async function reverseGeocode(lat: number, lng: number): Promise<GeocodedAddress> {
   const cacheKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
@@ -116,14 +127,59 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
     return reverseGeoCache.get(cacheKey)!;
   }
 
+  // 1. Try Backend Proxy (/api/geo/reverse)
+  try {
+    const res = await fetch(`${API_BASE}/geo/reverse?lat=${lat}&lng=${lng}`, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(3500)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.data) {
+        reverseGeoCache.set(cacheKey, data.data);
+        return data.data;
+      }
+    }
+  } catch (err) {
+    // Backend unavailable or offline, continue to client fallbacks
+  }
+
+  // 2. Try Client-side BigDataCloud Reverse Geocoding API (Fast, Free, Client-friendly, No Block)
+  try {
+    const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+    const res = await fetch(bdcUrl, { signal: AbortSignal.timeout(3500) });
+    if (res.ok) {
+      const bdc = await res.json();
+      const locality = bdc.locality || bdc.city || '';
+      const district = bdc.principalSubdivision || '';
+      const country = bdc.countryName || 'India';
+      const short = locality ? `${locality}, ${district}` : `${district}, ${country}`;
+      const full = [bdc.locality, bdc.city, bdc.principalSubdivision, bdc.countryName].filter(Boolean).join(', ');
+
+      const result: GeocodedAddress = {
+        address: full || `Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+        shortAddress: short || `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`,
+        city: bdc.city || locality || 'India',
+        suburb: bdc.locality,
+        postcode: bdc.postcode,
+        state: bdc.principalSubdivision || '',
+        country: country,
+        displayName: full || `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+      };
+
+      reverseGeoCache.set(cacheKey, result);
+      return result;
+    }
+  } catch (err) {
+    // Continue to next fallback
+  }
+
+  // 3. Try Direct OSM Nominatim fallback
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
     const res = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'KabadiwalaConnect-Dhatu/1.0'
-      },
-      signal: AbortSignal.timeout(5000)
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(4000)
     });
 
     if (res.ok) {
@@ -175,10 +231,10 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
       return result;
     }
   } catch (err) {
-    console.warn('Reverse geocoding request failed:', err);
+    console.warn('Direct reverse geocoding fallback failed:', err);
   }
 
-  // Fallback if network offline or rate-limited
+  // 4. Fallback if network offline or rate-limited
   const fallback: GeocodedAddress = {
     address: `Pin near ${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`,
     shortAddress: `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`,
@@ -189,32 +245,90 @@ export async function reverseGeocode(lat: number, lng: number): Promise<Geocoded
 }
 
 /**
- * Searches locations using OpenStreetMap Nominatim forward search
+ * Searches locations using forward geocoding.
+ * Multi-tier pipeline:
+ *  1. Local Cache (0ms)
+ *  2. Backend /api/geo/search proxy (compliant, cached)
+ *  3. Free Komoot Photon Geocoder (OSM-based, designed for search-as-you-type, no IP blocking)
+ *  4. Direct Nominatim fallback
  */
 export async function searchAddress(query: string): Promise<Array<{ lat: number; lng: number; displayName: string; shortName: string }>> {
   if (!query || query.trim().length < 2) return [];
 
+  const q = query.trim().toLowerCase();
+  if (searchGeoCache.has(q)) {
+    return searchGeoCache.get(q)!;
+  }
+
+  // 1. Try Backend Proxy (/api/geo/search)
+  try {
+    const res = await fetch(`${API_BASE}/geo/search?q=${encodeURIComponent(query)}`, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(3500)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        searchGeoCache.set(q, data.data);
+        return data.data;
+      }
+    }
+  } catch (err) {
+    // Backend offline or unreachable, continue to next fallback
+  }
+
+  // 2. Try Komoot Photon API (OSM data, built for autocomplete, CORS friendly)
+  try {
+    const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lat=28.6139&lon=77.2090`;
+    const res = await fetch(photonUrl, { signal: AbortSignal.timeout(3500) });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.features && data.features.length > 0) {
+        const results = data.features.map((feat: any) => {
+          const props = feat.properties || {};
+          const coords = feat.geometry?.coordinates || [77.2090, 28.6139];
+          const parts = [props.name, props.street, props.district, props.city, props.state, props.country].filter(Boolean);
+          const uniqueParts = Array.from(new Set(parts));
+
+          return {
+            lat: coords[1],
+            lng: coords[0],
+            displayName: uniqueParts.join(', ') || props.name || query,
+            shortName: props.name || props.street || props.city || query
+          };
+        });
+
+        searchGeoCache.set(q, results);
+        return results;
+      }
+    }
+  } catch (err) {
+    // Continue to next fallback
+  }
+
+  // 3. Fallback to direct OSM Nominatim
   try {
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=in&addressdetails=1`;
     const res = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'KabadiwalaConnect-Dhatu/1.0'
-      },
-      signal: AbortSignal.timeout(5000)
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(4000)
     });
 
     if (res.ok) {
       const data = await res.json();
-      return data.map((item: any) => ({
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon),
-        displayName: item.display_name,
-        shortName: item.name || item.display_name.split(',')[0]
-      }));
+      if (Array.isArray(data)) {
+        const results = data.map((item: any) => ({
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+          displayName: item.display_name,
+          shortName: item.name || item.display_name.split(',')[0]
+        }));
+        searchGeoCache.set(q, results);
+        return results;
+      }
     }
   } catch (err) {
-    console.warn('Address search failed:', err);
+    console.warn('Address search fallback failed:', err);
   }
 
   return [];

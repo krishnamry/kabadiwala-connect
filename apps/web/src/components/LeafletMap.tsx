@@ -84,12 +84,16 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
     if (!mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current, {
         zoomControl: true,
-        attributionControl: false
+        attributionControl: true
       }).setView(center, zoom);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-      }).addTo(map);
+      // CartoDB Voyager: High-performance OSM-based tile layer on global CDN, fully compliant with OSM guidelines
+      const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 20,
+        subdomains: 'abcd',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+      });
+      tileLayer.addTo(map);
 
       // Tap / Click anywhere on map to drop or reposition pin
       map.on('click', async (e: L.LeafletMouseEvent) => {
@@ -161,7 +165,7 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
           setIsSearching(false);
         }
       }
-    }, 350);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);

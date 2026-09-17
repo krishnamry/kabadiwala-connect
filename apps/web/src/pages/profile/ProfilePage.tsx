@@ -32,7 +32,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { LeafletMap } from '../../components/LeafletMap';
-import { reverseGeocode } from '../../lib/location';
+import { reverseGeocode, searchAddress } from '../../lib/location';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 
 interface ProfilePageProps {
@@ -141,17 +141,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       }
 
       const searchTarget = googleMapsLink.trim() ? (address.trim() || query) : address.trim();
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTarget)}&limit=1`, {
-        headers: { 'Accept': 'application/json' }
-      });
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
+      const results = await searchAddress(searchTarget);
+      if (results && results.length > 0) {
+        const lat = results[0].lat;
+        const lon = results[0].lng;
         setAddressLat(lat);
         setAddressLng(lon);
         setUserCoords([lat, lon]);
-        setGeoFeedback(`✓ Location confirmed on map: ${data[0].display_name.split(',').slice(0, 3).join(', ')}`);
+        setGeoFeedback(`✓ Location confirmed on map: ${results[0].shortName || results[0].displayName.split(',').slice(0, 3).join(', ')}`);
         hapticSuccess();
       } else {
         setGeoFeedback('Could not resolve exact coordinates. Tap or drag pin on map to set position.');

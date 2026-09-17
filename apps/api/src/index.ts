@@ -11,6 +11,7 @@ import pickupRoutes from './routes/pickup.routes';
 import kabadiwalaRoutes from './routes/kabadiwala.routes';
 import adminRoutes from './routes/admin.routes';
 import mlRoutes from './routes/ml.routes';
+import geoRoutes from './routes/geo.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -107,6 +108,7 @@ app.use('/api/pickups', pickupRoutes);
 app.use('/api/kabadiwala', kabadiwalaRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ml', mlRoutes);
+app.use('/api/geo', geoRoutes);
 
 // SPA fallback or API root info
 if (staticDir) {

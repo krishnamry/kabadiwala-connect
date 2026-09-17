@@ -16,6 +16,7 @@ const pickup_routes_1 = __importDefault(require("./routes/pickup.routes"));
 const kabadiwala_routes_1 = __importDefault(require("./routes/kabadiwala.routes"));
 const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const ml_routes_1 = __importDefault(require("./routes/ml.routes"));
+const geo_routes_1 = __importDefault(require("./routes/geo.routes"));
 const errorHandler_1 = require("./middleware/errorHandler");
 const app = (0, express_1.default)();
 // Security: Disable Express fingerprint header
@@ -102,6 +103,7 @@ app.use('/api/pickups', pickup_routes_1.default);
 app.use('/api/kabadiwala', kabadiwala_routes_1.default);
 app.use('/api/admin', admin_routes_1.default);
 app.use('/api/ml', ml_routes_1.default);
+app.use('/api/geo', geo_routes_1.default);
 // SPA fallback or API root info
 if (staticDir) {
     app.get('*', (req, res, next) => {

@@ -34,7 +34,7 @@ import {
   Link2,
   ExternalLink
 } from 'lucide-react';
-import { getCurrentPosition, reverseGeocode, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
+import { getCurrentPosition, reverseGeocode, searchAddress, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 
 export const CitizenDashboard: React.FC = () => {
@@ -247,19 +247,16 @@ export const CitizenDashboard: React.FC = () => {
         return;
       }
 
-      // 2. Query OSM Nominatim geocoder
+      // 2. Query geocoder via robust multi-tier resolver (cache -> backend proxy -> Photon -> Nominatim fallback)
       const searchTarget = googleMapsLink.trim() ? (address.trim() || query) : address.trim();
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTarget)}&limit=1`, {
-        headers: { 'Accept': 'application/json' }
-      });
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
+      const results = await searchAddress(searchTarget);
+      if (results && results.length > 0) {
+        const lat = results[0].lat;
+        const lon = results[0].lng;
         setLatitude(lat);
         setLongitude(lon);
         setUserCoords([lat, lon]);
-        setGpsFeedback(`✓ Location confirmed on map: ${data[0].display_name.split(',').slice(0, 3).join(', ')}`);
+        setGpsFeedback(`✓ Location confirmed on map: ${results[0].shortName || results[0].displayName.split(',').slice(0, 3).join(', ')}`);
         hapticSuccess();
       } else {
         setGpsFeedback('Could not resolve exact coordinates. Tap or drag pin on map to set location.');
