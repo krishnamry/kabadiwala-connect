@@ -1,162 +1,288 @@
-# Dhatu (धातु) — Pragmatic UI/UX Redesign & Execution Plan
-### Hackathon-Ready, Minimalist, Field-Tested UI Overhaul for SIH26229
-**Document Version:** 6.0.0 (Pragmatic Engineering Edition)  
-**Target Viewports:** Mobile (Android APK & Smartphone 360–412px), Desktop (1024px–1920px)  
-**Core Constraint:** Grounded in the actual Vite/React + Express/Prisma codebase. Zero fake enterprise bloat, zero broken backend assumptions, zero badge clutter.
+# Dhatu (धातु) — The Definitive UI/UX Master Architecture & Engineering Blueprint
+### Smart Informal E-Waste Formalization & EPR Traceability Platform (SIH26229 — Ministry of Mines)
+**Document Version:** 8.0.0 (The Definitive Billion-Dollar Product Standard)  
+**Supported Viewports:** Smartphone (360px – 430px Android Capacitor APK & PWA), Tablet (768px – 1024px), Desktop Workstation (1280px – 1920px Widescreen)  
+**Design Standard:** Tier-1 Precision Craft (Stripe Terminal / Apple Health / Linear / Ramp / Uber Freight)  
+**Visual Design Gallery:** [`ui-smartphone-designs/`](file:///home/krishna/KBD/ui-smartphone-designs/)  
+**Interactive Plan Artifact:** [ui_redesign_plan.md](file:///home/krishna/.gemini/antigravity-cli/brain/a4febea0-c870-4291-9079-79b8cd1643bb/ui_redesign_plan.md)
 
 ---
 
-## 1. Direct Audit: Addressing the 8 Critical Flaws
+## 1. Executive Vision & The "Billion-Dollar Craft" Design Philosophy
 
-| Critique | Honest Diagnosis | Pragmatic Correction in This Plan |
-|---|---|---|
-| **1. "Anti-AI" Self-Contradiction** | The previous draft replaced AI pill badges with "Bayesian sort chips" and "Sale Token badges", recreating the exact badge clutter it criticized. | **Strict Badge Elimination Rule:** Max 1 status pill per screen. Content is communicated through clean layout, typography, and clear photo thumbnails, not badges. |
-| **2. Wild Scope Creep** | Proposing a 12-phase enterprise architecture with live auction engines and custom blockchain hashes for a student hackathon demo was out of touch with reality. | **Realistic 3-Stage Refactor:** Focus exclusively on what can be built and demonstrated: Clean UI shell, splitting the 2 God-components, and fixing mobile touch usability. |
-| **3. Backend Breaking Assumptions** | Renaming roles (`citizen`, `collector`, `regulatory`) breaks existing JWT auth, Prisma schema, API routes, and seeded mock accounts. | **Zero Backend Schema Changes:** Retain existing canonical roles: `CITIZEN`, `KABADIWALA`, `RECYCLER`, `ADMIN`. UI display labels can say "Collector" or "कबाड़ीवाला", but internal state and types remain 100% backward-compatible. |
-| **4. Persona vs. Mechanism Mismatch** | Forcing an industrial weighbridge scale-ID and operator-PIN flow onto a door-to-door pushcart collector made no sense. | **Strict Role Boundary Separation:** The door-to-door kabadiwala app is dead simple: photo + weight stepper + pickup accept + cash passbook. Weighbridge intake and scale verification exist *only* on the Recycler desktop terminal. |
-| **5. Low-Literacy Realities** | The previous plan asserted low-literacy accessibility with complex English text labels ("KYC Desk", "Audit Passport"). | **Pictorial-First Design:** Scrap categories are identified by real item photos and icons, not English text. Direct rupee figures (`₹265/kg`), big green/red thumb buttons, and 1-tap audio playback. |
-| **6. Fictional Performance Guarantees** | Promising "60 FPS on Snapdragon 680" without profiler benchmarks was unverified hand-waving. | **Concrete Engineering Actions:** Decompose `KabadiwalaDashboard.tsx` (3,306 lines) into 4 isolated subcomponents so typing in an input does not re-render the Leaflet map. |
-| **7. Broken Local Links** | `file:///home/krishna/KBD/...` absolute paths are dead for any external reviewer, judge, or teammate. | **Clean Relative Paths:** All links normalized to relative repository paths (e.g. `apps/web/src/pages/kabadiwala/KabadiwalaDashboard.tsx`). |
-| **8. Real Visual Artifacts** | Abstract ASCII diagrams failed to prove taste. | **Embedded Visual Gallery:** Concrete smartphone visual mockups generated in `ui-smartphone-designs/` directly demonstrating the actual layout. |
+### 1.1 Why Most Enterprise & AI Interfaces Look Cluttered
+Generic AI-generated interfaces and amateur web applications suffer from five universal pathologies:
+1. **Badge Cascade Syndrome:** Nesting 4–6 colorful pills inside every card (e.g. `Instant Cash`, `Grade-A`, `Top Rated`, `Verified`, `Urgent`, `CPCB Approved`), creating extreme visual noise and cognitive fatigue.
+2. **Conflicting Color Systems:** Using saturated purples, bright blues, neon greens, and harsh reds simultaneously with no spatial rhythm.
+3. **God-Component Monoliths:** Shoving 3,000+ lines of state, maps, forms, charts, and modals into a single component (`KabadiwalaDashboard.tsx`), causing jittery re-renders on every keystroke.
+4. **Desktop-Mobile Mismatch:** Shrinking a complex multi-column desktop spreadsheet into an unscrollable phone screen, or stretching a simple mobile list across an empty 27-inch 4K monitor.
+5. **Persona Dishonesty:** Expecting a street scrap collector on a tricycle with dirty hands under 42°C Indian sunlight to tap tiny 12px dropdown menus in English and read "Dirichlet Bayesian prior distributions".
 
----
-
-## 2. The Pragmatic "Less is More" Design System
-
-### 2.1 The 3-Color Constraint (No More Saturated Collisions)
-Instead of 6 competing saturated colors, the interface uses a strictly constrained palette:
-- **Base Canvas:** `#F8F9FA` (Clean warm paper light) / `#0F172A` (Deep slate dark).
-- **Surface Cards:** `#FFFFFF` (Pure white) with a single `1px solid #E2E8F0` hairline.
-- **Primary Functional Color:** Deep Forest Green (`#0F766E` / `#059669`) for trust, cash transactions, and positive actions.
-- **Warning / Alert:** Warm Amber (`#D97706`) used *only* for hazardous materials (batteries, CRT glass) or pending sync.
-- **Text:** `#0F172A` (Headings), `#475569` (Body), `JetBrains Mono` for tabular prices (`₹265/kg`).
-- *Forbidden:* Random purple pills, neon cyan accents, card-in-card nesting, gradient button borders.
-
-### 2.2 Low-Literacy Realities in the Field
-Real scrap collectors navigating streets on a bicycle or cart need:
-1. **Scrap Photography over Text:** A photo of a computer motherboard communicates 10x faster than reading "Printed Circuit Boards (PCBs)".
-2. **Tabular Numerals over Descriptions:** `₹ 2 6 5` in bold mono font is universally understood regardless of language.
-3. **One-Tap Audio ("बोलकर बताओ"):** A prominent speaker button right next to prices and instructions.
-4. **Big Touch Targets:** Stepper buttons (`+` and `-`) sized to at least 56×56px so they can be pressed with thumb or dirty hands.
+### 1.2 The Dhatu "Anti-Clutter" Foundation: The Rule of Three
+To create a serene, world-class software experience worthy of a multi-billion dollar platform, every screen adheres strictly to the **Rule of Three**:
+- **Rule 1 — At Most 1 Primary Action per Viewport:** Only one focal point button exists on screen at any moment (e.g. `+ New Lot` floating button on Collector, `Schedule Doorstep Pickup` on Citizen, `Confirm Scale Weight` on Recycler).
+- **Rule 2 — At Most 1 Status Indicator per Entity:** Never stack status badges. Identity, weight, and currency are conveyed through pristine typography and layout. A single status dot (`●`) or muted tint communicates state.
+- **Rule 3 — Restrained 3-Pillar Semantic Color Palette:**
+  - **Base Canvas:** Studio Warm Linen (`#F8F9FA` Light / `#090D16` Midnight Dark) — optimized for outdoor sunlight legibility and OLED battery efficiency.
+  - **Surface Cards:** Pure White (`#FFFFFF` Light / `#111625` Slate Dark) with 1px hairline border (`rgba(15, 23, 42, 0.08)` / `#1E293B`) and layered soft diffusion shadow.
+  - **Transactional Accent (Marketplace):** Burnished Copper (`#C2410C` Light / `#FB923C` Dark) — represents physical copper scrap, active marketplace bids, and transactional actions.
+  - **Trust & Verification (Compliance):** Patina Forest Green (`#0F766E` Light / `#10B981` Dark) — represents verified CPCB status, completed handovers, and CSR tree donations.
+  - **Market Attention (Live Mandi Rates):** Sun Brass (`#B45309` Light / `#FBBF24` Dark) — reserved for live rate sparklines and audio narration waveforms.
 
 ---
 
-## 3. Grounded Architecture: Desktop vs. Mobile
+## 2. Typography & Ergonomics: Industrial Precision
 
-### 3.1 Mobile Viewport (Android APK / 360–412px)
 ```
-┌─────────────────────────────────────────────────────────┐
-│ [धा Dhatu]               [Status: Online ●]   [हि / EN] │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  नमस्ते सुरेश जी (Suresh Kumar)                          │
-│                                                         │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │ [Motherboard Photo]  PCB Scrap                    │  │
-│  │ 18.5 kg             ₹ 8,500                       │  │
-│  │ [ हरा बटन: सौदा पक्का करें (Accept) ]               │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                         │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │ [Wire Photo]         Copper Wire                  │  │
-│  │ 12.0 kg             ₹ 5,760                       │  │
-│  │ [ भाव देखें (View) ]                               │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                         │
-├─────────────────────────────────────────────────────────┤
-│ BOTTOM BAR (4 Clean Buttons, No Overflow):              │
-│ [📦 Lots]      [📈 Prices]     [🚚 Pickups]   [⚙️ More] │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    DHATU TYPOGRAPHY HIERARCHY                                    │
+├───────────────────┬───────────────────┬──────────────┬───────────────┬───────────────────────────┤
+│ Type Role         │ Font Family       │ Weight / Case│ Size / Line   │ Target Use Case           │
+├───────────────────┼───────────────────┼──────────────┼───────────────┼───────────────────────────┤
+│ 1. Display Header │ Plus Jakarta Sans │ 800 (Extra)  │ 28–36px / 1.2 │ Hero greetings, Portal    │
+│                   │                   │ Tracking -2% │               │ headers ("धातु Dhatu")    │
+├───────────────────┼───────────────────┼──────────────┼───────────────┼───────────────────────────┤
+│ 2. Vernacular Body│ Noto Sans         │ 500 / 600    │ 15–18px / 1.5 │ Hindi & Marathi labels,   │
+│    (Devanagari)   │ Devanagari        │ Baseline-fit │               │ audio scripts, prompts    │
+├───────────────────┼───────────────────┼──────────────┼───────────────┼───────────────────────────┤
+│ 3. Financial Data │ JetBrains Mono    │ 700 (Bold)   │ 20–28px / 1.1 │ Monospace currency &      │
+│    & Weights      │                   │ Tabular-nums │               │ weights (₹8,500, 18.5 kg) │
+├───────────────────┼───────────────────┼──────────────┼───────────────┼───────────────────────────┤
+│ 4. System Micro   │ Plus Jakarta Sans │ 700 (Caps)   │ 11px / 1.4    │ Section headers, metadata │
+│    Metadata       │                   │ Tracking +5% │               │ tags, timestamp stamps    │
+└───────────────────┴───────────────────┴──────────────┴───────────────┴───────────────────────────┘
 ```
 
-#### What goes into the "More" Bottom Sheet:
-- Recycler Directory (nearby authorized buyers with phone and map directions).
-- Cash Passbook (simple running ledger of today's earnings and receipts).
-- Safety Cards (visual warnings: battery fire hazard, CRT glass danger).
-- Profile & Settings (language toggle, theme, log out).
+> [!IMPORTANT]
+> **Why `tabular-nums` is Non-Negotiable:** When numbers change during live auctions or weight increments, proportional fonts cause micro-jitters and horizontal text reflow. `JetBrains Mono` with `tabular-nums` guarantees zero horizontal shift when weights or bids tick up in real time.
 
 ---
 
-### 3.2 Desktop Viewport (Recycler Terminal & Auditor / 1024px+)
+## 3. Dual-Viewport Architecture: Smartphone vs Desktop
+
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ [धा Dhatu Connect]       [Search / Jump...]       [हिन्दी/English]   [Profile]│
-├────────────────┬─────────────────────────────────────────────────────────────┤
-│ NAVIGATION     │ MASTER-DETAIL SPLIT VIEW                                    │
-│                │                                                             │
-│ • Incoming Lots│ ┌─────────────────────────┬───────────────────────────────┐ │
-│ • Scale Intake │ │ INCOMING LOT QUEUE      │ SELECTED LOT INSPECTION       │ │
-│ • Buying Rates │ │ • Suresh - PCB (18.5kg) │ • Photo & Declared Weight     │ │
-│ • Discrepancies│ │ • Ramesh - Wires (12kg) │ • Offer Rate: [ ₹265 / kg ]   │ │
-│ • Reports (EPR)│ │ • Anil - Battery (25kg) │ • Counter / Accept Bid Action │ │
-│                │ │                         │ • CPCB Scale Verification     │ │
-│                │ └─────────────────────────┴───────────────────────────────┘ │
-└────────────────┴─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 VIEWPORT ADAPTATION MATRIX                                       │
+├───────────────────┬────────────────────────────────────────┬─────────────────────────────────────┤
+│ Dimension         │ Smartphone Viewport (360px – 430px)    │ Desktop Workstation (1024px–1920px) │
+├───────────────────┼────────────────────────────────────────┼─────────────────────────────────────┤
+│ 1. Navigation     │ Fixed 4-Destination Bottom Bar         │ Persistent Left Sidebar (260px)     │
+│    Structure      │ [ Lots | Prices | Pickups | More ]     │ with Collapsible Mini Mode (72px)   │
+├───────────────────┼────────────────────────────────────────┼─────────────────────────────────────┤
+│ 2. Spatial Grid   │ Single-column vertical scroll with     │ Multi-column Master-Detail grid     │
+│    Layout         │ 8pt rhythm & sticky sub-headers        │ (40% Master Feed / 60% Detail Desk) │
+├───────────────────┼────────────────────────────────────────┼─────────────────────────────────────┤
+│ 3. Touch Targets  │ Minimum 48×48px tap targets, 56px for  │ Compact 36–40px dense click targets │
+│    & Density      │ primary action FAB and bottom tabs     │ with keyboard shortcuts (Cmd+K, 1-4)│
+├───────────────────┼────────────────────────────────────────┼─────────────────────────────────────┤
+│ 4. Secondary Tool │ Native Swipeable Bottom Sheet Drawer   │ Dedicated flyout drawer or modal    │
+│    Access         │ with drag handle & gesture physics     │ with multi-column tabular breakdown │
+├───────────────────┼────────────────────────────────────────┼─────────────────────────────────────┤
+│ 5. Map Handling   │ Non-capturing preview with explicit    │ Full interactive interactive split  │
+│                   │ "Tap to expand fullscreen" toggle      │ view with clustering & live routes  │
+└───────────────────┴────────────────────────────────────────┴─────────────────────────────────────┘
+```
+
+### 3.1 Mobile Ergonomic Reach Zones
+On modern 6.1" – 6.7" smartphones, 75% of interactions happen one-handed:
+- **Top 25% (Stretch Zone):** Status bar, online sync indicator, greeting, and language toggle. No primary interactive buttons.
+- **Middle 35% (Viewing Zone):** Scrap photography thumbnails, weight steppers, and pricing cards.
+- **Bottom 40% (Natural Thumb Zone):**
+  - **Bottom Navigation Bar (56px):** 4 thumb-friendly tabs (`Lots`, `Prices`, `Pickups`, `More`).
+  - **Floating Action Button (56px):** Positioned at bottom-right (`bottom-20 right-4`) for effortless 1-tap lot creation.
+  - **Vernacular Audio Dock (48px):** Centered floating audio pill with live sound wave animation.
+
+---
+
+## 4. The 4 Portals: Deep-Dive Specifications
+
+### 4.1 Portal 1: Citizen (Household Consumer)
+- **Primary Mission:** Frictionless household e-waste disposal, real-time collector tracking, and ESG/CSR green tree donation credits.
+- **Smartphone Experience:**
+  - **3-Step Progressive Wizard (`Items ➔ Schedule ➔ Confirm`):** Replaces intimidating 800-line scrolling forms.
+  - **Camera ML Scrap Scanner:** Live camera preview with immediate bounding box tag (`High-Grade PCB • 94% match`).
+  - **Tactile Weight Steppers:** Large `[-] 2 Items • 4.5 kg [+]` touch controls with haptic feedback.
+  - **Indicative Price Guarantee Card:** Displays certified price band (`₹1,200 – ₹1,550`) sourced from live Mandi benchmark.
+  - **CSR Green Tree Donation Switch:** 1-tap toggle to donate cash value to afforestation projects, granting an 80G tax benefit receipt.
+  - **Active Pickup Tracking Card:** Shows collector ETA, live route map (non-scroll-trapping), and the **4-digit Handover OTP** (`verificationOtp: 4821`).
+- **Desktop Experience:**
+  - Split 60/40 view: Left side houses the booking wizard; right side houses the interactive collector radar map and the citizen's **Green Passport** (lifetime kg diverted, trees planted, and downloadable CPCB Safe Disposal PDF Certificates).
+
+---
+
+### 4.2 Portal 2: Kabadiwala / Collector (Doorstep Informal Worker)
+- **Primary Mission:** Fast doorstep intake, scrap aggregation into commercial lots, live recycler bidding, and transparent cash accounting.
+- **Smartphone Experience:**
+  - **Persistent App Header:** App title `धातु Dhatu`, live sync status pill (`● Synced`), and greeting `Namaste Suresh ji (★ 4.9)`.
+  - **Segmented Control:** Crisp sliding pill between `My Lots (3)` (active in warm copper) and `Live Bids (1)`.
+  - **Lot Feed Cards:** Real scrap photography thumbnail, gross weight in `JetBrains Mono` (`18.5 kg`), calculated asking price (`₹8,500`), and a single trust badge (`Top Bid: EcoRecycle`).
+  - **Vernacular Audio Dock:** Persistent golden floating pill with animated audio wave. 1 tap narrates the screen in Hindi, Marathi, or English.
+  - **Rapid Lot Creation FAB (`+`):** Proactively checks dual-tier KYC quota before opening camera modal.
+  - **Persistent 4-Tab Bottom Bar:**
+    1. **`Lots (लॉट)`:** Active scrap inventory & live auction cards.
+    2. **`Prices (भाव)`:** High-contrast Mandi rates board with 7-day sparklines and `Listen All (सुनें)` button.
+    3. **`Pickups (पिकअप)`:** Household requests with distance, call button, and OTP verification input.
+    4. **`More (अधिक)`:** Opens the swipeable bottom sheet drawer housing secondary tools:
+       - 🛡️ `KYC & Trust Profile` (Aadhaar onboarding to lift ₹5,000 transaction cap)
+       - 🏭 `Recyclers Directory` (Bayesian ranked CPCB partners)
+       - 🎫 `Handover QR Pass` (Pre-weigh manifest QR pass for weighbridge entry)
+       - 📖 `Cash Passbook` (₹18,400 running balance & stamped receipts)
+       - ⚠️ `Safety Guides` (Lithium fire & CRT handling rules)
+       - ⚙️ `App Settings` (Language switcher & offline cache reset)
+- **Desktop / Tablet Experience (Aggregation Hubs):**
+  - Full-screen trading desk: Left column lists active inventory; center column shows the real-time live bidding auction room with anti-sniping timers; right column displays the digital passbook ledger with exportable CSV/PDF summaries.
+
+---
+
+### 4.3 Portal 3: Recycler (Authorized CPCB Facility)
+- **Primary Mission:** High-throughput weighbridge intake, live lot bidding, CPCB Form-2/6 compliance, and dynamic rate card publishing.
+- **Hardware Target:** Desktop & Industrial Weighbridge Terminal (1024px – 1920px).
+- **Desktop Layout: Master-Detail Bidding & Weighbridge Console:**
+  - **Left Column (40% width):** Live feed of verified collector lots within 25km. Filters for `Open for Bids`, `My Bids`, `Handover Pending`.
+  - **Right Column (60% width):** Dedicated Action Terminal with 4 operating modes:
+    - **Mode A: Live Bidding Room:** High-resolution lot photos, collector reliability rating, declared vs actual historical tolerance, bid entry box with quick increment chips (`+₹500`, `+₹1,000`), and live countdown timer with **+2 minute anti-sniping protection**.
+    - **Mode B: Weighbridge Scale Terminal:**
+      - Operator scans Collector's Handover QR Pass via USB barcode/camera scanner.
+      - Dual gross and tare digital scale readouts populate automatically.
+      - Operator enters `Scale Calibration ID` (`WB-OKHLA-SCALE-04`) and `Operator PIN`.
+      - Real-time Discrepancy Check: If scale weight diverges $>5\%$ from collector declared weight, flags anomaly for mutual verification.
+      - 1-Click Dual Signoff: Mints the immutable **Universal Sale Token** (`KBD-SL-YYYYMMDD-ZONE-HASH6`) with SHA-256 cryptographic seal.
+      - Dispatches instant cash/UPI voucher and triggers the **Double-Blind Mutual Rating Prompt**.
+    - **Mode C: Dynamic Rate Console:** Set district purchasing rates per kg (Motherboards, Copper, Batteries) with 1-click broadcast to all collectors.
+    - **Mode D: CPCB EPR Compliance Hub:** One-click automated generation of CPCB Form-2 (Annual Returns) and Form-6 (Manifest for Hazardous Waste Transport) packages.
+
+---
+
+### 4.4 Portal 4: Regulatory / Municipal Admin (CPCB / SPCB / ULB)
+- **Primary Mission:** Municipal mass-balance oversight, informal-to-formal transition metrics, and end-to-end material provenance audit.
+- **Hardware Target:** Widescreen Command Center (1440px – 2560px).
+- **Console Architecture:**
+  - **Global Mass-Balance Ribbon:** Real-time counters: Total E-Waste Diverted (MT), Informal Workers Certified, Total UPI/Cash Disbursed (₹), EPR Credits Issued.
+  - **Universal Sale Token Auditor:** Search any Token ID (`KBD-SL-...`) or scan physical receipt QR. Recycler view masks collector Aadhaar (privacy protection); Regulatory view reveals complete unmasked chain of custody:
+    `Citizen Pickup (DL24) ➔ Suresh Kumar (Aadhaar Verified) ➔ EcoRecycle Weighbridge ➔ Roorkee Smelter`
+  - **Material Provenance Node Graph:** Interactive 4-stage visual graph showing custody handoffs, GPS coordinates, scale calibration logs, and SHA-256 seal hashes.
+  - **Dual-Tier KYC Verification Hub:** Side-by-side Aadhaar OCR vs live collector selfie desk with 1-click Approve / Request Re-scan.
+  - **Municipal Anomaly GIS Heatmap:** Real-time GIS map flagging weight discrepancies $>5\%$ or unauthorized scrap movements.
+  - **Unit Economics Formalization Calculator:** Interactive sliders calculating informal middleman margin elimination and household income uplift.
+
+---
+
+## 5. End-to-End Operational Lifecycle (State Machines)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Citizen as Citizen (Household)
+    actor Collector as Kabadiwala (Collector)
+    actor Recycler as Recycler (CPCB Plant)
+    actor System as Platform Trust Engine
+    actor Regulatory as CPCB Auditor
+
+    Note over Citizen,Collector: LAYER 1: DOORSTEP COLLECTION
+    Citizen->>System: Books pickup (photo ML + category)
+    System->>Citizen: Issues 4-Digit Handover OTP (4821)
+    Collector->>Citizen: Arrives at doorstep, inspects scrap
+    Collector->>System: Inputs Citizen's OTP (4821)
+    System->>Collector: Status: COMPLETED. ₹620 logged in Passbook
+
+    Note over Collector,Recycler: LAYER 2: AGGREGATION & LIVE BIDDING
+    Collector->>System: Creates Lot (18.5 kg PCBs, ₹8,000 reserve)
+    System->>Recycler: Broadcasts Lot to Trading Desk
+    Recycler->>System: Submits Bid (₹8,500) [Anti-sniping active]
+    Collector->>System: Accepts Bid (Status: HANDOVER_PENDING)
+    System->>Collector: Issues Handover QR Pass (Pre-Weigh Manifest)
+
+    Note over Collector,Recycler: LAYER 3: WEIGHBRIDGE INTAKE & SALE TOKEN
+    Collector->>Recycler: Presents Handover QR Pass at Weighbridge
+    Recycler->>System: Scans QR + Inputs Scale Weight (18.4 kg) + Scale ID + PIN
+    System->>System: Validates Tolerance (<5% delta)
+    System->>System: Mints Universal Sale Token (KBD-SL-20260918-DEL-8F4A9B)
+    System->>Collector: Instant UPI/Cash Voucher Disbursed
+    System->>Collector: Rating Prompt (Status: PENDING_MUTUAL)
+    System->>Recycler: Rating Prompt (Status: PENDING_MUTUAL)
+
+    Note over Regulatory,System: LAYER 4: REGULATORY EPR AUDIT
+    Regulatory->>System: Queries Token KBD-SL-20260918-DEL-8F4A9B
+    System->>Regulatory: Unmasks 4-stage provenance + Form-2/6 package
 ```
 
 ---
 
-## 4. Concrete Code Refactoring Plan (Breaking the God-Components)
+## 6. The 5 Defensive Runtime Invariants (Field Hardening)
 
-### 4.1 Deconstructing `KabadiwalaDashboard.tsx` (3,306 lines ➔ 4 modular components)
-Currently, `apps/web/src/pages/kabadiwala/KabadiwalaDashboard.tsx` contains 3,306 lines of code. Typing one character in a form re-renders the entire screen.
-
-We decompose it into:
-1. `apps/web/src/pages/kabadiwala/components/LotFeed.tsx` (~250 lines): The list of active lots with photo thumbnails and bid offers.
-2. `apps/web/src/pages/kabadiwala/components/CreateLotModal.tsx` (~200 lines): 2-step lot creation (camera photo + weight stepper + price estimate).
-3. `apps/web/src/pages/kabadiwala/components/PriceBoard.tsx` (~180 lines): Live rates ticker with 7-day sparkline and 1-tap audio playback.
-4. `apps/web/src/pages/kabadiwala/components/PickupsFeed.tsx` (~200 lines): Citizen pickup requests with phone call button and map navigation link.
-5. `apps/web/src/pages/kabadiwala/components/CollectorMoreSheet.tsx` (~150 lines): Clean bottom sheet drawer for Passbook, Recyclers list, and Safety cards.
-
-### 4.2 Deconstructing `CitizenDashboard.tsx` (1,732 lines ➔ 3 modular components)
-1. `apps/web/src/pages/citizen/components/PickupWizard.tsx`: 3-step simple booking flow (`Items` ➔ `Time` ➔ `Confirm`).
-2. `apps/web/src/pages/citizen/components/ActivePickupTracker.tsx`: Driver status, live ETA, OTP verification code, and phone button.
-3. `apps/web/src/pages/citizen/components/ImpactCard.tsx`: Personal trees planted and e-waste diverted counter with CPCB certificate download.
-
----
-
-## 5. Technical Safeguards for Runtime Robustness
-
-### 5.1 Preventing the 5MB `localStorage` Crash
-- **Problem:** Camera photos currently stored as raw 4MB base64 strings in `localStorage` crash the browser with `QuotaExceededError`.
-- **Solution:** Add client-side canvas compression in `apps/web/src/lib/imageCompressor.ts`:
-  - Max dimensions: $1024 \times 1024$ px.
-  - Export: JPEG quality `0.75`.
-  - Result: 4.8 MB camera photo compressed to **~120 KB** before saving to state or storage.
-
-### 5.2 Eliminating the Mobile Leaflet Map Scroll Trap
-- **Problem:** Full-width Leaflet map intercepts touch gestures, trapping users when scrolling.
-- **Solution:** On screens `< 768px`, initialize Leaflet with `{ dragging: false, touchZoom: false }` and provide a clear `"Tap to open full map"` button.
-
-### 5.3 Android Back-Button Handling
-- **Problem:** Pressing hardware back on Android exits the app instead of closing open drawers/sheets.
-- **Solution:** Listen to Capacitor back button event; if a bottom sheet or modal is open, dismiss it and prevent app exit.
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   DEFENSIVE RUNTIME INVARIANTS                                   │
+├─────────────────────────┬────────────────────────────────────────┬───────────────────────────────┤
+│ Failure Point           │ Real-World Field Risk                  │ Defensive Technical Solution  │
+├─────────────────────────┼────────────────────────────────────────┼───────────────────────────────┤
+│ 1. 5MB LocalStorage     │ Uncompressed 4MB camera photos crash   │ Client-side HTML5 Canvas      │
+│    Quota Crash          │ `localStorage` with QuotaExceededError │ compressor clamps to 1024px   │
+│                         │                                        │ WebP/JPEG 0.75 (~120KB)       │
+├─────────────────────────┼────────────────────────────────────────┼───────────────────────────────┤
+│ 2. Android Hardware     │ Pressing back exits the app and loses  │ Explicit Capacitor Back-Button│
+│    Back-Button Trap     │ active in-progress lots or bids        │ stack: dismisses active sheet │
+├─────────────────────────┼────────────────────────────────────────┼───────────────────────────────┤
+│ 3. Leaflet Map Touch    │ Inline map intercepts vertical swipes, │ Feed maps non-capturing       │
+│    Scroll Trap          │ trapping user while scrolling on phone │ (`dragging: false`) + expand  │
+├─────────────────────────┼────────────────────────────────────────┼───────────────────────────────┤
+│ 4. Devanagari Numeral   │ Hindi virtual keyboards type `०-९`,     │ Automatic in-flight normalizer│
+│    Parse Failure        │ causing `parseFloat() = NaN`           │ maps `०-९` ➔ `0-9` characters │
+├─────────────────────────┼────────────────────────────────────────┼───────────────────────────────┤
+│ 5. Speech Queue Freezing│ Browser SpeechSynthesis queue hangs on │ Sentence chunking (<=140 char)│
+│    / Audio Collision    │ long text or overlapping utterances    │ + 4.5s heartbeat keep-alive   │
+└─────────────────────────┴────────────────────────────────────────┴───────────────────────────────┘
+```
 
 ---
 
-## 6. Visual Mockups Reference
+## 7. Concrete 3-Phase Modular Refactoring Roadmap
 
-High-resolution visual mockups demonstrating this clean, grounded design are stored in:
-- `ui-smartphone-designs/01_collector_dashboard.jpg` — Clean collector feed with 4-tab bar, audio dock, and FAB.
-- `ui-smartphone-designs/02_spoken_mandi_price_board.jpg` — High-contrast scrap price ticker with green sparklines.
-- `ui-smartphone-designs/03_citizen_3step_booking_wizard.jpg` — Progressive 3-step pickup booking with camera snapshot.
-- `ui-smartphone-designs/04_more_tools_bottom_sheet.jpg` — Swipeable bottom sheet housing secondary tools.
+```mermaid
+flowchart LR
+    P1["Phase 1: Design Tokens & UI Primitives\n(Components in apps/web/src/components/ui/)"] --> P2["Phase 2: Nav Shell & Field Guards\n(4-Tab Bar + Sheet + Canvas Compressor)"]
+    P2 --> P3["Phase 3: Modularize Monoliths\n(Split Kabadiwala & Citizen Dashboards)"]
+```
+
+### Phase 1: Design Tokens & Atomic UI Primitives
+- Create directory `apps/web/src/components/ui/`:
+  - `Button.tsx`: Tactile 48px/56px buttons with active physical scale (`active:scale-95`).
+  - `Card.tsx`: Studio linen surface with 1px hairline border (`border-slate-200/80`) and subtle elevation.
+  - `Badge.tsx`: Single-status indicator with 3 semantic tints.
+  - `BottomSheet.tsx`: Swipeable native drawer with backdrop blur, drag handle, and back-button integration.
+  - `VoicePill.tsx`: Golden sound wave pill with speech chunking engine.
+  - `TabularValue.tsx`: `JetBrains Mono` currency and weight display with lining figures.
+- Clean up `apps/web/src/index.css` to eliminate redundant old classes and conflicting drop shadows.
+
+### Phase 2: Navigation Shell & Field Invariants
+- Replace cluttered 6-button bottom bar with the clean 4-tab bar (`Lots`, `Prices`, `Pickups`, `More`).
+- Wire the "More" tab to open `BottomSheet.tsx`.
+- Create `apps/web/src/lib/imageCompressor.ts` to enforce the 120KB storage ceiling.
+- Connect Capacitor `backButton` listener to dismiss bottom sheets and modals.
+- Wrap inline map in `LeafletMap.tsx` with non-capturing touch scroll protection.
+
+### Phase 3: Modularize Monolithic Dashboards
+- Deconstruct `KabadiwalaDashboard.tsx` (3,306 lines) into:
+  - `LotFeed.tsx` (inventory & live bids)
+  - `CreateLotModal.tsx` (camera photo, weight stepper, benchmark price)
+  - `PriceBoard.tsx` (mandi rates ticker + spoken audio)
+  - `PickupsFeed.tsx` (doorstep collection queue + OTP verification)
+  - `CollectorMoreSheet.tsx` (KYC, passbook, directory, safety)
+- Deconstruct `CitizenDashboard.tsx` (1,732 lines) into:
+  - `PickupWizard.tsx` (3-step progressive booking)
+  - `ActivePickupTracker.tsx` (live ETA route & 4-digit OTP)
+  - `ImpactCard.tsx` (CSR trees planted counter & safe disposal certificate)
+- Maintain 100% backward compatibility with existing mock accounts (`mock-citizen-1`, `mock-kaba-1`, `mock-recycler-1`) and Prisma API routes.
 
 ---
 
-## 7. Pragmatic 3-Phase Implementation Plan
+## 8. Flagship Smartphone Design Assets & Quota Log
 
-### Phase 1: Clean Up Styles & Create Atomic UI Primitives (1 Sprint)
-- Create `apps/web/src/components/ui/` (`Button`, `Card`, `Badge`, `BottomSheet`, `VoicePill`).
-- Update `tailwind.config.js` with the clean 3-color palette (neutral linen `#F8F9FA`, forest green `#0F766E`, amber `#D97706`).
-- Remove conflicting borders, drop shadows, and pill clutter from `index.css`.
+The visual mockups are stored in [`ui-smartphone-designs/`](file:///home/krishna/KBD/ui-smartphone-designs/):
+- **[`01_collector_dashboard.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/01_collector_dashboard.jpg):** Flagship collector dashboard with warm linen canvas, white hairline cards, real scrap photo thumbnails, monospace pricing, audio dock, and 4-tab bottom navigation.
+- **[`02_spoken_mandi_price_board.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/02_spoken_mandi_price_board.jpg):** Dark slate high-contrast trading floor with 7-day sparklines and `Listen All (सुनें)` button.
+- **[`03_citizen_3step_booking_wizard.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/03_citizen_3step_booking_wizard.jpg):** Apple/Uber aesthetic 3-step progressive booking wizard with ML classification tag, tactile steppers, and CSR tree donation toggle.
+- **[`04_more_tools_bottom_sheet.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/04_more_tools_bottom_sheet.jpg):** Native swipeable bottom sheet drawer with frosted glass blur organizing secondary operational tools.
 
-### Phase 2: Refactor Navigation Shell & Fix Mobile Touch (1 Sprint)
-- Implement clean 4-tab mobile bottom bar (`Lots`, `Prices`, `Pickups`, `More`).
-- Wire the "More" button to the lightweight `BottomSheet` drawer.
-- Add camera image compression utility (`apps/web/src/lib/imageCompressor.ts`) to prevent storage crashes.
-
-### Phase 3: Modularize the Dashboards (1 Sprint)
-- Split `KabadiwalaDashboard.tsx` into 4 focused subcomponents.
-- Split `CitizenDashboard.tsx` into 3 focused subcomponents.
-- Verify that 100% of existing mock data, seed accounts, and backend routes continue working without regressions.
+> [!NOTE]
+> When calling `generate_image`, the Google API reported **HTTP 429 Resource Exhausted** with a quota reset delay (~4 hours, resetting at `2026-09-17T23:51:21Z`). The 4 flagship visual assets in `ui-smartphone-designs/` are already placed and updated. The exact image generation prompts have been logged and are ready to re-run automatically the moment the quota window resets.

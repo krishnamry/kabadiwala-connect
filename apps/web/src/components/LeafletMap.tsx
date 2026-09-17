@@ -87,11 +87,11 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
         attributionControl: true
       }).setView(center, zoom);
 
-      // CartoDB Voyager: High-performance OSM-based tile layer on global CDN, fully compliant with OSM guidelines
-      const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        maxZoom: 20,
-        subdomains: 'abcd',
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+      // OpenStreetMap: 100% Free, zero API key required, zero watermarks
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
       });
       tileLayer.addTo(map);
 
