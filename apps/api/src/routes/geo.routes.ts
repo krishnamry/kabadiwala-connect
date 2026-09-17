@@ -205,4 +205,51 @@ router.get('/search', async (req: Request, res: Response) => {
   return res.json({ success: true, data: [] });
 });
 
+// Bounded in-memory tile cache to minimize external network requests
+const tileCache = new Map<string, { buffer: Buffer; contentType: string }>();
+
+/**
+ * GET /api/geo/tile/:z/:x/:y.png
+ * Compliant tile proxy ensuring legitimate application User-Agent headers
+ */
+router.get('/tile/:z/:x/:y.png', async (req: Request, res: Response) => {
+  const { z, x, y } = req.params;
+  const key = `${z}/${x}/${y}`;
+
+  if (tileCache.has(key)) {
+    const cached = tileCache.get(key)!;
+    res.setHeader('Content-Type', cached.contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(cached.buffer);
+  }
+
+  try {
+    const response = await axios.get(`https://tile.openstreetmap.org/${z}/${x}/${y}.png`, {
+      headers: {
+        'User-Agent': OSM_HEADERS['User-Agent'],
+        'Accept': 'image/png,image/*;q=0.8'
+      },
+      responseType: 'arraybuffer',
+      timeout: 5000
+    });
+
+    const buffer = Buffer.from(response.data);
+    const contentType = (response.headers['content-type'] as string) || 'image/png';
+
+    // Bound in-memory cache to 500 tiles
+    if (tileCache.size > 500) {
+      const firstKey = tileCache.keys().next().value;
+      if (firstKey) tileCache.delete(firstKey);
+    }
+    tileCache.set(key, { buffer, contentType });
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(buffer);
+  } catch {
+    // Fallback to OSM France directly
+    return res.redirect(302, `https://a.tile.openstreetmap.fr/osmfr/${z}/${x}/${y}.png`);
+  }
+});
+
 export default router;

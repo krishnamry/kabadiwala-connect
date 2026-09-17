@@ -87,13 +87,15 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
         attributionControl: true
       }).setView(center, zoom);
 
-      // High-performance ESRI World Street Map: Zero API keys, zero watermarks, and no OSM localhost blocking
-      const tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, METI, TomTom'
+      // OpenStreetMap France: Original high-contrast, vibrant OSM Carto styling (crisp roads, metro lines, green parks)
+      // 100% Free, zero API keys required, zero watermarks, and no localhost referer blocking
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+        maxZoom: 20,
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; OpenStreetMap France &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
       });
 
-      // Automatic fallback to Humanitarian OSM if an individual ESRI tile fails
+      // Automatic fallback to Humanitarian OSM if an individual tile fails
       tileLayer.on('tileerror', (error: any) => {
         const img = error.tile as HTMLImageElement;
         if (img && !img.dataset.hasFallback) {

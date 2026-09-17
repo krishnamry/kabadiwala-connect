@@ -13,6 +13,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { LanguageSelectScreen } from './pages/auth/LanguageSelectScreen';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { DesignPreviewPage } from './pages/design-preview/DesignPreviewPage';
 import { Role } from './types';
 
 const MainContent: React.FC = () => {
@@ -138,6 +139,14 @@ const MainContent: React.FC = () => {
       return <AdminDashboard />;
     }
 
+    if (currentView === 'design-preview' || currentView === 'preview') {
+      return (
+        <DesignPreviewPage
+          onBackToApp={handleBack}
+        />
+      );
+    }
+
     return (
       <LandingPage
         onNavigatePortal={(portal: string) => handleNavigate(portal)}
@@ -145,7 +154,7 @@ const MainContent: React.FC = () => {
     );
   };
 
-  const isFullscreenSubpage = currentView === 'language-select' || currentView === 'settings' || currentView === 'profile';
+  const isFullscreenSubpage = currentView === 'language-select' || currentView === 'settings' || currentView === 'profile' || currentView === 'design-preview' || currentView === 'preview';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors duration-200 w-full">
