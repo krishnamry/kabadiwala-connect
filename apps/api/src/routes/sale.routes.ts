@@ -5,8 +5,15 @@ import crypto from 'crypto';
 
 const router = Router();
 
+// Helper to generate official CPCB Universal Sale Token Number
+export function generateSaleTokenNumber(zone: string = 'SZ'): string {
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const randomHex = crypto.randomBytes(3).toString('hex').toUpperCase();
+  return `KBD-SL-${datePart}-${zone}-${randomHex}`;
+}
+
 // Helper for Privacy-by-Design projection
-function projectSaleToken(token: any, role?: string) {
+export function projectSaleToken(token: any, role?: string) {
   const isRegulatory = role === 'ADMIN' || role === 'regulatory';
   const { collectorAadhaarRef, ...safeToken } = token;
 

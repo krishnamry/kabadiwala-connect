@@ -112,7 +112,15 @@ export function chunkSentence(text: string, maxLen: number = 135): string[] {
             const words = clause.split(/\s+/);
             let wordBuf = '';
             for (const w of words) {
-              if ((wordBuf + ' ' + w).trim().length <= maxLen) {
+              if (w.length > maxLen) {
+                if (wordBuf) {
+                  chunks.push(wordBuf);
+                  wordBuf = '';
+                }
+                for (let i = 0; i < w.length; i += maxLen) {
+                  chunks.push(w.slice(i, i + maxLen));
+                }
+              } else if ((wordBuf + ' ' + w).trim().length <= maxLen) {
                 wordBuf = (wordBuf + ' ' + w).trim();
               } else {
                 if (wordBuf) chunks.push(wordBuf);

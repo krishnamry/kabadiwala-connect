@@ -351,11 +351,15 @@ class SQLitePrismaClient {
       const id = params.data.id || crypto.randomUUID();
       const createdAt = new Date().toISOString();
       const role = params.data.role || 'CITIZEN';
+      const kycStatus = params.data.kycStatus || 'UNVERIFIED';
+      const kycDocuments = params.data.kycDocuments
+        ? (typeof params.data.kycDocuments === 'object' ? JSON.stringify(params.data.kycDocuments) : params.data.kycDocuments)
+        : null;
 
       this.db.prepare(`
-        INSERT INTO User (id, name, phone, role, password, createdAt)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(id, params.data.name, params.data.phone, role, params.data.password, createdAt);
+        INSERT INTO User (id, name, phone, role, password, createdAt, kycStatus, kycDocuments)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(id, params.data.name, params.data.phone, role, params.data.password, createdAt, kycStatus, kycDocuments);
 
       let kabadiwala: any = null;
       if (params.data.kabadiwala?.create) {
@@ -384,6 +388,7 @@ class SQLitePrismaClient {
         name: params.data.name,
         phone: params.data.phone,
         role,
+        kycStatus,
         password: params.data.password,
         createdAt,
         kabadiwala
@@ -1055,7 +1060,15 @@ class SQLitePrismaClient {
       const createdAt = params.data.createdAt || new Date().toISOString();
       const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const tokenNumber = params.data.tokenNumber || `KBD-SL-${datePart}-DL01-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
-      const sha256Signature = params.data.sha256Signature || crypto.createHash('sha256').update(tokenNumber + params.data.lotId + params.data.netWeightKg).digest('hex');
+      
+      const netWeight = Number(params.data.netWeightKg ?? params.data.actualWeightKg ?? 10);
+      const grossWeight = Number(params.data.grossWeightKg ?? (netWeight + 0.8));
+      const tareWeight = Number(params.data.tareWeightKg ?? 0.8);
+      const rate = Number(params.data.ratePerKg ?? 250);
+      const total = Number(params.data.totalAmount ?? params.data.finalPrice ?? (netWeight * rate));
+      const recyclerName = params.data.recyclerName ?? params.data.recyclerFacilityName ?? 'EcoRecycle Facility';
+      
+      const sha256Signature = params.data.sha256Signature || crypto.createHash('sha256').update(tokenNumber + (params.data.lotId || '') + netWeight).digest('hex');
 
       this.db.prepare(`
         INSERT INTO SaleToken (
@@ -1070,22 +1083,39 @@ class SQLitePrismaClient {
           ?, ?, ?, ?, ?
         )
       `).run(
-        id, tokenNumber, params.data.lotId, params.data.collectorId, params.data.collectorName,
-        params.data.collectorPhone, params.data.collectorAadhaarRef || 'XXXX-XXXX-8921',
-        params.data.recyclerId, params.data.recyclerName, params.data.cpcbRegNumber,
-        params.data.category, params.data.cpcbCategoryCode || 'ITEW2', params.data.grossWeightKg,
-        params.data.tareWeightKg, params.data.netWeightKg, params.data.ratePerKg,
-        params.data.totalAmount, params.data.paymentMode || 'CASH_ON_SPOT',
-        params.data.weighbridgeGpsLat || 28.5355, params.data.weighbridgeGpsLng || 77.2690,
-        params.data.operatorId || 'OP-OKHLA-981', sha256Signature, params.data.eprCredits || params.data.netWeightKg,
+        id,
+        tokenNumber,
+        params.data.lotId ?? null,
+        params.data.collectorId ?? null,
+        params.data.collectorName ?? 'Suresh Kumar',
+        params.data.collectorPhone ?? '+91 9876543210',
+        params.data.collectorAadhaarRef ?? 'XXXX-XXXX-8921',
+        params.data.recyclerId ?? null,
+        recyclerName,
+        params.data.cpcbRegNumber ?? 'CPCB-REG-2024-DEL-0091',
+        params.data.category ?? 'E-Waste Scrap',
+        params.data.cpcbCategoryCode ?? 'ITEW2',
+        grossWeight,
+        tareWeight,
+        netWeight,
+        rate,
+        total,
+        params.data.paymentMode ?? 'CASH_ON_SPOT',
+        params.data.weighbridgeGpsLat ?? 28.5355,
+        params.data.weighbridgeGpsLng ?? 77.2690,
+        params.data.operatorId ?? 'OP-OKHLA-981',
+        sha256Signature,
+        params.data.eprCredits ?? Number((netWeight * 1.5).toFixed(1)),
         createdAt
       );
 
-      // Link token back to lot
-      this.db.prepare(`
-        UPDATE EWasteLot SET saleTokenNumber = ?, status = 'CONFIRMED', verifiedAtWeighbridge = 1, actualWeightKg = ?, confirmedAt = ?
-        WHERE id = ?
-      `).run(tokenNumber, params.data.netWeightKg, createdAt, params.data.lotId);
+      // Link token back to lot if lotId provided
+      if (params.data.lotId) {
+        this.db.prepare(`
+          UPDATE EWasteLot SET saleTokenNumber = ?, status = 'CONFIRMED', verifiedAtWeighbridge = 1, actualWeightKg = ?, confirmedAt = ?
+          WHERE id = ?
+        `).run(tokenNumber, netWeight, createdAt, params.data.lotId);
+      }
 
       return this.saleToken.findUnique({ where: { tokenNumber } });
     },
