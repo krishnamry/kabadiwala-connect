@@ -13,7 +13,7 @@
 | Screen | Visual File | Design Description | Core Features Preserved & Researched Micro-Improvements |
 |---|---|---|---|
 | **1. Collector Feed & Lots** | [`01_collector_dashboard.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/01_collector_dashboard.jpg) | Hero-scale main screen with 4-tab bottom bar, audio dock & circular FAB | Real PCB/Cu stock photography, tabular pricing, `⏱ 2h 14m left` auction countdown, inline `Accept Bid ➔`, `● Synced 2m ago` heartbeat |
-| **2. Spoken Mandi Price Board** | [`02_spoken_mandi_price_board.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/02_spoken_mandi_price_board.jpg) | High-contrast dark slate trading floor with 7-day sparklines & spoken audio | `📍 Mayapuri Hub` APMC geographic anchor, `Day Range: ₹250–₹275`, 4 commodity cards (PCBs, Cu, Batteries, ICs), Bhashini spoken voice |
+| **2. Daily Mandi Price Board** | [`02_spoken_mandi_price_board.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/02_spoken_mandi_price_board.jpg) | Sunlight-resistant accessible rate cards with material icons, big rates & voice | High-contrast warm linen cards, huge rates (`₹480 / किलो`), simple direction (`▲ बढ़ा ₹20`), 1-tap Hindi speech, batch math chips (`10 kg = ₹4,800`) |
 | **3. Citizen 3-Step Booking Wizard** | [`03_citizen_3step_booking_wizard.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/03_citizen_3step_booking_wizard.jpg) | Consumer-grade e-waste pickup flow (Cashify/Uber aesthetic) | Real laptop photo, `94% match` ML tag, `🛡️ 100% Certified Data Wiping Included`, logical Step 1 CTA (`Continue to Slot ➔`), zero cancellation fee |
 | **4. "More Tools" Bottom Sheet** | [`04_more_tools_bottom_sheet.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/04_more_tools_bottom_sheet.jpg) | Elevated native drawer over frosted glass blurred feed | Collector ID header (`Suresh Kumar • KBD-9421 • Tier-2 Verified`), 4-tab bar consistency underneath, offline cache buffer (`3 Lots Offline`) |
 
@@ -21,7 +21,7 @@
 
 ## Researched Micro-Improvements Breakdown
 
-Following rigorous UX research into informal worker vernacular interfaces (Bhashini/NITI Aayog) and circular electronics logistics (Cashify/Uber Freight), we applied the following 8 micro-improvements:
+Following rigorous UX research into informal worker vernacular interfaces (Bhashini/NITI Aayog) and circular electronics logistics (Cashify/Uber Freight), we applied the following micro-improvements:
 
 ### 1. Collector Feed (`01_collector_dashboard.jpg`)
 1. **Active Auction Timer Pill (`⏱ 2h 14m left`):** Prevents anxiety for scrap collectors by clearly communicating remaining bidding window and anti-sniping protection (`+2m extension`).
@@ -29,11 +29,11 @@ Following rigorous UX research into informal worker vernacular interfaces (Bhash
 3. **Network & Sync Heartbeat (`● Synced 2m ago • 4G`):** Provides instant psychological reassurance in rural or industrial scrapyards with spotty connectivity.
 4. **Physical Grade Classification (`Grade-A High Yield`):** Eliminates classification ambiguity between collectors and authorized recyclers.
 
-### 2. Spoken Mandi Price Board (`02_spoken_mandi_price_board.jpg`)
-5. **Geographic APMC Mandi Anchor (`📍 Mayapuri Hub • Delhi`):** Grounds commodity prices to specific regional wholesale scrap hubs, accounting for inter-state freight differences.
-6. **Day Range Spread (`Day Range: ₹250 – ₹275`):** Displays modal market spreads alongside spot prices, preventing local middleman exploitation.
-7. **Expanded 4-Commodity Grid:** Complete coverage for PCBs (`₹265/kg`), Copper Cables (`₹480/kg`), Lithium Batteries (`₹145/kg`), and IC Processors (`₹620/kg`).
-8. **Vernacular Speed Adjustment (`1.0x / 1.2x`):** Empowers high-frequency collectors to listen at accelerated rates.
+### 2. Daily Mandi Price Board (`02_spoken_mandi_price_board.jpg`)
+5. **No Stock-Market Clutter for Collectors:** Eliminated sparklines, candlestick charts, and multi-currency percentage deltas that confuse low-literacy informal collectors. Replaced with tangible scrap item photos/icons and large singular rate typography (`₹480 / किलो`).
+6. **1-Tap Spoken Voice (Bhashini):** Big prominent 🔊 `दाम सुनें` button on each scrap card narrating the exact Hindi sentence ("Copper wire ka bhav char sau assi rupaye prati kilo hai").
+7. **Doorstep Batch Calculator Chips:** Pre-calculated chips (`5 kg = ₹2,400`, `10 kg = ₹4,800`) allowing doorstep arithmetic verification without mental math strain.
+8. **Recycler Separation:** Full price trend graphs, historical time-series (7D/30D/90D/1Y), moving averages (SMA/EMA), and APMC Mandi volume spreads are segregated into the Recycler B2B Console (Mode E), powered by public standard open-source libraries (`Recharts` / `TradingView Lightweight Charts` / `simple-statistics`).
 
 ### 3. Citizen 3-Step Wizard (`03_citizen_3step_booking_wizard.jpg`)
 9. **Logical Step-Progression CTA:** On Step 1 (`1. Items`), CTA clearly reads `Continue to Slot Selection (Step 2/3) ➔` rather than skipping directly to confirmation.

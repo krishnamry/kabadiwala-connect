@@ -1,0 +1,24 @@
+{
+  "checkpoint_id": "CHK-YYYYMMDD-001-01",
+  "task_id": "TASK-YYYYMMDD-001",
+  "timestamp": "YYYY-MM-DDTHH:MM:SSZ",
+  "agent_id": "agent-name-or-id",
+  "status": "IN_PROGRESS",
+  "progress_percentage": 50,
+  "completed_steps": [
+    "Step 1: Setup database schema"
+  ],
+  "current_step": "Step 2: API routes implementation",
+  "next_step": "Step 3: Run validation tests",
+  "touched_files": [
+    "apps/api/src/routes/auth.ts"
+  ],
+  "dirty_files": [
+    "apps/api/src/routes/auth.ts"
+  ],
+  "context_snapshot": {
+    "key_variables": {},
+    "last_command_output": "",
+    "notes_for_next_agent": "Remember to run migrations before running the api server."
+  }
+}

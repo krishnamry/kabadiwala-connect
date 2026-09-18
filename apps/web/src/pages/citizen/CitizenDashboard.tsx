@@ -341,7 +341,8 @@ export const CitizenDashboard: React.FC = () => {
     try {
       const result = await api.classifyScrapImage(file).catch(() => ({
         category: 'High-grade Printed Circuit Boards (PCBs)',
-        confidence: 0.96,
+        detectedItem: 'Electronic Circuit Board',
+        confidence: 0.95,
         estRate: 640,
         advice: 'Intact server/desktop motherboard detected. Contains gold-flashed contact pins and high copper content. Strip heat sinks separately to maximize payout.',
         filename: file.name,
@@ -356,7 +357,7 @@ export const CitizenDashboard: React.FC = () => {
       if (catLower.includes('battery') || catLower.includes('cell') || catLower.includes('lithium')) {
         detectedCat = 'Lithium-ion Batteries';
         detectedRate = result.estRate || 145;
-      } else if (catLower.includes('wire') || catLower.includes('cable') || catLower.includes('copper')) {
+      } else if (catLower.includes('wire') || catLower.includes('cable') || catLower.includes('copper') || catLower.includes('cord')) {
         detectedCat = 'Copper Cables & Insulated Wires';
         detectedRate = result.estRate || 480;
       } else if (catLower.includes('display') || catLower.includes('panel') || catLower.includes('lcd') || catLower.includes('screen') || catLower.includes('led')) {
@@ -368,9 +369,15 @@ export const CitizenDashboard: React.FC = () => {
       } else if (catLower.includes('crt') || catLower.includes('glass')) {
         detectedCat = 'CRT Monitor Glass Unit';
         detectedRate = result.estRate || 12;
-      } else if (catLower.includes('plastic') || catLower.includes('abs')) {
+      } else if (catLower.includes('plastic') || catLower.includes('abs') || catLower.includes('hips')) {
         detectedCat = 'Engineering E-Plastics (ABS/HIPS)';
         detectedRate = result.estRate || 38;
+      } else if (catLower.includes('low-grade')) {
+        detectedCat = 'Low-grade Printed Circuit Boards (PCBs)';
+        detectedRate = result.estRate || 180;
+      } else {
+        detectedCat = 'Printed Circuit Boards (PCBs)';
+        detectedRate = result.estRate || 640;
       }
 
       setItems(prev => [
@@ -380,6 +387,7 @@ export const CitizenDashboard: React.FC = () => {
           estWeightKg: 2.5,
           ratePerKg: detectedRate,
           quantity: 1,
+          customName: result.detectedItem,
           imageUrl: URL.createObjectURL(file)
         }
       ]);
@@ -919,8 +927,10 @@ export const CitizenDashboard: React.FC = () => {
               {mlResult && (
                 <div className="p-3 bg-white rounded border border-forest-500/40 text-xs text-steel-800 space-y-1">
                   <div className="font-bold text-forest-700 flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4 text-forest-600" />
-                    <span>AI Detected: {preserveEnglishItemName(mlResult.category)} ({Math.round(mlResult.confidence * 100)}% confidence)</span>
+                    <CheckCircle2 className="w-4 h-4 text-forest-600 shrink-0" />
+                    <span>
+                      AI Detected: {mlResult.detectedItem ? `${mlResult.detectedItem} — ${preserveEnglishItemName(mlResult.category)}` : preserveEnglishItemName(mlResult.category)} ({Math.round(mlResult.confidence * 100)}% match)
+                    </span>
                   </div>
                   <p className="text-[11px] text-steel-600">{mlResult.advice}</p>
                 </div>

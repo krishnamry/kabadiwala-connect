@@ -7,3 +7,5 @@ apps/api/prisma/*.db*
 **/.env.*
 !**/.env.example
 .neon
+__pycache__/
+*.pyc

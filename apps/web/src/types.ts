@@ -318,6 +318,7 @@ export interface AdminStats {
 
 export interface MLClassificationResult {
   category: string;
+  detectedItem?: string;
   confidence: number;
   estRate: number;
   advice: string;

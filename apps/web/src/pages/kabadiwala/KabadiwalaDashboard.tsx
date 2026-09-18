@@ -658,18 +658,22 @@ export const KabadiwalaDashboard: React.FC = () => {
       const catLower = (result.category || '').toLowerCase();
       if (catLower.includes('battery') || catLower.includes('cell') || catLower.includes('lithium')) {
         matchedCategory = 'Lithium-ion Batteries';
-      } else if (catLower.includes('cable') || catLower.includes('wire') || catLower.includes('copper')) {
+      } else if (catLower.includes('cable') || catLower.includes('wire') || catLower.includes('copper') || catLower.includes('cord')) {
         matchedCategory = 'Copper Cables & Insulated Wires';
       } else if (catLower.includes('display') || catLower.includes('lcd') || catLower.includes('led') || catLower.includes('screen') || catLower.includes('panel')) {
         matchedCategory = 'LCD/LED Display Panels';
       } else if (catLower.includes('motor') || catLower.includes('compressor')) {
         matchedCategory = 'Electric Motors & Compressors';
+      } else if (catLower.includes('low-grade')) {
+        matchedCategory = 'Low-grade Printed Circuit Boards (PCBs)';
       } else if (catLower.includes('pcb') || catLower.includes('circuit') || catLower.includes('board') || catLower.includes('ewaste') || catLower.includes('e-waste')) {
         matchedCategory = 'High-grade Printed Circuit Boards (PCBs)';
-      } else if (catLower.includes('plastic') || catLower.includes('abs')) {
+      } else if (catLower.includes('plastic') || catLower.includes('abs') || catLower.includes('hips')) {
         matchedCategory = 'Engineering E-Plastics (ABS/HIPS)';
       } else if (catLower.includes('crt') || catLower.includes('glass')) {
         matchedCategory = 'CRT Monitor Glass Unit';
+      } else if (catLower.includes('metal') || catLower.includes('steel') || catLower.includes('aluminum')) {
+        matchedCategory = 'Metal';
       }
       setLotCategory(matchedCategory);
       hapticSuccess();
@@ -1283,7 +1287,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                         <div className="space-y-1.5">
                           <div className="text-emerald-900 font-bold text-sm sm:text-base flex items-center justify-center gap-1.5">
                             <CheckCircle2 className="w-5 h-5 text-emerald-700" />
-                            <span>AI Detected: {preserveEnglishItemName(lotMlResult.category)} ({Math.round(lotMlResult.confidence * 100)}% match)</span>
+                            <span>
+                              AI Detected: {lotMlResult.detectedItem ? `${lotMlResult.detectedItem} — ${preserveEnglishItemName(lotMlResult.category)}` : preserveEnglishItemName(lotMlResult.category)} ({Math.round(lotMlResult.confidence * 100)}% match)
+                            </span>
                           </div>
                           <p className="text-xs sm:text-sm text-slate-600 font-normal">{lotMlResult.advice}</p>
                         </div>

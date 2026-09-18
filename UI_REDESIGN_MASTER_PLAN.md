@@ -4,7 +4,8 @@
 **Supported Viewports:** Smartphone (360px – 430px Android Capacitor APK & PWA), Tablet (768px – 1024px), Desktop Workstation (1280px – 1920px Widescreen)  
 **Design Standard:** Tier-1 Precision Craft (Stripe Terminal / Apple Health / Linear / Ramp / Uber Freight)  
 **Visual Design Gallery:** [`ui-smartphone-designs/`](file:///home/krishna/KBD/ui-smartphone-designs/)  
-**Interactive Plan Artifact:** [ui_redesign_plan.md](file:///home/krishna/.gemini/antigravity-cli/brain/a4febea0-c870-4291-9079-79b8cd1643bb/ui_redesign_plan.md)
+**Interactive Plan Artifact:** [ui_redesign_plan.md](file:///home/krishna/.gemini/antigravity-cli/brain/a4febea0-c870-4291-9079-79b8cd1643bb/ui_redesign_plan.md)  
+**Desktop Master Architecture Blueprint:** [`DESKTOP_UI_REDESIGN_MASTER_PLAN.md`](file:///home/krishna/KBD/DESKTOP_UI_REDESIGN_MASTER_PLAN.md)
 
 ---
 
@@ -16,7 +17,7 @@ Generic AI-generated interfaces and amateur web applications suffer from five un
 2. **Conflicting Color Systems:** Using saturated purples, bright blues, neon greens, and harsh reds simultaneously with no spatial rhythm.
 3. **God-Component Monoliths:** Shoving 3,000+ lines of state, maps, forms, charts, and modals into a single component (`KabadiwalaDashboard.tsx`), causing jittery re-renders on every keystroke.
 4. **Desktop-Mobile Mismatch:** Shrinking a complex multi-column desktop spreadsheet into an unscrollable phone screen, or stretching a simple mobile list across an empty 27-inch 4K monitor.
-5. **Persona Dishonesty:** Expecting a street scrap collector on a tricycle with dirty hands under 42°C Indian sunlight to tap tiny 12px dropdown menus in English and read "Dirichlet Bayesian prior distributions".
+5. **Persona Dishonesty (The "Trading Website" Fallacy):** Expecting an informal doorstep scrap collector (kabadiwala) on a tricycle under 42°C Indian sunlight to interpret stock-market style candlestick/sparkline charts, spread ranges ("Day Range: ₹250–₹275"), and percentage volatility badges ("+₹15 (▲ 5.6%)"). Informal collectors may have limited formal education: they need tangible scrap photos/icons, huge bold rates (₹/kg), 1-tap Hindi spoken voice narration, and 1-tap batch math calculators ("10 kg = ₹4,800"). Conversely, commercial recyclers running B2B processing plants *do* require price trend charts, moving averages, and market analytics, built on battle-tested publicly available charting libraries (Recharts / ECharts / Lightweight Charts) rather than bespoke homegrown algorithms.
 
 ### 1.2 The Dhatu "Anti-Clutter" Foundation: The Rule of Three
 To create a serene, world-class software experience worthy of a multi-billion dollar platform, every screen adheres strictly to the **Rule of Three**:
@@ -27,7 +28,7 @@ To create a serene, world-class software experience worthy of a multi-billion do
   - **Surface Cards:** Pure White (`#FFFFFF` Light / `#111625` Slate Dark) with 1px hairline border (`rgba(15, 23, 42, 0.08)` / `#1E293B`) and layered soft diffusion shadow.
   - **Transactional Accent (Marketplace):** Burnished Copper (`#C2410C` Light / `#FB923C` Dark) — represents physical copper scrap, active marketplace bids, and transactional actions.
   - **Trust & Verification (Compliance):** Patina Forest Green (`#0F766E` Light / `#10B981` Dark) — represents verified CPCB status, completed handovers, and CSR tree donations.
-  - **Market Attention (Live Mandi Rates):** Sun Brass (`#B45309` Light / `#FBBF24` Dark) — reserved for live rate sparklines and audio narration waveforms.
+  - **Market Attention (Daily Mandi Rates):** Sun Brass (`#B45309` Light / `#FBBF24` Dark) — reserved for daily mandi rate badges and vernacular audio narration waveforms.
 
 ---
 
@@ -120,7 +121,13 @@ On modern 6.1" – 6.7" smartphones, 75% of interactions happen one-handed:
   - **Rapid Lot Creation FAB (`+`):** Proactively checks dual-tier KYC quota before opening camera modal.
   - **Persistent 4-Tab Bottom Bar:**
     1. **`Lots (लॉट)`:** Active scrap inventory & live auction cards.
-    2. **`Prices (भाव)`:** High-contrast Mandi rates board with 7-day sparklines and `Listen All (सुनें)` button.
+    2. **`Prices (भाव - आज का भाव)`: Visual & Spoken Daily Mandi Board (Collector-Accessible):**
+       - **Sunlight-Resistant High-Contrast Cards:** Crisp studio white cards on warm linen with bold visual iconography and realistic scrap photos (Copper wire coils, Green PCBs, Inverter batteries, Iron scrap) eliminating visual ambiguity.
+       - **Massive Single Rate Typography:** Bold `JetBrains Mono` headline rates (e.g. `₹480 / किलो` or `₹265 / kg`). Replaces confusing stock-market spreads ("Day Range: ₹250–₹275") with one definitive, transparent benchmark price.
+       - **Simple Vernacular Price Direction:** High-contrast pill with plain words: `▲ ₹20 बढ़ा (Up)` in emerald, `▼ ₹10 घटा (Down)` in crimson, or `स्थिर (Same)` in slate. Eliminates abstract percentage mathematics (`+5.6%`) that cause confusion.
+       - **1-Tap Vernacular Spoken Audio (Bhashini AI):** Big tactile 🔊 `दाम सुनें` (Listen Rate) button on every item card + persistent floating dock `सभी भाव सुनें` (Listen All). Speaks aloud in colloquial Hindi/Marathi/Tamil: *"Copper wire ka aaj ka bhav 480 rupaye prati kilo hai."*
+       - **Doorstep Mental-Math Batch Chips:** Pre-calculated standard sack weight multipliers: `[5 kg = ₹2,400]`, `[10 kg = ₹4,800]`, `[20 kg = ₹9,600]`. Allows the collector to instantly know the total payout without manual mental arithmetic while negotiating at doorstep.
+       - **Zero Trading Clutter:** Completely removes sparklines, candlestick charts, bid/ask depth, and Bloomberg-style dark terminals from the mobile collector interface.
     3. **`Pickups (पिकअप)`:** Household requests with distance, call button, and OTP verification input.
     4. **`More (अधिक)`:** Opens the swipeable bottom sheet drawer housing secondary tools:
        - 🛡️ `KYC & Trust Profile` (Aadhaar onboarding to lift ₹5,000 transaction cap)
@@ -135,11 +142,11 @@ On modern 6.1" – 6.7" smartphones, 75% of interactions happen one-handed:
 ---
 
 ### 4.3 Portal 3: Recycler (Authorized CPCB Facility)
-- **Primary Mission:** High-throughput weighbridge intake, live lot bidding, CPCB Form-2/6 compliance, and dynamic rate card publishing.
+- **Primary Mission:** High-throughput weighbridge intake, live lot bidding, CPCB Form-2/6 compliance, dynamic rate card publishing, and commodity price trend analytics.
 - **Hardware Target:** Desktop & Industrial Weighbridge Terminal (1024px – 1920px).
-- **Desktop Layout: Master-Detail Bidding & Weighbridge Console:**
+- **Desktop Layout: Master-Detail Bidding, Analytics & Weighbridge Console:**
   - **Left Column (40% width):** Live feed of verified collector lots within 25km. Filters for `Open for Bids`, `My Bids`, `Handover Pending`.
-  - **Right Column (60% width):** Dedicated Action Terminal with 4 operating modes:
+  - **Right Column (60% width):** Dedicated Action Terminal with 5 operating modes:
     - **Mode A: Live Bidding Room:** High-resolution lot photos, collector reliability rating, declared vs actual historical tolerance, bid entry box with quick increment chips (`+₹500`, `+₹1,000`), and live countdown timer with **+2 minute anti-sniping protection**.
     - **Mode B: Weighbridge Scale Terminal:**
       - Operator scans Collector's Handover QR Pass via USB barcode/camera scanner.
@@ -150,6 +157,23 @@ On modern 6.1" – 6.7" smartphones, 75% of interactions happen one-handed:
       - Dispatches instant cash/UPI voucher and triggers the **Double-Blind Mutual Rating Prompt**.
     - **Mode C: Dynamic Rate Console:** Set district purchasing rates per kg (Motherboards, Copper, Batteries) with 1-click broadcast to all collectors.
     - **Mode D: CPCB EPR Compliance Hub:** One-click automated generation of CPCB Form-2 (Annual Returns) and Form-6 (Manifest for Hazardous Waste Transport) packages.
+    - **Mode E: Commodity Price Trend & Market Intelligence Desk (Enterprise Graphing Stack):**
+      - Dedicated analytical workstation mode for CPCB registered recyclers, smelters, and commercial e-waste aggregators who need to track seasonal price movements, hedge procurement margins, and analyze Mandi price trends across districts.
+      - **Publicly Available Graphing Stack (Zero Homegrown Algorithms):**
+        - *Strict Architectural Rule:* Engineering teams are explicitly prohibited from writing custom charting engines, bespoke SVG math canvas renderers, or homegrown trend calculation algorithms. All charts and trendlines must use battle-tested, peer-reviewed open-source libraries:
+        - **1. Primary React UI Charting Engine — Recharts (`recharts`):**
+          - Built on D3 and SVG; fully responsive and declarative (`<ResponsiveContainer>`, `<AreaChart>`, `<LineChart>`, `<XAxis>`, `<YAxis>`, `<Tooltip>`, `<ReferenceLine>`, `<Brush>`, `<CartesianGrid>`).
+          - Renders smooth gradient-filled price curves with zero canvas bloat and native accessible SVG tooltips.
+        - **2. High-Performance Financial & Candlestick Alternative — TradingView Lightweight Charts (`lightweight-charts`) / Apache ECharts (`echarts-for-react`):**
+          - For high-density multi-year zoomable commodity price tracking and APMC Mandi volume spreads without custom canvas code.
+        - **3. Public Standard Statistical & Trendline Algorithms:**
+          - **Moving Average Trendlines:** Standard 7-day and 30-day Simple Moving Average (SMA) and Exponential Moving Average (EMA) calculated using standard mathematical definitions.
+          - **Linear Regression & Price Trend Lines:** Sourced directly from **`simple-statistics`** (npm: `simple-statistics` via `linearRegression()` and `linearRegressionLine()`) or ECharts' official statistical extension (`ecStat`).
+          - **Mandi Volatility Spread:** Standard Interquartile Range (IQR) or Standard Deviation bands ($\mu \pm 1.5\sigma$) to indicate wholesale auction spreads across Okhla, Mayapuri, and Roorkee hubs.
+      - **Interactive Recycler Controls:**
+        - Timeframe toggles: `7D (1 Week)`, `30D (1 Month)`, `90D (Quarter)`, `1Y (Annual)`.
+        - Benchmark overlay: Compare local scrap pickup rates against international benchmarks (e.g. LME Spot Copper, Battery scrap index).
+        - Exportable time-series CSV / PDF for CPCB regulatory mass-balance filing and enterprise accounting.
 
 ---
 
@@ -280,7 +304,7 @@ flowchart LR
 
 The visual mockups are stored in [`ui-smartphone-designs/`](file:///home/krishna/KBD/ui-smartphone-designs/):
 - **[`01_collector_dashboard.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/01_collector_dashboard.jpg):** Flagship collector dashboard with warm linen canvas, white hairline cards, real scrap photo thumbnails, monospace pricing, audio dock, and 4-tab bottom navigation.
-- **[`02_spoken_mandi_price_board.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/02_spoken_mandi_price_board.jpg):** Dark slate high-contrast trading floor with 7-day sparklines and `Listen All (सुनें)` button.
+- **[`02_spoken_mandi_price_board.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/02_spoken_mandi_price_board.jpg):** Visual & Spoken Daily Mandi Board (आज का भाव) for informal collectors — warm linen high-contrast card board featuring recognizable material photos/icons, large bold rates (`₹480 / किलो`), simple direction indicators (`▲ बढ़ा` / `▼ घटा`), 1-tap Bhashini voice playback, and instant batch calculators (`10 kg = ₹4,800`). Complex price trend graphs and time-series sparklines have been moved to the Recycler B2B Console (Mode E) powered by Recharts.
 - **[`03_citizen_3step_booking_wizard.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/03_citizen_3step_booking_wizard.jpg):** Apple/Uber aesthetic 3-step progressive booking wizard with ML classification tag, tactile steppers, and CSR tree donation toggle.
 - **[`04_more_tools_bottom_sheet.jpg`](file:///home/krishna/KBD/ui-smartphone-designs/04_more_tools_bottom_sheet.jpg):** Native swipeable bottom sheet drawer with frosted glass blur organizing secondary operational tools.
 
