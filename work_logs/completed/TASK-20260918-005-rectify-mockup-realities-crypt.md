@@ -1,20 +1,18 @@
 ---
-id: "TASK-20260918-004-comprehensive-ui-ux-redesign-p"
-title: "Comprehensive UI/UX Redesign Plan for Desktop Version"
-status: "IN_PROGRESS"
+id: "TASK-20260918-005-rectify-mockup-realities-crypt"
+title: "Rectify Mockup Realities, Cryptographic Hash, and Compliance Risks"
+status: "COMPLETED"
 assigned_agent: "Antigravity"
-created_at: "2026-09-18T04:57:24Z"
-updated_at: "2026-09-18T04:57:24Z"
-completed_at: null
-locked_files:
-  - DESKTOP_UI_REDESIGN_MASTER_PLAN.md
-  - UI_REDESIGN_MASTER_PLAN.md
+created_at: "2026-09-18T05:05:44Z"
+updated_at: "2026-09-18T05:13:55Z"
+completed_at: "2026-09-18T05:13:55Z"
+locked_files: []
 dependencies: []
 ---
-# Task: [TASK-20260918-004-comprehensive-ui-ux-redesign-p] Comprehensive UI/UX Redesign Plan for Desktop Version
+# Task: [TASK-20260918-005-rectify-mockup-realities-crypt] Rectify Mockup Realities, Cryptographic Hash, and Compliance Risks
 
 ## 1. Context & Objectives
-- **Goal**: Create definitive architectural blueprint and design specification for the Dhatu Desktop Workstation Suite (Recycler Terminal, Regulatory Command Center, Aggregation Trading Desk, Citizen Web)
+- **Goal**: Make SHA-256 real via crypto.subtle, replace fake biometric Aadhaar matching with compliant human review, label scale intake as simulated/override, and align charting and serial claims with reality
 - **Trigger**: User request or parent task delegation.
 - **Success Criteria**:
   - [ ] Criteria 1
@@ -41,9 +39,16 @@ dependencies: []
 |-----------------------|---------------|---------------|-----------------------|
 | YYYY-MM-DD HH:MM | Initialized task | None | Task created and claimed |
 | YYYY-MM-DD HH:MM | Refactored module | `src/auth.ts` | Tests passed |
+| 2026-09-18 10:43:55 | COMPLETED TASK | None | Summary: Installed recharts (^3.10.1), replaced static hash with real Web Crypto SubtleCrypto SHA-256 computation, replaced fake Aadhaar biometric face-match score with compliant human regulatory verification desk, refactored weighbridge UI to certified scale edge daemon architecture, and updated design documentation. |
 
 ## 5. Artifacts & Deliverables
 - Output files created:
   - `path/to/output`
 - Tests run:
   - Command: `npm test` -> Result: PASS
+
+
+## Completion Summary
+> Completed at 2026-09-18 10:43:55
+
+Installed recharts (^3.10.1), replaced static hash with real Web Crypto SubtleCrypto SHA-256 computation, replaced fake Aadhaar biometric face-match score with compliant human regulatory verification desk, refactored weighbridge UI to certified scale edge daemon architecture, and updated design documentation.

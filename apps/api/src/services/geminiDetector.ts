@@ -82,13 +82,21 @@ const CANDIDATE_MODELS = [
  * Normalizes detected categories to match Kabadiwala Connect standard taxonomy.
  */
 function normalizeCategory(rawCategory: string, detectedItem: string): string {
+  // 1. Exact match attempt on rawCategory first
+  for (const cat of Object.keys(STANDARD_RATES)) {
+    if (rawCategory.trim().toLowerCase() === cat.toLowerCase()) {
+      return cat;
+    }
+  }
+
   const text = `${rawCategory} ${detectedItem}`.toLowerCase();
 
+  // 2. Specific device hierarchies
+  if (text.includes('motor') || text.includes('compressor') || text.includes('rotor') || text.includes('pump') || text.includes('stator')) {
+    return 'Electric Motors & Compressors';
+  }
   if (text.includes('battery') || text.includes('lithium') || text.includes('18650') || text.includes('cell') || text.includes('power bank')) {
     return 'Lithium-ion Batteries';
-  }
-  if (text.includes('copper') || text.includes('cable') || text.includes('wire') || text.includes('cord') || text.includes('charger') || text.includes('harness')) {
-    return 'Copper Cables & Insulated Wires';
   }
   if (text.includes('crt') || text.includes('cathode') || text.includes('picture tube')) {
     return 'CRT Monitor Glass Unit';
@@ -96,8 +104,8 @@ function normalizeCategory(rawCategory: string, detectedItem: string): string {
   if (text.includes('display') || text.includes('lcd') || text.includes('led') || text.includes('screen') || text.includes('panel') || text.includes('monitor') || text.includes('television') || text.includes('tv')) {
     return 'LCD/LED Display Panels';
   }
-  if (text.includes('motor') || text.includes('compressor') || text.includes('rotor') || text.includes('pump') || text.includes('dynamo') || text.includes('stator')) {
-    return 'Electric Motors & Compressors';
+  if (text.includes('cable') || text.includes('wire') || text.includes('cord') || text.includes('charger') || text.includes('harness') || text.includes('copper wire')) {
+    return 'Copper Cables & Insulated Wires';
   }
   if (text.includes('low-grade') || text.includes('single-sided') || text.includes('remote') || text.includes('phenolic')) {
     return 'Low-grade Printed Circuit Boards (PCBs)';
@@ -108,7 +116,7 @@ function normalizeCategory(rawCategory: string, detectedItem: string): string {
   if (text.includes('e-plastic') || text.includes('abs') || text.includes('hips') || text.includes('chassis') || text.includes('casing') || text.includes('printer') || text.includes('keyboard') || text.includes('mouse')) {
     return 'Engineering E-Plastics (ABS/HIPS)';
   }
-  if (text.includes('aluminum') || text.includes('heatsink') || text.includes('can') || text.includes('steel') || text.includes('iron') || text.includes('metal') || text.includes('tin') || text.includes('brass')) {
+  if (text.includes('aluminum') || text.includes('heatsink') || text.includes('steel') || text.includes('iron') || text.includes('metal') || text.includes('tin') || text.includes('brass') || text.includes('can')) {
     return 'Metal';
   }
   if (text.includes('cardboard') || text.includes('paper') || text.includes('carton') || text.includes('newspaper') || text.includes('book')) {
@@ -122,13 +130,6 @@ function normalizeCategory(rawCategory: string, detectedItem: string): string {
   }
   if (text.includes('organic') || text.includes('bio') || text.includes('leaf') || text.includes('food')) {
     return 'Organic';
-  }
-
-  // Exact match attempt
-  for (const cat of Object.keys(STANDARD_RATES)) {
-    if (rawCategory.toLowerCase() === cat.toLowerCase()) {
-      return cat;
-    }
   }
 
   return 'High-grade Printed Circuit Boards (PCBs)';
