@@ -17,8 +17,7 @@ import {
   Languages,
   Settings,
   HelpCircle,
-  Check,
-  Sparkles
+  Check
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -239,22 +238,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
               )}
             </div>
 
-            {/* Billion-Dollar UI Simulator Trigger */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic(20);
-                setProfileMenuOpen(false);
-                setLangMenuOpen(false);
-                onTabChange('design-preview');
-              }}
-              className="flex items-center gap-1.5 px-2.5 h-8 sm:h-9 rounded-full border border-orange-500/40 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 shadow-2xs transition-all active:scale-95 text-xs font-display font-bold"
-              title="Billion-Dollar UI Simulator (v8.0.0)"
-              aria-label="UI Simulator"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 animate-pulse" />
-              <span className="hidden sm:inline">UI Simulator</span>
-            </button>
 
             {/* App Settings Page Button (Opens Dedicated Settings Page) */}
             <button
