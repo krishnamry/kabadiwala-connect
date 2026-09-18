@@ -33,9 +33,15 @@ export const VoicePill: React.FC<VoicePillProps> = ({
     e.stopPropagation();
     triggerHaptic(20);
 
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    const hasNativeTTS = typeof window !== 'undefined' && !!(window as any).AndroidTTS?.isAvailable?.();
+    const hasWebTTS = typeof window !== 'undefined' && 'speechSynthesis' in window && !!window.speechSynthesis;
+
+    if (hasNativeTTS || hasWebTTS) {
       if (isPlaying) {
-        window.speechSynthesis.cancel();
+        if (hasNativeTTS) (window as any).AndroidTTS.stop();
+        if (hasWebTTS) {
+          try { window.speechSynthesis.cancel(); } catch {}
+        }
         setIsPlaying(false);
         return;
       }
@@ -47,7 +53,7 @@ export const VoicePill: React.FC<VoicePillProps> = ({
       speak(spokenContent);
 
       // Reset animation when speaking finishes
-      const estimatedDuration = Math.max(2000, (spokenContent.length / 15) * 1000);
+      const estimatedDuration = Math.max(2500, (spokenContent.length / 12) * 1000);
       setTimeout(() => {
         setIsPlaying(false);
       }, estimatedDuration);

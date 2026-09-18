@@ -2249,7 +2249,10 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
    * pre-processes currency and units into spoken words, and ensures reliable playback on Android WebView and browsers.
    */
   const speak = (text: string, langOverride?: Language) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (typeof window === 'undefined') return;
+    const hasNativeTTS = !!(window as any).AndroidTTS?.isAvailable?.();
+    const hasWebTTS = 'speechSynthesis' in window && !!window.speechSynthesis;
+    if (!hasNativeTTS && !hasWebTTS) return;
 
     const targetLang = langOverride || language;
     let spokenText = text;

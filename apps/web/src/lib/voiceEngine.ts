@@ -197,16 +197,63 @@ export function playVernacularSpeech(
     pitch?: number;
   }
 ): void {
+  // Cancel any ongoing utterance
+  stopVernacularSpeech();
+
+  const processed = preprocessVernacularText(text, lang);
+  if (!processed || !processed.trim()) {
+    options?.onEnd?.();
+    return;
+  }
+
+  // 1. Native Android TTS Bridge (Android APK WebView)
+  if (typeof window !== 'undefined' && (window as any).AndroidTTS?.isAvailable?.()) {
+    isCurrentlyPlaying = true;
+    playbackEndCallback = options?.onEnd || null;
+    options?.onStart?.();
+
+    (window as any).__onAndroidTTSStart = () => {
+      isCurrentlyPlaying = true;
+      options?.onStart?.();
+    };
+
+    (window as any).__onAndroidTTSEnd = () => {
+      isCurrentlyPlaying = false;
+      if (playbackEndCallback) {
+        playbackEndCallback();
+        playbackEndCallback = null;
+      }
+    };
+
+    (window as any).__onAndroidTTSError = (err: any) => {
+      console.warn('Native Android TTS error:', err);
+      isCurrentlyPlaying = false;
+      options?.onError?.(err);
+      if (playbackEndCallback) {
+        playbackEndCallback();
+        playbackEndCallback = null;
+      }
+    };
+
+    try {
+      const rate = options?.rate || (lang === 'hi' ? 0.90 : lang === 'mr' ? 0.88 : 0.95);
+      const pitch = options?.pitch || 1.0;
+      (window as any).AndroidTTS.speak(processed, lang, rate, pitch);
+    } catch (e) {
+      console.warn('Native Android TTS speak invocation error:', e);
+      isCurrentlyPlaying = false;
+      options?.onError?.(e);
+    }
+    return;
+  }
+
+  // 2. Browser Web Speech API
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     options?.onError?.(new Error('SpeechSynthesis not supported'));
     return;
   }
 
-  // Cancel any ongoing utterance
-  stopVernacularSpeech();
-
   const synth = window.speechSynthesis;
-  const processed = preprocessVernacularText(text, lang);
   const chunks = chunkSentence(processed);
 
   if (chunks.length === 0) {
@@ -317,6 +364,16 @@ export function stopVernacularSpeech(): void {
   activeUtteranceQueue = [];
   (window as any).__kabadiwalaUtterances = null;
 
+  // Stop native Android TTS if running
+  if (typeof window !== 'undefined' && (window as any).AndroidTTS?.stop) {
+    try {
+      (window as any).AndroidTTS.stop();
+    } catch (e) {
+      console.warn('AndroidTTS stop error:', e);
+    }
+  }
+
+  // Stop browser Web Speech synthesis if running
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
@@ -333,4 +390,11 @@ export function stopVernacularSpeech(): void {
 
 export function isVernacularSpeaking(): boolean {
   return isCurrentlyPlaying;
+}
+
+export function isVoiceEngineSupported(): boolean {
+  if (typeof window === 'undefined') return false;
+  const hasAndroidTTS = !!(window as any).AndroidTTS?.isAvailable?.();
+  const hasWebSpeech = 'speechSynthesis' in window && !!window.speechSynthesis;
+  return hasAndroidTTS || hasWebSpeech;
 }
