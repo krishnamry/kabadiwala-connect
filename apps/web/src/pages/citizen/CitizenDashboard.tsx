@@ -671,7 +671,7 @@ export const CitizenDashboard: React.FC = () => {
                   }`}
                 >
                   <div className="flex justify-between items-start border-b border-steel-200 pb-2 mb-2">
-                    <span className="font-mono text-xs font-bold text-copper-700">
+                    <span className="text-xs font-bold text-copper-700">
                       Ref #{p.id.slice(0, 10)}
                     </span>
                     <span
@@ -687,11 +687,11 @@ export const CitizenDashboard: React.FC = () => {
                     </span>
                   </div>
 
-                  <h4 className="font-display font-bold text-steel-900 text-sm">
+                  <h4 className="font-bold text-steel-900 text-sm">
                     {p.address}
                   </h4>
 
-                  <div className="mt-2 text-xs text-steel-600 space-y-0.5 font-mono">
+                  <div className="mt-2 text-xs text-steel-600 space-y-1">
                     <div className="flex items-center justify-between text-steel-700 font-bold">
                       <span>{t('totalItems', 'Total Items')}:</span>
                       <span className="text-copper-700">
@@ -701,7 +701,7 @@ export const CitizenDashboard: React.FC = () => {
                     <div>{t('itemsToRecycle', 'Items')}: {p.items.map(i => `${preserveEnglishItemName(i.category)} (${i.quantity || 1} ${t('pieces', 'pcs')}, ~${i.estWeightKg}kg)`).join(', ')}</div>
                     <div className="flex justify-between font-bold text-steel-800 pt-1">
                       <span>{t('indicative payout:', 'Indicative Payout:')}</span>
-                      <span className="text-copper-700 font-mono-num">₹{p.totalAmount || 620}</span>
+                      <span className="text-copper-700 font-bold">₹{p.totalAmount || 620}</span>
                     </div>
                   </div>
 
@@ -847,11 +847,11 @@ export const CitizenDashboard: React.FC = () => {
                     <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
                       {t('itemsToRecycle')}:
                     </span>
-                    <span className="text-xs font-mono font-bold text-copper-700 bg-copper-50 px-2.5 py-0.5 rounded-full border border-copper-200">
+                    <span className="text-xs font-bold text-copper-700 bg-copper-50 px-2.5 py-0.5 rounded-full border border-copper-200">
                       {t('totalItems', 'Total Items')}: {selectedPickup.totalItems || selectedPickup.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({selectedPickup.items?.length || 1} {t('items', 'types')})
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                     {selectedPickup.items.map((item, i) => (
                       <div key={i} className="bg-white p-2.5 rounded border border-steel-300 flex flex-col justify-between">
                         <div>
@@ -868,7 +868,7 @@ export const CitizenDashboard: React.FC = () => {
                 </div>
 
                 {/* Verifiable Hash Footer */}
-                <div className="pt-2 border-t border-steel-200 flex items-center justify-between text-[11px] font-mono text-steel-500">
+                <div className="pt-2 border-t border-steel-200 flex items-center justify-between text-[11px] text-steel-500">
                   <span>Traceability Hash: {selectedPickup.traceabilityHash || '0x9a8f2736b4...'}</span>
                   <span>100% CPCB Audit Logged</span>
                 </div>
@@ -1493,16 +1493,16 @@ export const CitizenDashboard: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
                     <span className="stamp-seal stamp-verified text-[9px]">CPCB DROP-OFF</span>
-                    <span className="font-mono text-xs font-bold text-copper-600 bg-copper-50 px-2 py-0.5 rounded border border-copper-200">
+                    <span className="text-xs font-bold text-copper-600 bg-copper-50 px-2 py-0.5 rounded border border-copper-200">
                       📍 {c.distanceKm} km away
                     </span>
                   </div>
 
-                  <h3 className="font-display font-bold text-steel-900 text-base">
+                  <h3 className="font-bold text-steel-900 text-base">
                     {c.name}
                   </h3>
 
-                  <div className="space-y-1 text-xs text-steel-600 font-mono">
+                  <div className="space-y-1 text-xs text-steel-600">
                     <p className="flex items-start gap-1">
                       <MapPin className="w-3.5 h-3.5 text-copper-600 flex-shrink-0 mt-0.5" />
                       <span>{c.address}</span>

@@ -3236,18 +3236,18 @@ export const KabadiwalaDashboard: React.FC = () => {
               >
                 <div>
                   <div className="flex items-center justify-between border-b border-steel-200 pb-2 mb-2">
-                    <span className="font-mono text-xs font-bold text-copper-700">Ref #{pickup.id.slice(0, 8)}</span>
+                    <span className="text-xs font-bold text-copper-700">Ref #{pickup.id.slice(0, 8)}</span>
                     <div className="flex items-center gap-2">
                       {pickup.distanceKm !== undefined && (
-                        <span className="text-[10px] font-mono text-forest-700 font-bold bg-forest-50 px-1.5 py-0.5 rounded border border-forest-300">
+                        <span className="text-[10px] text-forest-700 font-bold bg-forest-50 px-1.5 py-0.5 rounded border border-forest-300">
                           📍 {pickup.distanceKm} km away
                         </span>
                       )}
-                      <span className="text-[10px] font-mono text-steel-500 font-medium">{pickup.scheduledAt.slice(11, 16)}</span>
+                      <span className="text-[10px] text-steel-500 font-medium">{pickup.scheduledAt.slice(11, 16)}</span>
                     </div>
                   </div>
 
-                  <h4 className="font-display font-bold text-steel-900 text-sm">
+                  <h4 className="font-bold text-steel-900 text-sm">
                     {pickup.address}
                   </h4>
 
@@ -3259,7 +3259,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
 
                 <div className="pt-2 border-t border-steel-200 flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-mono font-bold text-copper-700 text-sm">
+                  <span className="font-bold text-copper-700 text-sm">
                     {t('estimatedPayout')}: ₹{pickup.totalAmount || 620}
                   </span>
                     <div className="flex items-center gap-2">
