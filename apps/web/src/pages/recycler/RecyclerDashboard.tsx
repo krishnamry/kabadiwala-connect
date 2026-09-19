@@ -28,16 +28,22 @@ import {
   X,
   Tag,
   Layers,
-  ExternalLink
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 import { getDirectionsUrl } from '../../lib/location';
+import { KycStatusBanner } from '../../components/KycStatusBanner';
+import { KycLockedModal } from '../../components/KycLockedModal';
+import { KycVerifiedModal } from '../../components/KycVerifiedModal';
+import { ChatDrawer } from '../../components/ChatDrawer';
 
 export const RecyclerDashboard: React.FC = () => {
   const { user } = useAuth();
   const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   const [activeTab, setActiveTab] = useState<'incoming' | 'handover' | 'rates' | 'anomalies' | 'reports' | 'profile'>('incoming');
+  const [showKycLockModal, setShowKycLockModal] = useState<boolean>(false);
 
   // Recycler buying rates state (dynamically sourced from shared storage)
   const [rates, setRates] = useState<{ [category: string]: number }>(() => {
@@ -73,7 +79,38 @@ export const RecyclerDashboard: React.FC = () => {
   const [bidSuccess, setBidSuccess] = useState<string | null>(null);
   const [marketFilter, setMarketFilter] = useState<'ALL' | 'OPEN' | 'MY_BIDS' | 'HANDOVER_PENDING' | 'CONFIRMED'>('ALL');
 
+  // Contextual Chat State
+  const [activeChatContext, setActiveChatContext] = useState<{
+    type: 'LOT' | 'PICKUP';
+    id: string;
+    title: string;
+    partnerId?: string;
+    partnerName: string;
+    partnerRole?: string;
+    partnerPhone?: string;
+  } | null>(null);
+
+  const [chatTick, setChatTick] = useState(0);
+
+  const openRecyclerLotChat = (lot: EWasteLot) => {
+    triggerHaptic(15);
+    setActiveChatContext({
+      type: 'LOT',
+      id: lot.id,
+      title: `${lot.category} (${lot.approxWeightKg}kg)`,
+      partnerId: lot.collectorId,
+      partnerName: lot.collectorName || 'Collector',
+      partnerRole: 'COLLECTOR'
+    });
+  };
+
   const openBidModal = (lot: EWasteLot) => {
+    if (user && user.kycStatus !== 'VERIFIED') {
+      setShowKycLockModal(true);
+      triggerHaptic(20);
+      return;
+    }
+
     setBiddingLot(lot);
     setBidMode('total');
     const ask = Number(lot.askingPrice || lot.estimatedValue || 0);
@@ -171,6 +208,9 @@ export const RecyclerDashboard: React.FC = () => {
           map[r.category] = r.ratePerKg;
         });
         setRates(map);
+      }
+      if (key === STORAGE_KEYS.CHAT_MESSAGES || key === '*') {
+        setChatTick(t => t + 1);
       }
     };
 
@@ -293,6 +333,18 @@ export const RecyclerDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
+      {/* Dynamic KYC Status Banner */}
+      <KycStatusBanner />
+
+      {/* One-Time Congratulations Modal upon Verification Approval */}
+      <KycVerifiedModal />
+
+      {/* Feature Locked Modal for unverified recyclers */}
+      <KycLockedModal
+        isOpen={showKycLockModal}
+        onClose={() => setShowKycLockModal(false)}
+        actionTitle={language === 'hi' ? 'लॉट पर बोली लगाना' : 'Scrap Lot Bidding'}
+      />
       
       {/* Top Header - Android 17 Expressive Dynamic Hero */}
       <div
@@ -301,11 +353,15 @@ export const RecyclerDashboard: React.FC = () => {
       >
         <div className="space-y-2 z-10">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-teal-500/25 text-teal-200 border border-teal-400/30">
-              CPCB / SPCB AUTHORIZED
+            <span className={`rounded-full px-3.5 py-1 text-xs font-bold ${
+              user?.kycStatus === 'VERIFIED'
+                ? 'bg-teal-500/25 text-teal-200 border border-teal-400/30'
+                : 'bg-amber-500/25 text-amber-200 border border-amber-400/30 animate-pulse'
+            }`}>
+              {user?.kycStatus === 'VERIFIED' ? 'CPCB / SPCB AUTHORIZED' : 'KYC UNDER REVIEW'}
             </span>
             <span className="rounded-full px-3 py-1 font-mono text-xs font-bold bg-white/10 text-slate-200 border border-white/15">
-              REG: CPCB-EW-2023-DL-0881
+              REG: {user?.recycler?.cpcbRegNumber || 'CPCB-EW-2023-DL-0881'}
             </span>
             <VoiceAssistButton
               text="EcoRecycle Aggregators Facility Dashboard. Authorized CPCB formal recycler interface."
@@ -315,7 +371,7 @@ export const RecyclerDashboard: React.FC = () => {
             />
           </div>
           <h1 className="text-3xl sm:text-4xl font-display font-black tracking-tight text-white">
-            EcoRecycle Aggregators <span className="text-teal-300 font-sans text-xl font-normal">(Okhla Terminal)</span>
+            {user?.name || user?.recycler?.facilityName || 'EcoRecycle Aggregators'} <span className="text-teal-300 font-sans text-xl font-normal">(Okhla Terminal)</span>
           </h1>
           <p className="text-sm sm:text-base text-slate-300 max-w-2xl font-normal">
             CPCB E-Waste Rules 2022 Central Registry • Weighbridge & EPR Credit Generation
@@ -697,6 +753,37 @@ export const RecyclerDashboard: React.FC = () => {
                               <span>{t('decline', 'Decline')}</span>
                             </button>
                           </div>
+
+                          {/* Chat with Collector Button with Live Unread Indicator */}
+                          {(() => {
+                            const unreadCount = storage.getUnreadChatCountForContext('LOT', lot.id, user?.id);
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => openRecyclerLotChat(lot)}
+                                className={`w-full py-2.5 px-3 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center space-x-1.5 transition-colors border active:scale-98 shadow-2xs ${
+                                  unreadCount > 0
+                                    ? 'bg-rose-50 text-rose-700 border-2 border-rose-400 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-700'
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
+                                }`}
+                                title="Chat directly with the collector who listed this lot"
+                              >
+                                <MessageSquare className="w-4 h-4 text-emerald-600" />
+                                <span>{t('chatCollector', 'Chat with Collector')}</span>
+                                {unreadCount > 0 && (
+                                  <span className="flex items-center gap-1 ml-1">
+                                    <span className="relative flex h-2 w-2">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                                    </span>
+                                    <span className="text-[10px] font-extrabold text-rose-700 dark:text-rose-300 font-mono">
+                                      ({unreadCount})
+                                    </span>
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })()}
                         </div>
                       ) : lot.status === 'HANDOVER_PENDING' ? (
                         <div className="pt-3 border-t border-slate-100 space-y-2.5">
@@ -704,16 +791,26 @@ export const RecyclerDashboard: React.FC = () => {
                             <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                             <span>{t('bidAcceptedMsg', 'Bid Accepted! Ready for physical QR scan.')}</span>
                           </div>
-                          <button
-                            onClick={() => {
-                              setHandoverCode(lot.lotCode);
-                              setActualWeight(lot.approxWeightKg);
-                              setActiveTab('handover');
-                            }}
-                            className="w-full btn-primary-m3 py-3 text-xs sm:text-sm font-bold rounded-full transition-all"
-                          >
-                            {t('Go to QR Handover Verification →', 'Go to QR Handover Verification →')}
-                          </button>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <button
+                              onClick={() => {
+                                setHandoverCode(lot.lotCode);
+                                setActualWeight(lot.approxWeightKg);
+                                setActiveTab('handover');
+                              }}
+                              className="w-full btn-primary-m3 py-3 text-xs sm:text-sm font-bold rounded-full transition-all"
+                            >
+                              {t('Go to QR Handover Verification →', 'Go to QR Handover Verification →')}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openRecyclerLotChat(lot)}
+                              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <MessageSquare className="w-4 h-4 text-emerald-600" />
+                              <span>{t('chatCollector', 'Chat with Collector')}</span>
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div className="pt-3 border-t border-slate-100 text-xs sm:text-sm text-slate-500 flex items-center justify-between font-body">
@@ -1601,6 +1698,20 @@ export const RecyclerDashboard: React.FC = () => {
             })()}
           </div>
         </div>
+      )}
+
+      {/* CONTEXTUAL CHAT DRAWER */}
+      {activeChatContext && (
+        <ChatDrawer
+          contextType={activeChatContext.type}
+          contextId={activeChatContext.id}
+          title={activeChatContext.title}
+          partnerId={activeChatContext.partnerId}
+          partnerName={activeChatContext.partnerName}
+          partnerRole={activeChatContext.partnerRole}
+          partnerPhone={activeChatContext.partnerPhone}
+          onClose={() => setActiveChatContext(null)}
+        />
       )}
 
     </div>

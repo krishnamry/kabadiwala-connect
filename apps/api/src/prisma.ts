@@ -329,6 +329,11 @@ class SQLitePrismaClient {
         args.push(params.where.role);
       }
 
+      if (params?.where?.kycStatus) {
+        clauses.push('kycStatus = ?');
+        args.push(params.where.kycStatus);
+      }
+
       if (clauses.length > 0) {
         query += ' WHERE ' + clauses.join(' AND ');
       }

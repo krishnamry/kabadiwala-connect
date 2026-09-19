@@ -99,6 +99,8 @@ export const LiveBiddingRoom: React.FC<LiveBiddingRoomProps> = ({
 
           <div className="flex items-center gap-2.5 self-start sm:self-center">
             <VoiceAssistButton
+              audioKey="bids_walkthrough"
+              label={language === 'hi' ? 'बोली निर्देश सुनें' : language === 'mr' ? 'लिलाव मार्गदर्शक ऐका' : 'Listen Bidding Guide'}
               text={voiceScripts.en}
               hindiText={voiceScripts.hi}
               marathiText={voiceScripts.mr}

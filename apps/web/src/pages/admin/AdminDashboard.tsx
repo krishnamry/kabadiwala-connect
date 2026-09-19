@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { storage, STORAGE_KEYS } from '../../lib/storage';
-import { AdminStats } from '../../types';
+import { AdminStats, User } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
+import { triggerHaptic } from '../../lib/haptics';
 import {
   ShieldCheck,
   Award,
@@ -25,16 +26,32 @@ import {
   Search,
   ArrowRight,
   ExternalLink,
-  Check
+  Check,
+  Eye,
+  X,
+  Clock,
+  CreditCard,
+  AlertTriangle,
+  FileText,
+  Truck,
+  User as UserIcon,
+  Filter
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [collectors, setCollectors] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'traceability' | 'uniteconomics' | 'verifications' | 'epr'>('overview');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // KYC Review State
+  const [kycFilter, setKycFilter] = useState<'ALL' | 'UNDER_REVIEW' | 'VERIFIED' | 'REJECTED'>('ALL');
+  const [previewDocUser, setPreviewDocUser] = useState<User | null>(null);
+  const [rejectModalUser, setRejectModalUser] = useState<User | null>(null);
+  const [rejectionReasonInput, setRejectionReasonInput] = useState('Document image blurry or details mismatch');
 
   // Unit Economics Calculator Interactive Sliders State (Section 1.D.5)
   const [monthlyVolumeKg, setMonthlyVolumeKg] = useState(450);
@@ -92,6 +109,7 @@ export const AdminDashboard: React.FC = () => {
 
       setStats(statsData || storage.getAdminStats());
       setCollectors(collectorsData && collectorsData.length > 0 ? collectorsData : storage.getCollectors());
+      setUsersList(storage.getUsers());
     } finally {
       setLoading(false);
     }
@@ -102,15 +120,55 @@ export const AdminDashboard: React.FC = () => {
 
     const handleStorageChange = (e: any) => {
       const key = e.detail?.key;
-      if (key === STORAGE_KEYS.COLLECTORS || key === STORAGE_KEYS.PICKUPS || key === STORAGE_KEYS.LOTS || key === '*') {
+      if (
+        key === STORAGE_KEYS.COLLECTORS ||
+        key === STORAGE_KEYS.PICKUPS ||
+        key === STORAGE_KEYS.LOTS ||
+        key === STORAGE_KEYS.USERS ||
+        key === '*'
+      ) {
         setCollectors(storage.getCollectors());
         setStats(storage.getAdminStats());
+        setUsersList(storage.getUsers());
       }
     };
 
     window.addEventListener('dhatu-storage-change', handleStorageChange);
     return () => window.removeEventListener('dhatu-storage-change', handleStorageChange);
   }, []);
+
+  const handleApproveKyc = (userId: string) => {
+    setActionLoading(userId);
+    try {
+      storage.verifyUserKyc(userId, 'VERIFIED');
+      setUsersList(storage.getUsers());
+      setCollectors(storage.getCollectors());
+      setStats(storage.getAdminStats());
+      triggerHaptic(30);
+      if (previewDocUser?.id === userId) {
+        setPreviewDocUser(null);
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectKyc = (userId: string, reason: string) => {
+    setActionLoading(userId);
+    try {
+      storage.verifyUserKyc(userId, 'REJECTED', reason);
+      setUsersList(storage.getUsers());
+      setCollectors(storage.getCollectors());
+      setStats(storage.getAdminStats());
+      setRejectModalUser(null);
+      triggerHaptic(25);
+      if (previewDocUser?.id === userId) {
+        setPreviewDocUser(null);
+      }
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const handleVerify = async (profileId: string, verified: boolean) => {
     setActionLoading(profileId);
@@ -584,56 +642,406 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 4: COLLECTOR KYC VERIFICATIONS */}
+      {/* TAB 4: COLLECTOR & PARTICIPANT KYC REGULATORY REVIEW */}
       {activeTab === 'verifications' && (
         <div className="space-y-6">
-          <div className="border-b border-steel-300 pb-3">
-            <span className="stamp-seal stamp-verified text-xs">{t('collectorKycBadge', 'KYC Verification')}</span>
-            <h2 className="text-xl font-display font-black text-steel-900 mt-2">
-              {t('collectorKycTitle', 'Collector KYC Verification & Identity Cards')}
-            </h2>
-            <p className="text-xs text-steel-600">
-              Verify identity and issue CPCB digital badges to formalize door-to-door scrap collectors.
-            </p>
-          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-steel-300 pb-4">
+            <div>
+              <span className="stamp-seal stamp-verified text-xs">{t('collectorKycBadge', 'Regulatory KYC Portal')}</span>
+              <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+                CPCB & ULB Regulatory Identity Verification
+              </h2>
+              <p className="text-xs text-steel-600">
+                Review submitted Aadhaar and PAN documents, verify identities, and issue official formalization clearances.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {collectors.map(c => (
-              <div key={c.id} className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm space-y-3">
-                <div className="flex justify-between items-start">
-                  <span className={`stamp-seal ${c.verified ? 'stamp-verified' : 'stamp-pending'} text-[10px]`}>
-                    {c.verified ? t('kycVerified', 'VERIFIED') : t('kycPending', 'VERIFICATION PENDING')}
-                  </span>
-                  <span className="text-xs font-bold text-forest-700">★ {c.reputationScore}</span>
-                </div>
-
-                <h4 className="font-display font-black text-lg text-steel-900">
-                  {c.user?.name || 'Collector'}
-                </h4>
-
-                <div className="space-y-1 text-xs font-mono text-steel-600">
-                  <div>Phone: {c.user?.phone}</div>
-                  <div>Vehicle: {c.vehicleType}</div>
-                  <div>Aadhaar: {c.aadhaarNumber}</div>
-                  <div>Completed: {c.completedJobsCount} pickups</div>
-                </div>
-
-                <div className="pt-2 border-t border-steel-200">
+            {/* Filter Chips */}
+            <div className="flex items-center gap-1.5 bg-paper-200/80 p-1 rounded-xl border border-steel-300 self-start sm:self-auto overflow-x-auto">
+              {(['ALL', 'UNDER_REVIEW', 'VERIFIED', 'REJECTED'] as const).map(filter => {
+                const count = usersList.filter(u => u.role !== 'ADMIN' && (filter === 'ALL' || u.kycStatus === filter)).length;
+                const isSelected = kycFilter === filter;
+                return (
                   <button
-                    onClick={() => handleVerify(c.id, !c.verified)}
-                    disabled={actionLoading === c.id}
-                    className={`w-full py-2 rounded text-xs font-bold ${
-                      c.verified
-                        ? 'bg-paper-200 text-signal-600 hover:bg-signal-500/10 border border-steel-400'
-                        : 'btn-dhatu-primary'
+                    key={filter}
+                    onClick={() => {
+                      triggerHaptic(10);
+                      setKycFilter(filter);
+                    }}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-white text-steel-900 shadow-xs'
+                        : 'text-steel-600 hover:text-steel-900 hover:bg-white/50'
                     }`}
                   >
-                    {c.verified ? t('rejectKyc') : t('approveKyc')}
+                    <span>
+                      {filter === 'ALL'
+                        ? 'All'
+                        : filter === 'UNDER_REVIEW'
+                        ? 'Under Review'
+                        : filter === 'VERIFIED'
+                        ? 'Verified'
+                        : 'Rejected'}
+                    </span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                      isSelected ? 'bg-steel-200 text-steel-800' : 'bg-steel-300/60 text-steel-600'
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* KYC Applicants Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {usersList
+              .filter(u => u.role !== 'ADMIN' && (kycFilter === 'ALL' || u.kycStatus === kycFilter))
+              .map(u => {
+                const isVerified = u.kycStatus === 'VERIFIED';
+                const isUnderReview = u.kycStatus === 'UNDER_REVIEW';
+                const isRejected = u.kycStatus === 'REJECTED';
+                const doc = u.kycDocuments;
+
+                return (
+                  <div
+                    key={u.id}
+                    className={`receipt-stub rounded-2xl p-5 border-2 shadow-sm space-y-4 transition-all ${
+                      isUnderReview
+                        ? 'border-amber-400/80 bg-amber-50/20'
+                        : isVerified
+                        ? 'border-forest-500/80 bg-forest-50/20'
+                        : isRejected
+                        ? 'border-signal-400/80 bg-signal-50/20'
+                        : 'border-steel-300 bg-white'
+                    }`}
+                  >
+                    {/* Header: Role & Status */}
+                    <div className="flex justify-between items-start gap-2">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        u.role === 'KABADIWALA'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : u.role === 'RECYCLER'
+                          ? 'bg-indigo-100 text-indigo-800 border border-indigo-300'
+                          : 'bg-blue-100 text-blue-800 border border-blue-300'
+                      }`}>
+                        {u.role === 'KABADIWALA' ? 'Collector' : u.role === 'RECYCLER' ? 'Recycler' : 'Citizen'}
+                      </span>
+
+                      <span className={`stamp-seal text-[10px] ${
+                        isVerified
+                          ? 'stamp-verified'
+                          : isUnderReview
+                          ? 'bg-amber-100 text-amber-800 border-amber-400 animate-pulse'
+                          : 'stamp-hazard'
+                      }`}>
+                        {isVerified ? 'VERIFIED' : isUnderReview ? 'UNDER REVIEW' : isRejected ? 'REJECTED' : 'UNVERIFIED'}
+                      </span>
+                    </div>
+
+                    {/* Applicant Name & Contacts */}
+                    <div>
+                      <h4 className="font-display font-black text-lg text-steel-900 leading-tight">
+                        {u.name}
+                      </h4>
+                      <p className="text-xs text-steel-600 font-mono mt-0.5">
+                        {u.phone} {u.email ? `• ${u.email}` : ''}
+                      </p>
+                    </div>
+
+                    {/* Meta info based on role */}
+                    <div className="p-3 bg-paper-100 rounded-xl border border-steel-200 text-xs font-mono space-y-1.5 text-steel-700">
+                      {u.role === 'KABADIWALA' && (
+                        <div>
+                          <span className="text-steel-500">Vehicle:</span> {u.kabadiwala?.vehicleType || 'Solar Cargo Trike'}
+                        </div>
+                      )}
+                      {u.role === 'RECYCLER' && (
+                        <>
+                          <div className="truncate">
+                            <span className="text-steel-500">Facility:</span> {u.recycler?.facilityName || 'Registered Processing Unit'}
+                          </div>
+                          <div className="truncate">
+                            <span className="text-steel-500">CPCB Reg:</span> {u.recycler?.cpcbRegNumber || 'CPCB-EW-2023-DL-0881'}
+                          </div>
+                        </>
+                      )}
+                      <div>
+                        <span className="text-steel-500">ID Document:</span> {doc?.idType || 'AADHAAR'} ({doc?.idNumber || 'XXXX-XXXX-8921'})
+                      </div>
+                      {doc?.submittedAt && (
+                        <div className="text-[10px] text-steel-400">
+                          Submitted: {new Date(doc.submittedAt).toLocaleString()}
+                        </div>
+                      )}
+                      {isRejected && doc?.rejectionReason && (
+                        <div className="text-signal-600 font-semibold text-[11px] pt-1 border-t border-steel-200">
+                          Reason: {doc.rejectionReason}
+                        </div>
+                      )}
+                      {doc?.remarks && (
+                        <div className="text-forest-700 font-medium text-[11px] pt-1 border-t border-steel-200">
+                          <span className="font-bold">Applicant Clarification:</span> {doc.remarks}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Controls */}
+                    <div className="space-y-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic(15);
+                          setPreviewDocUser(u);
+                        }}
+                        className="w-full py-2 px-3 rounded-xl bg-white hover:bg-paper-100 border border-steel-300 text-steel-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-forest-700" />
+                        <span>Review Submitted Documents</span>
+                      </button>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleApproveKyc(u.id)}
+                          disabled={actionLoading === u.id || isVerified}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs transition-all ${
+                            isVerified
+                              ? 'bg-forest-100 text-forest-800 cursor-default opacity-70 border border-forest-300'
+                              : 'btn-dhatu-primary active:scale-98'
+                          }`}
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>{isVerified ? 'Approved' : 'Approve'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(15);
+                            setRejectModalUser(u);
+                          }}
+                          disabled={actionLoading === u.id || isRejected}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all ${
+                            isRejected
+                              ? 'bg-signal-100 text-signal-700 opacity-60 border border-signal-200'
+                              : 'bg-paper-200 hover:bg-signal-50 text-signal-600 hover:text-signal-700 border border-steel-300 active:scale-98'
+                          }`}
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>{isRejected ? 'Rejected' : 'Reject'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          {/* DOCUMENT PREVIEW MODAL */}
+          {previewDocUser && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-steel-900/80 backdrop-blur-sm animate-fade-in">
+              <div className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-steel-300 space-y-5 max-h-[90vh] overflow-y-auto relative animate-scale-up">
+                <button
+                  onClick={() => setPreviewDocUser(null)}
+                  className="absolute top-4 right-4 p-2 rounded-full text-steel-400 hover:text-steel-700 hover:bg-paper-200"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="flex items-center gap-3 border-b border-steel-200 pb-3">
+                  <div className="w-10 h-10 rounded-xl bg-forest-500/10 text-forest-700 flex items-center justify-center">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-forest-700">
+                      Regulatory Identity Review
+                    </span>
+                    <h3 className="text-lg font-display font-black text-steel-900">
+                      {previewDocUser.name} • {previewDocUser.role}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Identity Summary */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-paper-100 p-3.5 rounded-2xl border border-steel-200">
+                  <div>
+                    <span className="text-steel-400 block text-[10px] uppercase font-bold">Document Type</span>
+                    <span className="font-bold text-steel-900">{previewDocUser.kycDocuments?.idType || 'AADHAAR'}</span>
+                  </div>
+                  <div>
+                    <span className="text-steel-400 block text-[10px] uppercase font-bold">ID Number</span>
+                    <span className="font-mono font-bold text-steel-900">{previewDocUser.kycDocuments?.idNumber || 'XXXX-XXXX-8921'}</span>
+                  </div>
+                  <div>
+                    <span className="text-steel-400 block text-[10px] uppercase font-bold">Phone</span>
+                    <span className="font-mono font-bold text-steel-900">{previewDocUser.phone}</span>
+                  </div>
+                  <div>
+                    <span className="text-steel-400 block text-[10px] uppercase font-bold">Current Status</span>
+                    <span className="font-bold text-amber-700 uppercase">{previewDocUser.kycStatus}</span>
+                  </div>
+                </div>
+
+                {/* Document Visual Display */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-steel-700 uppercase tracking-wider">
+                    Submitted Identity Photographs / Cards
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Front Document */}
+                    <div className="rounded-2xl border-2 border-steel-300 p-3 bg-paper-50 space-y-2">
+                      <span className="text-[11px] font-bold text-steel-600 block">Front Side (ID Photo & Seal)</span>
+                      {previewDocUser.kycDocuments?.frontImage ? (
+                        <img
+                          src={previewDocUser.kycDocuments.frontImage}
+                          alt="Front Document"
+                          className="w-full h-44 object-cover rounded-xl border border-steel-200"
+                        />
+                      ) : (
+                        <div className="w-full h-44 rounded-xl border-2 border-dashed border-steel-300 bg-white flex flex-col items-center justify-center p-4 text-center space-y-2">
+                          <CreditCard className="w-8 h-8 text-forest-700" />
+                          <div className="text-xs font-mono font-bold text-steel-800">
+                            {previewDocUser.kycDocuments?.idType || 'AADHAAR'} CARD FRONT
+                          </div>
+                          <span className="text-[10px] text-steel-500 font-mono">
+                            {previewDocUser.kycDocuments?.idNumber || '9821 4455 8921'}
+                          </span>
+                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-forest-100 text-forest-800 font-bold">
+                            Digital Certified
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Back Document */}
+                    <div className="rounded-2xl border-2 border-steel-300 p-3 bg-paper-50 space-y-2">
+                      <span className="text-[11px] font-bold text-steel-600 block">Back Side (Official Address)</span>
+                      {previewDocUser.kycDocuments?.backImage ? (
+                        <img
+                          src={previewDocUser.kycDocuments.backImage}
+                          alt="Back Document"
+                          className="w-full h-44 object-cover rounded-xl border border-steel-200"
+                        />
+                      ) : (
+                        <div className="w-full h-44 rounded-xl border-2 border-dashed border-steel-300 bg-white flex flex-col items-center justify-center p-4 text-center space-y-2">
+                          <FileText className="w-8 h-8 text-steel-400" />
+                          <div className="text-xs font-mono font-bold text-steel-800">
+                            {previewDocUser.kycDocuments?.idType || 'AADHAAR'} CARD BACK
+                          </div>
+                          <span className="text-[10px] text-steel-500">
+                            Address & QR Code Verified
+                          </span>
+                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-paper-200 text-steel-700 font-bold">
+                            UIDAI / CPCB Record
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {previewDocUser.kycDocuments?.remarks && (
+                  <div className="p-3 rounded-2xl bg-forest-50 border border-forest-200 text-xs">
+                    <span className="font-bold text-forest-800 block">Applicant Re-Application Note / Clarification:</span>
+                    <p className="text-forest-900 mt-0.5">{previewDocUser.kycDocuments.remarks}</p>
+                  </div>
+                )}
+
+                {/* Modal Actions */}
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-steel-200">
+                  <button
+                    onClick={() => {
+                      setRejectModalUser(previewDocUser);
+                    }}
+                    className="px-4 py-2.5 rounded-full bg-paper-200 hover:bg-signal-50 text-signal-700 border border-steel-300 text-xs font-bold"
+                  >
+                    Reject Application
+                  </button>
+                  <button
+                    onClick={() => handleApproveKyc(previewDocUser.id)}
+                    className="btn-dhatu-primary px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Approve Regulatory Verification</span>
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* REJECT REASON MODAL */}
+          {rejectModalUser && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-steel-900/80 backdrop-blur-sm animate-fade-in">
+              <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-steel-300 space-y-4 animate-scale-up">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-signal-100 text-signal-700 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-display font-black text-steel-900">
+                      Reject KYC Application
+                    </h3>
+                    <p className="text-xs text-steel-500">{rejectModalUser.name}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-steel-700 mb-1.5 uppercase">
+                    Select or Enter Reason for Rejection
+                  </label>
+                  <div className="space-y-1.5 mb-3">
+                    {[
+                      'Document photograph is blurry or unreadable',
+                      'Aadhaar / PAN name does not match applicant profile',
+                      'Expired or incomplete CPCB regulatory certificate',
+                      'Incomplete residential / facility address details'
+                    ].map((reason, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setRejectionReasonInput(reason)}
+                        className={`w-full text-left text-xs p-2 rounded-lg border transition-all ${
+                          rejectionReasonInput === reason
+                            ? 'bg-forest-50 border-forest-500 text-forest-800 font-semibold'
+                            : 'bg-paper-100 border-steel-200 text-steel-700 hover:bg-paper-200'
+                        }`}
+                      >
+                        {reason}
+                      </button>
+                    ))}
+                  </div>
+
+                  <input
+                    type="text"
+                    value={rejectionReasonInput}
+                    onChange={e => setRejectionReasonInput(e.target.value)}
+                    className="w-full p-2.5 text-xs bg-paper-100 border border-steel-300 rounded-xl text-steel-900 font-semibold"
+                    placeholder="Custom rejection note..."
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-steel-200">
+                  <button
+                    type="button"
+                    onClick={() => setRejectModalUser(null)}
+                    className="px-4 py-2 rounded-full text-xs font-bold text-steel-600 hover:bg-paper-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRejectKyc(rejectModalUser.id, rejectionReasonInput)}
+                    className="px-4 py-2 rounded-full bg-signal-600 hover:bg-signal-700 text-white text-xs font-bold shadow-sm"
+                  >
+                    Confirm Rejection
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

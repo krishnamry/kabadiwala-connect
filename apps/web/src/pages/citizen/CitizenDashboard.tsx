@@ -3,9 +3,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
 import { storage, STORAGE_KEYS } from '../../lib/storage';
-import { Pickup, ScrapRate, MLClassificationResult } from '../../types';
+import { Pickup, ScrapRate, MLClassificationResult, ChatPartner } from '../../types';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
+import { ChatDrawer } from '../../components/ChatDrawer';
+import { ChatPartnerSelectorModal } from '../../components/ChatPartnerSelectorModal';
 import {
   Plus,
   Trash2,
@@ -32,10 +34,13 @@ import {
   Loader2,
   Search,
   Link2,
-  ExternalLink
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
 import { getCurrentPosition, reverseGeocode, searchAddress, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
+import { KycStatusBanner } from '../../components/KycStatusBanner';
+import { KycVerifiedModal } from '../../components/KycVerifiedModal';
 
 export const CitizenDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -52,6 +57,62 @@ export const CitizenDashboard: React.FC = () => {
   const [donateToCsr, setDonateToCsr] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState<Pickup | null>(null);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
+
+  // Contextual In-App Chat State
+  const [activePartnerSelector, setActivePartnerSelector] = useState<{
+    pickup: Pickup;
+    partners: ChatPartner[];
+  } | null>(null);
+
+  const [activeChatContext, setActiveChatContext] = useState<{
+    type: 'LOT' | 'PICKUP';
+    id: string;
+    title: string;
+    partnerId?: string;
+    partnerName: string;
+    partnerRole?: string;
+    partnerPhone?: string;
+    pickup?: Pickup;
+  } | null>(null);
+
+  const [chatTick, setChatTick] = useState(0);
+
+  const openPickupChat = (pickup: Pickup) => {
+    triggerHaptic(15);
+    const partners = storage.getChatPartnersForContext('PICKUP', pickup.id, user?.id);
+
+    const defaultCollector = pickup.kabadiwala ? {
+      id: pickup.kabadiwala.id,
+      name: pickup.kabadiwala.name,
+      role: 'KABADIWALA',
+      phone: pickup.kabadiwala.phone,
+      vehicleType: pickup.kabadiwala.kabadiwala?.vehicleType || 'Solar Cargo Trike'
+    } : null;
+
+    if (partners.length > 1 || (partners.length === 0 && defaultCollector)) {
+      setActivePartnerSelector({
+        pickup,
+        partners
+      });
+    } else if (partners.length === 1) {
+      const p = partners[0];
+      setActiveChatContext({
+        type: 'PICKUP',
+        id: pickup.id,
+        title: `Pickup #${pickup.id.slice(0, 10)} (${pickup.address.slice(0, 24)}...)`,
+        partnerId: p.id,
+        partnerName: p.name,
+        partnerRole: p.role,
+        partnerPhone: p.phone || pickup.kabadiwala?.phone,
+        pickup
+      });
+    } else {
+      setActivePartnerSelector({
+        pickup,
+        partners: []
+      });
+    }
+  };
 
   const [address, setAddress] = useState('Detecting Live Location...');
   const [latitude, setLatitude] = useState(28.6139);
@@ -128,6 +189,9 @@ export const CitizenDashboard: React.FC = () => {
           if (!prev) return updated[0] || null;
           return updated.find(p => p.id === prev.id) || updated[0] || null;
         });
+      }
+      if (e.detail?.key === STORAGE_KEYS.CHAT_MESSAGES || e.detail?.key === '*') {
+        setChatTick(t => t + 1);
       }
     };
     window.addEventListener('dhatu-storage-change', handleStorageUpdate);
@@ -545,6 +609,11 @@ export const CitizenDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-24 md:pb-8">
+      {/* Dynamic KYC Status Banner */}
+      <KycStatusBanner />
+
+      {/* One-Time Congratulations Modal upon Verification Approval */}
+      <KycVerifiedModal />
       
       {/* Top Banner - Android 17 Expressive Dynamic Hero */}
       <div
@@ -705,23 +774,63 @@ export const CitizenDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  {p.status === 'COMPLETED' && (
-                    <div className="mt-3 pt-2 border-t border-steel-200 flex justify-between items-center">
-                      <span className="stamp-seal stamp-verified text-[9px]">
-                        {t('verifiedHandover', 'Verified Handover')}
+                  <div className="mt-3 pt-2.5 border-t border-steel-200 flex flex-wrap items-center justify-between gap-2">
+                    {/* Contextual Chat Button with Live Unread Indicator */}
+                    {(() => {
+                      const unreadCount = storage.getUnreadChatCountForContext('PICKUP', p.id, user?.id);
+                      return (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openPickupChat(p);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs ${
+                            unreadCount > 0
+                              ? 'bg-rose-50 text-rose-700 border-2 border-rose-400 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-700'
+                              : 'bg-paper-100 hover:bg-paper-200 text-steel-800 border border-steel-300'
+                          }`}
+                          title="Open Collector Messages"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                          <span>{t('messages', 'Messages / Chat')}</span>
+                          {unreadCount > 0 && (
+                            <span className="flex items-center gap-1 ml-0.5">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                              </span>
+                              <span className="text-[10px] font-extrabold text-rose-700 dark:text-rose-300 font-mono">
+                                ({unreadCount})
+                              </span>
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })()}
+
+                    {p.status === 'COMPLETED' ? (
+                      <div className="flex items-center gap-2">
+                        <span className="stamp-seal stamp-verified text-[9px]">
+                          {t('verifiedHandover', 'Verified Handover')}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowReceiptModal(p);
+                          }}
+                          className="text-xs text-copper-700 font-bold underline flex items-center gap-1"
+                        >
+                          <QrCode className="w-3.5 h-3.5" />
+                          <span>{t('viewReceipt', 'Receipt')}</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-steel-500 font-medium">
+                        {p.kabadiwala?.name ? `Assigned: ${p.kabadiwala.name}` : 'Awaiting Collector'}
                       </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowReceiptModal(p);
-                        }}
-                        className="text-xs text-copper-700 font-bold underline flex items-center gap-1"
-                      >
-                        <QrCode className="w-3.5 h-3.5" />
-                        <span>{t('viewReceipt', 'Verifiable Receipt')}</span>
-                      </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -751,6 +860,33 @@ export const CitizenDashboard: React.FC = () => {
                         {t('cancel', 'Cancel Request')}
                       </button>
                     )}
+
+                    <button
+                      type="button"
+                      onClick={() => openPickupChat(selectedPickup)}
+                      className="px-3 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 border border-steel-300 rounded text-xs font-bold flex items-center space-x-1.5 transition-colors relative"
+                      title="Chat with Collector"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                      <span>{t('chat', 'Chat / Messages')}</span>
+                      {(() => {
+                        const unread = storage.getUnreadChatCountForContext('PICKUP', selectedPickup.id, user?.id);
+                        if (unread > 0) {
+                          return (
+                            <span className="flex items-center gap-1 ml-0.5">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                              </span>
+                              <span className="text-[10px] font-extrabold text-rose-700 font-mono">
+                                ({unread})
+                              </span>
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </button>
 
                     {selectedPickup.kabadiwala && (
                       <a
@@ -1670,6 +1806,65 @@ export const CitizenDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* CONTEXTUAL CHAT PARTNER SELECTOR MODAL */}
+      {activePartnerSelector && (
+        <ChatPartnerSelectorModal
+          isOpen={!!activePartnerSelector}
+          contextType="PICKUP"
+          contextTitle={`Pickup #${activePartnerSelector.pickup.id.slice(0, 10)} (${activePartnerSelector.pickup.address.slice(0, 24)}...)`}
+          partners={activePartnerSelector.partners}
+          defaultAssignee={activePartnerSelector.pickup.kabadiwala ? {
+            id: activePartnerSelector.pickup.kabadiwala.id,
+            name: activePartnerSelector.pickup.kabadiwala.name,
+            role: 'KABADIWALA',
+            phone: activePartnerSelector.pickup.kabadiwala.phone,
+            vehicleType: activePartnerSelector.pickup.kabadiwala.kabadiwala?.vehicleType || 'Solar Cargo Trike'
+          } : null}
+          onSelectPartner={(partner) => {
+            const currentPickup = activePartnerSelector.pickup;
+            setActivePartnerSelector(null);
+            setActiveChatContext({
+              type: 'PICKUP',
+              id: currentPickup.id,
+              title: `Pickup #${currentPickup.id.slice(0, 10)} (${currentPickup.address.slice(0, 24)}...)`,
+              partnerId: partner.id,
+              partnerName: partner.name,
+              partnerRole: partner.role,
+              partnerPhone: partner.phone || currentPickup.kabadiwala?.phone,
+              pickup: currentPickup
+            });
+          }}
+          onClose={() => setActivePartnerSelector(null)}
+        />
+      )}
+
+      {/* CONTEXTUAL CHAT DRAWER */}
+      {activeChatContext && (
+        <ChatDrawer
+          contextType={activeChatContext.type}
+          contextId={activeChatContext.id}
+          title={activeChatContext.title}
+          partnerId={activeChatContext.partnerId}
+          partnerName={activeChatContext.partnerName}
+          partnerRole={activeChatContext.partnerRole}
+          partnerPhone={activeChatContext.partnerPhone}
+          onBackToPartners={() => {
+            if (activeChatContext.pickup) {
+              const currentPickup = activeChatContext.pickup;
+              const partners = storage.getChatPartnersForContext('PICKUP', currentPickup.id, user?.id);
+              setActiveChatContext(null);
+              setActivePartnerSelector({
+                pickup: currentPickup,
+                partners
+              });
+            } else {
+              setActiveChatContext(null);
+            }
+          }}
+          onClose={() => setActiveChatContext(null)}
+        />
       )}
 
       {/* MOBILE BOTTOM NAVIGATION BAR (Material 3 Expressive Navigation Bar) */}

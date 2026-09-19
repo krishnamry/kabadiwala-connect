@@ -1,0 +1,14 @@
+{
+  "checkpoint_id": "CHK-TASK-20260918-011-complete-overhaul-of-v2-html-i-1789716636",
+  "task_id": "TASK-20260918-011-complete-overhaul-of-v2-html-i",
+  "timestamp": "2026-09-18T07:30:36Z",
+  "agent_id": "Antigravity",
+  "status": "COMPLETED",
+  "current_step": "Completed v2.html overhaul with login-only personas and pure 3-language translations",
+  "next_step": "Update Navbar.tsx to remove parenthetical mixed language labels and route logo clicks exclusively to login when logged out",
+  "notes": "",
+  "dirty_files": [
+    "v2.html",
+    "apps/web/src/components/Navbar.tsx"
+  ]
+}

@@ -2,6 +2,34 @@ export type Role = 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN' | 'COLLECTOR'
 
 export type PickupStatus = 'REQUESTED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
+export interface KycDocumentData {
+  idType: 'AADHAAR' | 'PAN' | 'DRIVING_LICENSE' | 'VOTER_ID' | 'TRADE_PASS' | string;
+  idNumber: string;
+  frontImage?: string;
+  backImage?: string;
+  submittedAt: string;
+  verifiedAt?: string;
+  rejectionReason?: string;
+  remarks?: string;
+}
+
+export type NotificationType = 'KYC' | 'ORDER' | 'SYSTEM' | 'PICKUP' | 'LOT' | 'BID' | 'PAYMENT' | 'RATE' | 'CERTIFICATE';
+
+export interface InAppNotification {
+  id: string;
+  userId?: string;
+  userRole?: Role;
+  title: string;
+  message: string;
+  type: NotificationType;
+  timestamp: string;
+  read: boolean;
+  actionTab?: string;
+  entityId?: string;
+  entityType?: 'PICKUP' | 'LOT' | 'BID' | 'KYC' | 'CERTIFICATE';
+  metadata?: Record<string, any>;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -9,8 +37,9 @@ export interface User {
   role: Role;
   email?: string;
   address?: string;
+  pincode?: string;
   kycStatus?: 'UNVERIFIED' | 'UNDER_REVIEW' | 'VERIFIED' | 'REJECTED';
-  kycDocuments?: any;
+  kycDocuments?: KycDocumentData | null;
   createdAt?: string;
   kabadiwala?: KabadiwalaProfile | null;
   recycler?: RecyclerProfile | null;
@@ -207,13 +236,42 @@ export interface ChatMessage {
   receiverId?: string;
   senderName?: string;
   senderRole?: string;
+  receiverName?: string;
+  receiverRole?: string;
   contextType: 'LOT' | 'PICKUP';
   contextId: string;
+  contextTitle?: string;
   text?: string;
   audioUrl?: string;
   imageUrl?: string;
   isRead?: boolean;
   createdAt: string;
+}
+
+export interface ChatPartner {
+  id: string;
+  name: string;
+  role: Role | string;
+  phone?: string;
+  vehicleType?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount: number;
+  isOnline?: boolean;
+}
+
+export interface ChatThreadSummary {
+  threadKey: string;
+  contextType: 'LOT' | 'PICKUP';
+  contextId: string;
+  contextTitle: string;
+  partnerId: string;
+  partnerName: string;
+  partnerRole: Role | string;
+  partnerPhone?: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
 }
 
 export interface KycInfo {
@@ -224,6 +282,7 @@ export interface KycInfo {
     documentUrl?: string;
     submittedAt?: string;
     remarks?: string;
+    rejectionReason?: string;
   };
   dailyWeightLimitKg: number;
   maxLotValueInr: number;

@@ -1,4 +1,4 @@
-import { User, Pickup, EWasteLot, LotBid, ScrapRate, TransactionAnomaly, AdminStats, Role } from '../types';
+import { User, Pickup, EWasteLot, LotBid, ScrapRate, TransactionAnomaly, AdminStats, Role, KycDocumentData, InAppNotification, ChatMessage, ChatPartner, ChatThreadSummary } from '../types';
 
 // Storage Keys
 export const STORAGE_KEYS = {
@@ -14,7 +14,10 @@ export const STORAGE_KEYS = {
   ANOMALIES: 'dhatu_anomalies',
   OFFLINE_MODE: 'dhatu_offline_mode',
   OFFLINE_LOTS: 'dhatu_offline_lots',
-  LANGUAGE: 'dhatu_language'
+  LANGUAGE: 'dhatu_language',
+  NOTIFICATIONS: 'dhatu_notifications',
+  PASSWORDS: 'dhatu_passwords',
+  CHAT_MESSAGES: 'dhatu_chat_messages'
 } as const;
 
 // Broadcast custom event for reactive in-app synchronization
@@ -53,13 +56,21 @@ const SEED_USERS: User[] = [
     id: 'mock-citizen-1',
     name: 'Ramesh Sharma',
     phone: '9811100001',
-    role: 'CITIZEN'
+    role: 'CITIZEN',
+    kycStatus: 'VERIFIED'
   },
   {
     id: 'mock-kaba-1',
     name: 'Suresh Kumar',
     phone: '9876543210',
     role: 'KABADIWALA',
+    kycStatus: 'VERIFIED',
+    kycDocuments: {
+      idType: 'AADHAAR',
+      idNumber: '9821 4455 8921',
+      submittedAt: '2026-09-10T10:00:00Z',
+      verifiedAt: '2026-09-11T12:30:00Z'
+    },
     kabadiwala: {
       id: 'prof-1',
       userId: 'mock-kaba-1',
@@ -77,6 +88,13 @@ const SEED_USERS: User[] = [
     name: 'EcoRecycle Aggregators Ltd',
     phone: '9822200002',
     role: 'RECYCLER',
+    kycStatus: 'VERIFIED',
+    kycDocuments: {
+      idType: 'PAN',
+      idNumber: 'AAECE1234F',
+      submittedAt: '2026-09-08T09:00:00Z',
+      verifiedAt: '2026-09-09T14:00:00Z'
+    },
     recycler: {
       id: 'rec-fac-01',
       facilityName: 'EcoRecycle Aggregators Ltd (Unit-II)',
@@ -106,7 +124,8 @@ const SEED_USERS: User[] = [
     id: 'mock-admin-1',
     name: 'NDMC Waste & Mines Cell',
     phone: '9999900000',
-    role: 'ADMIN'
+    role: 'ADMIN',
+    kycStatus: 'VERIFIED'
   }
 ];
 
@@ -581,6 +600,324 @@ const SEED_ANOMALIES: TransactionAnomaly[] = [
   }
 ];
 
+const SEED_NOTIFICATIONS: InAppNotification[] = [
+  // Citizen Notifications (Ramesh Sharma)
+  {
+    id: 'notif-cit-1',
+    userId: 'mock-citizen-1',
+    userRole: 'CITIZEN',
+    title: 'Pickup Accepted • Suresh Kumar',
+    message: 'Kabadiwala Suresh Kumar has accepted your pickup request #p-active-01. Arriving with calibrated digital scale.',
+    type: 'PICKUP',
+    timestamp: '15 mins ago',
+    read: false,
+    actionTab: 'pickups',
+    entityId: 'p-active-01',
+    entityType: 'PICKUP'
+  },
+  {
+    id: 'notif-cit-2',
+    userId: 'mock-citizen-1',
+    userRole: 'CITIZEN',
+    title: 'Collector En Route (0.8 km)',
+    message: 'Solar Cargo Trike (DL-10-KBD-89) is approx 10 minutes away. Doorstep OTP: 4821.',
+    type: 'PICKUP',
+    timestamp: '8 mins ago',
+    read: false,
+    actionTab: 'pickups',
+    entityId: 'p-active-01',
+    entityType: 'PICKUP'
+  },
+  {
+    id: 'notif-cit-3',
+    userId: 'mock-citizen-1',
+    userRole: 'CITIZEN',
+    title: 'Eco-Karma Points Awarded! 🌱',
+    message: 'You earned 185 Green Karma Points and offset 24.6 kg CO2 eq for your previous e-waste recycling.',
+    type: 'SYSTEM',
+    timestamp: '1 hour ago',
+    read: false,
+    actionTab: 'impact'
+  },
+  {
+    id: 'notif-cit-4',
+    userId: 'mock-citizen-1',
+    userRole: 'CITIZEN',
+    title: '₹4,304 Payout Credited via UPI',
+    message: 'Payment for completed pickup #p-comp-02 was successfully transferred to your linked UPI ID.',
+    type: 'PAYMENT',
+    timestamp: '2 hours ago',
+    read: true,
+    actionTab: 'pickups',
+    entityId: 'p-comp-02'
+  },
+  {
+    id: 'notif-cit-5',
+    userId: 'mock-citizen-1',
+    userRole: 'CITIZEN',
+    title: 'CPCB Green Certificate Ready',
+    message: 'Official e-Waste Safe Disposal Certificate #CPCB-2026-DEL-0881 is verified and ready to download.',
+    type: 'CERTIFICATE',
+    timestamp: 'Yesterday',
+    read: true,
+    actionTab: 'impact'
+  },
+
+  // Kabadiwala Notifications (Suresh Kumar)
+  {
+    id: 'notif-kab-1',
+    userId: 'mock-kaba-1',
+    userRole: 'KABADIWALA',
+    title: 'New Bid Received on Lot #KC-LOT-9821',
+    message: 'EcoRecycle Aggregators Ltd placed a high bid of ₹11,200 (₹605/kg) for your High-grade PCB lot.',
+    type: 'BID',
+    timestamp: '10 mins ago',
+    read: false,
+    actionTab: 'bids',
+    entityId: 'lot-101',
+    entityType: 'LOT'
+  },
+  {
+    id: 'notif-kab-2',
+    userId: 'mock-kaba-1',
+    userRole: 'KABADIWALA',
+    title: 'New Bulk Pickup in Indiranagar (0.8 km)',
+    message: 'Ramesh Sharma requested doorstep pickup for 19.5 kg high-grade scrap. Estimated payout ₹4,304.',
+    type: 'PICKUP',
+    timestamp: '25 mins ago',
+    read: false,
+    actionTab: 'pickups',
+    entityId: 'p-active-01',
+    entityType: 'PICKUP'
+  },
+  {
+    id: 'notif-kab-3',
+    userId: 'mock-kaba-1',
+    userRole: 'KABADIWALA',
+    title: 'Daily APMC Scrap Rate Revision',
+    message: 'Benchmark rates updated: High-grade PCB +₹25/kg, Copper Cables +₹15/kg. Review your asking prices.',
+    type: 'RATE',
+    timestamp: '2 hours ago',
+    read: false,
+    actionTab: 'rates'
+  },
+  {
+    id: 'notif-kab-4',
+    userId: 'mock-kaba-1',
+    userRole: 'KABADIWALA',
+    title: 'Regulatory Trade KYC Approved! ✅',
+    message: 'Your Aadhaar and informal collector registration has been verified by the State Pollution Control Board.',
+    type: 'KYC',
+    timestamp: 'Yesterday',
+    read: true,
+    actionTab: 'profile'
+  },
+  {
+    id: 'notif-kab-5',
+    userId: 'mock-kaba-1',
+    userRole: 'KABADIWALA',
+    title: 'Weighbridge Calibration Slot Confirmed',
+    message: 'Inward weighing slot reserved at Okhla Industrial Cluster Scale-04 for today 3:30 PM.',
+    type: 'LOT',
+    timestamp: 'Yesterday',
+    read: true,
+    actionTab: 'handover'
+  },
+
+  // Recycler Notifications (EcoRecycle Aggregators Ltd)
+  {
+    id: 'notif-rec-1',
+    userId: 'mock-recycler-1',
+    userRole: 'RECYCLER',
+    title: 'Bid Leading: Lot #KC-LOT-9821',
+    message: 'Your bid of ₹11,200 is currently the highest offer on Suresh Kumar\'s 18.5kg High-grade PCB Lot.',
+    type: 'BID',
+    timestamp: '12 mins ago',
+    read: false,
+    actionTab: 'incoming',
+    entityId: 'lot-101',
+    entityType: 'LOT'
+  },
+  {
+    id: 'notif-rec-2',
+    userId: 'mock-recycler-1',
+    userRole: 'RECYCLER',
+    title: 'Consignment Dispatched via Solar Trike',
+    message: 'Collector Suresh Kumar has initiated transit for Lot #KC-LOT-9821 to Okhla Unit-II facility. ETA 40 mins.',
+    type: 'LOT',
+    timestamp: '30 mins ago',
+    read: false,
+    actionTab: 'handover',
+    entityId: 'lot-101',
+    entityType: 'LOT'
+  },
+  {
+    id: 'notif-rec-3',
+    userId: 'mock-recycler-1',
+    userRole: 'RECYCLER',
+    title: 'Weighbridge Gross Slip Uploaded',
+    message: 'Weighbridge slip #WB-OKHLA-SCALE-04 recorded 18.5 kg gross weight. Awaiting dual-key confirmation.',
+    type: 'ORDER',
+    timestamp: '1 hour ago',
+    read: false,
+    actionTab: 'handover'
+  },
+  {
+    id: 'notif-rec-4',
+    userId: 'mock-recycler-1',
+    userRole: 'RECYCLER',
+    title: 'MoEFCC EPR Credit Certificate Issued',
+    message: 'CPCB e-Waste portal issued 18.5 recycling credits (Ref: EPR-2026-DL-0881). Available in audit log.',
+    type: 'CERTIFICATE',
+    timestamp: 'Yesterday',
+    read: true,
+    actionTab: 'reports'
+  },
+  {
+    id: 'notif-rec-5',
+    userId: 'mock-recycler-1',
+    userRole: 'RECYCLER',
+    title: 'New High-Purity Copper Lot Broadcasted',
+    message: '24.0 kg Copper Cables & Wires listed by Mohan Lal in Mayapuri cluster. Asking rate ₹480/kg.',
+    type: 'LOT',
+    timestamp: 'Yesterday',
+    read: true,
+    actionTab: 'incoming',
+    entityId: 'lot-102',
+    entityType: 'LOT'
+  }
+];
+
+const SEED_CHAT_MESSAGES: ChatMessage[] = [
+  // --- Pickup p-active-01 Thread 1: Suresh Kumar (Collector) & Ramesh Sharma (Citizen) ---
+  {
+    id: 'msg-p1-1',
+    senderId: 'mock-kaba-1',
+    senderName: 'Suresh Kumar',
+    senderRole: 'KABADIWALA',
+    receiverId: 'mock-citizen-1',
+    receiverName: 'Ramesh Sharma',
+    receiverRole: 'CITIZEN',
+    contextType: 'PICKUP',
+    contextId: 'p-active-01',
+    contextTitle: 'Pickup #p-active-01 (19.5kg scrap)',
+    text: 'Namaste Ramesh ji! I have accepted your scrap pickup request. I am equipped with calibrated digital scales and will be arriving shortly.',
+    isRead: true,
+    createdAt: new Date(Date.now() - 35 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'msg-p1-2',
+    senderId: 'mock-citizen-1',
+    senderName: 'Ramesh Sharma',
+    senderRole: 'CITIZEN',
+    receiverId: 'mock-kaba-1',
+    receiverName: 'Suresh Kumar',
+    receiverRole: 'KABADIWALA',
+    contextType: 'PICKUP',
+    contextId: 'p-active-01',
+    contextTitle: 'Pickup #p-active-01 (19.5kg scrap)',
+    text: 'Namaste Suresh ji. Please enter through Gate 2 of Block D. The scrap is kept near the elevator on 4th floor.',
+    isRead: true,
+    createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'msg-p1-3',
+    senderId: 'mock-kaba-1',
+    senderName: 'Suresh Kumar',
+    senderRole: 'KABADIWALA',
+    receiverId: 'mock-citizen-1',
+    receiverName: 'Ramesh Sharma',
+    receiverRole: 'CITIZEN',
+    contextType: 'PICKUP',
+    contextId: 'p-active-01',
+    contextTitle: 'Pickup #p-active-01 (19.5kg scrap)',
+    text: 'Ji bilkul! Reached near Lajpat market main signal. Arriving at your doorstep in approx 8-10 minutes with Solar Cargo Trike.',
+    isRead: false,
+    createdAt: new Date(Date.now() - 8 * 60 * 1000).toISOString()
+  },
+
+  // --- Pickup p-active-01 Thread 2: Rajesh Yadav (Another Collector who reached out) ---
+  {
+    id: 'msg-p1-4',
+    senderId: 'prof-2',
+    senderName: 'Rajesh Yadav',
+    senderRole: 'KABADIWALA',
+    receiverId: 'mock-citizen-1',
+    receiverName: 'Ramesh Sharma',
+    receiverRole: 'CITIZEN',
+    contextType: 'PICKUP',
+    contextId: 'p-active-01',
+    contextTitle: 'Pickup #p-active-01 (19.5kg scrap)',
+    text: 'Hello Ramesh ji, if you have additional copper cables or battery scrap, I am also available in your sector with high instant cash payout.',
+    isRead: false,
+    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString()
+  },
+
+  // --- Lot lot-101 Thread 1: EcoRecycle Aggregators (Recycler) & Suresh Kumar (Collector) ---
+  {
+    id: 'msg-l1-1',
+    senderId: 'mock-recycler-1',
+    senderName: 'EcoRecycle Aggregators Ltd',
+    senderRole: 'RECYCLER',
+    receiverId: 'mock-kaba-1',
+    receiverName: 'Suresh Kumar',
+    receiverRole: 'KABADIWALA',
+    contextType: 'LOT',
+    contextId: 'lot-101',
+    contextTitle: 'High-grade PCBs (18.5kg)',
+    text: 'Namaste Suresh ji. We inspected your High-grade PCB lot #KC-LOT-9821. Are these server grade or mixed telecom boards?',
+    isRead: true,
+    createdAt: new Date(Date.now() - 40 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'msg-l1-2',
+    senderId: 'mock-kaba-1',
+    senderName: 'Suresh Kumar',
+    senderRole: 'KABADIWALA',
+    receiverId: 'mock-recycler-1',
+    receiverName: 'EcoRecycle Aggregators Ltd',
+    receiverRole: 'RECYCLER',
+    contextType: 'LOT',
+    contextId: 'lot-101',
+    contextTitle: 'High-grade PCBs (18.5kg)',
+    text: '100% server motherboard grade with dual gold pin sockets. No desoldering done.',
+    isRead: true,
+    createdAt: new Date(Date.now() - 28 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'msg-l1-3',
+    senderId: 'mock-recycler-1',
+    senderName: 'EcoRecycle Aggregators Ltd',
+    senderRole: 'RECYCLER',
+    receiverId: 'mock-kaba-1',
+    receiverName: 'Suresh Kumar',
+    receiverRole: 'KABADIWALA',
+    contextType: 'LOT',
+    contextId: 'lot-101',
+    contextTitle: 'High-grade PCBs (18.5kg)',
+    text: 'We placed a bid of ₹11,200. If you accept on platform, our weighbridge slot at Okhla Unit-II is open for instant intake.',
+    isRead: false,
+    createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString()
+  },
+
+  // --- Lot lot-101 Thread 2: Apex Metallics & Smelters (Another Recycler) ---
+  {
+    id: 'msg-l1-4',
+    senderId: 'rec-02',
+    senderName: 'Apex Metallics & Smelters',
+    senderRole: 'RECYCLER',
+    receiverId: 'mock-kaba-1',
+    receiverName: 'Suresh Kumar',
+    receiverRole: 'KABADIWALA',
+    contextType: 'LOT',
+    contextId: 'lot-101',
+    contextTitle: 'High-grade PCBs (18.5kg)',
+    text: 'Can you deliver before 5:00 PM? We can offer ₹620/kg if certified dry with no casing.',
+    isRead: false,
+    createdAt: new Date(Date.now() - 18 * 60 * 1000).toISOString()
+  }
+];
+
 // Initialize Storage with Seed Data if not present
 export function initStorage(): void {
   if (typeof window === 'undefined') return;
@@ -609,6 +946,12 @@ export function initStorage(): void {
   if (!localStorage.getItem(STORAGE_KEYS.ANOMALIES)) {
     saveToStorage(STORAGE_KEYS.ANOMALIES, SEED_ANOMALIES);
   }
+  if (!localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS)) {
+    saveToStorage(STORAGE_KEYS.NOTIFICATIONS, SEED_NOTIFICATIONS);
+  }
+  if (!localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES)) {
+    saveToStorage(STORAGE_KEYS.CHAT_MESSAGES, SEED_CHAT_MESSAGES);
+  }
 }
 
 // Auto-run initialization immediately upon module load
@@ -626,6 +969,8 @@ export const storage = {
     saveToStorage(STORAGE_KEYS.RATES, SEED_RATES);
     saveToStorage(STORAGE_KEYS.COLLECTORS, SEED_COLLECTORS);
     saveToStorage(STORAGE_KEYS.ANOMALIES, SEED_ANOMALIES);
+    saveToStorage(STORAGE_KEYS.NOTIFICATIONS, SEED_NOTIFICATIONS);
+    saveToStorage(STORAGE_KEYS.CHAT_MESSAGES, SEED_CHAT_MESSAGES);
     notifyStorageChange('*');
   },
 
@@ -667,6 +1012,349 @@ export const storage = {
     saveToStorage(STORAGE_KEYS.USERS, users);
     return user;
   },
+
+  // Password lookup for local auth simulation
+  getUserPassword: (phone: string): string => {
+    const passwords = getFromStorage<Record<string, string>>(STORAGE_KEYS.PASSWORDS, {});
+    return passwords[phone] || 'password123';
+  },
+  setUserPassword: (phone: string, password: string): void => {
+    const passwords = getFromStorage<Record<string, string>>(STORAGE_KEYS.PASSWORDS, {});
+    passwords[phone] = password;
+    saveToStorage(STORAGE_KEYS.PASSWORDS, passwords);
+  },
+
+  // Update user KYC (submission or re-application upon rejection)
+  updateUserKyc: (userId: string, kycData: KycDocumentData): User | null => {
+    const users = storage.getUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx === -1) return null;
+    const updated: User = {
+      ...users[idx],
+      kycStatus: 'UNDER_REVIEW',
+      kycDocuments: {
+        ...kycData,
+        rejectionReason: undefined // Clear active rejection upon re-application
+      },
+      kabadiwala: users[idx].kabadiwala ? {
+        ...users[idx].kabadiwala!,
+        verified: false
+      } : undefined,
+      recycler: users[idx].recycler ? {
+        ...users[idx].recycler!,
+        verified: false
+      } : undefined
+    };
+    users[idx] = updated;
+    saveToStorage(STORAGE_KEYS.USERS, users);
+
+    // Update collector record in collectors list if collector
+    if (users[idx].role === 'KABADIWALA') {
+      const collectors = storage.getCollectors();
+      const cIdx = collectors.findIndex(c => c.userId === userId || c.id === userId);
+      if (cIdx >= 0) {
+        collectors[cIdx].verified = false;
+        saveToStorage(STORAGE_KEYS.COLLECTORS, collectors);
+      }
+    }
+
+    const currentUser = storage.getCurrentUser();
+    if (currentUser?.id === userId) {
+      storage.setCurrentUser(updated);
+    }
+    return updated;
+  },
+
+  // Regulatory verify or reject user KYC
+  verifyUserKyc: (userId: string, status: 'VERIFIED' | 'REJECTED', reason?: string): User | null => {
+    const users = storage.getUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx === -1) return null;
+    const existingDocs = users[idx].kycDocuments || {
+      idType: 'AADHAAR' as const,
+      idNumber: '1234 5678 9012',
+      submittedAt: new Date().toISOString()
+    };
+    const updated: User = {
+      ...users[idx],
+      kycStatus: status,
+      kycDocuments: {
+        ...existingDocs,
+        verifiedAt: status === 'VERIFIED' ? new Date().toISOString() : undefined,
+        rejectionReason: status === 'REJECTED' ? (reason || 'Document verification failed') : undefined
+      },
+      kabadiwala: users[idx].kabadiwala ? {
+        ...users[idx].kabadiwala!,
+        verified: status === 'VERIFIED'
+      } : undefined,
+      recycler: users[idx].recycler ? {
+        ...users[idx].recycler!,
+        verified: status === 'VERIFIED'
+      } : undefined
+    };
+    users[idx] = updated;
+    saveToStorage(STORAGE_KEYS.USERS, users);
+
+    // Also update collector record in collectors list if collector
+    if (users[idx].role === 'KABADIWALA') {
+      const collectors = storage.getCollectors();
+      const cIdx = collectors.findIndex(c => c.userId === userId || c.id === userId);
+      if (cIdx >= 0) {
+        collectors[cIdx].verified = status === 'VERIFIED';
+        saveToStorage(STORAGE_KEYS.COLLECTORS, collectors);
+      }
+    }
+
+    // Add In-App notification
+    const notif: InAppNotification = {
+      id: `notif-${Date.now()}`,
+      userId,
+      title: status === 'VERIFIED' ? 'KYC Verification Approved' : 'KYC Verification Rejected',
+      message: status === 'VERIFIED'
+        ? 'Congratulations! Your profile and KYC have been successfully verified by the Regulatory Authority. Full platform access (lot creation and bidding) is now unlocked.'
+        : `Your KYC verification request was rejected. Reason: ${reason || 'Details could not be verified'}. Please update and resubmit your documents.`,
+      type: 'KYC',
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    storage.addNotification(notif);
+
+    const currentUser = storage.getCurrentUser();
+    if (currentUser?.id === userId) {
+      storage.setCurrentUser(updated);
+    }
+    return updated;
+  },
+
+  // Notifications
+  getNotifications: (userIdOrRole?: string): InAppNotification[] => {
+    const all = getFromStorage<InAppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, SEED_NOTIFICATIONS);
+    if (!userIdOrRole) return all;
+    const lower = userIdOrRole.toLowerCase();
+    return all.filter(n => 
+      (n.userId && n.userId.toLowerCase() === lower) || 
+      (n.userRole && n.userRole.toLowerCase() === lower)
+    );
+  },
+  getUnreadNotificationCount: (userIdOrRole?: string): number => {
+    return storage.getNotifications(userIdOrRole).filter(n => !n.read).length;
+  },
+  addNotification: (notif: InAppNotification): void => {
+    const all = getFromStorage<InAppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, SEED_NOTIFICATIONS);
+    all.unshift(notif);
+    saveToStorage(STORAGE_KEYS.NOTIFICATIONS, all);
+  },
+  markNotificationRead: (notificationId: string): void => {
+    const all = getFromStorage<InAppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, SEED_NOTIFICATIONS);
+    const updated = all.map(n => n.id === notificationId ? { ...n, read: true } : n);
+    saveToStorage(STORAGE_KEYS.NOTIFICATIONS, updated);
+  },
+  markAllNotificationsRead: (userIdOrRole?: string): void => {
+    const all = getFromStorage<InAppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, SEED_NOTIFICATIONS);
+    const lower = userIdOrRole?.toLowerCase();
+    const updated = all.map(n => {
+      if (!lower) return { ...n, read: true };
+      if ((n.userId && n.userId.toLowerCase() === lower) || (n.userRole && n.userRole.toLowerCase() === lower)) {
+        return { ...n, read: true };
+      }
+      return n;
+    });
+    saveToStorage(STORAGE_KEYS.NOTIFICATIONS, updated);
+  },
+
+  // --- Contextual Chat & Messages ---
+  getChatMessages: (contextType: 'LOT' | 'PICKUP', contextId: string, partnerId?: string): ChatMessage[] => {
+    const all = getFromStorage<ChatMessage[]>(STORAGE_KEYS.CHAT_MESSAGES, SEED_CHAT_MESSAGES);
+    const cType = contextType.toUpperCase();
+    const filtered = all.filter(m => m.contextType === cType && m.contextId === contextId);
+    if (!partnerId) return filtered;
+    return filtered.filter(m => m.senderId === partnerId || m.receiverId === partnerId);
+  },
+  sendChatMessage: (msg: Omit<ChatMessage, 'id' | 'createdAt'>): ChatMessage => {
+    const all = getFromStorage<ChatMessage[]>(STORAGE_KEYS.CHAT_MESSAGES, SEED_CHAT_MESSAGES);
+    const newMsg: ChatMessage = {
+      ...msg,
+      id: `chat-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      createdAt: new Date().toISOString(),
+      isRead: false
+    };
+    all.push(newMsg);
+    saveToStorage(STORAGE_KEYS.CHAT_MESSAGES, all);
+    return newMsg;
+  },
+  markChatRead: (contextType: 'LOT' | 'PICKUP', contextId: string, currentUserId?: string, partnerId?: string): void => {
+    const all = getFromStorage<ChatMessage[]>(STORAGE_KEYS.CHAT_MESSAGES, SEED_CHAT_MESSAGES);
+    const cType = contextType.toUpperCase();
+    let hasChanges = false;
+    const updated = all.map(m => {
+      if (m.contextType === cType && m.contextId === contextId && !m.isRead) {
+        if (partnerId && m.senderId === partnerId) {
+          hasChanges = true;
+          return { ...m, isRead: true };
+        }
+        if (currentUserId && (m.receiverId === currentUserId || m.senderId !== currentUserId)) {
+          hasChanges = true;
+          return { ...m, isRead: true };
+        }
+        if (!partnerId && !currentUserId) {
+          hasChanges = true;
+          return { ...m, isRead: true };
+        }
+      }
+      return m;
+    });
+    if (hasChanges) {
+      saveToStorage(STORAGE_KEYS.CHAT_MESSAGES, updated);
+    }
+  },
+  getUnreadChatCountForContext: (contextType: 'LOT' | 'PICKUP', contextId: string, currentUserId?: string): number => {
+    const messages = storage.getChatMessages(contextType, contextId);
+    return messages.filter(m => {
+      if (m.isRead) return false;
+      if (currentUserId && m.senderId === currentUserId) return false;
+      return true;
+    }).length;
+  },
+  getTotalUnreadChatCount: (currentUserId?: string): number => {
+    const all = getFromStorage<ChatMessage[]>(STORAGE_KEYS.CHAT_MESSAGES, SEED_CHAT_MESSAGES);
+    return all.filter(m => {
+      if (m.isRead) return false;
+      if (currentUserId && m.senderId === currentUserId) return false;
+      return true;
+    }).length;
+  },
+  getChatPartnersForContext: (contextType: 'LOT' | 'PICKUP', contextId: string, currentUserId?: string): ChatPartner[] => {
+    const messages = storage.getChatMessages(contextType, contextId);
+    const partnerMap = new Map<string, ChatPartner>();
+
+    messages.forEach(m => {
+      const isMe = currentUserId ? m.senderId === currentUserId : false;
+      const partnerId = isMe ? (m.receiverId || 'other') : m.senderId;
+      const partnerName = isMe ? (m.receiverName || 'Participant') : (m.senderName || 'Participant');
+      const partnerRole = isMe ? (m.receiverRole || 'COLLECTOR') : (m.senderRole || 'COLLECTOR');
+
+      if (!partnerMap.has(partnerId)) {
+        partnerMap.set(partnerId, {
+          id: partnerId,
+          name: partnerName,
+          role: partnerRole,
+          lastMessage: m.text,
+          lastMessageTime: m.createdAt,
+          unreadCount: 0
+        });
+      }
+
+      const entry = partnerMap.get(partnerId)!;
+      entry.lastMessage = m.text || (m.audioUrl ? '🎙️ Voice Note' : 'Image');
+      entry.lastMessageTime = m.createdAt;
+      if (!m.isRead && (!currentUserId || m.senderId !== currentUserId)) {
+        entry.unreadCount += 1;
+      }
+    });
+
+    return Array.from(partnerMap.values());
+  },
+  getAllChatThreads: (currentUserId?: string, userRole?: string): ChatThreadSummary[] => {
+    const allMessages = getFromStorage<ChatMessage[]>(STORAGE_KEYS.CHAT_MESSAGES, SEED_CHAT_MESSAGES);
+    const threadMap = new Map<string, ChatThreadSummary>();
+
+    // 1. Parse all messages into distinct threads
+    allMessages.forEach(m => {
+      const isSender = currentUserId ? m.senderId === currentUserId : m.senderRole === userRole;
+      const partnerId = isSender ? (m.receiverId || 'partner-default') : m.senderId;
+      const partnerName = isSender ? (m.receiverName || 'Partner') : (m.senderName || 'Partner');
+      const partnerRole = isSender ? (m.receiverRole || 'COLLECTOR') : (m.senderRole || 'COLLECTOR');
+
+      const threadKey = `${m.contextType}:${m.contextId}:${partnerId}`;
+
+      if (!threadMap.has(threadKey)) {
+        threadMap.set(threadKey, {
+          threadKey,
+          contextType: m.contextType,
+          contextId: m.contextId,
+          contextTitle: m.contextTitle || `${m.contextType === 'PICKUP' ? 'Pickup' : 'Lot'} #${m.contextId}`,
+          partnerId,
+          partnerName,
+          partnerRole,
+          lastMessage: m.text || (m.audioUrl ? '🎙️ Voice note' : 'Attachment'),
+          lastMessageTime: m.createdAt,
+          unreadCount: 0
+        });
+      }
+
+      const thread = threadMap.get(threadKey)!;
+      if (new Date(m.createdAt).getTime() >= new Date(thread.lastMessageTime).getTime()) {
+        thread.lastMessage = m.text || (m.audioUrl ? '🎙️ Voice note' : 'Attachment');
+        thread.lastMessageTime = m.createdAt;
+      }
+      if (!m.isRead && !isSender) {
+        thread.unreadCount += 1;
+      }
+    });
+
+    // 2. Also ensure active pickups with assigned partners have a visible thread entry
+    try {
+      const pickups = storage.getPickups();
+      pickups.forEach(p => {
+        if (p.kabadiwala) {
+          const partnerId = p.kabadiwala.id;
+          const threadKey = `PICKUP:${p.id}:${partnerId}`;
+          if (!threadMap.has(threadKey)) {
+            threadMap.set(threadKey, {
+              threadKey,
+              contextType: 'PICKUP',
+              contextId: p.id,
+              contextTitle: `Pickup #${p.id.slice(0, 10)} (${p.address ? p.address.slice(0, 20) + '...' : 'Doorstep'})`,
+              partnerId,
+              partnerName: p.kabadiwala.name,
+              partnerRole: 'KABADIWALA',
+              partnerPhone: p.kabadiwala.phone,
+              lastMessage: 'Tap to coordinate arrival, weighing & OTP verification',
+              lastMessageTime: p.scheduledAt || p.createdAt || new Date().toISOString(),
+              unreadCount: 0
+            });
+          } else {
+            const existing = threadMap.get(threadKey)!;
+            if (!existing.partnerPhone && p.kabadiwala.phone) {
+              existing.partnerPhone = p.kabadiwala.phone;
+            }
+          }
+        }
+      });
+    } catch {}
+
+    // 3. Ensure active lots with bids have visible thread entry
+    try {
+      const lots = storage.getLots();
+      lots.forEach(l => {
+        if (l.collectorId && l.bids && l.bids.length > 0) {
+          l.bids.forEach(b => {
+            const partnerId = b.recyclerId;
+            const threadKey = `LOT:${l.id}:${partnerId}`;
+            if (!threadMap.has(threadKey)) {
+              threadMap.set(threadKey, {
+                threadKey,
+                contextType: 'LOT',
+                contextId: l.id,
+                contextTitle: `Lot #${l.id.slice(0, 10)} (${l.category} ${l.approxWeightKg}kg)`,
+                partnerId,
+                partnerName: b.recyclerName,
+                partnerRole: 'RECYCLER',
+                lastMessage: `Bid submitted: ₹${b.bidAmount}. Tap to coordinate dispatch & gate pass.`,
+                lastMessageTime: b.createdAt || l.createdAt,
+                unreadCount: 0
+              });
+            }
+          });
+        }
+      });
+    } catch {}
+
+    return Array.from(threadMap.values()).sort(
+      (a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+    );
+  },
+
 
   // Pickups
   getPickups: (): Pickup[] => getFromStorage(STORAGE_KEYS.PICKUPS, SEED_PICKUPS),

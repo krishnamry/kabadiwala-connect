@@ -7,7 +7,11 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string, fallback?: string, params?: Record<string, string | number>) => string;
-  speak: (text: string, langOverride?: Language) => void;
+  speak: (
+    text: string,
+    langOverride?: Language,
+    options?: { audioKey?: string; onStart?: () => void; onEnd?: () => void }
+  ) => void;
   stopSpeaking: () => void;
   isSpeaking: boolean;
   formatCurrency: (amount: number) => string;
@@ -2149,6 +2153,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const setLanguage = (lang: Language) => {
+    stopVernacularSpeech();
+    setIsSpeaking(false);
     setLanguageState(lang);
     localStorage.setItem('dhatu_language', lang);
   };
@@ -2248,25 +2254,35 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
    * Selects best voice, smoothly handles fallback for languages without native browser TTS voices (e.g. Marathi),
    * pre-processes currency and units into spoken words, and ensures reliable playback on Android WebView and browsers.
    */
-  const speak = (text: string, langOverride?: Language) => {
+  const speak = (
+    text: string,
+    langOverride?: Language,
+    options?: { audioKey?: string; onStart?: () => void; onEnd?: () => void }
+  ) => {
     if (typeof window === 'undefined') return;
-    const hasNativeTTS = !!(window as any).AndroidTTS?.isAvailable?.();
-    const hasWebTTS = 'speechSynthesis' in window && !!window.speechSynthesis;
-    if (!hasNativeTTS && !hasWebTTS) return;
 
     const targetLang = langOverride || language;
     let spokenText = text;
 
-    // Auto-translate English if speaking in hi or mr and not already Devanagari script
+    // Auto-translate English if speaking in hi or mr and not already Devanagari script and not an explicit audioKey
     const hasDevanagari = /[\u0900-\u097F]/.test(spokenText);
-    if (targetLang !== 'en' && !hasDevanagari) {
+    if (targetLang !== 'en' && !hasDevanagari && !options?.audioKey) {
       spokenText = t(text, text);
     }
 
     playVernacularSpeech(spokenText, targetLang, {
-      onStart: () => setIsSpeaking(true),
-      onEnd: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false)
+      audioKey: options?.audioKey,
+      onStart: () => {
+        setIsSpeaking(true);
+        options?.onStart?.();
+      },
+      onEnd: () => {
+        setIsSpeaking(false);
+        options?.onEnd?.();
+      },
+      onError: () => {
+        setIsSpeaking(false);
+      }
     });
   };
 

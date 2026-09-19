@@ -5,6 +5,8 @@ import { useTheme } from '../context/ThemeContext';
 import { Capacitor } from '@capacitor/core';
 import { Role } from '../types';
 import { triggerHaptic } from '../lib/haptics';
+import { storage, STORAGE_KEYS } from '../lib/storage';
+import { InboxModal } from './InboxModal';
 import {
   User as UserIcon,
   ShieldCheck,
@@ -17,7 +19,9 @@ import {
   Languages,
   Settings,
   HelpCircle,
-  Check
+  Check,
+  Bell,
+  MessageSquare
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -31,6 +35,37 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
   const { currentThemeConfig } = useTheme();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(() => {
+    return user ? storage.getUnreadNotificationCount(user.id || user.role) : 0;
+  });
+  const [unreadChatCount, setUnreadChatCount] = useState<number>(() => {
+    return user ? storage.getTotalUnreadChatCount(user.id) : 0;
+  });
+
+  useEffect(() => {
+    const updateCounts = () => {
+      if (user) {
+        setUnreadNotifCount(storage.getUnreadNotificationCount(user.id || user.role));
+        setUnreadChatCount(storage.getTotalUnreadChatCount(user.id));
+      } else {
+        setUnreadNotifCount(0);
+        setUnreadChatCount(0);
+      }
+    };
+    updateCounts();
+    const handleStorageChange = (e: any) => {
+      if (
+        e.detail?.key === STORAGE_KEYS.NOTIFICATIONS ||
+        e.detail?.key === STORAGE_KEYS.CHAT_MESSAGES ||
+        e.detail?.key === '*'
+      ) {
+        updateCounts();
+      }
+    };
+    window.addEventListener('dhatu-storage-change', handleStorageChange);
+    return () => window.removeEventListener('dhatu-storage-change', handleStorageChange);
+  }, [user]);
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -255,6 +290,66 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
               <Settings className="w-4 h-4 text-slate-700 dark:text-slate-200" />
             </button>
 
+            {/* Chat & Messages Button with Live Unread Badge */}
+            {user && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(15);
+                  setProfileMenuOpen(false);
+                  setLangMenuOpen(false);
+                  onTabChange('chats');
+                }}
+                className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-2xs transition-all active:scale-95"
+                title={language === 'hi' ? 'बातचीत एवं संदेश' : 'Chats & Messages'}
+                aria-label="Chats and Messages"
+              >
+                <MessageSquare className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                {unreadChatCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-600 text-white text-[9px] font-extrabold items-center justify-center shadow-xs">
+                      {unreadChatCount > 9 ? '9+' : unreadChatCount}
+                    </span>
+                  </span>
+                )}
+              </button>
+            )}
+
+            {/* Activity Inbox Bell Icon Button with Live Unread Badge */}
+            {user && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(15);
+                  setProfileMenuOpen(false);
+                  setLangMenuOpen(false);
+                  const isSmartphonePortrait =
+                    isNative ||
+                    window.innerWidth < 768 ||
+                    (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(orientation: portrait)').matches);
+                  if (isSmartphonePortrait) {
+                    onTabChange('notifications');
+                  } else {
+                    setInboxOpen(true);
+                  }
+                }}
+                className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-2xs transition-all active:scale-95"
+                title={language === 'hi' ? 'सूचनाएं एवं अलर्ट' : 'Activity Inbox'}
+                aria-label="Activity Inbox"
+              >
+                <Bell className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-600 text-white text-[9px] font-extrabold items-center justify-center shadow-xs">
+                      {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                    </span>
+                  </span>
+                )}
+              </button>
+            )}
+
             {/* Profile Dropdown Trigger & Popover Menu */}
             {user ? (
               <div className="relative" ref={profileMenuRef}>
@@ -420,7 +515,67 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
                           </span>
                         </button>
 
-                        {/* 4. App Settings */}
+                        {/* 4. Notifications & Alerts */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(15);
+                            setProfileMenuOpen(false);
+                            onTabChange('notifications');
+                          }}
+                          className="w-full text-left p-2.5 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-between gap-3 transition-colors group"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                              <Bell className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                                {language === 'hi' ? 'सूचनाएं एवं अलर्ट' : 'Notifications'}
+                              </div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                                {unreadNotifCount > 0 ? `${unreadNotifCount} unread` : 'Lifecycle updates'}
+                              </div>
+                            </div>
+                          </div>
+                          {unreadNotifCount > 0 && (
+                            <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-full border border-rose-200/60 dark:border-rose-800/60">
+                              {unreadNotifCount}
+                            </span>
+                          )}
+                        </button>
+
+                        {/* 5. Chats & Messages */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(15);
+                            setProfileMenuOpen(false);
+                            onTabChange('chats');
+                          }}
+                          className="w-full text-left p-2.5 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-between gap-3 transition-colors group"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                              <MessageSquare className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                                {language === 'hi' ? 'बातचीत एवं संदेश' : 'Chats & Messages'}
+                              </div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                                {unreadChatCount > 0 ? `${unreadChatCount} new` : 'Direct messaging'}
+                              </div>
+                            </div>
+                          </div>
+                          {unreadChatCount > 0 && (
+                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/60">
+                              {unreadChatCount}
+                            </span>
+                          )}
+                        </button>
+
+                        {/* 6. App Settings */}
                         <button
                           type="button"
                           onClick={() => {
@@ -487,6 +642,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
           </div>
         </div>
       </div>
+
+      {/* Unified In-App Activity Inbox */}
+      <InboxModal
+        isOpen={inboxOpen}
+        onClose={() => setInboxOpen(false)}
+        onNavigateTab={(tab) => {
+          setInboxOpen(false);
+          onTabChange(tab);
+        }}
+      />
     </header>
   );
 };

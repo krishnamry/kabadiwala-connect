@@ -4,6 +4,8 @@
  * speech queue stall, and Devanagari phonetic pronunciation issues.
  */
 
+import { sarvamVoiceService } from './sarvamVoiceService';
+
 export type VoiceLanguage = 'en' | 'hi' | 'mr';
 
 // Module-level retainers to prevent browser GC from prematurely destroying active utterances
@@ -190,6 +192,7 @@ export function playVernacularSpeech(
   text: string,
   lang: VoiceLanguage = 'hi',
   options?: {
+    audioKey?: string;
     onStart?: () => void;
     onEnd?: () => void;
     onError?: (err: any) => void;
@@ -197,54 +200,84 @@ export function playVernacularSpeech(
     pitch?: number;
   }
 ): void {
-  // Cancel any ongoing utterance
+  // Cancel any ongoing utterance or audio
   stopVernacularSpeech();
 
-  const processed = preprocessVernacularText(text, lang);
-  if (!processed || !processed.trim()) {
+  const hasAudioKey = Boolean(options?.audioKey);
+  const processed = preprocessVernacularText(text || '', lang);
+  if (!hasAudioKey && (!processed || !processed.trim())) {
     options?.onEnd?.();
     return;
   }
 
-  // 1. Native Android TTS Bridge (Android APK WebView)
-  if (typeof window !== 'undefined' && (window as any).AndroidTTS?.isAvailable?.()) {
-    isCurrentlyPlaying = true;
-    playbackEndCallback = options?.onEnd || null;
-    options?.onStart?.();
+  isCurrentlyPlaying = true;
+  playbackEndCallback = options?.onEnd || null;
 
-    (window as any).__onAndroidTTSStart = () => {
+  // 1. Primary Engine: Sarvam AI High-Fidelity Voice (Static Asset Bank / IndexedDB Cache / REST API)
+  sarvamVoiceService
+    .play(text || options?.audioKey || '', lang, {
+      audioKey: options?.audioKey,
+      onStart: () => {
+        isCurrentlyPlaying = true;
+        options?.onStart?.();
+      },
+      onEnd: () => {
+        isCurrentlyPlaying = false;
+        if (playbackEndCallback) {
+          playbackEndCallback();
+          playbackEndCallback = null;
+        }
+      },
+      onError: (err) => {
+        console.warn('[VoiceEngine] Sarvam AI play error, falling back to Native/Web speech:', err);
+        fallbackToNativeOrWebSpeech(processed, lang, options);
+      }
+    })
+    .then((played) => {
+      if (!played) {
+        fallbackToNativeOrWebSpeech(processed, lang, options);
+      }
+    })
+    .catch((err) => {
+      console.warn('[VoiceEngine] Sarvam AI invocation error, falling back:', err);
+      fallbackToNativeOrWebSpeech(processed, lang, options);
+    });
+}
+
+function fallbackToNativeOrWebSpeech(
+  processed: string,
+  lang: VoiceLanguage,
+  options?: {
+    onStart?: () => void;
+    onEnd?: () => void;
+    onError?: (err: any) => void;
+    rate?: number;
+    pitch?: number;
+  }
+): void {
+  // 1. Direct native Android TTS bridge if available in Capacitor APK
+  if (typeof window !== 'undefined' && (window as any).AndroidTTS?.speak) {
+    try {
+      const androidLang = lang === 'hi' ? 'hi' : lang === 'mr' ? 'mr' : 'en';
       isCurrentlyPlaying = true;
       options?.onStart?.();
-    };
-
-    (window as any).__onAndroidTTSEnd = () => {
-      isCurrentlyPlaying = false;
-      if (playbackEndCallback) {
-        playbackEndCallback();
-        playbackEndCallback = null;
-      }
-    };
-
-    (window as any).__onAndroidTTSError = (err: any) => {
-      console.warn('Native Android TTS error:', err);
-      isCurrentlyPlaying = false;
-      options?.onError?.(err);
-      if (playbackEndCallback) {
-        playbackEndCallback();
-        playbackEndCallback = null;
-      }
-    };
-
-    try {
-      const rate = options?.rate || (lang === 'hi' ? 0.90 : lang === 'mr' ? 0.88 : 0.95);
-      const pitch = options?.pitch || 1.0;
-      (window as any).AndroidTTS.speak(processed, lang, rate, pitch);
+      (window as any).__onAndroidTTSEnd = () => {
+        isCurrentlyPlaying = false;
+        if (playbackEndCallback) {
+          playbackEndCallback();
+          playbackEndCallback = null;
+        }
+        options?.onEnd?.();
+      };
+      (window as any).__onAndroidTTSError = (err: any) => {
+        isCurrentlyPlaying = false;
+        options?.onError?.(err);
+      };
+      (window as any).AndroidTTS.speak(processed, androidLang, options?.rate || 1.0, options?.pitch || 1.0);
+      return;
     } catch (e) {
-      console.warn('Native Android TTS speak invocation error:', e);
-      isCurrentlyPlaying = false;
-      options?.onError?.(e);
+      console.warn('[VoiceEngine] Direct AndroidTTS failed, falling back to Web Speech:', e);
     }
-    return;
   }
 
   // 2. Browser Web Speech API
@@ -359,12 +392,19 @@ export function playVernacularSpeech(
 }
 
 export function stopVernacularSpeech(): void {
+  // 1. Stop Sarvam AI audio
+  try {
+    sarvamVoiceService.stopAudio();
+  } catch (e) {
+    console.warn('Sarvam stop error:', e);
+  }
+
   stopKeepAliveHeartbeat();
   isCurrentlyPlaying = false;
   activeUtteranceQueue = [];
   (window as any).__kabadiwalaUtterances = null;
 
-  // Stop native Android TTS if running
+  // 2. Stop native Android TTS if running
   if (typeof window !== 'undefined' && (window as any).AndroidTTS?.stop) {
     try {
       (window as any).AndroidTTS.stop();
@@ -373,7 +413,7 @@ export function stopVernacularSpeech(): void {
     }
   }
 
-  // Stop browser Web Speech synthesis if running
+  // 3. Stop browser Web Speech synthesis if running
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
@@ -389,12 +429,9 @@ export function stopVernacularSpeech(): void {
 }
 
 export function isVernacularSpeaking(): boolean {
-  return isCurrentlyPlaying;
+  return isCurrentlyPlaying || sarvamVoiceService.isSpeaking();
 }
 
 export function isVoiceEngineSupported(): boolean {
-  if (typeof window === 'undefined') return false;
-  const hasAndroidTTS = !!(window as any).AndroidTTS?.isAvailable?.();
-  const hasWebSpeech = 'speechSynthesis' in window && !!window.speechSynthesis;
-  return hasAndroidTTS || hasWebSpeech;
+  return true; // Sarvam AI audio is universally supported on web and mobile
 }

@@ -1,0 +1,32 @@
+{
+  "citizen_welcome_briefing": {
+    "description": "Welcome walkthrough on Citizen Dashboard",
+    "hi": "धातु मंच पर आपका स्वागत है। यहाँ आप अपने घर या दफ्तर का पुराना ई-कचरा, लैपटॉप, मोबाइल और तार सीधे अधिकृत कबाड़ीवाले को बेच सकते हैं। पिकअप बुक करने के लिए हरे बटन 'पिकअप शेड्यूल करें' पर दबाएं।",
+    "mr": "धातु व्यासपीठावर आपले स्वागत आहे. येथे आपण घरातील किंवा कार्यालयातील जुने ई-कचरा, लॅपटॉप, मोबाईल अधिकृत कबाडीवाल्याला विकू शकता. संकलन बुक करण्यासाठी हिरव्या बटनावर टॅप करा.",
+    "en": "Welcome to Dhatu. Here you can responsibly sell old electronics, computers, and copper to certified doorstep collectors. Tap the green 'Schedule Pickup' button to start."
+  },
+  "citizen_schedule_pickup": {
+    "description": "Guidance on booking a scrap pickup from home",
+    "hi": "पिकअप बुक करने के लिए: सबसे पहले अपने पुराने उपकरणों की सूची चुनें, अपना पता और सुविधाजनक समय चुनें, फिर सबसे नीचे दिए गए हरे बटन 'पिकअप बुक करें' पर दबाएं।",
+    "mr": "संकलन बुक करण्यासाठी: प्रथम जुन्या वस्तूंची यादी निवडा, पत्ता आणि सोयीची वेळ ठरवा, नंतर सर्वात खालील हिरव्या बटनावर 'पिकअप बुक करा' दाबा.",
+    "en": "To book a pickup: select your discarded electronic items, confirm your address and preferred time slot, then tap the green 'Book Pickup' button below."
+  },
+  "citizen_ai_scanner": {
+    "description": "AI camera scanner guidance for classifying electronics",
+    "hi": "अपने पुराने मोबाइल, लैपटॉप या सर्किट बोर्ड का फोटो लें। हमारी एआई तकनीक धातु की शुद्धता और श्रेणी पहचानकर आपको तुरंत सही दाम बताएगी।",
+    "mr": "आपल्या जुन्या मोबाईल किंवा सर्किट बोर्डचा फोटो काढा. आमची एआय प्रणाली धातूची शुद्धता तपासून अचूक बाजारभाव लगेच दर्शवेल.",
+    "en": "Capture a clear photo of your old device or circuit board. Our AI scanner automatically detects the material grade and estimated market value."
+  },
+  "citizen_doorstep_handover": {
+    "description": "Safety and verification guidance during collector doorstep arrival",
+    "hi": "कबाड़ीवाले के आने पर उनका सरकारी हरा बैज देखें। डिजिटल तराजू पर वजन देखकर ही अपने फोन पर आया 4 अंकों का ओटीपी साझा करें।",
+    "mr": "कबाडीवाला आल्यावर त्यांचा अधिकृत हिरवा बॅज तपासा. डिजिटल काट्यावर वजन पाहूनच आपल्या मोबाईलवरील 4-अंकी ओटीपी सामायिक करा.",
+    "en": "When the collector arrives, verify their Green Badge. Check the digital scale reading before sharing your 4-digit verification OTP."
+  },
+  "citizen_eco_rewards": {
+    "description": "Green credits and CPCB compliance certificate guidance",
+    "hi": "प्रत्येक पिकअप पूरा होने पर आपको पर्यावरण हरित अंक और सरकारी सीपीसीबी रिसाइक्लिंग प्रमाण पत्र मिलता है। इसे अपनी प्रोफाइल में देख सकते हैं।",
+    "mr": "प्रत्येक संकलन पूर्ण झाल्यावर आपल्याला हरित क्रेडिट्स आणि अधिकृत सीपीसीबी प्रमाणपत्र मिळते. आपण ते प्रोफाइलमध्ये पाहू शकता.",
+    "en": "For every completed pickup, you receive eco credits and an official CPCB recycling certificate visible in your environmental profile."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "recycler_welcome_briefing": {
+    "description": "Welcome walkthrough on Recycler / Smelter Dashboard",
+    "hi": "रिसाइक्लर प्रोक्योरमेंट पोर्टल में आपका स्वागत है। यहाँ प्रमाणित कबाड़ीवालों द्वारा पोस्ट किए गए तांबा, पीसीबी और भारी स्क्रैप के लॉट उपलब्ध हैं। बोली लगाने के लिए किसी भी लॉट पर टैप करें।",
+    "mr": "रिसायकलर खरेदी पोर्टलवर आपले स्वागत आहे. येथे अधिकृत संकलकांनी नोंदवलेले तांबे, पीसीबी व जड भंगाराचे लॉट उपलब्ध आहेत. बोली लावण्यासाठी कोणत्याही लॉटवर टॅप करा.",
+    "en": "Welcome to the Recycler Procurement Portal. Browse verified bulk lots of copper, circuit boards, and battery scrap posted by certified collectors."
+  },
+  "recycler_bidding_room": {
+    "description": "Live auction bidding guidance for recyclers",
+    "hi": "लाइव नीलामी कक्ष: नीलामी समाप्त होने से पहले अपनी सर्वोत्तम दर दर्ज करें। बोली स्वीकृत होने पर एस्क्रो धनराशि सुरक्षित हो जाएगी और गेट पास जारी होगा।",
+    "mr": "थेट लिलाव कक्ष: लिलाव संपण्यापूर्वी आपला सर्वोत्तम दर नोंदवा. बोली मंजूर झाल्यावर एस्क्रो रक्कम सुरक्षित होईल आणि गेट पास तयार होईल.",
+    "en": "Live Bidding Room: Enter your highest purchase bid before the timer expires. Winning bids lock funds securely in escrow and issue a weighbridge gate pass."
+  },
+  "recycler_weighbridge_scan": {
+    "description": "Weighbridge gate pass QR code verification guidance",
+    "hi": "कलेक्टर के ट्रक आगमन पर उनके डिजिटल गेट पास का क्यूआर कोड स्कैन करें। धर्मकांटे का सकल और खाली वजन स्वतः सत्यापित होकर दर्ज हो जाएगा।",
+    "mr": "संकलकाचे वाहन आल्यावर त्यांच्या डिजिटल गेट पासचा क्यूआर कोड स्कॅन करा. वजनकाट्यावरील वजन आपोआप तपासले जाईल.",
+    "en": "Scan the collector's digital gate pass QR code upon yard arrival. Gross and tare weights from the calibrated weighbridge are recorded automatically."
+  },
+  "recycler_escrow_release": {
+    "description": "Quality approval and instant escrow fund release guidance",
+    "hi": "सामग्री की शुद्धता और नमी जांचने के बाद नीचे दिए गए नीले बटन 'भुगतान जारी करें' पर दबाएं। एस्क्रो से तत्काल भुगतान कलेक्टर के खाते में चला जाएगा।",
+    "mr": "मालाची शुद्धता तपासल्यानंतर खालील निळ्या बटनावर 'रक्कम द्या' दाबा. एस्क्रोमधून त्वरित रक्कम संकलकाच्या खात्यात हस्तांतरित होईल.",
+    "en": "After verifying material purity and moisture inspection, tap 'Release Escrow Payout'. Funds will be instantly transferred to the collector's bank account."
+  }
+}

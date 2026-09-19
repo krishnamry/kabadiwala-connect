@@ -10,37 +10,77 @@ import { KabadiwalaDashboard } from './pages/kabadiwala/KabadiwalaDashboard';
 import { RecyclerDashboard } from './pages/recycler/RecyclerDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { LoginPage } from './pages/auth/LoginPage';
+import { AuthChoicePage } from './pages/auth/AuthChoicePage';
+import { SignUpPage } from './pages/auth/SignUpPage';
 import { LanguageSelectScreen } from './pages/auth/LanguageSelectScreen';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { NotificationsPage } from './pages/notifications/NotificationsPage';
+import { ChatsPage } from './pages/chats/ChatsPage';
 import { DesignPreviewPage } from './pages/design-preview/DesignPreviewPage';
 import { Role } from './types';
+import { storage } from './lib/storage';
 
 const MainContent: React.FC = () => {
   const { user, loading } = useAuth();
   const { language, t } = useLanguage();
   const isNative = Capacitor.isNativePlatform();
 
-  // Release v1.0.2 onboarding key: prompts every user for language preference upon opening after release, then proceeds to login!
-  const ONBOARDING_KEY = 'dhatu_onboarded_v1_0_2';
-
+  // Navigation flow:
+  // - If user is logged in: direct to dashboard (avoid onboarding / language selection)
+  // - If user is NOT logged in: First screen is Language Selection
   const [currentView, setCurrentView] = useState<string>(() => {
-    const hasChosenLanguage = localStorage.getItem(ONBOARDING_KEY) === 'true';
-    return hasChosenLanguage ? 'login' : 'language-select';
+    const existingUser = storage.getCurrentUser();
+    if (existingUser) {
+      return existingUser.role.toLowerCase();
+    }
+    return 'language-select';
   });
 
   // Track sub-section when navigating to profile (personal, security, support)
   const [profileInitialSection, setProfileInitialSection] = useState<'personal' | 'security' | 'support'>('personal');
 
-  // Track previous view for seamless Back navigation from Settings and Profile pages
+  // Track optional context when navigating directly to chat (e.g. from pickup/lot)
+  const [activeChatContext, setActiveChatContext] = useState<{
+    contextType: 'LOT' | 'PICKUP';
+    contextId: string;
+    partnerId?: string;
+    title?: string;
+  } | null>(null);
+
+  // Track previous view for seamless Back navigation from Settings, Profile, Notifications, and Chats pages
   const [previousView, setPreviousView] = useState<string>('login');
 
-  const handleNavigate = (newView: string, section?: 'personal' | 'security' | 'support') => {
+  const handleNavigate = (
+    newView: string,
+    section?: 'personal' | 'security' | 'support',
+    chatContext?: {
+      contextType: 'LOT' | 'PICKUP';
+      contextId: string;
+      partnerId?: string;
+      title?: string;
+    }
+  ) => {
     if (section) {
       setProfileInitialSection(section);
     }
-    if (newView === 'settings' || newView === 'profile') {
-      if (currentView !== 'settings' && currentView !== 'profile') {
+    if (chatContext) {
+      setActiveChatContext(chatContext);
+    } else if (newView !== 'chats') {
+      setActiveChatContext(null);
+    }
+    if (
+      newView === 'settings' ||
+      newView === 'profile' ||
+      newView === 'notifications' ||
+      newView === 'chats'
+    ) {
+      if (
+        currentView !== 'settings' &&
+        currentView !== 'profile' &&
+        currentView !== 'notifications' &&
+        currentView !== 'chats'
+      ) {
         setPreviousView(currentView);
       }
     }
@@ -55,16 +95,26 @@ const MainContent: React.FC = () => {
   // When user logs in or role changes, redirect to their role's dashboard
   useEffect(() => {
     if (user) {
-      if (currentView !== 'settings' && currentView !== 'profile') {
-        if (user.role === 'CITIZEN') setCurrentView('citizen');
-        else if (user.role === 'KABADIWALA') setCurrentView('kabadiwala');
-        else if (user.role === 'RECYCLER') setCurrentView('recycler');
-        else if (user.role === 'ADMIN') setCurrentView('admin');
+      if (
+        currentView !== 'settings' &&
+        currentView !== 'profile' &&
+        currentView !== 'notifications' &&
+        currentView !== 'chats'
+      ) {
+        setCurrentView(user.role.toLowerCase());
       }
     } else {
-      const hasChosenLanguage = localStorage.getItem(ONBOARDING_KEY) === 'true';
-      if (currentView !== 'settings' && currentView !== 'profile' && currentView !== 'login' && currentView !== 'language-select') {
-        setCurrentView(hasChosenLanguage ? 'login' : 'language-select');
+      if (
+        currentView !== 'settings' &&
+        currentView !== 'profile' &&
+        currentView !== 'notifications' &&
+        currentView !== 'chats' &&
+        currentView !== 'login' &&
+        currentView !== 'signup' &&
+        currentView !== 'auth-choice' &&
+        currentView !== 'language-select'
+      ) {
+        setCurrentView('language-select');
       }
     }
   }, [user?.role, user?.id]);
@@ -77,15 +127,56 @@ const MainContent: React.FC = () => {
             className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin"
             style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }}
           />
-          <p className="text-slate-600 dark:text-slate-300 font-bold font-display text-sm">{t('initializing', 'Initializing Dhatu Ecosystem...')}</p>
+          <p className="text-slate-600 dark:text-slate-300 font-bold font-display text-sm">
+            {t('initializing', 'Initializing Dhatu Ecosystem...')}
+          </p>
         </div>
       );
     }
 
+    // Step 1: Language Selection screen (First in navigation flow for unauthenticated users)
     if (currentView === 'language-select') {
       return (
         <LanguageSelectScreen
-          onComplete={() => setCurrentView('login')}
+          onComplete={() => setCurrentView('auth-choice')}
+        />
+      );
+    }
+
+    // Step 2: Auth Gateway screen (Sign Up on top, Log In below)
+    if (currentView === 'auth-choice') {
+      return (
+        <AuthChoicePage
+          onSelectSignUp={() => setCurrentView('signup')}
+          onSelectLogin={() => setCurrentView('login')}
+          onChangeLanguage={() => setCurrentView('language-select')}
+        />
+      );
+    }
+
+    // Step 3a: Sign Up Wizard with Role Selection, 2x Password, & Aadhaar/PAN KYC
+    if (currentView === 'signup') {
+      return (
+        <SignUpPage
+          onBack={() => setCurrentView('auth-choice')}
+          onGoToLogin={() => setCurrentView('login')}
+          onSuccess={(role: Role) => {
+            setCurrentView(role.toLowerCase());
+          }}
+        />
+      );
+    }
+
+    // Step 3b: Log In page with Role switcher, Forgot Password recovery, & Quick Demo tabs
+    if (currentView === 'login') {
+      return (
+        <LoginPage
+          onBack={() => setCurrentView('auth-choice')}
+          onGoToSignUp={() => setCurrentView('signup')}
+          onChangeLanguage={() => setCurrentView('language-select')}
+          onSuccess={(role: Role) => {
+            setCurrentView(role.toLowerCase());
+          }}
         />
       );
     }
@@ -109,16 +200,20 @@ const MainContent: React.FC = () => {
       );
     }
 
-    if (currentView === 'login') {
+    if (currentView === 'notifications') {
       return (
-        <LoginPage
-          onChangeLanguage={() => handleNavigate('language-select')}
-          onSuccess={(role: Role) => {
-            if (role === 'CITIZEN') setCurrentView('citizen');
-            else if (role === 'KABADIWALA') setCurrentView('kabadiwala');
-            else if (role === 'RECYCLER') setCurrentView('recycler');
-            else if (role === 'ADMIN') setCurrentView('admin');
-          }}
+        <NotificationsPage
+          onBack={handleBack}
+          onNavigateTab={(tab) => handleNavigate(tab)}
+        />
+      );
+    }
+
+    if (currentView === 'chats') {
+      return (
+        <ChatsPage
+          onBack={handleBack}
+          initialContext={activeChatContext}
         />
       );
     }
@@ -154,7 +249,17 @@ const MainContent: React.FC = () => {
     );
   };
 
-  const isFullscreenSubpage = currentView === 'language-select' || currentView === 'settings' || currentView === 'profile' || currentView === 'design-preview' || currentView === 'preview';
+  const isFullscreenSubpage =
+    currentView === 'language-select' ||
+    currentView === 'auth-choice' ||
+    currentView === 'signup' ||
+    currentView === 'login' ||
+    currentView === 'settings' ||
+    currentView === 'profile' ||
+    currentView === 'notifications' ||
+    currentView === 'chats' ||
+    currentView === 'design-preview' ||
+    currentView === 'preview';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 font-body antialiased transition-colors duration-200 w-full">
@@ -183,7 +288,7 @@ const MainContent: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-slate-400 text-xs">
+            <div className="flex wrap items-center gap-3 text-slate-400 text-xs">
               <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">3-Sided Formal Funnel</span>
               <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">CPCB EPR Compliant</span>
               <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-medium">Spoken TTS</span>

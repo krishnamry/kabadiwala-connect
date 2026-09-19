@@ -1,0 +1,20 @@
+{
+  "notifications_walkthrough": {
+    "description": "Guidance on mobile notifications page and filter navigation",
+    "hi": "यहाँ आपके पिकअप, लॉट और सत्यापन से जुड़े सभी नए अलर्ट हैं। बिना पढ़े संदेश देखने के लिए लाल 'अपठित' बटन दबाएं। वापस जाने के लिए ऊपर बाएँ तीर पर दबाएं।",
+    "mr": "येथे संकलन, लॉट आणि पडताळणी संबंधित सर्व सतर्कता आहेत. न वाचलेले संदेश पाहण्यासाठी लाल 'न वाचलेले' बटन दाबा. मागे जाण्यासाठी डाव्या बाणावर टॅप करा.",
+    "en": "Here are all real-time alerts for your pickups, lots, and KYC. Tap the red 'Unread' pill to filter unread updates. Tap the top-left arrow to return."
+  },
+  "chats_walkthrough": {
+    "description": "Guidance on smartphone chat screen with voice notes and partner messaging",
+    "hi": "यहाँ आप अपने पिकअप ग्राहक या रिसाइक्लिंग फैक्ट्री से सीधे बातचीत कर सकते हैं। जल्दी बोलने के लिए माइक बटन दबाकर वॉयस नोट भेजें।",
+    "mr": "येथे आपण संकलन ग्राहक किंवा कारखान्याशी थेट संवाद साधू शकता. जलद बोलण्यासाठी माइक बटण दाबून व्हॉइस नोट पाठवा.",
+    "en": "Here you can coordinate directly with pickup customers or recycling partners. Tap the microphone button to send an instant spoken voice memo."
+  },
+  "brand_intro": {
+    "description": "App identity audio cue",
+    "hi": "कबाड़ीवाला कनेक्ट, धातु ई-कचरा मंच। पारदर्शी वजन, त्वरित भुगतान और सरकारी प्रमाणन।",
+    "mr": "कबाडीवाला कनेक्ट, धातु ई-कचरा व्यासपीठ. पारदर्शक वजन, त्वरित पेमेंट आणि अधिकृत प्रमाणपत्र.",
+    "en": "Kabadiwala Connect, Dhatu e-waste formalization platform. Transparent weights, instant payouts, and certified recycling."
+  }
+}

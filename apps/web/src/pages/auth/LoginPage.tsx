@@ -4,6 +4,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { triggerHaptic } from '../../lib/haptics';
+import { storage } from '../../lib/storage';
 import { Role } from '../../types';
 import {
   User,
@@ -13,22 +15,36 @@ import {
   Lock,
   Phone,
   ArrowRight,
+  ArrowLeft,
   Sparkles,
   CheckCircle2,
   Building2,
   ChevronRight,
   Info,
   ChevronDown,
-  Globe
+  Globe,
+  Eye,
+  EyeOff,
+  X,
+  KeyRound,
+  AlertCircle,
+  UserPlus
 } from 'lucide-react';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
 
 interface LoginPageProps {
   onSuccess: (role: Role) => void;
+  onBack?: () => void;
+  onGoToSignUp?: () => void;
   onChangeLanguage?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguage }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({
+  onSuccess,
+  onBack,
+  onGoToSignUp,
+  onChangeLanguage
+}) => {
   const { login, quickDemoLogin } = useAuth();
   const { language, t } = useLanguage();
   const { currentThemeConfig } = useTheme();
@@ -40,6 +56,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFeatures, setShowFeatures] = useState(false);
+
+  // Forgot Password Modal State
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotStep, setForgotStep] = useState<1 | 2 | 3>(1);
+  const [forgotPhone, setForgotPhone] = useState('');
+  const [forgotOtp, setForgotOtp] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
+  const [showForgotPw1, setShowForgotPw1] = useState(false);
+  const [showForgotPw2, setShowForgotPw2] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
+  const [targetResetUser, setTargetResetUser] = useState<any>(null);
 
   type LoginRole = 'CITIZEN' | 'KABADIWALA' | 'RECYCLER' | 'ADMIN';
 
@@ -148,55 +177,55 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         'रोख ताळमेळासह चालू पासबुक वही'
       ],
       voiceText: 'Kabadiwala Collector Login. Voice-first passbook for Suresh Kumar with live price board.',
-      voiceHi: 'कबाड़ीवाला लॉगिन। बोलता हुआ दाम पत्रक, आसान लॉट निर्माण और नकद खाता बही।',
-      voiceMr: 'भंगार संग्राहक लॉगिन. बोलणारा भाव फलक आणि सोपे पासबुक.'
+      voiceHi: 'कबाड़ीवाला लॉगिन। सुरेश कुमार के लिए खाता बही एवं मंडी दाम पत्रक।',
+      voiceMr: 'कबाडीवाला लॉगिन. सुरेश कुमार यांच्यासाठी बोलणारा भाव फलक.'
     },
     RECYCLER: {
       tabLabelEn: 'Recycler',
       tabLabelHi: 'रीसायकलर',
-      tabLabelMr: 'रीसायकलर',
+      tabLabelMr: 'पुनर्वापरकर्ता',
       titleEn: 'Authorized Recycler',
-      titleHi: 'अधिकृत रीसायकलर',
-      titleMr: 'अधिकृत रीसायकलर',
-      subtitle: 'CPCB & State PCB registered facility portal. Receive collector lots, verify scale weight, confirm QR handovers, and export EPR compliance reports.',
-      subtitleHi: 'सीपीसीबी पंजीकृत संयंत्र पोर्टल। कबाड़ीवालों के लॉट प्राप्त करें, वजन सत्यापित करें, क्यूआर हस्तांतरण पुष्ट करें और ईपीआर रिपोर्ट निकालें।',
-      subtitleMr: 'सीपीसीबी नोंदणीकृत प्रकल्प पोर्टल. संग्राहकांचे लॉट स्वीकारा, वजन तपासा, क्यूआर हस्तांतरण निश्चित करा आणि ईपीआर अहवाल मिळवा.',
-      badge: 'RECYCLER PORTAL',
-      badgeHi: 'रीसायकलर पोर्टल',
-      badgeMr: 'रीसायकलर पोर्टल',
-      demoName: 'EcoRecycle Aggregators Ltd',
+      titleHi: 'अधिकृत पुनर्चक्रणकर्ता',
+      titleMr: 'अधिकृत पुनर्वापर केंद्र',
+      subtitle: 'B2B Procurement & EPR Settlement Engine. Bid on collector lots, calibrate weighbridge scale receipts, issue instant UPI payouts, and file CPCB Form-2.',
+      subtitleHi: 'बी2बी खरीद एवं ईपीआर निपटान इंजन। कबाड़ीवालों के लॉट पर बोली लगाएं, वेईब्रिज पैमाना कैलिब्रेट करें, यूपीआई भुगतान करें और सीपीसीबी फॉर्म-2 दाखिल करें।',
+      subtitleMr: 'बी२बी खरेदी व ईपीआर पूर्तता इंजिन. संग्राहक लॉट्सवर थेट बोली लावा, डिजिटल वजन पावती द्या आणि सीपीसीबी फॉर्म-२ भरा.',
+      badge: 'RECYCLER ENGINE',
+      badgeHi: 'रीसायकलर इंजन',
+      badgeMr: 'पुनर्वापर इंजिन',
+      demoName: 'EcoRecycle Aggregators',
       demoPhone: '9822200002',
-      defaultPhone: '9822200002',
+      defaultPhone: 'CPCB-EW-2023-DL-0881',
       icon: Factory,
       features: [
-        'Incoming collector lot requests review (Accept/Reject/Counter)',
-        'QR code scanner closing the formal traceability chain',
-        'Live rate-setting console broadcasting to collector boards',
-        'Statistical anomaly flags on abnormal weights/values',
-        'Exportable CPCB Form-2 & Form-6 regulatory filing reports'
+        'Live collector lot bidding room with multi-lot multi-round counter offers',
+        'Automated digital weighbridge intake & tolerance reconciliation',
+        'Instant UPI payout settlement & digital passbook debit',
+        'CPCB Form-2 / Form-6 automated regulatory filing generator',
+        'Audit-grade SHA-256 batch custody ledger export'
       ],
       featuresHi: [
-        'आने वाले लॉट अनुरोधों की समीक्षा (स्वीकार/अस्वीकार/काउंटर)',
-        'औपचारिक ट्रेसेबिलिटी श्रृंखला को पूर्ण करने वाला क्यूआर स्कैनर',
-        'कबाड़ीवालों के बोर्ड पर प्रसारित होने वाला लाइव दर निर्धारण कंसोल',
-        'असामान्य वजन या मूल्य पर सांख्यिकीय विसंगति अलर्ट',
-        'सीपीसीबी फॉर्म-2 एवं फॉर्म-6 विनियामक अनुपालन रिपोर्ट'
+        'काउंटर ऑफर के साथ लाइव कबाड़ीवाला लॉट बोली कक्ष',
+        'स्वचालित डिजिटल वेईब्रिज वजन मिलान प्रणाली',
+        'त्वरित यूपीआई भुगतान एवं डिजिटल पासबुक रिकॉर्ड',
+        'सीपीसीबी फॉर्म-2 / फॉर्म-6 स्वचालित विनियामक रिपोर्ट',
+        'ऑडिट-स्तरीय SHA-256 सामग्री मागोवा लेजर निर्यात'
       ],
       featuresMr: [
-        'येणाऱ्या लॉट विनंत्यांची तपासणी (स्वीकारा/नाकारा/काउंटर)',
-        'अधिकृत ट्रेसिबिलिटी साखळी पूर्ण करणारा क्यूआर स्कॅनर',
-        'संग्राहकांच्या फलकावर थेट दर प्रसारित करणारा कंसोल',
-        'असामान्य वजन किंवा मूल्यावर त्रुटी सूचना',
-        'सीपीसीबी फॉर्म-२ व फॉर्म-६ अधिकृत अहवाल'
+        'थेट कबाडीवाला लॉट लिलाव व बोली कक्ष',
+        'स्वयंचलित डिजिटल वजन मापन आणि जुळवणी',
+        'तात्काळ यूपीआय पेमेंट आणि डिजिटल पासबुक नोंद',
+        'सीपीसीबी फॉर्म-२ / फॉर्म-६ स्वयंचलित अहवाल',
+        'तपासणीयोग्य SHA-256 डिजिटल वही निर्यात'
       ],
-      voiceText: 'Authorized Recycler Portal. Intake electronic waste lots and close traceability loops.',
-      voiceHi: 'अधिकृत रीसायकलर पोर्टल। कबाड़ीवालों के लॉट स्वीकारें और ईपीआर रिपोर्ट निकालें।',
-      voiceMr: 'अधिकृत रीसायकलर पोर्टल. ई-कचरा लॉट स्वीकारा आणि ईपीआर अहवाल मिळवा.'
+      voiceText: 'Authorized Recycler Login. EcoRecycle Aggregators. B2B lot bidding and weighbridge settlement.',
+      voiceHi: 'रीसायकलर लॉगिन। इको-रीसायकल एग्रीगेटर्स। लॉट बोली और वेईब्रिज सेटलमेंट।',
+      voiceMr: 'अधिकृत पुनर्वापर केंद्र लॉगिन. लॉट बोली आणि वजन सेटलमेंट.'
     },
     ADMIN: {
-      tabLabelEn: 'Regulatory',
-      tabLabelHi: 'नियामक (ऑडिट)',
-      tabLabelMr: 'नियामक',
+      tabLabelEn: 'Admin / CPCB',
+      tabLabelHi: 'प्रशासन',
+      tabLabelMr: 'प्रशासन',
       titleEn: 'Regulatory & Audit',
       titleHi: 'प्रशासन एवं ऑडिट',
       titleMr: 'प्रशासन व तपासणी',
@@ -244,11 +273,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     const lookupKey = (r as LoginRole) in roleConfig ? (r as LoginRole) : 'CITIZEN';
     setPhone(roleConfig[lookupKey].defaultPhone);
     setError(null);
-    if (Capacitor.isNativePlatform()) {
-      try {
-        Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
-      } catch {}
-    }
+    triggerHaptic(15);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -257,6 +282,35 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     setLoading(true);
 
     try {
+      // First check local storage users
+      const users = storage.getUsers();
+      const matched = users.find(u => 
+        u.phone === phone || 
+        (selectedRole === 'RECYCLER' && u.recycler?.cpcbRegNumber === facilityReg)
+      );
+
+      if (matched) {
+        const storedPassword = storage.getUserPassword(matched.id);
+        // If password was set, enforce it. If not set yet (demo seeds), accept password123 or any PIN
+        if (storedPassword && storedPassword !== password) {
+          setError(
+            language === 'hi'
+              ? 'गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें या "पासवर्ड भूल गए" पर क्लिक करें।'
+              : language === 'mr'
+              ? 'चुकीचा पासवर्ड! कृपया योग्य पासवर्ड प्रविष्ट करा किंवा "पासवर्ड विसरलात" वर क्लिक करा.'
+              : 'Invalid password. Please check your credentials or click "Forgot Password".'
+          );
+          setLoading(false);
+          return;
+        }
+
+        storage.setCurrentUser(matched);
+        triggerHaptic(30);
+        onSuccess(matched.role);
+        return;
+      }
+
+      // If not in local users, attempt standard API login
       await login(phone, password);
       onSuccess(selectedRole);
     } catch (err: any) {
@@ -272,11 +326,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     setError(null);
     setLoading(true);
     try {
-      if (Capacitor.isNativePlatform()) {
-        try {
-          Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
-        } catch {}
-      }
+      triggerHaptic(30);
       await quickDemoLogin(selectedRole);
       onSuccess(selectedRole);
     } catch (err: any) {
@@ -286,11 +336,142 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
     }
   };
 
+  // Forgot Password Step 1: Search user and send OTP
+  const handleForgotStep1 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError(null);
+    const users = storage.getUsers();
+    const cleanPhone = forgotPhone.trim();
+
+    const matched = users.find(u => 
+      u.phone === cleanPhone || 
+      (u.role === 'RECYCLER' && u.recycler?.cpcbRegNumber === cleanPhone)
+    );
+
+    if (!matched && cleanPhone !== currentConfig.defaultPhone) {
+      setForgotError(
+        language === 'hi'
+          ? 'इस नंबर से कोई पंजीकृत खाता नहीं मिला।'
+          : language === 'mr'
+          ? 'या नंबरसह कोणतेही खाते आढळले नाही.'
+          : 'No registered account found with this phone number.'
+      );
+      return;
+    }
+
+    setTargetResetUser(matched || {
+      id: `user-${Date.now()}`,
+      name: currentConfig.demoName,
+      phone: cleanPhone,
+      role: selectedRole,
+      kycStatus: 'VERIFIED'
+    });
+
+    triggerHaptic(20);
+    setForgotStep(2);
+    setForgotOtp('1234'); // Pre-fill 1234 for seamless testing
+    setForgotSuccess(
+      language === 'hi'
+        ? `सत्यापन कोड ${cleanPhone} पर भेजा गया। (परीक्षण हेतु OTP: 1234)`
+        : language === 'mr'
+        ? `पडताळणी कोड ${cleanPhone} वर पाठवला. (चाचणी OTP: 1234)`
+        : `Verification code sent to +91 ${cleanPhone}. (Testing OTP: 1234)`
+    );
+  };
+
+  // Forgot Password Step 2: Verify OTP
+  const handleForgotStep2 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError(null);
+    if (forgotOtp.trim() !== '1234') {
+      setForgotError(
+        language === 'hi' ? 'गलत OTP! कृपया 1234 दर्ज करें।' : 'Invalid OTP. Please enter 1234.'
+      );
+      return;
+    }
+
+    triggerHaptic(20);
+    setForgotStep(3);
+    setForgotSuccess(null);
+  };
+
+  // Forgot Password Step 3: Set New Password (typed two times)
+  const handleForgotStep3 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError(null);
+
+    if (forgotNewPassword.length < 4) {
+      setForgotError(
+        language === 'hi'
+          ? 'पासवर्ड कम से कम 4 अक्षरों का होना चाहिए।'
+          : language === 'mr'
+          ? 'पासवर्ड किमान 4 अक्षरांचा असावा.'
+          : 'Password must be at least 4 characters long.'
+      );
+      return;
+    }
+
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      setForgotError(
+        language === 'hi'
+          ? 'दोनों पासवर्ड मेल नहीं खाते!'
+          : language === 'mr'
+          ? 'दोन्ही पासवर्ड जुळत नाहीत!'
+          : 'Passwords do not match!'
+      );
+      return;
+    }
+
+    if (targetResetUser) {
+      storage.setUserPassword(targetResetUser.id, forgotNewPassword);
+      storage.setCurrentUser(targetResetUser);
+      triggerHaptic(35);
+      setShowForgotModal(false);
+      onSuccess(targetResetUser.role);
+    } else {
+      setShowForgotModal(false);
+    }
+  };
+
   const rolesList: LoginRole[] = ['CITIZEN', 'KABADIWALA', 'RECYCLER', 'ADMIN'];
 
   return (
-    <div className="min-h-[82vh] py-3 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-4xl mx-auto flex flex-col justify-center">
+    <div className="min-h-[85vh] py-3 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-4xl mx-auto flex flex-col justify-center">
       
+      {/* Top Header Navigation (Back Button & Language Switcher) */}
+      <div className="flex items-center justify-between w-full mb-3 sm:mb-4">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic(15);
+              onBack();
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>{language === 'hi' ? 'वापस' : language === 'mr' ? 'मागे' : 'Back'}</span>
+          </button>
+        ) : <div />}
+
+        {onChangeLanguage && (
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic(15);
+              onChangeLanguage();
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all"
+          >
+            <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>{language === 'hi' ? 'हिन्दी' : language === 'mr' ? 'मराठी' : 'English'}</span>
+            <span className="text-[10px] text-slate-400 font-normal underline">
+              {language === 'hi' ? 'बदलें' : language === 'mr' ? 'बदला' : 'Change'}
+            </span>
+          </button>
+        )}
+      </div>
+
       {/* App Branding & Welcome Header */}
       <div className="text-center space-y-2 mb-4 sm:mb-6">
         <div 
@@ -307,24 +488,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium max-w-md mx-auto">
           {t('loginSubtitleApp', 'Smart Informal Waste & EPR Traceability Platform. Select your portal to continue.')}
         </p>
-        {onChangeLanguage && (
-          <div className="pt-1">
-            <button
-              type="button"
-              onClick={onChangeLanguage}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-xs font-semibold shadow-2xs transition-transform active:scale-95"
-            >
-              <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>
-                {language === 'hi'
-                  ? 'भाषा: हिन्दी (बदलें)'
-                  : language === 'mr'
-                  ? 'भाषा: मराठी (बदला)'
-                  : 'Language: English (Change)'}
-              </span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* M3 Segmented Role Selector Tabs */}
@@ -422,11 +585,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
             <span className="px-3 text-[11px] uppercase text-slate-400 font-semibold tracking-wider">
               {t('orCredentials', 'Or Login with Phone & PIN')}
             </span>
-            <div className="flex-1 border-t border-slate-200"></div>
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
           </div>
 
           {error && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs sm:text-sm font-semibold">
+            <div className="p-3.5 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-2xl text-rose-800 dark:text-rose-300 text-xs sm:text-sm font-semibold animate-shake">
               {error}
             </div>
           )}
@@ -446,7 +609,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
                     value={facilityReg}
                     onChange={e => setFacilityReg(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none transition-all shadow-sm"
-                    style={{ '--tw-ring-color': 'var(--color-primary)' } as any}
                   />
                 </div>
               </div>
@@ -463,16 +625,30 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none transition-all shadow-sm"
-                    style={{ '--tw-ring-color': 'var(--color-primary)' } as any}
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">
-                {t('password', 'Security PIN / Password')}
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                  {t('password', 'Security PIN / Password')}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotPhone(phone);
+                    setForgotStep(1);
+                    setForgotError(null);
+                    setForgotSuccess(null);
+                    setShowForgotModal(true);
+                  }}
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  {language === 'hi' ? 'पासवर्ड भूल गए?' : language === 'mr' ? 'पासवर्ड विसरलात?' : 'Forgot Password?'}
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
@@ -481,7 +657,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none transition-all shadow-sm"
-                  style={{ '--tw-ring-color': 'var(--color-primary)' } as any}
                 />
               </div>
             </div>
@@ -496,8 +671,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
             </button>
           </form>
 
+          {/* Go to Sign Up Section */}
+          {onGoToSignUp && (
+            <div className="pt-2 text-center border-t border-slate-100 dark:border-slate-800">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                {language === 'hi'
+                  ? 'खाता नहीं है? '
+                  : language === 'mr'
+                  ? 'खाते नाही आहे? '
+                  : "Don't have an account? "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(20);
+                    onGoToSignUp();
+                  }}
+                  className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>
+                    {language === 'hi'
+                      ? 'नया खाता बनाएं (केवाईसी सहित)'
+                      : language === 'mr'
+                      ? 'नवीन खाते तयार करा (केवायसीसह)'
+                      : 'Sign Up with KYC'}
+                  </span>
+                </button>
+              </p>
+            </div>
+          )}
+
           {/* Collapsible / Clean Portal Capabilities */}
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="pt-1">
             <button
               type="button"
               onClick={() => setShowFeatures(!showFeatures)}
@@ -539,6 +744,181 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSuccess, onChangeLanguag
         </div>
 
       </div>
+
+      {/* FORGOT PASSWORD MODAL */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5 relative animate-scale-up">
+            <button
+              onClick={() => setShowForgotModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-display font-black text-slate-900 dark:text-white">
+                  {language === 'hi' ? 'पासवर्ड रीसेट करें' : language === 'mr' ? 'पासवर्ड रीसेट करा' : 'Reset Password'}
+                </h3>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  Step {forgotStep} of 3
+                </span>
+              </div>
+            </div>
+
+            {forgotError && (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-xl text-rose-800 dark:text-rose-300 text-xs font-semibold">
+                {forgotError}
+              </div>
+            )}
+
+            {forgotSuccess && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
+                {forgotSuccess}
+              </div>
+            )}
+
+            {/* STEP 1: Enter Phone */}
+            {forgotStep === 1 && (
+              <form onSubmit={handleForgotStep1} className="space-y-4">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {language === 'hi'
+                    ? 'कृपया अपना पंजीकृत मोबाइल नंबर दर्ज करें। हम आपको सत्यापन कोड भेजेंगे।'
+                    : language === 'mr'
+                    ? 'कृपया तुमचा नोंदणीकृत मोबाईल नंबर प्रविष्ट करा. आम्ही तुम्हाला पडताळणी कोड पाठवू.'
+                    : 'Enter your registered mobile phone number. We will send a verification OTP.'}
+                </p>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Mobile Number
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                    <input
+                      type="tel"
+                      required
+                      value={forgotPhone}
+                      onChange={e => setForgotPhone(e.target.value)}
+                      placeholder="e.g. 9811100001"
+                      className="w-full pl-10 pr-4 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-all active:scale-98"
+                >
+                  Send Verification Code
+                </button>
+              </form>
+            )}
+
+            {/* STEP 2: Enter OTP */}
+            {forgotStep === 2 && (
+              <form onSubmit={handleForgotStep2} className="space-y-4">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Enter the 4-digit code sent to +91 {forgotPhone}. For this demo, use <strong className="text-emerald-600">1234</strong>.
+                </p>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Verification OTP
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={forgotOtp}
+                    onChange={e => setForgotOtp(e.target.value)}
+                    placeholder="1234"
+                    className="w-full text-center tracking-widest text-lg font-black py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-all active:scale-98"
+                >
+                  Verify Code
+                </button>
+              </form>
+            )}
+
+            {/* STEP 3: Enter New Password (typed two times) */}
+            {forgotStep === 3 && (
+              <form onSubmit={handleForgotStep3} className="space-y-4">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Create a new secure password. You must type it twice to confirm.
+                </p>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showForgotPw1 ? 'text' : 'password'}
+                      required
+                      value={forgotNewPassword}
+                      onChange={e => setForgotNewPassword(e.target.value)}
+                      placeholder="Minimum 4 characters"
+                      className="w-full px-4 pr-10 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPw1(!showForgotPw1)}
+                      className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                    >
+                      {showForgotPw1 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showForgotPw2 ? 'text' : 'password'}
+                      required
+                      value={forgotConfirmPassword}
+                      onChange={e => setForgotConfirmPassword(e.target.value)}
+                      placeholder="Type password again"
+                      className="w-full px-4 pr-10 py-2.5 text-sm font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPw2(!showForgotPw2)}
+                      className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                    >
+                      {showForgotPw2 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {forgotConfirmPassword && forgotNewPassword === forgotConfirmPassword && (
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Passwords match!
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-all active:scale-98"
+                >
+                  Save New Password & Sign In
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

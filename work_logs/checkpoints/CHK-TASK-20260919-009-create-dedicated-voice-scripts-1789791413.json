@@ -1,0 +1,15 @@
+{
+  "checkpoint_id": "CHK-TASK-20260919-009-create-dedicated-voice-scripts-1789791413",
+  "task_id": "TASK-20260919-009-create-dedicated-voice-scripts",
+  "timestamp": "2026-09-19T04:16:53Z",
+  "agent_id": "Antigravity",
+  "status": "IN_PROGRESS",
+  "current_step": "Completed voice_scripts management framework with catalog sync and development safety locks",
+  "next_step": "Complete task and release locks",
+  "notes": "Zero voice regeneration policy strictly enforced. 45 scripts validated across hi, mr, en. TypeScript clean.",
+  "dirty_files": [
+    "voice_scripts/manage_scripts.py",
+    "apps/web/src/lib/sarvamVoiceService.ts",
+    "apps/web/src/lib/sarvamAudioCatalog.ts"
+  ]
+}

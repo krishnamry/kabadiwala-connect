@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KycInfo } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
@@ -14,7 +14,8 @@ import {
   BadgeCheck,
   Lock,
   ArrowRight,
-  UserCheck
+  UserCheck,
+  RefreshCw
 } from 'lucide-react';
 
 interface CollectorKycCardProps {
@@ -30,10 +31,16 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
 }) => {
   const { language, t, formatCurrency } = useLanguage();
   const [docType, setDocType] = useState('Aadhaar Card');
-  const [docNumber, setDocNumber] = useState('');
-  const [remarks, setRemarks] = useState('');
+  const [docNumber, setDocNumber] = useState(kycInfo?.kycDocuments?.documentNumber || '');
+  const [remarks, setRemarks] = useState(kycInfo?.kycDocuments?.remarks || '');
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (kycInfo?.kycDocuments?.documentNumber && !docNumber) {
+      setDocNumber(kycInfo.kycDocuments.documentNumber);
+    }
+  }, [kycInfo?.kycDocuments?.documentNumber]);
 
   const status = kycInfo?.kycStatus || 'UNVERIFIED';
 
@@ -41,7 +48,7 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
     e.preventDefault();
     if (!docNumber.trim()) return;
     setSubmitting(true);
-    triggerHaptic();
+    triggerHaptic(20);
     try {
       await onSubmitKyc({
         documentType: docType,
@@ -49,7 +56,11 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
         remarks
       });
       hapticSuccess();
-      setSuccessMsg(language === 'hi' ? 'दस्तावेज़ जमा हो गए हैं! नियामक द्वारा जांच जारी है।' : 'Documents submitted for Regulatory approval!');
+      setSuccessMsg(
+        status === 'REJECTED'
+          ? (language === 'hi' ? 'संशोधित दस्तावेज़ पुनः जमा हो गए हैं! सीपीसीबी सेल द्वारा समीक्षा जारी है।' : 'Corrected documents re-submitted for Regulatory review!')
+          : (language === 'hi' ? 'दस्तावेज़ जमा हो गए हैं! नियामक द्वारा जांच जारी है।' : 'Documents submitted for Regulatory approval!')
+      );
       onRefresh();
     } catch (err: any) {
       console.warn('KYC submit error:', err);
@@ -83,6 +94,8 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
           </div>
 
           <VoiceAssistButton
+            audioKey="kyc_walkthrough"
+            label={language === 'hi' ? 'केवाईसी निर्देश सुनें' : language === 'mr' ? 'केवायसी मार्गदर्शक ऐका' : 'Listen KYC Guide'}
             text={voiceScripts.en}
             hindiText={voiceScripts.hi}
             marathiText={voiceScripts.mr}
@@ -97,14 +110,28 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
                 ? 'bg-emerald-500 text-white'
                 : status === 'UNDER_REVIEW'
                 ? 'bg-amber-500 text-white'
+                : status === 'REJECTED'
+                ? 'bg-rose-500 text-white'
                 : 'bg-slate-700 text-slate-300'
             }`}>
-              {status === 'VERIFIED' ? <ShieldCheck className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+              {status === 'VERIFIED' ? (
+                <ShieldCheck className="w-6 h-6" />
+              ) : status === 'REJECTED' ? (
+                <AlertTriangle className="w-6 h-6" />
+              ) : (
+                <Clock className="w-6 h-6" />
+              )}
             </div>
             <div>
               <span className="text-[11px] text-blue-300 font-medium block uppercase tracking-wider">Verification Status</span>
               <span className="text-base font-bold">
-                {status === 'VERIFIED' ? '✓ CPCB Tier-2 Verified Collector' : status === 'UNDER_REVIEW' ? '⏳ Under Review by Municipal NDMC' : '⚠ Tier-1 Unverified (Limited Limits)'}
+                {status === 'VERIFIED'
+                  ? '✓ CPCB Tier-2 Verified Collector'
+                  : status === 'UNDER_REVIEW'
+                  ? '⏳ Under Review by Municipal NDMC'
+                  : status === 'REJECTED'
+                  ? '❌ KYC Rejected — Re-Application Required'
+                  : '⚠ Tier-1 Unverified (Limited Limits)'}
               </span>
             </div>
           </div>
@@ -120,11 +147,33 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
         </div>
       </div>
 
+      {/* Rejection Alert Box */}
+      {status === 'REJECTED' && (
+        <div className="p-4 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-2 animate-fade-in shadow-sm">
+          <div className="flex items-center gap-2 text-rose-700 dark:text-rose-300 font-bold text-xs uppercase tracking-wider">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>
+              {language === 'hi' ? 'सीपीसीबी नियामक अस्वीकृति का कारण:' : language === 'mr' ? 'नियामक नाकारण्याचे कारण:' : 'CPCB Regulatory Rejection Reason:'}
+            </span>
+          </div>
+          <p className="font-semibold text-rose-950 dark:text-rose-100 text-xs sm:text-sm pl-6 leading-relaxed">
+            "{kycInfo?.kycDocuments?.rejectionReason || 'Document details were unclear or unverified.'}"
+          </p>
+          <p className="text-[11px] text-rose-700/90 dark:text-rose-300/80 pl-6">
+            {language === 'hi'
+              ? 'कृपया नीचे दिए गए फॉर्म में पहचान संख्या या दस्तावेज़ सुधारें और पुनः अनुमोदन के लिए जमा करें।'
+              : language === 'mr'
+              ? 'कृपया खालील फॉर्ममध्ये ओळख क्रमांक किंवा कागदपत्रे दुरुस्त करा आणि पुन्हा मंजुरीसाठी सादर करा.'
+              : 'Please review the reason above, update your document number or yard details in the form below, and re-apply for CPCB approval.'}
+          </p>
+        </div>
+      )}
+
       {/* Tier Comparison Matrix */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Tier 1 Box */}
         <div className={`rounded-3xl p-5 border transition-all ${
-          status === 'UNVERIFIED'
+          status === 'UNVERIFIED' || status === 'REJECTED'
             ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800/80 shadow-sm'
             : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 opacity-80'
         }`}>
@@ -179,15 +228,23 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
       {status !== 'VERIFIED' && (
         <div className="bg-white dark:bg-[#151f32] rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 flex items-center justify-center">
-              <Upload className="w-5 h-5" />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              status === 'REJECTED'
+                ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'
+                : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
+            }`}>
+              {status === 'REJECTED' ? <RefreshCw className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {t('submitKycHeader', 'Submit Verification Documents')}
+                {status === 'REJECTED'
+                  ? (language === 'hi' ? 'केवाईसी पुनः आवेदन / दस्तावेज़ सुधार' : 'Re-Apply for KYC / Correct Details')
+                  : t('submitKycHeader', 'Submit Verification Documents')}
               </h3>
               <p className="text-xs text-slate-500">
-                {t('submitKycSub', 'Aadhaar / Driving License / Municipal Waste License')}
+                {status === 'REJECTED'
+                  ? (language === 'hi' ? 'संशोधित पहचान संख्या दर्ज करें और सीपीसीबी को पुनः भेजें' : 'Enter corrected identity number and resubmit for CPCB approval')
+                  : t('submitKycSub', 'Aadhaar / Driving License / Municipal Waste License')}
               </p>
             </div>
           </div>
@@ -238,7 +295,11 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
               </label>
               <input
                 type="text"
-                placeholder="e.g. Operating primarily in Mayapuri and Lajpat Nagar clusters"
+                placeholder={
+                  status === 'REJECTED'
+                    ? 'e.g. Re-submitting with corrected Aadhaar number and updated yard details'
+                    : 'e.g. Operating primarily in Mayapuri and Lajpat Nagar clusters'
+                }
                 value={remarks}
                 onChange={e => setRemarks(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm"
@@ -248,10 +309,20 @@ export const CollectorKycCard: React.FC<CollectorKycCardProps> = ({
             <button
               type="submit"
               disabled={submitting || !docNumber.trim()}
-              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
+              className={`w-full sm:w-auto px-6 py-3 rounded-2xl text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 ${
+                status === 'REJECTED'
+                  ? 'bg-rose-600 hover:bg-rose-700'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              <UserCheck className="w-4 h-4" />
-              <span>{submitting ? 'Submitting to NDMC...' : 'Submit for CPCB Approval'}</span>
+              {status === 'REJECTED' ? <RefreshCw className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+              <span>
+                {submitting
+                  ? (language === 'hi' ? 'जमा हो रहा है...' : 'Submitting to NDMC...')
+                  : status === 'REJECTED'
+                  ? (language === 'hi' ? 'सुधार पुनः जमा करें (Re-Submit)' : 'Re-Submit for CPCB Approval')
+                  : 'Submit for CPCB Approval'}
+              </span>
             </button>
           </form>
         </div>

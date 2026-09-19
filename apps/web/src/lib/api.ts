@@ -629,33 +629,80 @@ export const api = {
   },
 
   // --- Contextual Chat & Voice Notes ---
-  getChatMessages: async (contextType: 'LOT' | 'PICKUP', contextId: string): Promise<ChatMessage[]> => {
+  getChatMessages: async (contextType: 'LOT' | 'PICKUP', contextId: string, partnerId?: string): Promise<ChatMessage[]> => {
     try {
-      return await request<ChatMessage[]>(`/chat/${contextType}/${contextId}`);
-    } catch {
-      return [];
-    }
+      const serverMsgs = await request<ChatMessage[]>(`/chat/${contextType}/${contextId}`);
+      if (serverMsgs && serverMsgs.length > 0) return serverMsgs;
+    } catch {}
+    return storage.getChatMessages(contextType, contextId, partnerId);
   },
 
   sendChatMessage: async (payload: {
     contextType: 'LOT' | 'PICKUP';
     contextId: string;
+    contextTitle?: string;
+    senderId?: string;
+    senderName?: string;
+    senderRole?: string;
+    receiverId?: string;
+    receiverName?: string;
+    receiverRole?: string;
     text?: string;
     audioUrl?: string;
     imageUrl?: string;
   }): Promise<ChatMessage> => {
-    return request<ChatMessage>('/chat', {
-      method: 'POST',
-      body: JSON.stringify(payload)
+    const currentUser = storage.getCurrentUser();
+    const senderId = payload.senderId || currentUser?.id || 'anonymous';
+    const senderName = payload.senderName || currentUser?.name || 'User';
+    const senderRole = payload.senderRole || currentUser?.role || 'CITIZEN';
+
+    try {
+      const msg = await request<ChatMessage>('/chat/message', {
+        method: 'POST',
+        body: JSON.stringify({
+          receiverId: payload.receiverId || 'other',
+          contextType: payload.contextType,
+          contextId: payload.contextId,
+          text: payload.text,
+          audioUrl: payload.audioUrl,
+          imageUrl: payload.imageUrl
+        })
+      });
+      if (msg) {
+        storage.sendChatMessage({
+          ...msg,
+          senderName: msg.senderName || senderName,
+          senderRole: msg.senderRole || senderRole,
+          receiverName: payload.receiverName,
+          receiverRole: payload.receiverRole,
+          contextTitle: payload.contextTitle
+        });
+        return msg;
+      }
+    } catch {}
+
+    return storage.sendChatMessage({
+      senderId,
+      senderName,
+      senderRole,
+      receiverId: payload.receiverId,
+      receiverName: payload.receiverName,
+      receiverRole: payload.receiverRole,
+      contextType: payload.contextType,
+      contextId: payload.contextId,
+      contextTitle: payload.contextTitle,
+      text: payload.text,
+      audioUrl: payload.audioUrl,
+      imageUrl: payload.imageUrl
     });
   },
 
-  markChatRead: async (contextType: 'LOT' | 'PICKUP', contextId: string): Promise<{ success: boolean }> => {
+  markChatRead: async (contextType: 'LOT' | 'PICKUP', contextId: string, currentUserId?: string, partnerId?: string): Promise<{ success: boolean }> => {
+    storage.markChatRead(contextType, contextId, currentUserId, partnerId);
     try {
-      return await request<{ success: boolean }>(`/chat/read/${contextType}/${contextId}`, { method: 'POST' });
-    } catch {
-      return { success: true };
-    }
+      await request<{ success: boolean }>(`/chat/read/${contextType}/${contextId}`, { method: 'POST' });
+    } catch {}
+    return { success: true };
   },
 
   // --- KYC & Verification ---

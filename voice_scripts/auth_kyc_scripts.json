@@ -1,0 +1,38 @@
+{
+  "auth_language_select": {
+    "description": "Language selection prompt during initial app onboarding",
+    "hi": "अपनी पसंदीदा भाषा चुनें: हिंदी, मराठी या अंग्रेजी। आप इसे बाद में कभी भी बदल सकते हैं।",
+    "mr": "आपली आवडती भाषा निवडा: मराठी, हिंदी किंवा इंग्रजी. आपण हे नंतर कधीही बदलू शकता.",
+    "en": "Select your preferred language: English, Hindi, or Marathi. You can change this anytime from settings."
+  },
+  "auth_phone_login": {
+    "description": "Mobile number entry guidance on login/signup",
+    "hi": "अपना 10 अंकों का मोबाइल नंबर दर्ज करें और नीचे दिए गए हरे बटन 'ओटीपी प्राप्त करें' पर टैप करें।",
+    "mr": "आपला 10-अंकी मोबाईल नंबर प्रविष्ट करा आणि खालील हिरव्या बटनावर 'ओटीपी मिळवा' टॅप करा.",
+    "en": "Enter your 10-digit mobile number and tap the green 'Get OTP' button below to continue."
+  },
+  "auth_otp_verify": {
+    "description": "SMS OTP code entry guidance",
+    "hi": "आपके मोबाइल पर 4 अंकों का गुप्त कोड भेजा गया है। कोड दर्ज करके 'सत्यापित करें' दबाएं।",
+    "mr": "आपल्या मोबाईलवर 4-अंकी गुप्त कोड पाठवला आहे. कोड प्रविष्ट करून 'पडताळणी करा' दाबा.",
+    "en": "A 4-digit verification code has been sent to your phone. Enter the code and tap 'Verify'."
+  },
+  "kyc_upload_guidance": {
+    "description": "Aadhaar / Government ID photo capture guidance",
+    "hi": "अपने आधार कार्ड को समतल जगह पर रखें। नीले कैमरा बटन पर दबाकर साफ फोटो लें ताकि नाम और 12 अंक साफ दिखाई दें।",
+    "mr": "आपले आधार कार्ड सपाट जागी ठेवा. निळ्या कॅमेरा बटनावर दाबून स्पष्ट फोटो घ्या जेणेकरून नाव आणि 12 अंक स्पष्ट दिसतील.",
+    "en": "Place your Aadhaar card on a flat surface. Tap the blue camera button to take a clear photo ensuring your name and 12-digit number are legible."
+  },
+  "kyc_rejected_reapply": {
+    "description": "Guidance when KYC document is rejected, instructing re-upload",
+    "hi": "आपके दस्तावेज की फोटो धुंधली होने के कारण सत्यापन अस्वीकृत हुआ है। कृपया अच्छी रोशनी में आधार की नई साफ फोटो खींचकर पुनः जमा करें।",
+    "mr": "दस्तावेजाचा फोटो अस्पष्ट असल्याने पडताळणी नाकारली गेली आहे. कृपया चांगल्या प्रकाशात आधारचा नवीन स्पष्ट फोटो काढून पुन्हा सबमिट करा.",
+    "en": "Your KYC was rejected due to an unclear image. Please capture a clear photo of your Aadhaar in bright light and re-submit."
+  },
+  "kyc_verified_celebration": {
+    "description": "Celebration announcement when government CPCB KYC is approved",
+    "hi": "बधाई हो! आपका आधार सत्यापन पूरा हो गया है। आपको सरकारी सीपीसीबी का हरा बैज मिला है और आपकी दैनिक सीमा 50,000 रुपये हो गई है।",
+    "mr": "अभिनंदन! आपली आधार पडताळणी पूर्ण झाली आहे. आपल्याला अधिकृत सीपीसीबीचा हिरवा बॅज मिळाला असून आपली दैनिक मर्यादा 50,000 झाली आहे.",
+    "en": "Congratulations! Your Aadhaar KYC is verified. You have earned the certified CPCB Green Badge and your daily trading limit is raised to 50,000 Rupees."
+  }
+}

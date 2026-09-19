@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../lib/api';
 import { storage, STORAGE_KEYS, PassbookTxn } from '../../lib/storage';
-import { Pickup, ScrapItem, EWasteLot, EWasteLotItem, LotBid, SafetyGuidanceCard, ScrapRate, MLClassificationResult, KycInfo, SaleToken } from '../../types';
+import { Pickup, ScrapItem, EWasteLot, EWasteLotItem, LotBid, SafetyGuidanceCard, ScrapRate, MLClassificationResult, KycInfo, SaleToken, ChatPartner } from '../../types';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
 import { LeafletMap } from '../../components/LeafletMap';
 import { VoiceAssistButton } from '../../components/VoiceAssistButton';
@@ -12,6 +12,10 @@ import { LiveBiddingRoom } from './LiveBiddingRoom';
 import { CollectorKycCard } from './CollectorKycCard';
 import { RatingModal } from './RatingModal';
 import { ChatDrawer } from './ChatDrawer';
+import { ChatPartnerSelectorModal } from '../../components/ChatPartnerSelectorModal';
+import { KycStatusBanner } from '../../components/KycStatusBanner';
+import { KycLockedModal } from '../../components/KycLockedModal';
+import { KycVerifiedModal } from '../../components/KycVerifiedModal';
 import {
   Truck,
   Gavel,
@@ -132,7 +136,7 @@ export const SCRAP_HUB_PRESETS: ScrapHubPreset[] = [
 ];
 
 export const KabadiwalaDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { language, t, formatCurrency, speak, preserveEnglishItemName } = useLanguage();
   
   // Active Tab: lots | bids | priceboard | recyclers | handover | passbook | kyc | safety | pickups
@@ -142,13 +146,84 @@ export const KabadiwalaDashboard: React.FC = () => {
   const [kycInfo, setKycInfo] = useState<KycInfo | null>(null);
 
   // Contextual Chat State
+  const [activePartnerSelector, setActivePartnerSelector] = useState<{
+    contextType: 'LOT' | 'PICKUP';
+    contextId: string;
+    title: string;
+    partners: ChatPartner[];
+    lot?: EWasteLot;
+    pickup?: Pickup;
+  } | null>(null);
+
   const [activeChatContext, setActiveChatContext] = useState<{
     type: 'LOT' | 'PICKUP';
     id: string;
     title: string;
+    partnerId?: string;
     partnerName: string;
     partnerRole?: string;
+    partnerPhone?: string;
+    lot?: EWasteLot;
+    pickup?: Pickup;
   } | null>(null);
+
+  const openLotChat = (lot: EWasteLot) => {
+    triggerHaptic(15);
+    const partners = storage.getChatPartnersForContext('LOT', lot.id, user?.id);
+    const defaultRecyclerName = lot.recyclerName || lot.bids?.[0]?.recyclerName;
+    const defaultRecycler = defaultRecyclerName ? {
+      id: lot.recyclerId || lot.bids?.[0]?.recyclerId || 'mock-recycler-1',
+      name: defaultRecyclerName,
+      role: 'RECYCLER' as const
+    } : {
+      id: 'mock-recycler-1',
+      name: 'EcoRecycle Aggregators Ltd',
+      role: 'RECYCLER' as const
+    };
+
+    if (partners.length > 1 || (partners.length === 0 && defaultRecycler)) {
+      setActivePartnerSelector({
+        contextType: 'LOT',
+        contextId: lot.id,
+        title: `${lot.category} (${lot.approxWeightKg}kg)`,
+        partners,
+        lot
+      });
+    } else if (partners.length === 1) {
+      const p = partners[0];
+      setActiveChatContext({
+        type: 'LOT',
+        id: lot.id,
+        title: `${lot.category} (${lot.approxWeightKg}kg)`,
+        partnerId: p.id,
+        partnerName: p.name,
+        partnerRole: p.role,
+        lot
+      });
+    } else {
+      setActivePartnerSelector({
+        contextType: 'LOT',
+        contextId: lot.id,
+        title: `${lot.category} (${lot.approxWeightKg}kg)`,
+        partners: [],
+        lot
+      });
+    }
+  };
+
+  const openCollectorPickupChat = (pickup: Pickup) => {
+    triggerHaptic(15);
+    setActiveChatContext({
+      type: 'PICKUP',
+      id: pickup.id,
+      title: `Pickup: ${pickup.address.slice(0, 24)}...`,
+      partnerId: pickup.citizen?.id || pickup.citizenId,
+      partnerName: pickup.citizen?.name || 'Citizen',
+      partnerRole: 'CITIZEN',
+      partnerPhone: pickup.citizen?.phone,
+      pickup
+    });
+  };
 
   // Rating Modal State
   const [ratingModalData, setRatingModalData] = useState<{
@@ -164,6 +239,7 @@ export const KabadiwalaDashboard: React.FC = () => {
   const [myLots, setMyLots] = useState<EWasteLot[]>(() => storage.getMyLots(user?.id));
   const [createdLotModal, setCreatedLotModal] = useState<EWasteLot | null>(null);
   const [lotFilter, setLotFilter] = useState<'ALL' | 'AVAILABLE' | 'BIDDING' | 'HANDOVER_PENDING' | 'CONFIRMED'>('ALL');
+  const [showKycLockModal, setShowKycLockModal] = useState<boolean>(false);
 
   // Offline Mode State
   const [isOffline, setIsOffline] = useState<boolean>(() => {
@@ -259,6 +335,135 @@ export const KabadiwalaDashboard: React.FC = () => {
     trend: (r.weeklyDelta ?? 0) > 0 ? 'UP' : (r.weeklyDelta ?? 0) < 0 ? 'DOWN' : 'STABLE',
     desc: r.description
   }));
+
+  const getMandiAudioKey = (category: string): string | undefined => {
+    const cat = category.toLowerCase();
+    if (cat.includes('copper')) return 'mandi_copper';
+    if (cat.includes('pcb') || cat.includes('circuit')) return 'mandi_pcb';
+    if (cat.includes('crt') || cat.includes('glass')) return 'mandi_crt';
+    if (cat.includes('aluminium') || cat.includes('aluminum')) return 'mandi_aluminium';
+    if (cat.includes('iron') || cat.includes('steel')) return 'mandi_iron';
+    if (cat.includes('battery') || cat.includes('batteries') || cat.includes('lithium')) return 'mandi_battery';
+    if (cat.includes('mobile') || cat.includes('smartphone') || cat.includes('phone')) return 'mandi_mobile';
+    if (cat.includes('laptop') || cat.includes('computer')) return 'mandi_laptop';
+    return undefined;
+  };
+
+  const getMobileCopilotConfig = () => {
+    switch (activeTab) {
+      case 'lots':
+        if (lotsSubView === 'mylots') {
+          return {
+            key: 'mylots_walkthrough',
+            labelHi: 'लॉट सूची निर्देश',
+            labelMr: 'लॉट यादी मार्गदर्शक',
+            labelEn: 'Lot Guide',
+            text: 'Here are all your created scrap lots. Lots that have received recycler bids show a highlighted indicator. Tap on any lot to view offers.',
+            hindiText: 'यहाँ आपके बनाए गए सभी कबाड़ लॉट दिख रहे हैं। जिस लॉट पर रिसाइकलर ने बोली लगाई है, उस पर पीला निशान दिखेगा। बोली देखने के लिए उस लॉट पर टैप करें।',
+            marathiText: 'येथे आपले तयार केलेले सर्व भंगार लॉट दिसत आहेत. ज्या लॉटवर कारखान्याने बोली लावली आहे, त्यावर पिवळा निशाण दिसेल. बोली पाहण्यासाठी त्या लॉटवर टॅप करा.'
+          };
+        }
+        return {
+          key: 'lot_creation_walkthrough',
+          labelHi: 'नया लॉट कैसे बनाएं',
+          labelMr: 'नवीन लॉट कसा बनवावा',
+          labelEn: 'Create Lot Guide',
+          text: 'Creating a lot takes 3 simple steps: First, tap the blue camera button to photograph scrap. Second, set the scale weight using the plus and minus buttons. Third, pick your nearby scrap hub and tap the green Submit Lot button at the bottom.',
+          hindiText: "नया लॉट बनाने के तीन आसान कदम हैं: पहला, नीचे नीले कैमरा बटन को दबाकर कबाड़ की साफ फोटो लें। दूसरा, कांटे पर वजन तौलकर प्लस और माइनस बटन से वजन सेट करें। तीसरा, अपनी नजदीकी मंडी चुनकर सबसे नीचे हरा बटन 'लॉट जमा करें' दबाएं।",
+          marathiText: "नवीन लॉट तयार करण्याचे तीन सोपे टप्पे आहेत: पहिला, खालील निळ्या कॅमेरा बटनावर दाबून भंगाराचा स्पष्ट फोटो घ्या. दुसरा, काट्यावरील वजन पाहून प्लस आणि मायनस बटनाने वजन सेट करा. तिसरा, जवळची बाजारपेठ निवडून सर्वात खालील हिरवे बटन 'लॉट जमा करा' दाबा."
+        };
+      case 'bids':
+        return {
+          key: 'bids_walkthrough',
+          labelHi: 'लाइव बोली निर्देश',
+          labelMr: 'थेट लिलाव मार्गदर्शक',
+          labelEn: 'Bidding Guide',
+          text: 'Here are active recycler bids. The highest paying recycler is at the top. Tap the green Accept Bid button beside their offer to confirm the sale.',
+          hindiText: 'यहाँ रिसाइकलर्स द्वारा लगाई गई लाइव बोलियाँ हैं। सबसे अधिक दाम देने वाले रिसाइकलर का प्रस्ताव सबसे ऊपर दिखेगा। बिक्री पक्की करने के लिए हरे बटन पर टैप करें।',
+          marathiText: 'येथे कारखान्यांनी लावलेल्या थेट बोली आहेत. सर्वाधिक दर देणारा खरेदीदार सर्वात वर दिसेल. विक्री पक्की करण्यासाठी हिरव्या बटनावर टॅप करा.'
+        };
+      case 'priceboard':
+        return {
+          key: 'mandi_listen_all',
+          labelHi: 'आज के सभी मंडी भाव',
+          labelMr: 'आजचे सर्व बाजार भाव',
+          labelEn: 'Listen All Rates',
+          text: "Today's official Mandi rates: Copper 480 Rupees/kg, PCB 3,200 Rupees/kg, Aluminium 165 Rupees/kg, Iron 38 Rupees/kg, and Batteries 120 Rupees/kg. Tap the yellow speaker on any card to hear 10kg batch calculations.",
+          hindiText: 'आज के आधिकारिक मंडी भाव: तांबा 480 रुपये प्रति किलो, पीसीबी 3,200 रुपये प्रति किलो, एल्युमिनियम 165 रुपये प्रति किलो, लोहा 38 रुपये प्रति किलो और बैटरी 120 रुपये प्रति किलो। किसी भी कार्ड पर स्पीकर दबाकर 10 किलो का हिसाब सुनें।',
+          marathiText: 'आजचे अधिकृत बाजार भाव: तांबे 480 रुपये प्रति किलो, पीसीबी 3,200 रुपये प्रति किलो, अल्युमिनियम 165 रुपये प्रति किलो, लोखंड 38 रुपये प्रति किलो आणि बॅटरी 120 रुपये प्रति किलो. कोणत्याही कार्डावरील स्पीकर दाबून 10 किलोचे गणित ऐका.'
+        };
+      case 'pickups':
+        return {
+          key: 'pickups_walkthrough',
+          labelHi: 'पिकअप कैसे करें',
+          labelMr: 'संकलन कसे करावे',
+          labelEn: 'Pickup Guide',
+          text: 'Here are doorstep pickup requests. Tap the blue Map button for directions. Tap the green phone button to call the customer. After weighing scrap, collect the 4-digit OTP from the customer.',
+          hindiText: 'यहाँ नागरिकों द्वारा दिए गए घर-घर पिकअप अनुरोध हैं। दिशा जानने के लिए नीले मैप बटन पर टैप करें। ग्राहक से बात करने के लिए हरे फोन बटन पर टैप करें। वजन तौलने के बाद ग्राहक से 4 अंकों का ओटीपी प्राप्त करें।',
+          marathiText: 'येथे नागरिकांच्या घरोघरी संकलनाच्या विनंत्या आहेत. दिशेसाठी निळ्या नकाशा बटनावर टॅप करा. ग्राहकाशी बोलण्यासाठी हिरव्या फोन बटनावर टॅप करा. वजन केल्यावर ग्राहकाकडून 4 अंकी ओटीपी घ्या.'
+        };
+      case 'recyclers':
+        return {
+          key: 'recyclers_walkthrough',
+          labelHi: 'फैक्ट्री और यार्ड सूची',
+          labelMr: 'कारखाने व यार्ड यादी',
+          labelEn: 'Recycler Hubs',
+          text: 'Here are all authorized recycling plants and weighbridges near you. Tap any card to view distance and contact details. Tap the green phone button to call directly.',
+          hindiText: 'यहाँ आपके आसपास की सभी अधिकृत रीसाइक्लिंग फैक्ट्रियां और धर्मकांटे दिख रहे हैं। दूरी और संपर्क देखने के लिए किसी भी कार्ड पर टैप करें। सीधे बात करने के लिए हरे फोन बटन पर टैप करें।',
+          marathiText: 'येथे आपल्या परिसरातील सर्व अधिकृत पुनर्वापर कारखाने आणि वजनकाटे दिसत आहेत. अंतर आणि संपर्क पाहण्यासाठी कोणत्याही कार्डावर टॅप करा. थेट बोलण्यासाठी हिरव्या फोन बटनावर टॅप करा.'
+        };
+      case 'handover':
+        return {
+          key: 'handover_walkthrough',
+          labelHi: 'धर्मकांटा गेट पास',
+          labelMr: 'वजनकाटा गेट पास',
+          labelEn: 'Gate Pass Guide',
+          text: 'This is your official weighbridge gate pass. When you reach the factory yard, show this large QR code to the weighbridge operator. They will scan it to record weights. No paperwork is needed.',
+          hindiText: 'यह आपका आधिकारिक धर्मकांटा गेट पास है। जब आप रीसाइक्लिंग यार्ड पहुंचें, तो धर्मकांटा ऑपरेटर को यह बड़ा क्यूआर कोड दिखाएं। वे इसे स्कैन करके वजन दर्ज करेंगे। किसी कागजी कार्रवाई की आवश्यकता नहीं है।',
+          marathiText: 'हे आपले अधिकृत वजनकाटा गेट पास आहे. आपण कारखान्यात पोहोचल्यावर ऑपरेटरला हा मोठा क्यूआर कोड दाखवा. ते हा कोड स्कॅन करून वजन नोंदवतील. कोणत्याही कागदपत्रांची गरज नाही.'
+        };
+      case 'passbook':
+        return {
+          key: 'passbook_walkthrough',
+          labelHi: 'पासबुक और कमाई',
+          labelMr: 'पासबुक व कमाई',
+          labelEn: 'Passbook Summary',
+          text: 'Cash passbook: You have 18,400 Rupees available. Previous payout of 4,800 Rupees was sent to your bank. Tap Withdraw Funds to transfer earnings.',
+          hindiText: "कैश पासबुक: आपके पास 18,400 रुपये उपलब्ध हैं। 4,800 रुपये का पिछला भुगतान आपके बैंक खाते में भेजा जा चुका है। कमाई निकालने के लिए 'पैसे निकालें' पर टैप करें।",
+          marathiText: "कॅश पासबुक: आपल्या खात्यात 18,400 रुपये उपलब्ध आहेत. 4,800 रुपयांचे मागील पैसे आपल्या बँकेत जमा केले आहेत. रक्कम काढण्यासाठी 'पैसे काढा' वर टॅप करा."
+        };
+      case 'kyc':
+        return {
+          key: 'kyc_walkthrough',
+          labelHi: 'आधार व पहचान सत्यापन',
+          labelMr: 'आधार व ओळख पडताळणी',
+          labelEn: 'KYC Verification',
+          text: 'Without Aadhaar verification, your daily trading limit is 5,000 Rupees. Upload your Aadhaar photo to raise your daily limit to 50,000 Rupees and receive a certified CPCB Green Badge.',
+          hindiText: 'आधार सत्यापन के बिना आपकी दैनिक व्यापार सीमा 5,000 रुपये है। अपनी सीमा 50,000 रुपये तक बढ़ाने और सीपीसीबी प्रमाणित ग्रीन बैज पाने के लिए अपने आधार की फोटो अपलोड करें।',
+          marathiText: 'आधार पडताळणीशिवाय आपकी दैनिक व्यापार मर्यादा 5,000 रुपये आहे. आपली मर्यादा 50,000 रुपयांपर्यंत वाढवण्यासाठी आणि सीपीसीबी प्रमाणित ग्रीन बॅज मिळवण्यासाठी आधारचा फोटो अपलोड करा.'
+        };
+      case 'safety':
+        return {
+          key: 'safety_walkthrough',
+          labelHi: 'सुरक्षा और खतरे के नियम',
+          labelMr: 'सुरक्षा व धोक्याचे नियम',
+          labelEn: 'Safety Rules',
+          text: 'Hazardous scrap safety: Never puncture lithium batteries or expose them to water or fire. Always wear heavy-duty work gloves when handling CRT glass.',
+          hindiText: 'खतरनाक कबाड़ से सुरक्षा: लिथियम बैटरी को कभी न दबाएं और न ही पानी या आग के संपर्क में लाएं। सीआरटी स्क्रीन कांच को छूते समय हमेशा मजबूत दस्ताने पहनें।',
+          marathiText: 'धोकादायक भंगारापासून सुरक्षा: लिथियम बॅटरी कधीही दाबू नका किंवा पाणी व आगीच्या संपर्कात आणू नका. सीआरटी काच हाताळताना नेहमी जाड हातमोजे वापरा.'
+        };
+      default:
+        return {
+          key: 'briefing_daily_overview',
+          labelHi: 'दैनिक सारांश सुनें',
+          labelMr: 'दैनिक सारांश ऐका',
+          labelEn: 'Daily Briefing',
+          text: 'Welcome to Dhatu. Tap any feature tab below to manage your e-waste collection.',
+          hindiText: 'धातु ऐप में आपका स्वागत है। अपने ई-कचरा संग्रह को प्रबंधित करने के लिए नीचे दिए गए किसी भी टैब पर टैप करें।',
+          marathiText: 'धातु अ‍ॅपमध्ये आपले स्वागत आहे. आपले ई-कचरा संकलन व्यवस्थापित करण्यासाठी खालील कोणत्याही टॅबवर टॅप करा.'
+        };
+    }
+  };
 
   // Recycler Directory Data (Ranked by distance, rate, CPCB status)
   const nearbyRecyclers = [
@@ -459,7 +664,21 @@ export const KabadiwalaDashboard: React.FC = () => {
   };
 
   const handleSubmitKyc = async (payload: { documentType: string; documentNumber: string; remarks?: string }) => {
-    await api.submitKycDocuments(payload);
+    try {
+      await api.submitKycDocuments(payload);
+    } catch {
+      // Local fallback
+    }
+    if (user) {
+      storage.updateUserKyc(user.id, {
+        idType: payload.documentType as any,
+        idNumber: payload.documentNumber,
+        submittedAt: new Date().toISOString(),
+        remarks: payload.remarks,
+        rejectionReason: undefined
+      });
+      if (refreshUser) await refreshUser();
+    }
     await loadKyc();
   };
 
@@ -688,6 +907,12 @@ export const KabadiwalaDashboard: React.FC = () => {
   const handleCreateLot = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (user && user.kycStatus !== 'VERIFIED') {
+      setShowKycLockModal(true);
+      triggerHaptic(20);
+      return;
+    }
+
     let finalCategory = lotCategory;
     let finalWeight = lotWeight;
     let finalValuation = aiValuation;
@@ -783,6 +1008,15 @@ export const KabadiwalaDashboard: React.FC = () => {
     setHandoverLotCode(newLot.lotCode);
     hapticSuccess();
     setCreatedLotModal(newLot); // Trigger confirmation popup
+    speak(
+      language === 'hi'
+        ? 'बधाई हो! आपका लॉट सफलतापूर्वक दर्ज हो गया है। अब रिसाइक्लर इस पर अपनी बोली लगाएंगे।'
+        : language === 'mr'
+        ? 'अभिनंदन! आपला लॉट यशस्वीरित्या नोंदवला गेला आहे. आता कारखाने यावर बोली लावतील.'
+        : 'Congratulations! Your lot has been registered. Recyclers will now bid on it.',
+      language,
+      { audioKey: 'lot_created_success' }
+    );
   };
 
   // Handle Collector Accepting a Recycler Bid
@@ -796,6 +1030,15 @@ export const KabadiwalaDashboard: React.FC = () => {
     await loadLots();
     setMyLots(storage.getMyLots(user?.id));
     hapticSuccess();
+    speak(
+      language === 'hi'
+        ? 'बोली स्वीकार कर ली गई है। अब गेट पास क्यूआर कोड लेकर फैक्ट्री के धर्मकांटे पर पहुंचें।'
+        : language === 'mr'
+        ? 'बोली स्वीकारली आहे. आता गेट पास क्यूआर कोड घेऊन कारखान्याच्या वजनकाट्यावर पोहोचा.'
+        : 'Bid accepted. Please proceed to the factory weighbridge with your Gate Pass QR code.',
+      language,
+      { audioKey: 'bid_accepted' }
+    );
     setJobSuccess(`Bid of ₹${updated.estimatedValue} accepted for Lot #${updated.lotCode}! Delivery handover is now pending.`);
     setActiveTab('handover');
   };
@@ -832,7 +1075,15 @@ export const KabadiwalaDashboard: React.FC = () => {
       setActiveJob(accepted);
       setActiveTab('pickups');
       await loadPickups();
-      speak(language === 'hi' ? 'पिकअप स्वीकार कर लिया गया है।' : language === 'mr' ? 'संकलन स्वीकारले आहे.' : 'Pickup accepted');
+      speak(
+        language === 'hi'
+          ? 'पिकअप स्वीकार कर लिया गया है। ग्राहक के पते पर पहुंचने के लिए नेविगेशन शुरू करें।'
+          : language === 'mr'
+          ? 'संकलन स्वीकारले आहे. ग्राहकाच्या पत्त्यावर जाण्यासाठी नेव्हिगेशन सुरू करा.'
+          : 'Pickup accepted. Starting navigation to the customer location.',
+        language,
+        { audioKey: 'pickup_accepted' }
+      );
     } catch (e: any) {
       const accepted = storage.updatePickupStatus(pickup.id, 'ACCEPTED', {
         kabadiwalaId: user?.id || 'mock-kaba-1',
@@ -851,6 +1102,15 @@ export const KabadiwalaDashboard: React.FC = () => {
       setActiveJob(target);
       setActiveTab('pickups');
       await loadPickups();
+      speak(
+        language === 'hi'
+          ? 'पिकअप स्वीकार कर लिया गया है। ग्राहक के पते पर पहुंचने के लिए नेविगेशन शुरू करें।'
+          : language === 'mr'
+          ? 'संकलन स्वीकारले आहे. ग्राहकाच्या पत्त्यावर जाण्यासाठी नेव्हिगेशन सुरू करा.'
+          : 'Pickup accepted. Starting navigation to the customer location.',
+        language,
+        { audioKey: 'pickup_accepted' }
+      );
     }
   };
 
@@ -893,6 +1153,15 @@ export const KabadiwalaDashboard: React.FC = () => {
         totalAmount: activeJob.totalAmount || 620
       }));
       setJobSuccess(`Pickup completed! Layer 1 Handover Verified (OTP: ${expectedOtp}). Payment of ₹${res.totalAmount || activeJob.totalAmount || 620} recorded in Passbook.`);
+      speak(
+        language === 'hi'
+          ? 'ओटीपी सत्यापित हो गया है! पिकअप सफलतापूर्वक पूरा हुआ और भुगतान आपके वॉलेट में जोड़ दिया गया है।'
+          : language === 'mr'
+          ? 'ओटीपी यशस्वीरित्या तपासला! संकलन पूर्ण झाले आणि रक्कम आपल्या खात्यात जमा झाली आहे.'
+          : 'OTP verified! Pickup completed successfully and payout has been credited to your wallet.',
+        language,
+        { audioKey: 'pickup_completed' }
+      );
       setActiveJob(null);
       setItemWeights({});
       setCitizenOtpInput('');
@@ -908,6 +1177,18 @@ export const KabadiwalaDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6 pb-28">
+      {/* Dynamic KYC Verification Progress Banner */}
+      <KycStatusBanner />
+
+      {/* One-Time Congratulations Modal upon Verification Approval */}
+      <KycVerifiedModal />
+
+      {/* Feature Locked Modal for unverified users */}
+      <KycLockedModal
+        isOpen={showKycLockModal}
+        onClose={() => setShowKycLockModal(false)}
+        actionTitle={language === 'hi' ? 'डिजिटल लॉट निर्माण' : 'Digital Lot Creation'}
+      />
       
       {/* Top Collector Header Bar - Android 17 Expressive Dynamic Hero */}
       <div
@@ -918,8 +1199,14 @@ export const KabadiwalaDashboard: React.FC = () => {
           
           <div className="space-y-2 z-10">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="rounded-full px-3.5 py-1 text-xs font-bold bg-emerald-500/25 text-emerald-200 border border-emerald-400/30">
-                {t('verifiedCollector', 'VERIFIED COLLECTOR')}
+              <span className={`rounded-full px-3.5 py-1 text-xs font-bold ${
+                user?.kycStatus === 'VERIFIED'
+                  ? 'bg-emerald-500/25 text-emerald-200 border border-emerald-400/30'
+                  : 'bg-amber-500/25 text-amber-200 border border-amber-400/30 animate-pulse'
+              }`}>
+                {user?.kycStatus === 'VERIFIED'
+                  ? t('verifiedCollector', 'VERIFIED COLLECTOR')
+                  : 'KYC UNDER REVIEW'}
               </span>
               <span className="rounded-full px-3 py-1 font-mono text-xs font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
                 ID: KC-COL-8921
@@ -928,15 +1215,17 @@ export const KabadiwalaDashboard: React.FC = () => {
                 {user?.kabadiwala?.vehicleType || 'Solar Cargo Trike'}
               </span>
               <VoiceAssistButton
-                text="Welcome Suresh Kumar. Kabadiwala Collector Portal. Create lots, view spoken price board, find recyclers, and check passbook ledger."
-                hindiText="नमस्ते सुरेश कुमार। कबाड़ीवाला संग्राहक पोर्टल। लॉट बनाएं, बोलता हुआ दाम पत्रक देखें, रीसायकलर खोजें और खाता बही देखें।"
-                marathiText="सुरेश कुमार स्वागत आहे. भंगार संग्राहक पोर्टल. नवीन लॉट तयार करा, बोलणारा भाव फलक पहा आणि पासबुक तपासा."
+                audioKey="briefing_daily_overview"
+                label={language === 'hi' ? 'दैनिक सारांश सुनें' : language === 'mr' ? 'दैनिक सारांश ऐका' : 'Listen Daily Briefing'}
+                text={`Welcome ${user?.name || 'Suresh Kumar'}. Kabadiwala Collector Portal. Today copper is 480 Rupees and PCB is 3,200 Rupees per kg. You have 2 new pickup requests. Tap the 3rd button 'Pickups' at the bottom to view customer details.`}
+                hindiText="नमस्ते सुरेश जी! धातु ऐप में आपका स्वागत है। आज तांबे का भाव 480 रुपये और उच्च श्रेणी पीसीबी 3,200 रुपये प्रति किलो है। आपके इलाके में 2 नए पिकअप अनुरोध आए हैं। नीचे दिए गए तीसरे बटन 'पिकअप' पर जाकर ग्राहक का पता देखें और कबाड़ उठाएं।"
+                marathiText="नमस्कार सुरेश जी! धातु अ‍ॅपमध्ये आपले स्वागत आहे. आज तांब्याचा भाव 480 रुपये आणि उच्च दर्जाचे पीसीबी 3,200 रुपये प्रति किलो आहे. आपल्या भागात 2 नवीन संकलन विनंत्या आल्या आहेत. खालील तिसऱ्या 'पिकअप' बटनावर जाऊन पत्ता पहा आणि भंगार गोळा करा."
                 size="sm"
               />
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-display font-black tracking-tight text-white">
-              {language === 'hi' || language === 'mr' ? 'सुरेश कुमार' : 'Suresh Kumar'}
+              {user?.name || (language === 'hi' || language === 'mr' ? 'सुरेश कुमार' : 'Suresh Kumar')}
             </h1>
 
             <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
@@ -1186,18 +1475,11 @@ export const KabadiwalaDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="rounded-full px-3.5 py-1 chip-primary-m3 text-xs font-bold shadow-xs">{t('lotCreationBadge', 'Lot Creation')}</span>
                     <VoiceAssistButton
-                      text={lotTypeMode === 'custom' 
-                        ? `Custom mixed lot mode. Add multiple scrap materials to bundle into one consignment. Total weight ${customTotalWeight} kilograms.`
-                        : "Create lot. Photograph item, enter approx weight, get instant AI valuation estimate."
-                      }
-                      hindiText={lotTypeMode === 'custom'
-                        ? `कस्टम मिक्स्ड लॉट मोड। एक साथ कई तरह का कबाड़ जोड़ें। कुल वजन ${customTotalWeight} किलो।`
-                        : "लॉट बनाएं। कबाड़ की फोटो लें, वजन डालें और तुरंत अनुमानित दाम देखें।"
-                      }
-                      marathiText={lotTypeMode === 'custom'
-                        ? `कस्टम मिक्स्ड लॉट मोड. एकाच लॉटमध्ये विविध प्रकारचे भंगार जोडा. एकूण वजन ${customTotalWeight} किलो.`
-                        : "नवीन लॉट तयार करा. फोटो घ्या, वजन टाका आणि अंदाजे किंमत पहा."
-                      }
+                      audioKey="lot_creation_walkthrough"
+                      label={language === 'hi' ? 'लॉट बनाने का तरीका सुनें' : language === 'mr' ? 'लॉट कसा बनवावा ऐका' : 'How to Create Lot'}
+                      text="Creating a lot takes 3 simple steps: First, tap the blue camera button to photograph scrap. Second, set the scale weight using the plus and minus buttons. Third, pick your nearby scrap hub and tap the green 'Submit Lot' button at the bottom."
+                      hindiText="नया लॉट बनाने के तीन आसान कदम हैं: पहला, नीचे नीले कैमरा बटन को दबाकर कबाड़ की साफ फोटो लें। दूसरा, कांटे पर वजन तौलकर प्लस और माइनस बटन से वजन सेट करें। तीसरा, अपनी नजदीकी मंडी चुनकर सबसे नीचे हरा बटन 'लॉट जमा करें' दबाएं।"
+                      marathiText="नवीन लॉट तयार करण्याचे तीन सोपे टप्पे आहेत: पहिला, खालील निळ्या कॅमेरा बटनावर दाबून भंगाराचा स्पष्ट फोटो घ्या. दुसरा, काट्यावरील वजन पाहून प्लस आणि मायनस बटनाने वजन सेट करा. तिसरा, जवळची बाजारपेठ निवडून सर्वात खालील हिरवे बटन 'लॉट जमा करा' दाबा."
                       size="sm"
                     />
                   </div>
@@ -1261,9 +1543,18 @@ export const KabadiwalaDashboard: React.FC = () => {
                   
                   {/* Photo Upload / Capture Simulator with Real AI Classification */}
                   <div>
-                    <label className="block text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      {t('uploadPhotoLabel', '2. Upload or Capture Photograph')}
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">
+                        {t('uploadPhotoLabel', '2. Upload or Capture Photograph')}
+                      </label>
+                      <VoiceAssistButton
+                        audioKey="lot_step_camera"
+                        size="sm"
+                        text="Tap the blue camera box to capture photo. Keep scrap in good light so AI can accurately classify the grade."
+                        hindiText="कैमरा खोलने के लिए नीले कैमरे वाले डिब्बे पर टैप करें। स्क्रैप को अच्छी रोशनी में रखें ताकि धातु की किस्म और तांबे की चमक साफ दिखे। हमारी एआई अपने आप पहचान लेगी।"
+                        marathiText="कॅमेरा उघडण्यासाठी निळ्या कॅमेरा बॉक्सवर टॅप करा. भंगार चांगल्या प्रकाशात ठेवा जेणेकरून धातूचा प्रकार स्पष्ट दिसेल. आमची एआय आपोआप प्रकार ओळखेल."
+                      />
+                    </div>
                     <input
                       type="file"
                       accept="image/*"
@@ -1379,7 +1670,16 @@ export const KabadiwalaDashboard: React.FC = () => {
                           <label className="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">
                             {t('approxWeightLabel', '4. Enter Approx Weight (Kilograms)')}
                           </label>
-                          <span className="text-xs sm:text-sm text-slate-500 font-semibold">{t('minWeightNote', 'Custom weight (min 0.01 kg)')}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs sm:text-sm text-slate-500 font-semibold">{t('minWeightNote', 'Custom weight (min 0.01 kg)')}</span>
+                            <VoiceAssistButton
+                              audioKey="lot_step_weight"
+                              size="sm"
+                              text="Use the plus (+) and minus (-) buttons to set the scale weight. Your total payout based on official Mandi rates will calculate automatically below."
+                              hindiText="कांटे पर जितना वजन आया है, उसे प्लस (+) दबाकर बढ़ाएं या माइनस (-) दबाकर घटाएं। वजन डालते ही नीचे सरकारी मंडी के हिसाब से आपकी कुल कमाई अपने आप दिखने लगेगी।"
+                              marathiText="काट्यावरील वजन प्लस (+) दाबून वाढवा किंवा मायनस (-) दाबून कमी करा. वजन टाकताच खाली बाजारभावानुसार आपली एकूण कमाई आपोआप दिसेल."
+                            />
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -1753,9 +2053,18 @@ export const KabadiwalaDashboard: React.FC = () => {
                           {t('lotLocationLabel', '5. Set Handover / Scrap Yard Location')}
                         </label>
                       </div>
-                      <span className="text-xs font-bold uppercase bg-white px-3 py-1 rounded-full border border-slate-200 text-slate-700 shadow-2xs">
-                        {lotLocationMode === 'gps' ? '🛰️ GPS Lock' : lotLocationMode === 'preset' ? '🏭 Scrap Hub' : '✏️ Custom'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase bg-white px-3 py-1 rounded-full border border-slate-200 text-slate-700 shadow-2xs">
+                          {lotLocationMode === 'gps' ? '🛰️ GPS Lock' : lotLocationMode === 'preset' ? '🏭 Scrap Hub' : '✏️ Custom'}
+                        </span>
+                        <VoiceAssistButton
+                          audioKey="lot_step_hub"
+                          size="sm"
+                          text="Select the scrap hub or recycling factory where you want to deliver. Then tap the large green 'Submit Lot' button at the bottom."
+                          hindiText="माल किस स्क्रैप यार्ड या फैक्ट्री में पहुंचाना चाहते हैं, उस यार्ड पर टैप करें। फिर सबसे नीचे बड़े हरे बटन 'लॉट जमा करें' को दबाएं।"
+                          marathiText="माल कोणत्या भंगार बाजारात किंवा कारखान्यात पोहोचवायचा आहे, तो यार्ड निवडा. नंतर सर्वात खालील मोठ्या हिरव्या बटनावर 'लॉट जमा करा' दाबा."
+                        />
+                      </div>
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600">
                       {t('lotLocationDesc', 'Specify where the recycler will inspect and pick up this lot.')}
@@ -2048,13 +2357,23 @@ export const KabadiwalaDashboard: React.FC = () => {
             /* MY CREATED LOTS VIEW WITH BIDDING & ACCEPTANCE */
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-display font-black text-slate-900">
-                    {t('myCreatedLotsTitle', 'My Registered Digital Lots & Live Bids')}
-                  </h3>
-                  <p className="text-sm sm:text-base text-slate-600 mt-0.5 font-normal">
-                    {t('myCreatedLotsDesc', 'All lots created by you, open recycler tenders, and price negotiation bids.')}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <h3 className="text-2xl sm:text-3xl font-display font-black text-slate-900">
+                      {t('myCreatedLotsTitle', 'My Registered Digital Lots & Live Bids')}
+                    </h3>
+                    <p className="text-sm sm:text-base text-slate-600 mt-0.5 font-normal">
+                      {t('myCreatedLotsDesc', 'All lots created by you, open recycler tenders, and price negotiation bids.')}
+                    </p>
+                  </div>
+                  <VoiceAssistButton
+                    audioKey="mylots_walkthrough"
+                    label={language === 'hi' ? 'लॉट निर्देश सुनें' : language === 'mr' ? 'लॉट मार्गदर्शक ऐका' : 'Listen Lot Guide'}
+                    text="Here are all your created scrap lots. Lots that have received recycler bids show a highlighted indicator. Tap on any lot to view offers."
+                    hindiText="यहाँ आपके बनाए गए सभी कबाड़ लॉट दिख रहे हैं। जिस लॉट पर रिसाइकलर ने बोली लगाई है, उस पर पीला निशान दिखेगा। बोली देखने के लिए उस लॉट पर टैप करें।"
+                    marathiText="येथे आपले तयार केलेले सर्व भंगार लॉट दिसत आहेत. ज्या लॉटवर कारखान्याने बोली लावली आहे, त्यावर पिवळा निशाण दिसेल. बोली पाहण्यासाठी त्या लॉटवर टॅप करा."
+                    size="sm"
+                  />
                 </div>
 
                 {/* Status Filter Buttons */}
@@ -2342,22 +2661,34 @@ export const KabadiwalaDashboard: React.FC = () => {
                                 <span>Rate Recycler</span>
                               </button>
                             )}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveChatContext({
-                                  type: 'LOT',
-                                  id: lot.id,
-                                  title: `${lot.category} (${lot.approxWeightKg}kg)`,
-                                  partnerName: lot.recyclerName || lot.bids?.[0]?.recyclerName || 'EcoRecycle Aggregators Ltd',
-                                  partnerRole: 'RECYCLER'
-                                });
-                              }}
-                              className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 py-2.5 px-3 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-95"
-                            >
-                              <MessageSquare className="w-3.5 h-3.5 text-slate-700" />
-                              <span>Chat</span>
-                            </button>
+                            {(() => {
+                              const unreadLotCount = storage.getUnreadChatCountForContext('LOT', lot.id, user?.id);
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() => openLotChat(lot)}
+                                  className={`w-full sm:w-auto py-2.5 px-3 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-2xs ${
+                                    unreadLotCount > 0
+                                      ? 'bg-rose-50 text-rose-700 border-2 border-rose-400 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-700'
+                                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
+                                  }`}
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />
+                                  <span>{t('lotChat', 'Lot Inquiries / Chat')}</span>
+                                  {unreadLotCount > 0 && (
+                                    <span className="flex items-center gap-1 ml-0.5">
+                                      <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                                      </span>
+                                      <span className="text-[10px] font-extrabold text-rose-700 dark:text-rose-300 font-mono">
+                                        ({unreadLotCount})
+                                      </span>
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })()}
                           </div>
                         </div>
                       );
@@ -2374,15 +2705,7 @@ export const KabadiwalaDashboard: React.FC = () => {
         <LiveBiddingRoom
           lots={myLots}
           onAcceptBid={handleAcceptBid}
-          onOpenChat={(lot) => {
-            setActiveChatContext({
-              type: 'LOT',
-              id: lot.id,
-              title: `${lot.category} (${lot.approxWeightKg}kg)`,
-              partnerName: lot.recyclerName || lot.bids?.[0]?.recyclerName || 'EcoRecycle Aggregators Ltd',
-              partnerRole: 'RECYCLER'
-            });
-          }}
+          onOpenChat={(lot) => openLotChat(lot)}
           onRefresh={loadLots}
         />
       )}
@@ -2395,9 +2718,11 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="stamp-seal stamp-verified text-xs">{t('tabPriceBoard', 'Price Board')}</span>
                 <VoiceAssistButton
-                  text="Live e-waste price board. Buying rates by category and weekly trend across India."
-                  hindiText="लाइव ई-कचरा दाम पत्रक। अखिल भारतीय आज के खरीदारी दाम और साप्ताहिक रुझान।"
-                  marathiText="थेट ई-कचरा भाव फलक. देशभरातील आजचे खरेदी दर आणि साप्ताहिक कल."
+                  audioKey="mandi_listen_all"
+                  label={language === 'hi' ? 'सभी मंडी भाव सुनें' : language === 'mr' ? 'सर्व बाजार भाव ऐका' : 'Listen All Rates'}
+                  text="Today's official Mandi rates: Copper 480 Rupees/kg, PCB 3,200 Rupees/kg, Aluminium 165 Rupees/kg, Iron 38 Rupees/kg, and Batteries 120 Rupees/kg. Tap the yellow speaker on any card to hear 10kg batch calculations."
+                  hindiText="आज की आधिकारिक मंडी दरें: तांबा 480 रुपये प्रति किलो, पीसीबी 3,200 रुपये प्रति किलो, एल्युमिनियम 165 रुपये प्रति किलो, लोहा 38 रुपये प्रति किलो, और बैटरियां 120 रुपये प्रति किलो हैं। किसी भी स्क्रैप का 10 किलो का हिसाब सुनने के लिए उसके पीले बटन को दबाएं।"
+                  marathiText="आजचे अधिकृत बाजार भाव: तांबे 480 रुपये प्रति किलो, पीसीबी 3,200 रुपये प्रति किलो, अ‍ॅल्युमिनियम 165 रुपये प्रति किलो, लोखंड 38 रुपये प्रति किलो, आणि बॅटऱ्या 120 रुपये प्रति किलो आहेत. 10 किलोचा हिशोब ऐकण्यासाठी पिवळे बटन दाबा."
                   size="sm"
                 />
               </div>
@@ -2426,6 +2751,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                       ITEM #{idx + 1}
                     </span>
                     <VoiceAssistButton
+                      audioKey={getMandiAudioKey(item.category)}
                       text={`${preserveEnglishItemName(item.category)}. Current rate is rupees ${item.ratePerKg} per kilogram. ${item.trend === 'UP' ? 'Price increased by rupees ' + item.delta : 'Price stable'}`}
                       hindiText={`${preserveEnglishItemName(item.category)}। आज का ताजा मंडी भाव ${item.ratePerKg} रुपये प्रति किलो है। ${item.delta > 0 ? 'दाम ' + item.delta + ' रुपये बढ़ा है।' : 'दाम स्थिर हैं।'}`}
                       marathiText={`${preserveEnglishItemName(item.category)}. आजचा थेट बाजार भाव ${item.ratePerKg} रुपये प्रति किलो आहे. ${item.delta > 0 ? 'भाव ' + item.delta + ' रुपये वाढला आहे.' : 'भाव स्थिर आहे.'}`}
@@ -2478,9 +2804,11 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="stamp-seal stamp-verified text-xs">{t('tabFindRecyclers', 'Recycler Hubs')}</span>
                 <VoiceAssistButton
-                  text="Authorized recyclers directory. Find certified smelting centers matching your location."
-                  hindiText="अधिकृत रीसायकलर सूची। अपने स्थान से जुड़े अधिकृत केंद्र खोजें।"
-                  marathiText="अधिकृत रीसायकलर यादी. आपल्या जवळचे अधिकृत केंद्र शोधा."
+                  audioKey="recyclers_walkthrough"
+                  label={language === 'hi' ? 'रीसायकलर निर्देश सुनें' : language === 'mr' ? 'कारखाने मार्गदर्शक ऐका' : 'Listen Recycler Guide'}
+                  text="Here are all authorized recycling plants and weighbridges near you. Tap any card to view distance and contact details. Tap the green phone button to call directly."
+                  hindiText="यहाँ आपके नजदीकी सभी अधिकृत रिसाइक्लिंग प्लांट और धर्मकांटे दिख रहे हैं। उनकी दूरी और फोन नंबर देखने के लिए कार्ड पर टैप करें। सीधे बात करने के लिए हरे फोन बटन को दबाएं।"
+                  marathiText="येथे आपल्या जवळचे सर्व अधिकृत रिसायकलिंग कारखाने आणि वजनकाटे दिसत आहेत. अंतर आणि फोन नंबर पाहण्यासाठी कार्डवर टॅप करा. थेट बोलण्यासाठी हिरवे फोन बटन दाबा."
                   size="sm"
                 />
               </div>
@@ -2619,9 +2947,11 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="stamp-seal stamp-verified text-xs">{t('handoverVoucherBadge', 'Digital Handover')}</span>
                 <VoiceAssistButton
-                  text="Digital verifiable handover record. Show this QR code to the authorized recycler to confirm weight and receive payment."
-                  hindiText="डिजिटल हैंडओवर रसीद। वजन सत्यापित करने और भुगतान पाने के लिए अधिकृत रीसायकलर को यह क्यूआर कोड दिखाएं।"
-                  marathiText="डिजिटल पावती. वजन तपासण्यासाठी आणि पैसे मिळवण्यासाठी हा क्यूआर कोड दाखवा."
+                  audioKey="handover_walkthrough"
+                  label={language === 'hi' ? 'गेट पास निर्देश सुनें' : language === 'mr' ? 'गेट पास मार्गदर्शक ऐका' : 'Listen Gate Pass Guide'}
+                  text="This is your official weighbridge gate pass. When you reach the factory yard, show this large QR code to the weighbridge operator. They will scan it to record weights. No paperwork is needed."
+                  hindiText="यह आपका अधिकृत धर्मकांटा गेट पास है। जब आप माल लेकर फैक्ट्री यार्ड पहुंचे, तो गेट पर ऑपरेटर को यह बड़ा क्यूआर कोड दिखाएं। वे इसे स्कैन करके वजन दर्ज करेंगे। आपको कोई कागज दिखाने की जरूरत नहीं है।"
+                  marathiText="हा आपला अधिकृत वजनकाटा गेट पास आहे. यार्डमध्ये पोहोचल्यावर गेटवरील ऑपरेटरला हा मोठा क्यूआर कोड दाखवा. ते हा कोड स्कॅन करून वजन नोंदवतील. कोणत्याही कागदाची गरज नाही."
                   size="sm"
                 />
               </div>
@@ -2796,9 +3126,11 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="stamp-seal stamp-verified text-xs">{t('passbookBadge', 'Cash Passbook')}</span>
                 <VoiceAssistButton
-                  text="Earnings Passbook Ledger. Running record of transactions, payments received in cash or UPI, and balance."
-                  hindiText="कमाई खाता बही और पासबुक। नकद या यूपीआई में प्राप्त भुगतानों और कुल शेष राशि का खाता।"
-                  marathiText="कमाई पासबुक नोंदवही. रोख किंवा डिजिटल व्यवहारांची नोंद."
+                  audioKey="passbook_walkthrough"
+                  label={language === 'hi' ? 'पासबुक हिसाब सुनें' : language === 'mr' ? 'पासबुक हिशोब ऐका' : 'Listen Passbook Summary'}
+                  text="Cash passbook: You have 18,400 Rupees available. Previous payout of 4,800 Rupees was sent to your bank. Tap 'Withdraw Funds' to transfer earnings."
+                  hindiText="कैश पासबुक: आपके वॉलेट में 18,400 रुपये उपलब्ध हैं। पिछले पिकअप के 4,800 रुपये आपके बैंक खाते में सफलतापूर्वक भेजे जा चुके हैं। नया भुगतान निकालने के लिए नीचे हरे बटन 'पैसे निकालें' पर दबाएं।"
+                  marathiText="कॅश पासबुक: आपल्या वॉलेटमध्ये 18,400 रुपये शिल्लक आहेत. मागील संकलनाचे 4,800 रुपये आपल्या बँकेत जमा झाले आहेत. पैसे काढण्यासाठी खालील हिरव्या बतानावर दाबा."
                   size="sm"
                 />
               </div>
@@ -2892,9 +3224,11 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="stamp-seal stamp-hazard text-xs">{t('safetyBadge', 'Safety Guidance')}</span>
                 <VoiceAssistButton
-                  text="Safety guidance for hazardous e-waste. Avoid battery puncture, toxic cable burning, CRT glass implosion, and acid leaching."
-                  hindiText="ई-कचरा सुरक्षा मार्गदर्शन। बैटरी फटने, तारों को जलाने, सीआरटी स्क्रीन तोड़ने और तेजाब के खतरों से बचें।"
-                  marathiText="ई-कचरा सुरक्षा नियम. बॅटरी, विषारी धूर, काच आणि आम्लाच्या धोक्यांपासून सावध राहा."
+                  audioKey="safety_walkthrough"
+                  label={language === 'hi' ? 'सुरक्षा नियम सुनें' : language === 'mr' ? 'सुरक्षा नियम ऐका' : 'Listen Safety Rules'}
+                  text="Hazardous scrap safety: Never puncture lithium batteries or expose them to water or fire. Always wear heavy-duty work gloves when handling CRT glass."
+                  hindiText="खतरनाक कबाड़ से बचने के नियम: मोबाइल और लैपटॉप की लिथियम बैटरी को कभी न तोड़े और न ही आग या पानी में डालें—इससे विस्फोट हो सकता है। सीआरटी टीवी और शीशा उठाते समय भारी दस्ताने जरूर पहनें।"
+                  marathiText="धोकादायक कचरा हाताळण्याचे नियम: मोबाईल व लॅपटॉपची लिथियम बॅटरी कधीही फोडू नका किंवा आगीजवळ ठेवू नका. सीआरटी टीव्ही हाताळताना हातमोजे अवश्य वापरा."
                   size="sm"
                 />
               </div>
@@ -3005,9 +3339,11 @@ export const KabadiwalaDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="stamp-seal stamp-verified text-xs">{t('citizenPickupsBadge', 'Citizen Pickups')}</span>
                 <VoiceAssistButton
-                  text="Household pickups. View nearby e-waste requests from citizens, accept jobs, and update verified weights."
-                  hindiText="नागरिक ई-कचरा पिकअप। पास के घरों से स्क्रैप अनुरोध देखें और स्वीकार करें।"
-                  marathiText="नागरिक संकलन विनंत्या पहा आणि स्वीकारा."
+                  audioKey="pickups_walkthrough"
+                  label={language === 'hi' ? 'पिकअप निर्देश सुनें' : language === 'mr' ? 'संकलन मार्गदर्शक ऐका' : 'Listen Pickup Guide'}
+                  text="Here are doorstep pickup requests. Tap the blue 'Map' button for directions. Tap the green phone button to call the customer. After weighing scrap, collect the 4-digit OTP from the customer."
+                  hindiText="यहाँ आपके आसपास के घरों से पिकअप रिक्वेस्ट हैं। ग्राहक के पास जाने के लिए नीले बटन 'नक्शा देखें' पर दबाएं। फोन करने के लिए हरे फोन बटन पर दबाएं। कबाड़ तोलने के बाद ग्राहक से 4 अंकों का ओटीपी जरूर पूछें।"
+                  marathiText="येथे परिसरातील घरांच्या संकलन विनंत्या आहेत. पत्त्यावर जाण्यासाठी निळ्या 'नकाशा' बटनावर दाबा. फोन करण्यासाठी हिरव्या फोन बटनावर दाबा. वजन केल्यावर ग्राहकाकडून 4-अंकी ओटीपी अवश्य घ्या."
                   size="sm"
                 />
               </div>
@@ -3119,9 +3455,18 @@ export const KabadiwalaDashboard: React.FC = () => {
                     <ShieldCheck className="w-4 h-4 text-copper-600" />
                     <span>Layer 1 Verification: Citizen Handover OTP</span>
                   </span>
-                  <span className="text-[10px] text-steel-500 font-mono">
-                    Mandatory physical check
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-steel-500 font-mono">
+                      Mandatory physical check
+                    </span>
+                    <VoiceAssistButton
+                      audioKey="pickup_otp_guidance"
+                      size="sm"
+                      text="Ask the customer for the 4-digit OTP sent to their mobile. Enter the 4 digits into these boxes and tap the green 'Verify OTP' button to instantly credit your wallet."
+                      hindiText="ग्राहक के मोबाइल पर 4 अंकों का एक सीक्रेट कोड आया होगा। ग्राहक से वह 4 अंक पूछें और इन 4 डिब्बों में भरें, फिर नीचे हरा बटन 'ओटीपी सत्यापित करें' दबाएं। इससे पैसा तुरंत आपके खाते में जमा हो जाएगा।"
+                      marathiText="ग्राहकाच्या मोबाईलवर 4-अंकी कोड आला असेल. ग्राहकाकडून ते 4 अंक विचारा आणि या 4 डब्यांत भरा, नंतर खालील हिरवे बटन 'ओटीपी तपासा' दाबा. रक्कम लगेच आपल्या खात्यात जमा होईल."
+                    />
+                  </div>
                 </div>
 
                 <p className="text-[11px] text-steel-600">
@@ -3263,23 +3608,35 @@ export const KabadiwalaDashboard: React.FC = () => {
                     {t('estimatedPayout')}: ₹{pickup.totalAmount || 620}
                   </span>
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveChatContext({
-                            type: 'PICKUP',
-                            id: pickup.id,
-                            title: `Pickup: ${pickup.address.slice(0, 24)}...`,
-                            partnerName: pickup.citizen?.name || 'Citizen',
-                            partnerRole: 'CITIZEN'
-                          });
-                        }}
-                        className="px-2.5 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
-                        title="Chat with Citizen"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
-                        <span>Chat</span>
-                      </button>
+                      {(() => {
+                        const unread = storage.getUnreadChatCountForContext('PICKUP', pickup.id, user?.id);
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => openCollectorPickupChat(pickup)}
+                            className={`px-2.5 py-1.5 text-xs font-bold rounded border flex items-center gap-1 transition-colors ${
+                              unread > 0
+                                ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
+                                : 'bg-paper-200 hover:bg-paper-300 text-steel-800 border-steel-400'
+                            }`}
+                            title="Chat with Citizen"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                            <span>{t('chat', 'Chat')}</span>
+                            {unread > 0 && (
+                              <span className="flex items-center gap-1 ml-0.5">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                                </span>
+                                <span className="text-[10px] font-extrabold text-rose-700 dark:text-rose-300 font-mono">
+                                  ({unread})
+                                </span>
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })()}
                       <a
                         href={getDirectionsUrl(pickup.latitude, pickup.longitude, collectorCoords[0], collectorCoords[1])}
                         target="_blank"
@@ -3305,6 +3662,43 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+      {/* MOBILE FLOATING VOICE CO-PILOT DOCK (Accessible high-contrast one-tap spoken guide) */}
+      {(() => {
+        const copilot = getMobileCopilotConfig();
+        const label = language === 'hi' ? copilot.labelHi : language === 'mr' ? copilot.labelMr : copilot.labelEn;
+        return (
+          <aside
+            aria-label="Spoken Voice Instructions"
+            className="lg:hidden fixed bottom-16 sm:bottom-20 left-3 right-3 z-30 max-w-md mx-auto animate-fade-in pointer-events-auto"
+          >
+            <div className="bg-slate-950/95 backdrop-blur-md border-2 border-amber-400 text-white rounded-2xl p-2.5 shadow-2xl flex items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 font-black text-xs shadow-sm">
+                  AI
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 block leading-tight">
+                    {language === 'hi' ? 'बोलता हुआ सहायक' : language === 'mr' ? 'बोलणारा मार्गदर्शक' : 'Voice Co-Pilot'}
+                  </span>
+                  <p className="text-xs font-bold text-white truncate leading-tight">
+                    {label}
+                  </p>
+                </div>
+              </div>
+              <div className="shrink-0">
+                <VoiceAssistButton
+                  audioKey={copilot.key}
+                  label={language === 'hi' ? 'निर्देश सुनें' : language === 'mr' ? 'मार्गदर्शक ऐका' : 'Listen'}
+                  text={copilot.text}
+                  size="sm"
+                  className="!bg-amber-400 !text-slate-950 hover:!bg-amber-300 font-black shadow-md border-0"
+                />
+              </div>
+            </div>
+          </aside>
+        );
+      })()}
 
       {/* MOBILE BOTTOM TAB BAR (Material 3 Expressive Navigation Bar) */}
       <nav
@@ -3578,14 +3972,67 @@ export const KabadiwalaDashboard: React.FC = () => {
         />
       )}
 
+      {/* CONTEXTUAL CHAT PARTNER SELECTOR MODAL */}
+      {activePartnerSelector && (
+        <ChatPartnerSelectorModal
+          isOpen={!!activePartnerSelector}
+          contextType={activePartnerSelector.contextType}
+          contextTitle={activePartnerSelector.title}
+          partners={activePartnerSelector.partners}
+          defaultAssignee={
+            activePartnerSelector.contextType === 'LOT' && activePartnerSelector.lot
+              ? {
+                  id: activePartnerSelector.lot.recyclerId || activePartnerSelector.lot.bids?.[0]?.recyclerId || 'mock-recycler-1',
+                  name: activePartnerSelector.lot.recyclerName || activePartnerSelector.lot.bids?.[0]?.recyclerName || 'EcoRecycle Aggregators Ltd',
+                  role: 'RECYCLER'
+                }
+              : null
+          }
+          onSelectPartner={(partner) => {
+            const currentSelector = activePartnerSelector;
+            setActivePartnerSelector(null);
+            setActiveChatContext({
+              type: currentSelector.contextType,
+              id: currentSelector.contextId,
+              title: currentSelector.title,
+              partnerId: partner.id,
+              partnerName: partner.name,
+              partnerRole: partner.role,
+              partnerPhone: partner.phone,
+              lot: currentSelector.lot,
+              pickup: currentSelector.pickup
+            });
+          }}
+          onClose={() => setActivePartnerSelector(null)}
+        />
+      )}
+
       {/* CONTEXTUAL IN-APP CHAT DRAWER */}
       {activeChatContext && (
         <ChatDrawer
           contextType={activeChatContext.type}
           contextId={activeChatContext.id}
           title={activeChatContext.title}
+          partnerId={activeChatContext.partnerId}
           partnerName={activeChatContext.partnerName}
           partnerRole={activeChatContext.partnerRole}
+          partnerPhone={activeChatContext.partnerPhone}
+          onBackToPartners={() => {
+            if (activeChatContext.lot) {
+              const currentLot = activeChatContext.lot;
+              const partners = storage.getChatPartnersForContext('LOT', currentLot.id, user?.id);
+              setActiveChatContext(null);
+              setActivePartnerSelector({
+                contextType: 'LOT',
+                contextId: currentLot.id,
+                title: `${currentLot.category} (${currentLot.approxWeightKg}kg)`,
+                partners,
+                lot: currentLot
+              });
+            } else {
+              setActiveChatContext(null);
+            }
+          }}
           onClose={() => setActiveChatContext(null)}
         />
       )}
