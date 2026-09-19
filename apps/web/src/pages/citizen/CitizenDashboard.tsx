@@ -35,7 +35,8 @@ import {
   Search,
   Link2,
   ExternalLink,
-  MessageSquare
+  MessageSquare,
+  Package
 } from 'lucide-react';
 import { getCurrentPosition, reverseGeocode, searchAddress, calculateDistanceKm, getDirectionsUrl } from '../../lib/location';
 import { triggerHaptic, hapticSuccess } from '../../lib/haptics';
@@ -723,58 +724,101 @@ export const CitizenDashboard: React.FC = () => {
           
           {/* Pickup List Column */}
           <div className="lg:col-span-5 space-y-4">
-            <h3 className="font-display font-bold text-steel-900 text-base flex items-center justify-between">
-              <span>{t('yourPickupRequests', 'Your Pickup Requests')}</span>
-              <span className="text-xs font-mono text-steel-500">{pickups.length} total</span>
-            </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <h3 className="font-display font-black text-slate-900 dark:text-white text-lg tracking-tight">
+                  {t('yourPickupRequests', 'Your Pickup Requests')}
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100/70 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800">
+                  {pickups.length}
+                </span>
+              </div>
+            </div>
 
             <div className="space-y-3">
               {pickups.map(p => (
                 <div
                   key={p.id}
                   onClick={() => setSelectedPickup(p)}
-                  className={`receipt-stub rounded-lg p-4 border-2 cursor-pointer transition-all ${
+                  className={`rounded-2xl p-4 sm:p-5 border transition-all duration-200 cursor-pointer ${
                     selectedPickup?.id === p.id
-                      ? 'border-copper-600 shadow-tactile bg-copper-500/5'
-                      : 'border-steel-300 hover:border-steel-400'
+                      ? 'bg-emerald-50/50 dark:bg-emerald-950/25 border-emerald-500 shadow-md ring-2 ring-emerald-500/20 dark:ring-emerald-400/20'
+                      : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-700/60 hover:shadow-md'
                   }`}
                 >
-                  <div className="flex justify-between items-start border-b border-steel-200 pb-2 mb-2">
-                    <span className="text-xs font-bold text-copper-700">
+                  {/* Header: Ref & Status Pill */}
+                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/80">
+                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80">
                       Ref #{p.id.slice(0, 10)}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                      className={`text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs ${
                         p.status === 'COMPLETED'
-                          ? 'bg-forest-500/10 text-forest-600 border border-forest-500/30'
-                          : p.status === 'IN_PROGRESS'
-                          ? 'bg-brass-100 text-brass-800 border border-brass-400'
-                          : 'bg-paper-200 text-steel-700 border border-steel-300'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800'
+                          : p.status === 'IN_PROGRESS' || p.status === 'ACCEPTED'
+                          ? 'bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800'
+                          : 'bg-sky-50 text-sky-800 border border-sky-200 dark:bg-sky-950/70 dark:text-sky-300 dark:border-sky-800'
                       }`}
                     >
-                      {t(p.status)}
+                      {p.status === 'COMPLETED' ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      ) : (
+                        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      )}
+                      <span>{t(p.status)}</span>
                     </span>
                   </div>
 
-                  <h4 className="font-bold text-steel-900 text-sm">
-                    {p.address}
-                  </h4>
+                  {/* Address */}
+                  <div className="mt-3 flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm leading-snug line-clamp-2">
+                      {p.address}
+                    </h4>
+                  </div>
 
-                  <div className="mt-2 text-xs text-steel-600 space-y-1">
-                    <div className="flex items-center justify-between text-steel-700 font-bold">
-                      <span>{t('totalItems', 'Total Items')}:</span>
-                      <span className="text-copper-700">
+                  {/* Total Items & Item Chips */}
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <Package className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                        <span>{t('totalItems', 'Total Items')}:</span>
+                      </span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-[11px] border border-slate-200/60 dark:border-slate-700/60">
                         {p.totalItems || p.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({p.items?.length || 1} {t('items', 'types')})
                       </span>
                     </div>
-                    <div>{t('itemsToRecycle', 'Items')}: {p.items.map(i => `${preserveEnglishItemName(i.category)} (${i.quantity || 1} ${t('pieces', 'pcs')}, ~${i.estWeightKg}kg)`).join(', ')}</div>
-                    <div className="flex justify-between font-bold text-steel-800 pt-1">
-                      <span>{t('indicative payout:', 'Indicative Payout:')}</span>
-                      <span className="text-copper-700 font-bold">₹{p.totalAmount || 620}</span>
+
+                    {/* Structured Item Chips */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {p.items?.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs"
+                        >
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
+                            {preserveEnglishItemName(item.category)}
+                          </span>
+                          <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/60">
+                            {item.quantity || 1} {t('pieces', 'pcs')} • ~{item.estWeightKg}kg
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Indicative Payout Highlight */}
+                    <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        {t('indicative payout:', 'Indicative Payout:')}
+                      </span>
+                      <span className="text-base font-black font-mono text-emerald-600 dark:text-emerald-400">
+                        ₹{p.totalAmount || 620}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="mt-3 pt-2.5 border-t border-steel-200 flex flex-wrap items-center justify-between gap-2">
+                  {/* Card Footer: Chat & Collector Info */}
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
                     {/* Contextual Chat Button with Live Unread Indicator */}
                     {(() => {
                       const unreadCount = storage.getUnreadChatCountForContext('PICKUP', p.id, user?.id);
@@ -785,14 +829,14 @@ export const CitizenDashboard: React.FC = () => {
                             e.stopPropagation();
                             openPickupChat(p);
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs ${
                             unreadCount > 0
                               ? 'bg-rose-50 text-rose-700 border-2 border-rose-400 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-700'
-                              : 'bg-paper-100 hover:bg-paper-200 text-steel-800 border border-steel-300'
+                              : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700'
                           }`}
                           title="Open Collector Messages"
                         >
-                          <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                          <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>{t('messages', 'Messages / Chat')}</span>
                           {unreadCount > 0 && (
                             <span className="flex items-center gap-1 ml-0.5">
@@ -811,23 +855,25 @@ export const CitizenDashboard: React.FC = () => {
 
                     {p.status === 'COMPLETED' ? (
                       <div className="flex items-center gap-2">
-                        <span className="stamp-seal stamp-verified text-[9px]">
-                          {t('verifiedHandover', 'Verified Handover')}
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-full">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>{t('verifiedHandover', 'Verified Handover')}</span>
                         </span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setShowReceiptModal(p);
                           }}
-                          className="text-xs text-copper-700 font-bold underline flex items-center gap-1"
+                          className="text-xs text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold underline flex items-center gap-1"
                         >
                           <QrCode className="w-3.5 h-3.5" />
                           <span>{t('viewReceipt', 'Receipt')}</span>
                         </button>
                       </div>
                     ) : (
-                      <span className="text-[10px] text-steel-500 font-medium">
-                        {p.kabadiwala?.name ? `Assigned: ${p.kabadiwala.name}` : 'Awaiting Collector'}
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>{p.kabadiwala?.name ? `Assigned: ${p.kabadiwala.name}` : t('awaitingCollector', 'Awaiting Collector')}</span>
                       </span>
                     )}
                   </div>
@@ -839,13 +885,22 @@ export const CitizenDashboard: React.FC = () => {
           {/* Map & Live Collector ETA Column (Section 1.A.3) */}
           <div className="lg:col-span-7 space-y-4">
             {selectedPickup ? (
-              <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 shadow-sm space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-steel-300 pb-3">
+              <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm p-6 sm:p-7 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                   <div>
-                    <span className="stamp-seal stamp-pending text-xs">
-                      {selectedPickup.status === 'COMPLETED' ? t('HANDOVER COMPLETED', 'HANDOVER COMPLETED') : t('COLLECTOR DISPATCHED', 'COLLECTOR DISPATCHED')}
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                      selectedPickup.status === 'COMPLETED'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+                        : 'bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800'
+                    }`}>
+                      {selectedPickup.status === 'COMPLETED' ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      ) : (
+                        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      )}
+                      <span>{selectedPickup.status === 'COMPLETED' ? t('HANDOVER COMPLETED', 'HANDOVER COMPLETED') : t('COLLECTOR DISPATCHED', 'COLLECTOR DISPATCHED')}</span>
                     </span>
-                    <h3 className="text-lg font-display font-black text-steel-900 mt-1">
+                    <h3 className="text-xl font-display font-black text-slate-900 dark:text-white mt-2">
                       {selectedPickup.address}
                     </h3>
                   </div>
@@ -855,7 +910,7 @@ export const CitizenDashboard: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleCancelPickup(selectedPickup.id)}
-                        className="px-3 py-1.5 bg-paper-200 hover:bg-signal-500/10 text-signal-600 border border-signal-300 rounded text-xs font-bold transition-colors"
+                        className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800 border border-rose-200 rounded-xl text-xs font-bold transition-colors shadow-2xs"
                       >
                         {t('cancel', 'Cancel Request')}
                       </button>
@@ -864,10 +919,10 @@ export const CitizenDashboard: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => openPickupChat(selectedPickup)}
-                      className="px-3 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 border border-steel-300 rounded text-xs font-bold flex items-center space-x-1.5 transition-colors relative"
+                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors relative shadow-2xs"
                       title="Chat with Collector"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                      <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       <span>{t('chat', 'Chat / Messages')}</span>
                       {(() => {
                         const unread = storage.getUnreadChatCountForContext('PICKUP', selectedPickup.id, user?.id);
@@ -878,7 +933,7 @@ export const CitizenDashboard: React.FC = () => {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
                               </span>
-                              <span className="text-[10px] font-extrabold text-rose-700 font-mono">
+                              <span className="text-[10px] font-extrabold text-rose-700 dark:text-rose-300 font-mono">
                                 ({unread})
                               </span>
                             </span>
@@ -891,7 +946,7 @@ export const CitizenDashboard: React.FC = () => {
                     {selectedPickup.kabadiwala && (
                       <a
                         href={`tel:${selectedPickup.kabadiwala.phone}`}
-                        className="btn-dhatu-primary px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1.5"
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-2xs transition-colors"
                       >
                         <Phone className="w-3.5 h-3.5" />
                         <span>{t('callCollector', 'Call Collector')}</span>
@@ -902,15 +957,15 @@ export const CitizenDashboard: React.FC = () => {
 
                 {/* Live ETA Tracker Banner */}
                 {selectedPickup.status === 'IN_PROGRESS' && (
-                  <div className="p-4 bg-brass-100/80 border-2 border-brass-400 rounded-lg flex items-center justify-between">
+                  <div className="p-4 sm:p-5 bg-gradient-to-r from-amber-50 to-amber-100/60 dark:from-amber-950/40 dark:to-amber-900/20 border border-amber-300/80 dark:border-amber-800/80 rounded-2xl flex items-center justify-between gap-4 shadow-xs">
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-mono font-bold text-brass-800 uppercase tracking-wider block">
+                      <span className="text-[10px] font-mono font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">
                         {t('LIVE ETA ESTIMATE', 'LIVE ETA ESTIMATE')}
                       </span>
-                      <div className="text-lg font-display font-black text-steel-900">
+                      <div className="text-lg font-display font-black text-slate-900 dark:text-white">
                         {language === 'hi' ? 'कबाड़ीवाला सुरेश लगभग 1.4 किमी दूर है (~12 मिनट में आगमन)' : language === 'mr' ? 'संग्राहक सुरेश अंदाजे 1.4 किमी अंतरावर आहे (~12 मिनिटांत आगमन)' : 'Collector Suresh is 1.4 km away (Arriving in ~12 mins)'}
                       </div>
-                      <p className="text-xs text-steel-600">
+                      <p className="text-xs text-slate-600 dark:text-slate-400">
                         {language === 'hi' ? 'वाहन: सोलर कार्गो ट्राइक (DL-10-KBD-89) • सत्यापित आधार' : language === 'mr' ? 'वाहन: सोलर कार्गो ट्रायसायकल (DL-10-KBD-89) • प्रमाणित आधार' : 'Vehicle: Solar Cargo Tricycle (DL-10-KBD-89) • Verified Aadhaar'}
                       </p>
                     </div>
@@ -924,50 +979,51 @@ export const CitizenDashboard: React.FC = () => {
                 )}
                 {/* Layer 1: Handover Verification OTP Card & Audit Seal */}
                 {selectedPickup.status !== 'COMPLETED' ? (
-                  <div className="p-4 bg-paper-100 rounded-xl border-2 border-dashed border-copper-500 shadow-tactile space-y-2.5">
+                  <div className="p-5 bg-gradient-to-br from-emerald-50/60 via-white to-slate-50 dark:from-slate-800/90 dark:to-slate-900 rounded-2xl border border-emerald-300/80 dark:border-emerald-800/80 shadow-xs space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="stamp-seal stamp-verified text-[10px]">
-                        {t('layer 1 verification: citizen handover otp', 'LAYER 1 VERIFICATION • DOORSTEP SCRAP HANDOVER')}
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-300/60 dark:border-emerald-800">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>{t('layer 1 verification: citizen handover otp', 'LAYER 1 VERIFICATION • DOORSTEP SCRAP HANDOVER')}</span>
                       </span>
-                      <span className="font-mono text-xs font-bold text-copper-700 bg-copper-200/60 px-2 py-0.5 rounded border border-copper-400">
+                      <span className="font-mono text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-300/60 dark:border-emerald-800">
                         {t('SECURE OTP', 'SECURE OTP')}
                       </span>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                       <div>
-                        <span className="text-xs font-bold text-steel-900 block">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white block">
                           {language === 'hi' ? 'भौतिक हस्तांतरण प्राधिकरण कोड' : language === 'mr' ? 'प्रत्यक्ष हस्तांतरण प्रमाणीकरण कोड' : 'Physical Handover Authorization Code'}
                         </span>
-                        <p className="text-[11px] text-steel-600">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                           {language === 'hi' ? 'वजन सत्यापन एवं आधिकारिक हस्तांतरण हेतु कबाड़ीवाले के आने पर यह 4-अंकीय कोड साझा करें।' : language === 'mr' ? 'वजन तपासणी व प्रमाणित हस्तांतरणासाठी संग्राहक आल्यावर हा 4-अंकी कोड सांगा.' : 'Share this 4-digit code with the collector upon arrival to verify physical weighing & authorized handover.'}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 self-start sm:self-auto">
-                        <span className="font-mono text-2xl font-black text-copper-700 tracking-widest bg-paper-50 px-4 py-1.5 rounded-lg border-2 border-copper-500 shadow-sm">
+                      <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        <span className="font-mono text-3xl font-black text-emerald-700 dark:text-emerald-300 tracking-widest bg-white dark:bg-slate-800 px-5 py-2 rounded-xl border border-emerald-200 dark:border-emerald-700/60 shadow-sm">
                           {selectedPickup.verificationOtp || '4821'}
                         </span>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3.5 bg-forest-500/10 border-2 border-forest-500 rounded-xl space-y-1.5 text-xs text-forest-900">
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-2xl space-y-2 text-xs text-emerald-900 dark:text-emerald-100 shadow-xs">
                     <div className="flex items-center justify-between font-bold">
-                      <span className="flex items-center gap-1.5 text-forest-800">
-                        <CheckCircle2 className="w-4 h-4 text-forest-600 shrink-0" />
+                      <span className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-200">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                         <span>{t('layer 1 verified: physical doorstep handover confirmed', 'Layer 1 Verified: Physical Doorstep Handover Confirmed')}</span>
                       </span>
-                      <span className="font-mono text-[11px] text-forest-700 bg-forest-100 px-2 py-0.5 rounded border border-forest-300">
+                      <span className="font-mono text-[11px] text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/80 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
                         OTP {selectedPickup.verificationOtp || '4821'} MATCHED
                       </span>
                     </div>
-                    <p className="text-[11px] text-forest-700 font-mono">
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-mono">
                       Audit Hash: {selectedPickup.traceabilityHash || '0x8f4a9b2c7e103984fa55'} • Digitally signed & credited
                     </p>
                   </div>
                 )}
 
                 {/* Leaflet Map Visualizer */}
-                <div className="h-64 rounded-lg overflow-hidden border-2 border-steel-400 shadow-inner">
+                <div className="h-64 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
                   <LeafletMap
                     center={[selectedPickup.latitude, selectedPickup.longitude]}
                     zoom={15}
@@ -978,40 +1034,47 @@ export const CitizenDashboard: React.FC = () => {
                 </div>
 
                 {/* Material Item Breakdown */}
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
-                      {t('itemsToRecycle')}:
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                      <Package className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{t('itemsToRecycle')}:</span>
                     </span>
-                    <span className="text-xs font-bold text-copper-700 bg-copper-50 px-2.5 py-0.5 rounded-full border border-copper-200">
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 font-mono">
                       {t('totalItems', 'Total Items')}: {selectedPickup.totalItems || selectedPickup.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({selectedPickup.items?.length || 1} {t('items', 'types')})
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
                     {selectedPickup.items.map((item, i) => (
-                      <div key={i} className="bg-white p-2.5 rounded border border-steel-300 flex flex-col justify-between">
+                      <div key={i} className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex flex-col justify-between shadow-2xs">
                         <div>
-                          <span className="font-bold text-steel-900 block">{preserveEnglishItemName(item.category)}</span>
-                          <div className="text-steel-600 mt-1 flex justify-between">
+                          <span className="font-bold text-slate-900 dark:text-slate-100 block">{preserveEnglishItemName(item.category)}</span>
+                          <div className="text-slate-600 dark:text-slate-400 mt-1.5 flex justify-between text-[11px]">
                             <span>{item.quantity || 1} {t('pieces', 'pcs')}</span>
-                            <span>~{item.estWeightKg} kg</span>
+                            <span className="font-mono">~{item.estWeightKg} kg</span>
                           </div>
                         </div>
-                        <span className="text-copper-700 block font-bold mt-1">@ ₹{item.ratePerKg}/kg</span>
+                        <div className="mt-2 pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between">
+                          <span className="text-[10px] text-slate-400">Rate:</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">₹{item.ratePerKg}/kg</span>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Verifiable Hash Footer */}
-                <div className="pt-2 border-t border-steel-200 flex items-center justify-between text-[11px] text-steel-500">
-                  <span>Traceability Hash: {selectedPickup.traceabilityHash || '0x9a8f2736b4...'}</span>
-                  <span>100% CPCB Audit Logged</span>
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="font-mono">Traceability Hash: {selectedPickup.traceabilityHash || '0x9a8f2736b4...'}</span>
+                  <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>100% CPCB Audit Logged</span>
+                  </span>
                 </div>
               </div>
             ) : (
-              <div className="receipt-stub rounded-xl p-12 border-2 border-steel-300 text-center text-steel-500">
-                Select a pickup from the left list to view live tracking and digital handover status.
+              <div className="rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 p-12 text-center text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/50">
+                {t('selectPickupPrompt', 'Select a pickup from the left list to view live tracking and digital handover status.')}
               </div>
             )}
           </div>
@@ -1024,25 +1087,25 @@ export const CitizenDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Booking Form */}
-          <div className="lg:col-span-7 bg-paper-50 rounded-xl p-6 sm:p-8 border-2 border-steel-300 shadow-sm space-y-6">
+          <div className="lg:col-span-7 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
             <div>
-              <span className="stamp-seal stamp-verified text-xs">{t('householdPickupBadge', 'Doorstep Pickup')}</span>
-              <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">{t('householdPickupBadge', 'Doorstep Pickup')}</span>
+              <h2 className="text-xl font-display font-black text-slate-900 dark:text-white mt-2">
                 {t('bookPickupHeader', 'Book Doorstep E-Waste Pickup')}
               </h2>
-              <p className="text-xs text-steel-600">
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 Upload photos of your obsolete electronics. Our AI classifies the material and provides an indicative price range before booking.
               </p>
             </div>
 
             {/* AI Photo Scanner */}
-            <div className="p-4 bg-paper-100 rounded-lg border-2 border-dashed border-steel-400 space-y-3">
+            <div className="p-5 bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border-2 border-dashed border-emerald-300 dark:border-emerald-700/60 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-steel-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <Camera className="w-4 h-4 text-copper-600" />
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>{t('aiPhotoScanner', 'AI Photo Scanner (Upload Photo for Auto-Classification)')}</span>
                 </span>
-                {classifying && <span className="text-xs font-mono text-copper-600 animate-pulse">Scanning PCB...</span>}
+                {classifying && <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 animate-pulse">Scanning PCB...</span>}
               </div>
 
               <input
@@ -1054,9 +1117,9 @@ export const CitizenDashboard: React.FC = () => {
               />
               <label
                 htmlFor="photo-upload-input"
-                className="btn-dhatu-steel px-4 py-2.5 rounded text-xs font-bold cursor-pointer inline-flex items-center space-x-2 shadow-sm"
+                className="btn-primary-m3 px-4 py-2.5 text-xs font-bold cursor-pointer inline-flex items-center space-x-2 shadow-sm"
               >
-                <Sparkles className="w-4 h-4 text-brass-400" />
+                <Sparkles className="w-4 h-4 text-amber-300" />
                 <span>{t('scanAiPhoto', 'Upload e-Waste Photo (AI Category Scan)')}</span>
               </label>
 
@@ -1088,7 +1151,7 @@ export const CitizenDashboard: React.FC = () => {
                       value={address}
                       onChange={e => setAddress(e.target.value)}
                       placeholder={t('pickupAddressPlaceholder', 'House/flat no., street name, locality, landmark, pincode...')}
-                      className="flex-1 px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border-2 border-steel-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none shadow-xs"
+                      className="flex-1 px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none shadow-xs"
                       required
                     />
                     <div className="flex gap-2 shrink-0">
@@ -1140,7 +1203,7 @@ export const CitizenDashboard: React.FC = () => {
                       value={googleMapsLink}
                       onChange={e => setGoogleMapsLink(e.target.value)}
                       placeholder="e.g. https://maps.app.goo.gl/xyz or 28.6139, 77.2090"
-                      className="flex-1 px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border-2 border-steel-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none shadow-xs"
+                      className="flex-1 px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none shadow-xs"
                     />
                     {googleMapsLink.trim() && (
                       <button
@@ -1177,14 +1240,14 @@ export const CitizenDashboard: React.FC = () => {
                 {/* Interactive Doorstep Location Pin Map Confirmation */}
                 <div className="space-y-1 pt-1">
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-steel-700 dark:text-slate-300 font-bold flex items-center gap-1">
+                    <span className="text-slate-700 dark:text-slate-300 font-bold flex items-center gap-1">
                       <span>📍 {language === 'hi' ? 'मानचित्र पर सटीक गेट चुनें (पिन पुष्टी)' : language === 'mr' ? 'नकाशावर अचूक जागा निवडा (पिन पुष्टी)' : 'Doorstep Location Map Confirmation'}:</span>
                     </span>
-                    <span className="text-[10px] text-copper-700 dark:text-copper-400 font-bold bg-paper-200 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-steel-300 dark:border-slate-700">
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                       {latitude.toFixed(4)}° N, {longitude.toFixed(4)}° E
                     </span>
                   </div>
-                  <div className="h-52 sm:h-60 rounded-2xl overflow-hidden border-2 border-steel-400 dark:border-slate-700 shadow-inner relative">
+                  <div className="h-52 sm:h-60 rounded-2xl overflow-hidden border border-slate-300 dark:border-slate-700 shadow-inner relative">
                     <LeafletMap
                       center={[latitude, longitude]}
                       zoom={15}
@@ -1194,26 +1257,40 @@ export const CitizenDashboard: React.FC = () => {
                       onLocationSelect={handleMapLocationSelect}
                       height="100%"
                     />
-                    <div className="absolute bottom-2 left-2 right-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-[10px] font-mono text-steel-700 dark:text-slate-300 border border-steel-300 dark:border-slate-700 pointer-events-none text-center shadow-sm">
-                      {language === 'hi' ? '✓ मानचित्र पर पिन देखकर पुष्टि करें। टैप या ड्रैग करके गेट सटीक करें।' : language === 'mr' ? '✓ नकाशावर पिन तपासा. अचूक जागेसाठी ड्रॅग करा.' : '✓ Pin confirms pickup doorstep. Tap anywhere or drag pin to fine-tune.'}
+                    <div className="absolute bottom-2 left-2 right-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-[10px] font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 pointer-events-none text-center shadow-sm">
+                      {language === 'hi' ? 'मानचित्र पर क्लिक करके सटीक पिकअप गेट बदलें' : language === 'mr' ? 'अचूक गेट निवडण्यासाठी नकाशावर कुठेही क्लिक करा' : 'Click anywhere on map to reposition your pickup pin'}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Pickup Schedule Slot Selector */}
-              <div>
-                <label className="block text-xs font-bold text-steel-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                  📅 {t('schedulePickupSlot', 'Schedule Pickup Slot')}
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    📅 {t('schedulePickupSlot', 'Schedule Pickup Slot')}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const now = new Date();
+                      now.setHours(now.getHours() + 2);
+                      const formatted = now.toISOString().slice(0, 16);
+                      setScheduledAt(formatted);
+                    }}
+                    className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 hover:underline font-bold"
+                  >
+                    +2 hrs ({t('earliestSlot', 'Earliest Slot')})
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => setScheduledAt(new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 16))}
-                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
+                    className="p-2.5 text-left rounded-xl border text-xs font-mono bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-700 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
                   >
                     <span className="font-bold block">⚡ {t('slotToday', 'Today')}</span>
-                    <span className="text-[10px] text-steel-500 dark:text-slate-400">{t('slotWithin2Hrs', 'Within 2 hrs')}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">{t('slotWithin2Hrs', 'Within 2 hrs')}</span>
                   </button>
                   <button
                     type="button"
@@ -1223,10 +1300,10 @@ export const CitizenDashboard: React.FC = () => {
                       d.setHours(10, 0, 0, 0);
                       setScheduledAt(d.toISOString().slice(0, 16));
                     }}
-                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
+                    className="p-2.5 text-left rounded-xl border text-xs font-mono bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-700 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
                   >
                     <span className="font-bold block">🌅 {t('slotTomorrow', 'Tomorrow')}</span>
-                    <span className="text-[10px] text-steel-500 dark:text-slate-400">10:00 AM</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">10:00 AM</span>
                   </button>
                   <button
                     type="button"
@@ -1236,10 +1313,10 @@ export const CitizenDashboard: React.FC = () => {
                       d.setHours(16, 0, 0, 0);
                       setScheduledAt(d.toISOString().slice(0, 16));
                     }}
-                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
+                    className="p-2.5 text-left rounded-xl border text-xs font-mono bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-700 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
                   >
                     <span className="font-bold block">🌆 {t('slotTomorrow', 'Tomorrow')}</span>
-                    <span className="text-[10px] text-steel-500 dark:text-slate-400">04:00 PM</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">04:00 PM</span>
                   </button>
                   <button
                     type="button"
@@ -1250,17 +1327,17 @@ export const CitizenDashboard: React.FC = () => {
                       d.setHours(11, 0, 0, 0);
                       setScheduledAt(d.toISOString().slice(0, 16));
                     }}
-                    className="p-2 text-left rounded-xl border text-xs font-mono bg-paper-100 dark:bg-slate-800 hover:bg-paper-200 dark:hover:bg-slate-700 border-steel-300 dark:border-slate-700 text-steel-800 dark:text-slate-200"
+                    className="p-2.5 text-left rounded-xl border text-xs font-mono bg-slate-50 dark:bg-slate-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-700 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
                   >
                     <span className="font-bold block">🗓️ {t('slotWeekend', 'Weekend')}</span>
-                    <span className="text-[10px] text-steel-500 dark:text-slate-400">{t('slotSat11AM', 'Saturday 11 AM')}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">{t('slotSat11AM', 'Saturday 11 AM')}</span>
                   </button>
                 </div>
                 <input
                   type="datetime-local"
                   value={scheduledAt}
                   onChange={e => setScheduledAt(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border-2 border-steel-300 dark:border-slate-700 text-steel-900 dark:text-white rounded-xl focus:border-copper-600 focus:outline-none"
+                  className="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:border-emerald-600 dark:focus:border-emerald-500 focus:outline-none"
                   required
                 />
               </div>
@@ -1439,15 +1516,15 @@ export const CitizenDashboard: React.FC = () => {
               </div>
 
               {/* Indicative Value Range Display (Section 1.A.2) */}
-              <div className="p-4 bg-brass-100/90 border-2 border-brass-400 rounded-lg flex items-center justify-between">
+              <div className="p-5 bg-gradient-to-r from-emerald-50 via-teal-50/40 to-slate-50 dark:from-emerald-950/30 dark:via-slate-800/60 dark:to-slate-900 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl flex items-center justify-between gap-4 shadow-xs">
                 <div>
-                  <span className="text-[10px] font-mono font-bold text-brass-800 uppercase tracking-wider block">
+                  <span className="text-[10px] font-mono font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">
                     {t('priceRangeTitle', 'Indicative Market Price Range')}
                   </span>
-                  <div className="text-xl sm:text-2xl font-mono-num font-black text-steel-900">
+                  <div className="text-xl sm:text-2xl font-mono-num font-black text-slate-900 dark:text-white mt-0.5">
                     {formatCurrency(indicativeMin)} — {formatCurrency(indicativeMax)}
                   </div>
-                  <span className="text-[11px] text-steel-600">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {t('currentPriceNotice', 'Live rates pulled from CPCB registered aggregators across India')}
                   </span>
                 </div>
@@ -1460,16 +1537,16 @@ export const CitizenDashboard: React.FC = () => {
               </div>
 
               {/* Option to Donate Value to CSR / NGO (Section 1.A.6) */}
-              <div className="p-3.5 bg-paper-200 rounded-lg border border-steel-300 flex items-center justify-between">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-forest-500/20 text-forest-600 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                     <Heart className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-steel-900 block">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
                       {t('donateToCsrLabel', 'Donate Value to Environmental NGO (Plant Trees)')}
                     </span>
-                    <span className="text-[11px] text-steel-600">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       {t('treeDonationNotice', 'Funds 5 native tree saplings in national reforestation green corridors.')}
                     </span>
                   </div>
@@ -1482,14 +1559,14 @@ export const CitizenDashboard: React.FC = () => {
                     onChange={e => setDonateToCsr(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-steel-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-steel-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-forest-600"></div>
+                  <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full btn-dhatu-primary py-3.5 rounded-lg text-sm font-bold flex items-center justify-center space-x-2 shadow-tactile"
+                className="w-full btn-primary-m3 py-3.5 text-sm font-bold flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>{t('confirmPickupBtn', 'Confirm & Request Doorstep Pickup')}</span>
@@ -1499,27 +1576,27 @@ export const CitizenDashboard: React.FC = () => {
 
           {/* Right Column: Information & Traceability Guarantee */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-4">
-              <span className="stamp-seal stamp-verified text-xs">{t('traceabilityBadge', 'Verified Chain')}</span>
-              <h3 className="font-display font-black text-steel-900 text-lg">
+            <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 space-y-4 shadow-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">{t('traceabilityBadge', 'Verified Chain')}</span>
+              <h3 className="font-display font-black text-slate-900 dark:text-white text-lg">
                 {t('traceabilityGuarantee', 'Dhatu Traceability & Chain of Custody Guarantee')}
               </h3>
-              <p className="text-xs text-steel-600">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 How your discarded devices are protected from dangerous open burning:
               </p>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3 bg-white rounded border border-steel-200 space-y-1">
-                  <div className="font-bold text-copper-700">1. Verified Doorstep Collector</div>
-                  <p className="text-steel-600">Aadhaar KYC verified kabadiwala visits with calibrated scales.</p>
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-1">
+                  <div className="font-bold text-emerald-700 dark:text-emerald-400">1. Verified Doorstep Collector</div>
+                  <p className="text-slate-600 dark:text-slate-400">Aadhaar KYC verified kabadiwala visits with calibrated scales.</p>
                 </div>
-                <div className="p-3 bg-white rounded border border-steel-200 space-y-1">
-                  <div className="font-bold text-copper-700">2. Tamper-Proof Digital Receipt</div>
-                  <p className="text-steel-600">Instant QR receipt generated with GPS stamp and weight verification.</p>
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-1">
+                  <div className="font-bold text-emerald-700 dark:text-emerald-400">2. Tamper-Proof Digital Receipt</div>
+                  <p className="text-slate-600 dark:text-slate-400">Instant QR receipt generated with GPS stamp and weight verification.</p>
                 </div>
-                <div className="p-3 bg-white rounded border border-steel-200 space-y-1">
-                  <div className="font-bold text-copper-700">3. CPCB Smelter Handover</div>
-                  <p className="text-steel-600">Lot confirmed by authorized aggregator EcoRecycle for zero-landfill recovery.</p>
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-1">
+                  <div className="font-bold text-emerald-700 dark:text-emerald-400">3. CPCB Smelter Handover</div>
+                  <p className="text-slate-600 dark:text-slate-400">Lot confirmed by authorized aggregator EcoRecycle for zero-landfill recovery.</p>
                 </div>
               </div>
             </div>
@@ -1530,21 +1607,21 @@ export const CitizenDashboard: React.FC = () => {
 
       {/* TAB 3: PERSONAL ENVIRONMENTAL IMPACT & GREEN CREDITS */}
       {activeTab === 'impact' && (
-        <div className="bg-paper-50 rounded-xl p-6 sm:p-8 border-2 border-steel-300 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-steel-200 pb-4">
+        <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
-              <span className="stamp-seal stamp-verified text-xs">{t('environmentalImpactHeader', 'Environmental Impact')}</span>
-              <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">{t('environmentalImpactHeader', 'Environmental Impact')}</span>
+              <h2 className="text-xl font-display font-black text-slate-900 dark:text-white mt-2">
                 {t('personalImpactTitle', 'Your Environmental & Landfill Diversion Impact')}
               </h2>
-              <p className="text-xs text-steel-600">
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 Official metrics audited by Central Pollution Control Board (CPCB) methodology.
               </p>
             </div>
 
             <button
               onClick={() => setShowCertificateModal(true)}
-              className="btn-dhatu-primary px-4 py-2 rounded text-xs font-bold flex items-center space-x-1.5 self-start sm:self-auto"
+              className="btn-primary-m3 px-4 py-2 text-xs font-bold flex items-center space-x-1.5 self-start sm:self-auto shadow-sm"
             >
               <Award className="w-4 h-4" />
               <span>{t('downloadCertBtn', 'Download Disposal Certificate')}</span>
@@ -1552,28 +1629,28 @@ export const CitizenDashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-center">
-            <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">{t('ewasteDiverted', 'E-Waste Diverted from Landfills')}</span>
-              <span className="text-3xl font-bold text-copper-600">28.2 kg</span>
-              <span className="text-[10px] text-forest-600 block mt-1">Zero toxic leaching</span>
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase block tracking-wider">{t('ewasteDiverted', 'E-Waste Diverted from Landfills')}</span>
+              <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 block mt-1">28.2 kg</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block mt-1 font-semibold">Zero toxic leaching</span>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">{t('carbonSaved', 'Carbon Emissions Avoided')}</span>
-              <span className="text-3xl font-bold text-forest-600">64.5 kg</span>
-              <span className="text-[10px] text-steel-500 block mt-1">Equivalent to 4 trees</span>
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase block tracking-wider">{t('carbonSaved', 'Carbon Emissions Avoided')}</span>
+              <span className="text-3xl font-bold text-teal-600 dark:text-teal-400 block mt-1">64.5 kg</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Equivalent to 4 trees</span>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">{t('metalsRecycled', 'Metals & Copper Recycled')}</span>
-              <span className="text-3xl font-bold text-brass-700">8.4 kg</span>
-              <span className="text-[10px] text-steel-500 block mt-1">Smelter pure ingot</span>
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase block tracking-wider">{t('metalsRecycled', 'Metals & Copper Recycled')}</span>
+              <span className="text-3xl font-bold text-amber-600 dark:text-amber-400 block mt-1">8.4 kg</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1">Smelter pure ingot</span>
             </div>
 
-            <div className="bg-white p-4 rounded-lg border border-steel-300 shadow-sm">
-              <span className="text-steel-500 text-[10px] uppercase block">{t('csrCreditsEarned', 'CSR Green Credits Earned')}</span>
-              <span className="text-3xl font-bold text-steel-900">420 Pts</span>
-              <span className="text-[10px] text-copper-700 block mt-1">Eligible for tax rebate</span>
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase block tracking-wider">{t('csrCreditsEarned', 'CSR Green Credits Earned')}</span>
+              <span className="text-3xl font-bold text-slate-900 dark:text-white block mt-1">420 Pts</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block mt-1 font-semibold">Eligible for tax rebate</span>
             </div>
           </div>
         </div>
@@ -1583,27 +1660,27 @@ export const CitizenDashboard: React.FC = () => {
       {activeTab === 'dropoff' && (
         <div className="space-y-6">
           <div>
-            <span className="stamp-seal stamp-verified text-xs">{t('selfDropoffBadge', 'Self Drop-Off Option')}</span>
-            <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">{t('selfDropoffBadge', 'Self Drop-Off Option')}</span>
+            <h2 className="text-xl font-display font-black text-slate-900 dark:text-white mt-2">
               {t('selfDropoffTitle', 'Authorized E-Waste Drop-Off Centers')}
             </h2>
-            <p className="text-xs text-steel-600">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
               For citizens who prefer dropping off items in person without scheduling a home pickup.
             </p>
           </div>
 
           {/* Drop-off Terminals Map Preview */}
-          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-2">
-            <div className="font-display font-bold text-steel-800 text-sm flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-copper-600" />
+          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm p-5 sm:p-6 space-y-3">
+            <div className="font-display font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center justify-between">
+              <span className="flex items-center gap-1.5 font-bold">
+                <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>{language === 'hi' ? 'ड्रॉप-ऑफ केंद्र मानचित्र' : language === 'mr' ? 'ड्रॉप-ऑफ केंद्र नकाशा' : 'Authorized Drop-off Centers Map'}</span>
               </span>
-              <span className="text-xs font-mono text-copper-700 bg-paper-200 px-2.5 py-0.5 rounded border border-steel-300 font-bold">
+              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 font-bold">
                 3 Verified Kiosks
               </span>
             </div>
-            <div className="h-56 sm:h-64 rounded-lg overflow-hidden border border-steel-300">
+            <div className="h-56 sm:h-64 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
               <LeafletMap
                 center={[currentRefLat, currentRefLng]}
                 zoom={12}
@@ -1625,38 +1702,38 @@ export const CitizenDashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {dropoffCenters.map((c, i) => (
-              <div key={i} className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm flex flex-col justify-between space-y-3 hover:border-copper-500 transition-colors">
+              <div key={i} className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all">
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
-                    <span className="stamp-seal stamp-verified text-[9px]">CPCB DROP-OFF</span>
-                    <span className="text-xs font-bold text-copper-600 bg-copper-50 px-2 py-0.5 rounded border border-copper-200">
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">CPCB DROP-OFF</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200/80 dark:border-slate-700">
                       📍 {c.distanceKm} km away
                     </span>
                   </div>
 
-                  <h3 className="font-bold text-steel-900 text-base">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">
                     {c.name}
                   </h3>
 
-                  <div className="space-y-1 text-xs text-steel-600">
+                  <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
                     <p className="flex items-start gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-copper-600 flex-shrink-0 mt-0.5" />
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span>{c.address}</span>
                     </p>
-                    <p className="text-steel-500">{c.hours}</p>
+                    <p className="text-slate-500 dark:text-slate-400">{c.hours}</p>
                   </div>
 
-                  <div className="p-2.5 bg-paper-200 rounded border border-steel-300 text-xs text-forest-800 font-medium">
+                  <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/50 rounded-xl border border-emerald-200/80 dark:border-emerald-800/80 text-xs text-emerald-800 dark:text-emerald-300 font-medium">
                     🎁 <strong>Incentive:</strong> {c.incentive}
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-steel-200">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                   <a
                     href={c.directionsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full btn-dhatu-primary py-2 px-3 rounded text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-transform text-center"
+                    className="w-full btn-primary-m3 py-2 px-3 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-transform text-center"
                   >
                     <Navigation className="w-3.5 h-3.5" />
                     <span>Navigate on Google Maps ({c.distanceKm} km) →</span>
@@ -1670,71 +1747,71 @@ export const CitizenDashboard: React.FC = () => {
 
       {/* VERIFIABLE RECEIPT MODAL (Section 1.A.4) */}
       {showReceiptModal && (
-        <div className="fixed inset-0 z-[60] bg-steel-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-paper-50 rounded-2xl max-w-md w-full border-4 border-steel-800 shadow-2xl p-6 space-y-4">
-            <div className="flex justify-between items-start border-b-2 border-steel-300 pb-3">
+        <div className="fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full border border-slate-200/80 dark:border-slate-800 shadow-2xl p-6 sm:p-7 space-y-4">
+            <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
-                <span className="stamp-seal stamp-verified text-xs">{t('verifiedReceiptModalTitle', 'Verified Digital Receipt')}</span>
-                <h3 className="font-display font-black text-xl text-steel-900 mt-1">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">{t('verifiedReceiptModalTitle', 'Verified Digital Receipt')}</span>
+                <h3 className="font-display font-black text-xl text-slate-900 dark:text-white mt-1">
                   E-Waste Handover Voucher
                 </h3>
               </div>
               <button
                 onClick={() => setShowReceiptModal(null)}
-                className="w-8 h-8 rounded-full bg-paper-200 text-steel-800 hover:bg-steel-300 flex items-center justify-center font-bold"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center font-bold text-sm"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-4 bg-white rounded-lg border-2 border-steel-800 flex flex-col items-center justify-center space-y-2">
-              <QrCode className="w-32 h-32 text-steel-900" />
-              <div className="font-mono text-xs font-bold text-copper-700">
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex flex-col items-center justify-center space-y-2">
+              <QrCode className="w-32 h-32 text-slate-900 dark:text-white" />
+              <div className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">
                 RECEIPT #{showReceiptModal.id.slice(0, 12).toUpperCase()}
               </div>
             </div>
 
-            <div className="space-y-2 text-xs font-mono bg-paper-100 p-3.5 rounded border border-paper-300">
+            <div className="space-y-2 text-xs font-mono bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700">
               <div className="flex justify-between">
-                <span className="text-steel-500">Citizen:</span>
-                <span className="font-bold">Ramesh Sharma</span>
+                <span className="text-slate-500 dark:text-slate-400">Citizen:</span>
+                <span className="font-bold text-slate-900 dark:text-white">Ramesh Sharma</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-steel-500">Verified Collector:</span>
-                <span className="font-bold">Suresh Kumar (KC-COL-8921)</span>
+                <span className="text-slate-500 dark:text-slate-400">Verified Collector:</span>
+                <span className="font-bold text-slate-900 dark:text-white">Suresh Kumar (KC-COL-8921)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-steel-500">Status:</span>
-                <span className="text-forest-700 font-bold">100% Closed Loop Recycled</span>
+                <span className="text-slate-500 dark:text-slate-400">Status:</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">100% Closed Loop Recycled</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-steel-500">{t('totalItems', 'Total Items')}:</span>
-                <span className="font-bold text-steel-900">
+                <span className="text-slate-500 dark:text-slate-400">{t('totalItems', 'Total Items')}:</span>
+                <span className="font-bold text-slate-900 dark:text-white">
                   {showReceiptModal.totalItems || showReceiptModal.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({showReceiptModal.items?.length || 1} {t('items', 'types')})
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-steel-500">Total Scrap Value:</span>
-                <span className="font-bold text-copper-600">₹{showReceiptModal.totalAmount || 598}</span>
+                <span className="text-slate-500 dark:text-slate-400">Total Scrap Value:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">₹{showReceiptModal.totalAmount || 598}</span>
               </div>
               {showReceiptModal.items && showReceiptModal.items.length > 0 && (
-                <div className="pt-2 border-t border-paper-300 space-y-1">
-                  <span className="text-steel-500 text-[10px] uppercase font-bold tracking-wider block">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
+                  <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider block">
                     {t('itemsToRecycle', 'Itemized Manifest')}:
                   </span>
                   {showReceiptModal.items.map((it, idx) => (
-                    <div key={idx} className="flex justify-between text-[11px] text-steel-800 bg-white px-2 py-1 rounded border border-paper-200">
+                    <div key={idx} className="flex justify-between text-[11px] text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
                       <span className="truncate pr-1">• {preserveEnglishItemName(it.category)}</span>
-                      <span className="font-bold shrink-0">
+                      <span className="font-bold shrink-0 font-mono text-emerald-700 dark:text-emerald-400">
                         {it.quantity ? `${it.quantity} ${t('pieces', 'pcs')} • ` : ''}{it.actualWeightKg || it.estWeightKg} kg
                       </span>
                     </div>
                   ))}
                 </div>
               )}
-              <div className="flex justify-between pt-1 border-t border-paper-300 text-[10px] text-steel-500">
+              <div className="flex justify-between pt-1 border-t border-slate-200 dark:border-slate-700 text-[10px] text-slate-500 dark:text-slate-400">
                 <span>Cryptographic Hash:</span>
-                <span>{showReceiptModal.traceabilityHash || '0x19283746...'}</span>
+                <span className="font-mono">{showReceiptModal.traceabilityHash || '0x19283746...'}</span>
               </div>
             </div>
 
@@ -1743,7 +1820,7 @@ export const CitizenDashboard: React.FC = () => {
                 alert('Receipt PDF downloaded! (CPCB EPR Compliant)');
                 setShowReceiptModal(null);
               }}
-              className="w-full btn-dhatu-primary py-2.5 rounded text-xs font-bold flex items-center justify-center space-x-1.5"
+              className="w-full btn-primary-m3 py-3 rounded-2xl text-xs font-bold flex items-center justify-center space-x-1.5 shadow-sm"
             >
               <Download className="w-4 h-4" />
               <span>Download Signed Receipt (PDF)</span>

@@ -1,0 +1,11 @@
+{
+  "checkpoint_id": "CHK-TASK-20260919-017-harmonize-pickup-requests-and--1789795362",
+  "task_id": "TASK-20260919-017-harmonize-pickup-requests-and-",
+  "timestamp": "2026-09-19T05:22:42Z",
+  "agent_id": "Antigravity",
+  "status": "IN_PROGRESS",
+  "current_step": "Audited residual receipt-stubs and harsh borders in admin and recycler dashboards",
+  "next_step": "Upgrade remaining dashboard cards to Material 3 elevated squircle design",
+  "notes": "",
+  "dirty_files": []
+}

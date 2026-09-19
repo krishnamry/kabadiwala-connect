@@ -368,28 +368,28 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Environmental Savings Grid */}
-          <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-4">
+          <div className="rounded-3xl p-6 sm:p-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <span className="stamp-seal stamp-verified text-xs">{language === 'hi' ? 'सीपीसीबी हरित मानक' : language === 'mr' ? 'सीपीसीबी हरित निर्देशांक' : 'CPCB GREEN METRICS'}</span>
-            <h3 className="font-display font-bold text-steel-900 text-lg">
+            <h3 className="font-display font-bold text-slate-900 dark:text-white text-lg">
               {t('environmentalImpactHeader', 'Cumulative Environmental Impact Saved')}
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center font-mono">
-              <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">{t('carbonSaved', 'CO2 PREVENTED')}</span>
-                <span className="text-2xl font-bold text-forest-600">58.2 MT</span>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold">{t('carbonSaved', 'CO2 PREVENTED')}</span>
+                <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">58.2 MT</span>
               </div>
-              <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">{t('treesPlanted', 'TREES EQUIVALENT')}</span>
-                <span className="text-2xl font-bold text-forest-600">3,840</span>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold">{t('treesPlanted', 'TREES EQUIVALENT')}</span>
+                <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">3,840</span>
               </div>
-              <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">{language === 'hi' ? 'जल संरक्षण' : language === 'mr' ? 'पाण्याची बचत' : 'WATER SAVED'}</span>
-                <span className="text-2xl font-bold text-copper-600">1.94 Lakh L</span>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold">{language === 'hi' ? 'जल संरक्षण' : language === 'mr' ? 'पाण्याची बचत' : 'WATER SAVED'}</span>
+                <span className="text-2xl font-bold text-sky-600 dark:text-sky-400">1.94 Lakh L</span>
               </div>
-              <div className="bg-white p-4 rounded border border-steel-300">
-                <span className="text-steel-500 text-[10px] block">{language === 'hi' ? 'सीसा अपशिष्ट रोका गया' : language === 'mr' ? 'लेड कचरा रोखला' : 'LEAD SLAG BLOCKED'}</span>
-                <span className="text-2xl font-bold text-signal-600">760 kg</span>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold">{language === 'hi' ? 'सीसा अपशिष्ट रोका गया' : language === 'mr' ? 'लेड कचरा रोखला' : 'LEAD SLAG BLOCKED'}</span>
+                <span className="text-2xl font-bold text-rose-600 dark:text-rose-400">760 kg</span>
               </div>
             </div>
           </div>
@@ -422,12 +422,12 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-steel-300 pb-4">
+          <div className="rounded-3xl p-6 sm:p-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-4">
               <div>
-                <span className="font-mono text-xs font-bold text-copper-700 block">{selectedLotChain.lotCode}</span>
-                <h3 className="font-display font-black text-xl text-steel-900">{preserveEnglishItemName(selectedLotChain.category)}</h3>
-                <span className="text-xs font-mono text-steel-500">Gross Intake Weight: {selectedLotChain.totalWeightKg} kg</span>
+                <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 block">{selectedLotChain.lotCode}</span>
+                <h3 className="font-display font-black text-xl text-slate-900 dark:text-white">{preserveEnglishItemName(selectedLotChain.category)}</h3>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">Gross Intake Weight: {selectedLotChain.totalWeightKg} kg</span>
               </div>
               <span className="stamp-seal stamp-verified text-xs">
                 AUDIT SEALED (CPCB VERIFIED)
@@ -437,39 +437,39 @@ export const AdminDashboard: React.FC = () => {
             {/* 4-Stage Visualizer */}
             <div className="space-y-4">
               {selectedLotChain.stages.map((stg, idx) => (
-                <div key={idx} className="bg-white p-4 rounded-lg border border-steel-300 space-y-2 relative">
+                <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 relative">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-display font-bold text-steel-900 text-sm">{stg.stage}</span>
+                    <span className="font-display font-bold text-slate-900 dark:text-white text-sm">{stg.stage}</span>
                     <span className="stamp-seal stamp-verified text-[9px]">{stg.status}</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono text-steel-700">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono text-slate-700 dark:text-slate-300">
                     <div>
-                      <span className="text-[10px] text-steel-500 block">ACTOR</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">ACTOR</span>
                       <span className="font-bold">{stg.actor}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-steel-500 block">LOCATION</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">LOCATION</span>
                       <span>{stg.location}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-steel-500 block">TIMESTAMP</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block">TIMESTAMP</span>
                       <span>{stg.timestamp}</span>
                     </div>
                   </div>
 
-                  <div className="text-[10px] font-mono text-steel-500 pt-1 border-t border-paper-200">
+                  <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-700/60">
                     Tamper-Evident SHA-256 Hash: {stg.hash}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="text-xs text-steel-600 bg-paper-100 p-3 rounded border border-steel-300 flex items-center justify-between">
+            <div className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between">
               <span>
                 🔒 <strong>CPCB Regulatory Compliance:</strong> Closes the formal traceability loop required by SIH26229.
               </span>
-              <span className="font-mono text-[11px] text-forest-700 font-bold">100% Audit Ready</span>
+              <span className="font-mono text-[11px] text-emerald-700 dark:text-emerald-300 font-bold">100% Audit Ready</span>
             </div>
           </div>
         </div>
@@ -565,73 +565,73 @@ export const AdminDashboard: React.FC = () => {
             <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
               
               {/* Column 1: Informal Market */}
-              <div className="receipt-stub rounded-xl p-5 border-2 border-signal-500/80 shadow-sm space-y-4">
-                <div className="border-b border-steel-300 pb-2">
+              <div className="rounded-3xl p-6 bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 shadow-sm space-y-4">
+                <div className="border-b border-rose-200/60 dark:border-rose-900/40 pb-3">
                   <span className="stamp-seal stamp-hazard text-[10px]">INFORMAL BASELINE</span>
-                  <h4 className="font-display font-black text-lg text-steel-900 mt-1">
+                  <h4 className="font-display font-black text-lg text-slate-900 dark:text-white mt-1">
                     {t('informalMarketLabel', 'Informal Scrap Market (Status Quo)')}
                   </h4>
-                  <p className="text-[11px] text-steel-500">Traditional Predatory Scrap Chain</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Traditional Predatory Scrap Chain</p>
                 </div>
 
                 <div className="space-y-2.5 text-xs font-mono">
                   <div className="flex justify-between">
-                    <span className="text-steel-600">Reported Weight:</span>
-                    <span className="font-bold text-signal-600">{informalReportedWeight.toFixed(1)} kg</span>
+                    <span className="text-slate-600 dark:text-slate-400">Reported Weight:</span>
+                    <span className="font-bold text-rose-600 dark:text-rose-400">{informalReportedWeight.toFixed(1)} kg</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-steel-600">Middleman Margin Cut:</span>
-                    <span className="font-bold text-signal-600">-{informalMiddlemanCut}%</span>
+                    <span className="text-slate-600 dark:text-slate-400">Middleman Margin Cut:</span>
+                    <span className="font-bold text-rose-600 dark:text-rose-400">-{informalMiddlemanCut}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-steel-600">Formalization Bonus:</span>
-                    <span className="text-steel-400">₹0</span>
+                    <span className="text-slate-600 dark:text-slate-400">Formalization Bonus:</span>
+                    <span className="text-slate-400">₹0</span>
                   </div>
-                  <div className="pt-2 border-t border-steel-200 flex justify-between items-baseline">
-                    <span className="font-bold text-steel-900">Collector Monthly Take:</span>
-                    <span className="text-2xl font-black text-signal-600 font-mono-num">
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between items-baseline">
+                    <span className="font-bold text-slate-900 dark:text-white">Collector Monthly Take:</span>
+                    <span className="text-2xl font-black text-rose-600 dark:text-rose-400 font-mono-num">
                       {formatCurrency(informalCollectorPay)}
                     </span>
                   </div>
                 </div>
 
-                <div className="text-[11px] text-steel-500 p-2 bg-paper-100 rounded border border-steel-200">
+                <div className="text-[11px] text-slate-600 dark:text-slate-400 p-3 bg-white/80 dark:bg-slate-900/60 rounded-xl border border-rose-200/60 dark:border-rose-900/30">
                   ❌ No receipts, no pension, unsafe acid leaching, predatory middleman debt traps.
                 </div>
               </div>
 
               {/* Column 2: Kabadiwala Connect Platform */}
-              <div className="receipt-stub rounded-xl p-5 border-2 border-forest-500 shadow-md space-y-4 bg-forest-500/5">
-                <div className="border-b border-steel-300 pb-2">
+              <div className="rounded-3xl p-6 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-800/60 shadow-sm space-y-4">
+                <div className="border-b border-emerald-200/60 dark:border-emerald-800/50 pb-3">
                   <span className="stamp-seal stamp-verified text-[10px]">KABADIWALA CONNECT</span>
-                  <h4 className="font-display font-black text-lg text-steel-900 mt-1">
+                  <h4 className="font-display font-black text-lg text-slate-900 dark:text-white mt-1">
                     {t('formalPlatformLabel', 'Kabadiwala Connect Platform (Formalized)')}
                   </h4>
-                  <p className="text-[11px] text-forest-700 font-bold">Formal CPCB Smelter Chain</p>
+                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold">Formal CPCB Smelter Chain</p>
                 </div>
 
                 <div className="space-y-2.5 text-xs font-mono">
                   <div className="flex justify-between">
-                    <span className="text-steel-600">Verified Scale Weight:</span>
-                    <span className="font-bold text-forest-700">{monthlyVolumeKg} kg (100%)</span>
+                    <span className="text-slate-600 dark:text-slate-400">Verified Scale Weight:</span>
+                    <span className="font-bold text-emerald-700 dark:text-emerald-300">{monthlyVolumeKg} kg (100%)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-steel-600">Direct Recycler Rate:</span>
-                    <span className="font-bold text-forest-700">100% Benchmark</span>
+                    <span className="text-slate-600 dark:text-slate-400">Direct Recycler Rate:</span>
+                    <span className="font-bold text-emerald-700 dark:text-emerald-300">100% Benchmark</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-steel-600">Ministry Loyalty Bonus:</span>
-                    <span className="font-bold text-brass-700">+₹500 / month</span>
+                    <span className="text-slate-600 dark:text-slate-400">Ministry Loyalty Bonus:</span>
+                    <span className="font-bold text-amber-700 dark:text-amber-400">+₹500 / month</span>
                   </div>
-                  <div className="pt-2 border-t border-steel-200 flex justify-between items-baseline">
-                    <span className="font-bold text-steel-900">Collector Monthly Take:</span>
-                    <span className="text-2xl font-black text-forest-700 font-mono-num">
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between items-baseline">
+                    <span className="font-bold text-slate-900 dark:text-white">Collector Monthly Take:</span>
+                    <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono-num">
                       {formatCurrency(formalCollectorPay)}
                     </span>
                   </div>
                 </div>
 
-                <div className="p-3 bg-forest-500/10 rounded-lg border border-forest-500/40 text-xs font-bold text-forest-800 text-center">
+                <div className="p-3.5 bg-emerald-500/10 dark:bg-emerald-950/40 rounded-xl border border-emerald-500/30 text-xs font-bold text-emerald-800 dark:text-emerald-300 text-center">
                   🎉 +{percentageIncrease}% More Net Income (+{formatCurrency(earningsDifference)}/mo)
                 </div>
               </div>
@@ -707,14 +707,14 @@ export const AdminDashboard: React.FC = () => {
                 return (
                   <div
                     key={u.id}
-                    className={`receipt-stub rounded-2xl p-5 border-2 shadow-sm space-y-4 transition-all ${
+                    className={`rounded-3xl p-5 sm:p-6 border shadow-sm space-y-4 transition-all ${
                       isUnderReview
-                        ? 'border-amber-400/80 bg-amber-50/20'
+                        ? 'border-amber-400/80 dark:border-amber-600/70 bg-amber-50/30 dark:bg-amber-950/20'
                         : isVerified
-                        ? 'border-forest-500/80 bg-forest-50/20'
+                        ? 'border-emerald-500/80 dark:border-emerald-700/70 bg-emerald-50/30 dark:bg-emerald-950/20'
                         : isRejected
-                        ? 'border-signal-400/80 bg-signal-50/20'
-                        : 'border-steel-300 bg-white'
+                        ? 'border-rose-400/80 dark:border-rose-700/70 bg-rose-50/30 dark:bg-rose-950/20'
+                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
                     }`}
                   >
                     {/* Header: Role & Status */}

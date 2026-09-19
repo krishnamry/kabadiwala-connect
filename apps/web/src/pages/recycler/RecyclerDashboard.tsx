@@ -1141,61 +1141,63 @@ export const RecyclerDashboard: React.FC = () => {
             {anomalies.map(anom => (
               <div
                 key={anom.id}
-                className={`receipt-stub rounded-lg p-5 border-2 ${
-                  anom.severity === 'HIGH' ? 'border-signal-500' : 'border-brass-500'
-                } shadow-sm space-y-3`}
+                className={`rounded-3xl p-5 sm:p-6 border shadow-sm space-y-4 transition-all ${
+                  anom.severity === 'HIGH'
+                    ? 'border-rose-300 dark:border-rose-900/60 bg-rose-50/30 dark:bg-rose-950/20'
+                    : 'border-amber-300 dark:border-amber-900/60 bg-amber-50/30 dark:bg-amber-950/20'
+                }`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-steel-200 pb-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
                   <div className="flex items-center space-x-2">
                     <span className={`stamp-seal ${anom.severity === 'HIGH' ? 'stamp-hazard' : 'stamp-pending'} text-[10px]`}>
                       {anom.severity} RISK
                     </span>
-                    <span className="font-mono text-xs font-bold text-steel-900">Lot: {anom.lotCode}</span>
-                    <span className="text-xs text-steel-600">Collector: <strong>{anom.collectorName}</strong></span>
+                    <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">Lot: {anom.lotCode}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-400">Collector: <strong className="text-slate-900 dark:text-slate-200">{anom.collectorName}</strong></span>
                   </div>
-                  <div className="text-[11px] font-mono text-steel-500">
+                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
                     Flagged: {anom.flaggedAt}
                   </div>
                 </div>
 
-                <p className="text-xs text-steel-800 font-medium">
+                <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
                   {anom.reason}
                 </p>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-paper-100 p-2.5 rounded text-xs font-mono border border-paper-300">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl text-xs font-mono border border-slate-200 dark:border-slate-800">
                   <div>
-                    <span className="text-[10px] text-steel-500 block">CATEGORY</span>
-                    <span className="font-bold">{preserveEnglishItemName(anom.category)}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">CATEGORY</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{preserveEnglishItemName(anom.category)}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-steel-500 block">WEIGHT</span>
-                    <span className="font-bold">{anom.weightKg} kg</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">WEIGHT</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{anom.weightKg} kg</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-steel-500 block">DECLARED</span>
-                    <span className="font-bold text-signal-500">{formatCurrency(anom.declaredValue)}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">DECLARED</span>
+                    <span className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(anom.declaredValue)}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-steel-500 block">BENCHMARK</span>
-                    <span className="font-bold text-forest-600">{formatCurrency(anom.benchmarkValue)}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">BENCHMARK</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(anom.benchmarkValue)}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-steel-200">
-                  <span className="text-[11px] text-steel-500">
-                    Status: <strong className={anom.status === 'FLAGGED' ? 'text-signal-600' : 'text-forest-600'}>{anom.status}</strong>
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Status: <strong className={anom.status === 'FLAGGED' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}>{anom.status}</strong>
                   </span>
                   {anom.status === 'FLAGGED' && (
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleResolveAnomaly(anom.id, 'REVIEWED')}
-                        className="px-3 py-1 bg-paper-200 hover:bg-forest-500/20 text-forest-700 text-xs font-bold rounded border border-steel-300"
+                        className="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-xl border border-emerald-300 dark:border-emerald-800 transition-colors"
                       >
                         Mark Verified & Audited
                       </button>
                       <button
                         onClick={() => handleResolveAnomaly(anom.id, 'DISMISSED')}
-                        className="px-3 py-1 bg-paper-200 hover:bg-steel-300 text-steel-700 text-xs font-bold rounded border border-steel-300"
+                        className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 transition-colors"
                       >
                         Dismiss Flag
                       </button>
@@ -1302,55 +1304,55 @@ export const RecyclerDashboard: React.FC = () => {
 
       {/* TAB 6: FACILITY PROFILE */}
       {activeTab === 'profile' && (
-        <div className="receipt-stub rounded-xl p-6 sm:p-8 border-2 border-steel-300 space-y-6">
-          <div className="flex items-center justify-between border-b border-steel-200 pb-4">
+        <div className="rounded-3xl p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
             <div>
               <span className="stamp-seal stamp-verified text-xs">AUTHORIZED AGGREGATOR</span>
-              <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+              <h2 className="text-xl font-display font-black text-slate-900 dark:text-white mt-2">
                 CPCB Registered Processing Facility Profile
               </h2>
             </div>
-            <span className="font-mono text-xs text-steel-500">Facility ID: FAC-DL-OKHLA-02</span>
+            <span className="font-mono text-xs text-slate-500 dark:text-slate-400">Facility ID: FAC-DL-OKHLA-02</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-            <div className="space-y-3">
-              <div>
-                <span className="text-steel-500 font-mono block">FACILITY LEGAL ENTITY</span>
-                <span className="text-sm font-bold text-steel-900">EcoRecycle Aggregators Private Limited</span>
+            <div className="space-y-3.5">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block">FACILITY LEGAL ENTITY</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">EcoRecycle Aggregators Private Limited</span>
               </div>
-              <div>
-                <span className="text-steel-500 font-mono block">CENTRAL POLLUTION CONTROL BOARD REG</span>
-                <span className="font-mono font-bold text-copper-600">CPCB-EW-2023-DL-0881 (Valid till 2028)</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block">CENTRAL POLLUTION CONTROL BOARD REG</span>
+                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">CPCB-EW-2023-DL-0881 (Valid till 2028)</span>
               </div>
-              <div>
-                <span className="text-steel-500 font-mono block">STATE PCB CONSENT TO OPERATE (CTO)</span>
-                <span className="font-mono text-steel-800">DPCC/E-WASTE/CTO/2023/1049</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block">STATE PCB CONSENT TO OPERATE (CTO)</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200">DPCC/E-WASTE/CTO/2023/1049</span>
               </div>
-              <div>
-                <span className="text-steel-500 font-mono block">PHYSICAL ADDRESS</span>
-                <span className="text-steel-800">Plot 42, Okhla Phase-II Industrial Area, New Delhi - 110020</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block">PHYSICAL ADDRESS</span>
+                <span className="text-slate-800 dark:text-slate-200">Plot 42, Okhla Phase-II Industrial Area, New Delhi - 110020</span>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <span className="text-steel-500 font-mono block">SERVICE RADIUS</span>
-                <span className="font-bold text-steel-800">25 km (Regional Industrial & Urban Hub Network)</span>
+            <div className="space-y-3.5">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block">SERVICE RADIUS</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">25 km (Regional Industrial & Urban Hub Network)</span>
               </div>
-              <div>
-                <span className="text-steel-500 font-mono block">AUTHORIZED E-WASTE STREAMS</span>
-                <div className="flex flex-wrap gap-1 mt-1">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block mb-1.5">AUTHORIZED E-WASTE STREAMS</span>
+                <div className="flex flex-wrap gap-1.5">
                   {['CRTs', 'LCDs', 'PCBs', 'Copper Cables', 'Batteries', 'Magnets', 'ABS Plastics'].map(m => (
-                    <span key={m} className="px-2 py-0.5 bg-paper-200 text-steel-800 rounded font-mono text-[10px] border border-steel-300">
+                    <span key={m} className="px-2.5 py-0.5 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 rounded-full font-mono text-[10px] border border-slate-200 dark:border-slate-700 shadow-2xs">
                       {m}
                     </span>
                   ))}
                 </div>
               </div>
-              <div>
-                <span className="text-steel-500 font-mono block">PICKUP FLEET</span>
-                <span className="text-steel-800">4 Electric Mini-Trucks (2-tonne payload each) with GPS Telematics</span>
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block">PICKUP FLEET</span>
+                <span className="text-slate-800 dark:text-slate-200">4 Electric Mini-Trucks (2-tonne payload each) with GPS Telematics</span>
               </div>
             </div>
           </div>

@@ -2839,11 +2839,11 @@ export const KabadiwalaDashboard: React.FC = () => {
             {priceBoardData.map((item, idx) => (
               <div
                 key={idx}
-                className="receipt-stub rounded-lg p-4 border-2 border-steel-300 shadow-sm flex flex-col justify-between space-y-3 hover:border-copper-500 transition-colors"
+                className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all flex flex-col justify-between space-y-3.5"
               >
                 <div>
                   <div className="flex items-start justify-between">
-                    <span className="text-[10px] font-mono text-steel-500 uppercase tracking-wider">
+                    <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
                       ITEM #{idx + 1}
                     </span>
                     <VoiceAssistButton
@@ -2855,32 +2855,32 @@ export const KabadiwalaDashboard: React.FC = () => {
                     />
                   </div>
 
-                  <h3 className="font-display font-black text-steel-900 text-sm mt-1 leading-snug">
+                  <h3 className="font-display font-black text-slate-900 dark:text-white text-sm mt-1 leading-snug">
                     {preserveEnglishItemName(item.category)}
                   </h3>
-                  <p className="text-[11px] text-steel-500 mt-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     {language === 'hi' ? item.categoryHi : language === 'mr' ? item.categoryMr : item.desc}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-steel-200">
+                <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-baseline justify-between">
-                    <div className="text-2xl font-mono-num font-black text-copper-600">
+                    <div className="text-2xl font-mono-num font-black text-emerald-600 dark:text-emerald-400">
                       ₹{item.ratePerKg}
-                      <span className="text-xs font-mono text-steel-500 ml-1">/kg</span>
+                      <span className="text-xs font-mono text-slate-500 dark:text-slate-400 ml-1 font-normal">/kg</span>
                     </div>
 
                     <div className="flex items-center space-x-1 text-xs font-mono font-bold">
                       {item.trend === 'UP' ? (
-                        <span className="text-forest-600 flex items-center">
+                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center">
                           <TrendingUp className="w-3.5 h-3.5 mr-0.5" /> +₹{item.delta}
                         </span>
                       ) : item.trend === 'DOWN' ? (
-                        <span className="text-signal-500 flex items-center">
+                        <span className="text-rose-600 dark:text-rose-400 flex items-center">
                           <TrendingDown className="w-3.5 h-3.5 mr-0.5" /> ₹{item.delta}
                         </span>
                       ) : (
-                        <span className="text-steel-500">— {language === 'hi' ? 'स्थिर' : language === 'mr' ? 'स्थिर' : 'Steady'}</span>
+                        <span className="text-slate-400 dark:text-slate-500">— {language === 'hi' ? 'स्थिर' : language === 'mr' ? 'स्थिर' : 'Steady'}</span>
                       )}
                     </div>
                   </div>
@@ -2922,17 +2922,17 @@ export const KabadiwalaDashboard: React.FC = () => {
           </div>
 
           {/* Nearby Authorized Smelters Map Preview */}
-          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-2">
-            <div className="font-display font-bold text-steel-800 text-sm flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <Factory className="w-4 h-4 text-copper-600" />
+          <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <div className="font-display font-bold text-slate-800 dark:text-slate-200 text-sm sm:text-base flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Factory className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>{language === 'hi' ? 'अधिकृत रीसायकलर संयंत्र मानचित्र' : language === 'mr' ? 'अधिकृत रीसायकलर नकाशा' : 'Authorized Recyclers & Smelters Map'}</span>
               </span>
-              <span className="text-xs font-mono text-forest-700 bg-paper-200 px-2.5 py-0.5 rounded border border-steel-300 font-bold">
+              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 font-bold">
                 3 CPCB Smelters
               </span>
             </div>
-            <div className="h-60 sm:h-72 rounded-lg overflow-hidden border border-steel-300">
+            <div className="h-60 sm:h-72 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
               <LeafletMap
                 center={collectorCoords}
                 zoom={12}
@@ -2963,44 +2963,44 @@ export const KabadiwalaDashboard: React.FC = () => {
               return (
                 <div
                   key={rec.id}
-                  className="receipt-stub rounded-xl p-5 border-2 border-steel-300 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-copper-500 transition-colors"
+                  className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all"
                 >
                   <div className="space-y-1.5 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="stamp-seal stamp-verified text-[10px]">
+                      <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                         CPCB REGISTERED
                       </span>
-                      <span className="font-mono text-xs text-copper-700 font-bold">
+                      <span className="font-mono text-xs text-slate-700 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200/80 dark:border-slate-700">
                         {rec.cpcbReg}
                       </span>
-                      <span className="text-xs text-forest-700 font-bold">★ {rec.rating}</span>
-                      <span className="text-xs font-mono font-bold text-copper-700 bg-copper-50 px-2 py-0.5 rounded border border-copper-200">
+                      <span className="text-xs text-amber-600 dark:text-amber-400 font-bold">★ {rec.rating}</span>
+                      <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                         📍 {liveDistance} km away
                       </span>
                     </div>
 
-                    <h3 className="font-display font-black text-lg text-steel-900">
+                    <h3 className="font-display font-black text-lg text-slate-900 dark:text-white">
                       {rec.name}
                     </h3>
 
-                    <p className="text-xs text-steel-600 flex items-center gap-1 font-medium">
-                      <MapPin className="w-3.5 h-3.5 text-copper-600" />
+                    <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5 font-medium">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <span>{rec.location}</span>
                     </p>
 
                     <div className="flex flex-wrap gap-1 mt-2">
                       {rec.acceptedMaterials.map(mat => (
-                        <span key={mat} className="text-[10px] font-mono bg-paper-200 text-steel-700 px-2 py-0.5 rounded border border-steel-300">
+                        <span key={mat} className="text-[10px] font-mono bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-slate-700">
                           {mat}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:items-end gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-steel-200">
-                    <div className="text-right">
-                      <span className="text-xs font-mono font-bold text-copper-600 block">{rec.rateMultiplier}</span>
-                      <span className="text-[11px] text-steel-500">
+                  <div className="flex flex-col sm:items-end gap-2.5 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 dark:border-slate-800">
+                    <div className="text-left sm:text-right">
+                      <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 block">{rec.rateMultiplier}</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
                         {rec.pickupAvailable ? '🚚 Doorstep Mini-Truck Pickup Available' : '🏢 Self Drop-Off at Gate'}
                       </span>
                     </div>
@@ -3010,9 +3010,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                         href={directionsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
+                        className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs"
                       >
-                        <Navigation className="w-3.5 h-3.5 text-copper-600" />
+                        <Navigation className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>Navigate ({liveDistance} km)</span>
                       </a>
                       <button
@@ -3021,7 +3021,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                           alert(`Lot dispatched to ${rec.name}! Handover reference code generated.`);
                           setActiveTab('handover');
                         }}
-                        className="btn-dhatu-primary px-4 py-2 rounded text-xs font-bold flex items-center space-x-1"
+                        className="btn-primary-m3 px-4 py-2 text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-98 transition-transform"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>{t('sellLotHere', 'Sell Lot to this Facility')}</span>
@@ -3038,7 +3038,7 @@ export const KabadiwalaDashboard: React.FC = () => {
       {/* TAB 4: HANDOVER QR & VERIFIABLE RECORD GENERATOR */}
       {activeTab === 'handover' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="receipt-stub rounded-xl p-6 border-2 border-steel-400 space-y-6 shadow-sm">
+          <div className="rounded-3xl p-6 sm:p-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
             <div>
               <div className="flex items-center justify-between">
                 <span className="stamp-seal stamp-verified text-xs">{t('handoverVoucherBadge', 'Digital Handover')}</span>
@@ -3051,74 +3051,74 @@ export const KabadiwalaDashboard: React.FC = () => {
                   size="sm"
                 />
               </div>
-              <h2 className="text-xl font-display font-black text-steel-900 mt-2">
+              <h2 className="text-xl font-display font-black text-slate-900 dark:text-white mt-2">
                 {t('handoverVoucherTitle', 'Digital Handover QR Voucher')}
               </h2>
-              <p className="text-xs text-steel-600">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Verifiable digital transfer record containing GPS coordinates, timestamp, weight, and unique CPCB hash.
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border-2 border-steel-800 flex flex-col items-center justify-center space-y-3 shadow-inner">
-              <div className="w-44 h-44 bg-paper-100 border-4 border-steel-900 p-2 flex items-center justify-center rounded-lg">
-                <QrCode className="w-36 h-36 text-steel-900" />
+            <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center space-y-3">
+              <div className="w-44 h-44 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 p-2 flex items-center justify-center rounded-2xl shadow-inner">
+                <QrCode className="w-36 h-36 text-slate-900 dark:text-white" />
               </div>
               <div className="text-center font-mono">
-                <span className="text-lg font-black text-copper-700 tracking-wider block">{handoverLotCode}</span>
-                <span className="text-[10px] text-steel-500">Hash: 8f4a1c9e02bb44... (SHA-256)</span>
+                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-wider block">{handoverLotCode}</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Hash: 8f4a1c9e02bb44... (SHA-256)</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs font-mono bg-paper-100 p-3.5 rounded border border-paper-300">
+            <div className="grid grid-cols-2 gap-3 text-xs font-mono bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
               <div>
-                <span className="text-[10px] text-steel-500 block">COLLECTOR ID</span>
-                <span className="font-bold text-steel-800">{user?.id ? `KC-COL-${user.id.slice(0, 4).toUpperCase()}` : 'KC-COL-8921 (Suresh)'}</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">COLLECTOR ID</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{user?.id ? `KC-COL-${user.id.slice(0, 4).toUpperCase()}` : 'KC-COL-8921 (Suresh)'}</span>
               </div>
               <div>
-                <span className="text-[10px] text-steel-500 block">HANDOVER RECIPIENT</span>
-                <span className="font-bold text-steel-800">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">HANDOVER RECIPIENT</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">
                   {myLots.find(l => l.lotCode === handoverLotCode)?.recyclerName || 'EcoRecycle (Okhla Ph-II)'}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-steel-500 block">ESTIMATED VALUE</span>
-                <span className="font-bold text-forest-700">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">ESTIMATED VALUE</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
                   ₹{(myLots.find(l => l.lotCode === handoverLotCode)?.finalPrice || myLots.find(l => l.lotCode === handoverLotCode)?.askingPrice || 8000).toLocaleString('en-IN')} ({language === 'hi' ? 'नकद / UPI' : language === 'mr' ? 'रोख / UPI' : 'Cash / UPI Escrow'})
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-steel-500 block">SALE TOKEN</span>
-                <span className="font-bold text-steel-800">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">SALE TOKEN</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">
                   {myLots.find(l => l.lotCode === handoverLotCode)?.saleTokenNumber || 'KBD-SL-20260917-SZ-E92A1F'}
                 </span>
               </div>
             </div>
 
-            <div className="text-[11px] text-steel-600 flex items-center gap-1.5 p-2 bg-paper-200 rounded border border-steel-300">
-              <ShieldCheck className="w-4 h-4 text-forest-600 flex-shrink-0" />
+            <div className="text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/50">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
               <span>
                 {language === 'hi' ? 'रीसायकलर द्वारा स्कैन करते ही यह रसीद सीपीसीबी ईपीआर पोर्टल पर दर्ज हो जाती है।' : language === 'mr' ? 'रीसायकलरने स्कॅन करताच ही पावती सीपीसीबी पोर्टलवर नोंदवली जाते.' : 'Upon recycler QR scan, this lot is immediately sealed on the CPCB central registry.'}
               </span>
             </div>
 
             {/* Universal CPCB Sale Token & Partner Actions */}
-            <div className="p-4 bg-white rounded-xl border-2 border-emerald-300 space-y-3 shadow-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-emerald-300 dark:border-emerald-800/60 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-emerald-700" />
-                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">CPCB Universal Sale Token</span>
+                  <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">CPCB Universal Sale Token</span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                   CPCB Rule 13(2) Verified
                 </span>
               </div>
 
-              <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-xs font-mono flex items-center justify-between">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-mono flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-slate-500 block uppercase">Audit Trace Hash</span>
-                  <span className="font-bold text-slate-900">{myLots.find(l => l.lotCode === handoverLotCode)?.saleTokenNumber || 'KBD-SL-20260917-SZ-E92A1F'}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Audit Trace Hash</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{myLots.find(l => l.lotCode === handoverLotCode)?.saleTokenNumber || 'KBD-SL-20260917-SZ-E92A1F'}</span>
                 </div>
-                <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
+                <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800">
                   🔒 DPDP Shield (Aadhaar Masked)
                 </span>
               </div>
@@ -3154,9 +3154,9 @@ export const KabadiwalaDashboard: React.FC = () => {
                       partnerRole: 'RECYCLER'
                     });
                   }}
-                  className="bg-paper-200 hover:bg-paper-300 text-steel-800 border border-steel-300 py-2 px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95"
+                  className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 py-2 px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Chat Recycler</span>
                 </button>
               </div>
@@ -3164,47 +3164,47 @@ export const KabadiwalaDashboard: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <div className="bg-paper-50 rounded-xl p-6 border-2 border-steel-300 shadow-sm space-y-4">
-              <h3 className="font-display font-bold text-steel-900 text-base">
+            <div className="rounded-3xl p-6 sm:p-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
                 {t('handoverStepsTitle', '3 Easy Steps for Handover')}
               </h3>
 
               <div className="space-y-3 text-xs">
-                <div className="flex items-start gap-3 p-3 bg-white rounded border border-steel-200">
-                  <div className="w-6 h-6 rounded-full bg-copper-600 text-white flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">
+                <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">
                     1
                   </div>
                   <div>
-                    <span className="font-bold text-steel-800 block">{t('step1Weight', 'Weight Check at Recycler Gate')}</span>
-                    <span className="text-steel-600">{t('step1Desc', 'Weigh items on calibrated electronic scale.')}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">{t('step1Weight', 'Weight Check at Recycler Gate')}</span>
+                    <span className="text-slate-500 dark:text-slate-400">{t('step1Desc', 'Weigh items on calibrated electronic scale.')}</span>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 bg-white rounded border border-steel-200">
-                  <div className="w-6 h-6 rounded-full bg-copper-600 text-white flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">
+                <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">
                     2
                   </div>
                   <div>
-                    <span className="font-bold text-steel-800 block">{t('step2Scan', 'Scan Handover QR Code')}</span>
-                    <span className="text-steel-600">{t('step2Desc', 'Recycler operator scans voucher with their phone.')}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">{t('step2Scan', 'Scan Handover QR Code')}</span>
+                    <span className="text-slate-500 dark:text-slate-400">{t('step2Desc', 'Recycler operator scans voucher with their phone.')}</span>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 bg-white rounded border border-steel-200">
-                  <div className="w-6 h-6 rounded-full bg-copper-600 text-white flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">
+                <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">
                     3
                   </div>
                   <div>
-                    <span className="font-bold text-steel-800 block">{t('step3Pay', 'Receive Cash or Wallet Payout')}</span>
-                    <span className="text-steel-600">{t('step3Desc', 'Receive immediate cash or wallet escrow payment. Recorded in passbook.')}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">{t('step3Pay', 'Receive Cash or Wallet Payout')}</span>
+                    <span className="text-slate-500 dark:text-slate-400">{t('step3Desc', 'Receive immediate cash or wallet escrow payment. Recorded in passbook.')}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-brass-100 rounded-xl border border-brass-400 text-xs text-steel-800 space-y-1">
-              <span className="font-bold text-brass-900 block flex items-center gap-1">
-                <Award className="w-4 h-4 text-brass-700" /> {t('formalizationBenefitTitle', 'Ministry of Mines Formalization Incentive:')}
+            <div className="p-5 bg-amber-50/80 dark:bg-amber-950/25 rounded-2xl border border-amber-200/80 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-200 space-y-1">
+              <span className="font-bold text-amber-900 dark:text-amber-300 block flex items-center gap-1.5">
+                <Award className="w-4 h-4 text-amber-600" /> {t('formalizationBenefitTitle', 'Ministry of Mines Formalization Incentive:')}
               </span>
               <p>
                 {t('formalizationBenefitDesc', 'Earn ₹500 formalization loyalty bonus for every verified digital lot handover.')}
@@ -3216,8 +3216,8 @@ export const KabadiwalaDashboard: React.FC = () => {
 
       {/* TAB 5: PASSBOOK RUNNING LEDGER */}
       {activeTab === 'passbook' && (
-        <div className="bg-paper-50 rounded-xl p-5 sm:p-7 border-2 border-steel-400 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-steel-300 pb-4">
+        <div className="rounded-3xl p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="stamp-seal stamp-verified text-xs">{t('passbookBadge', 'Cash Passbook')}</span>
@@ -3230,17 +3230,17 @@ export const KabadiwalaDashboard: React.FC = () => {
                   size="sm"
                 />
               </div>
-              <h2 className="text-xl font-display font-black text-steel-900 mt-1">
+              <h2 className="text-xl font-display font-black text-slate-900 dark:text-white mt-1">
                 {t('passbookTitle', 'Collector Running Passbook Ledger')}
               </h2>
-              <p className="text-xs text-steel-600 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 Traditional passbook-style stamped entries for maximum trust, cash reconciliation, and pending dues.
               </p>
             </div>
 
-            <div className="bg-steel-900 text-paper-50 px-4 py-2.5 rounded-lg border border-steel-700 font-mono text-right">
-              <span className="text-[10px] text-paper-400 block uppercase">TOTAL RUNNING BALANCE</span>
-              <span className="text-xl font-bold text-brass-400">{formatCurrency(walletBalance)}</span>
+            <div className="bg-slate-900 dark:bg-slate-800 text-white px-5 py-3 rounded-2xl border border-slate-800 dark:border-slate-700 font-mono text-right shadow-sm">
+              <span className="text-[10px] text-slate-400 block uppercase font-semibold">TOTAL RUNNING BALANCE</span>
+              <span className="text-2xl font-black text-emerald-400">{formatCurrency(walletBalance)}</span>
             </div>
           </div>
 
@@ -3345,16 +3345,16 @@ export const KabadiwalaDashboard: React.FC = () => {
             {safetyCards.map(card => (
               <div
                 key={card.id}
-                className="receipt-stub rounded-xl p-5 border-2 border-signal-500 shadow-sm space-y-4"
+                className="rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 hover:border-amber-400 dark:hover:border-amber-600 transition-colors"
               >
-                <div className="flex items-start justify-between border-b border-steel-300 pb-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-9 h-9 rounded-lg bg-signal-500/10 text-signal-600 flex items-center justify-center">
+                <div className="flex items-start justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
                       <AlertTriangle className="w-5 h-5" />
                     </div>
                     <div>
                       <span className="stamp-seal stamp-hazard text-[9px]">{card.severity} HAZARD</span>
-                      <h3 className="font-display font-bold text-steel-900 text-base leading-snug">
+                      <h3 className="font-display font-bold text-slate-900 dark:text-white text-base leading-snug">
                         {language === 'hi' ? card.hazardTitleHi : language === 'mr' ? card.hazardTitleMr : card.hazardTitleEn}
                       </h3>
                     </div>
@@ -3369,22 +3369,22 @@ export const KabadiwalaDashboard: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="bg-forest-500/10 p-3 rounded border border-forest-500/30 space-y-1.5">
-                    <span className="font-bold text-forest-700 flex items-center gap-1 uppercase text-[10px]">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> {t('dosTitle', "DO'S:")}
+                  <div className="bg-emerald-500/10 dark:bg-emerald-950/25 p-4 rounded-2xl border border-emerald-500/20 space-y-2">
+                    <span className="font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 uppercase text-[10px]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t('dosTitle', "DO'S:")}
                     </span>
-                    <ul className="space-y-1 text-steel-800 list-disc list-inside">
+                    <ul className="space-y-1.5 text-slate-700 dark:text-slate-300 list-disc list-inside">
                       {(language === 'hi' ? card.dosHi : language === 'mr' ? card.dosMr : card.dosEn).map((d, i) => (
                         <li key={i}>{d}</li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="bg-signal-500/10 p-3 rounded border border-signal-500/30 space-y-1.5">
-                    <span className="font-bold text-signal-700 flex items-center gap-1 uppercase text-[10px]">
-                      <Flame className="w-3.5 h-3.5" /> {t('dontsTitle', "DON'TS:")}
+                  <div className="bg-rose-500/10 dark:bg-rose-950/25 p-4 rounded-2xl border border-rose-500/20 space-y-2">
+                    <span className="font-bold text-rose-700 dark:text-rose-300 flex items-center gap-1.5 uppercase text-[10px]">
+                      <Flame className="w-3.5 h-3.5 text-rose-600" /> {t('dontsTitle', "DON'TS:")}
                     </span>
-                    <ul className="space-y-1 text-steel-800 list-disc list-inside">
+                    <ul className="space-y-1.5 text-slate-700 dark:text-slate-300 list-disc list-inside">
                       {(language === 'hi' ? card.dontsHi : language === 'mr' ? card.dontsMr : card.dontsEn).map((d, i) => (
                         <li key={i}>{d}</li>
                       ))}
@@ -3392,7 +3392,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="text-[11px] text-steel-500 italic bg-paper-100 p-2 rounded border border-paper-300">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
                   "{t('safetyQuote', 'Proper segregation protects worker health and yields up to 35% higher buyback value from formal smelters.')}"
                 </div>
               </div>
@@ -3400,27 +3400,27 @@ export const KabadiwalaDashboard: React.FC = () => {
           </div>
 
           {/* Value-Preservation Segregation Guide Banner (Section 1.B.8) */}
-          <div className="bg-paper-100 rounded-xl p-6 border-2 border-brass-400 space-y-3">
+          <div className="rounded-3xl p-6 sm:p-7 bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/40 space-y-4 shadow-sm">
             <span className="stamp-seal stamp-verified text-xs">{t('valueBadge', 'Value Maximization Guide')}</span>
-            <h3 className="font-display font-black text-steel-900 text-lg">
+            <h3 className="font-display font-black text-slate-900 dark:text-white text-lg">
               {t('valuePreservationTitle', '4 Rules of Value-Preservation Disassembly for Maximum Earnings')}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-              <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">{t('step1Plastic', 'Step 1: Unscrew External Plastic')}</span>
-                <p className="text-steel-600 mt-1">{t('step1PlasticDesc', 'Remove clean ABS plastic housing without smashing screws (sells separately at ₹38/kg).')}</p>
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 block">{t('step1Plastic', 'Step 1: Unscrew External Plastic')}</span>
+                <p className="text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">{t('step1PlasticDesc', 'Remove clean ABS plastic housing without smashing screws (sells separately at ₹38/kg).')}</p>
               </div>
-              <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">{t('step2Pcb', 'Step 2: Keep Circuit Boards Whole')}</span>
-                <p className="text-steel-600 mt-1">{t('step2PcbDesc', 'High-grade motherboards sell at ₹640/kg when components and gold pins remain intact.')}</p>
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 block">{t('step2Pcb', 'Step 2: Keep Circuit Boards Whole')}</span>
+                <p className="text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">{t('step2PcbDesc', 'High-grade motherboards sell at ₹640/kg when components and gold pins remain intact.')}</p>
               </div>
-              <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">{t('step3Copper', 'Step 3: Strip Copper Cold')}</span>
-                <p className="text-steel-600 mt-1">{t('step3CopperDesc', 'Extract copper windings using hand wire-strippers without open-flame burning (₹480/kg).')}</p>
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 block">{t('step3Copper', 'Step 3: Strip Copper Cold')}</span>
+                <p className="text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">{t('step3CopperDesc', 'Extract copper windings using hand wire-strippers without open-flame burning (₹480/kg).')}</p>
               </div>
-              <div className="bg-white p-3 rounded border border-steel-300">
-                <span className="font-bold text-copper-700 block">{t('step4Battery', 'Step 4: Bag Batteries Separately')}</span>
-                <p className="text-steel-600 mt-1">{t('step4BatteryDesc', 'Keep lithium cells insulated in a dry bag to prevent punctures, sparks, or thermal runaways.')}</p>
+              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 block">{t('step4Battery', 'Step 4: Bag Batteries Separately')}</span>
+                <p className="text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">{t('step4BatteryDesc', 'Keep lithium cells insulated in a dry bag to prevent punctures, sparks, or thermal runaways.')}</p>
               </div>
             </div>
           </div>
@@ -3471,20 +3471,23 @@ export const KabadiwalaDashboard: React.FC = () => {
 
           {/* Active Job in Progress */}
           {activeJob && (
-            <div className="receipt-stub rounded-xl p-6 border-2 border-copper-600 shadow-md space-y-4 bg-copper-500/5">
-              <div className="flex justify-between items-start border-b border-steel-300 pb-3">
+            <div className="rounded-3xl bg-white dark:bg-slate-900 border-2 border-emerald-500/80 dark:border-emerald-500/60 shadow-md p-6 sm:p-7 space-y-5">
+              <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
-                  <span className="stamp-seal stamp-pending text-xs">{t('activeJobBadge', 'IN PROGRESS')}</span>
-                  <h3 className="text-lg font-display font-black text-steel-900 mt-1">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{t('activeJobBadge', 'IN PROGRESS')}</span>
+                  </span>
+                  <h3 className="text-xl font-display font-black text-slate-900 dark:text-white mt-2">
                     {activeJob.address}
                   </h3>
-                  <p className="text-xs text-steel-600">
-                    Citizen: {activeJob.citizen?.name || 'Ramesh Sharma'} • {t('totalItems', 'Total Items')}: {activeJob.totalItems || activeJob.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({activeJob.items?.length || 1} {t('items', 'types')})
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                    Citizen: <strong className="text-slate-800 dark:text-slate-200">{activeJob.citizen?.name || 'Ramesh Sharma'}</strong> • {t('totalItems', 'Total Items')}: <span className="font-bold text-emerald-700 dark:text-emerald-400">{activeJob.totalItems || activeJob.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({activeJob.items?.length || 1} {t('items', 'types')})</span>
                   </p>
                 </div>
                 <a
                   href={`tel:${activeJob.citizen?.phone || '9811100001'}`}
-                  className="btn-dhatu-primary px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1"
+                  className="btn-primary-m3 px-3.5 py-1.5 text-xs font-bold flex items-center space-x-1.5 shadow-2xs"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>{t('callBtn', 'Call')}</span>
@@ -3493,26 +3496,26 @@ export const KabadiwalaDashboard: React.FC = () => {
 
               {/* Weight Adjustment Stepper for Completion */}
               <div className="space-y-3">
-                <span className="text-xs font-bold text-steel-800 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider block">
                   {t('verifyWeightTitle', 'Verify & Adjust Final Weight:')}
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {activeJob.items.map((item, idx) => (
-                    <div key={idx} className="bg-white p-3 rounded border border-steel-300 flex items-center justify-between">
+                    <div key={idx} className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between shadow-2xs">
                       <div>
-                        <span className="text-xs font-bold text-steel-800 block">
+                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
                           {item.quantity ? `${item.quantity} ${t('pieces', 'pcs')} • ` : ''}{preserveEnglishItemName(item.category)}
                         </span>
-                        <span className="text-[10px] text-steel-500">Rate: ₹{item.ratePerKg}/kg</span>
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold">Rate: ₹{item.ratePerKg}/kg</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => {
                             const cur = itemWeights[item.category] || item.estWeightKg;
                             setItemWeights({ ...itemWeights, [item.category]: Math.max(0.01, Math.round((cur - 0.1) * 10) / 10) });
                           }}
-                          className="w-8 h-8 rounded bg-paper-200 border border-steel-400 flex items-center justify-center font-bold text-steel-800"
+                          className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-800 dark:text-slate-200 text-sm transition-colors"
                         >
                           -
                         </button>
@@ -3525,16 +3528,16 @@ export const KabadiwalaDashboard: React.FC = () => {
                             const val = parseFloat(e.target.value);
                             setItemWeights({ ...itemWeights, [item.category]: isNaN(val) ? 0.01 : Math.max(0.01, Math.round(val * 100) / 100) });
                           }}
-                          className="w-16 px-1.5 py-1 text-center font-mono text-sm font-bold bg-white border border-steel-400 rounded text-steel-900"
+                          className="w-16 px-1.5 py-1 text-center font-mono text-sm font-bold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none"
                         />
-                        <span className="text-xs text-steel-500 font-mono">kg</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">kg</span>
                         <button
                           type="button"
                           onClick={() => {
                             const cur = itemWeights[item.category] || item.estWeightKg;
                             setItemWeights({ ...itemWeights, [item.category]: Math.round((cur + 0.1) * 10) / 10 });
                           }}
-                          className="w-8 h-8 rounded bg-copper-600 text-white flex items-center justify-center font-bold"
+                          className="w-8 h-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center font-bold text-sm shadow-xs transition-colors"
                         >
                           +
                         </button>
@@ -3545,14 +3548,14 @@ export const KabadiwalaDashboard: React.FC = () => {
               </div>
 
               {/* Layer 1 Verification: Citizen Handover OTP */}
-              <div className="p-3.5 bg-paper-100 rounded-lg border-2 border-dashed border-steel-400 space-y-2">
+              <div className="p-5 bg-gradient-to-br from-emerald-50/60 via-white to-slate-50 dark:from-slate-800/90 dark:to-slate-900 rounded-2xl border border-emerald-300/80 dark:border-emerald-800/80 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-steel-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-copper-600" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>Layer 1 Verification: Citizen Handover OTP</span>
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-steel-500 font-mono">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                       Mandatory physical check
                     </span>
                     <VoiceAssistButton
@@ -3565,11 +3568,11 @@ export const KabadiwalaDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-[11px] text-steel-600">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   Ask citizen {activeJob.citizen?.name || 'Ramesh'} for the 4-digit verification code displayed on their portal to confirm physical collection.
                 </p>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <input
                     type="text"
                     maxLength={4}
@@ -3579,7 +3582,7 @@ export const KabadiwalaDashboard: React.FC = () => {
                       setOtpError(null);
                     }}
                     placeholder="4-digit OTP"
-                    className="w-32 px-3 py-2 text-sm font-mono font-bold tracking-widest text-center bg-white border-2 border-steel-400 rounded-lg focus:border-copper-600 focus:outline-none"
+                    className="w-36 px-3 py-2 text-base font-mono font-black tracking-widest text-center bg-white dark:bg-slate-800 border-2 border-emerald-500/60 rounded-xl focus:border-emerald-600 focus:outline-none text-slate-900 dark:text-white shadow-2xs"
                   />
                   <button
                     type="button"
@@ -3590,15 +3593,16 @@ export const KabadiwalaDashboard: React.FC = () => {
                       setOtpError(null);
                       hapticSuccess();
                     }}
-                    className="btn-dhatu-steel px-3 py-2 text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm"
+                    className="btn-primary-m3 px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 shadow-2xs"
                   >
-                    <QrCode className="w-3.5 h-3.5 text-copper-600" />
+                    <QrCode className="w-3.5 h-3.5" />
                     <span>Scan / Autofill ({activeJob.verificationOtp || '4821'})</span>
                   </button>
 
                   {isOtpVerified && (
-                    <span className="text-xs font-bold text-forest-700 flex items-center gap-1 bg-forest-50 px-2 py-1 rounded border border-forest-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-forest-600" /> Handover Verified
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/70 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800 shadow-2xs">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>OTP Verified</span>
                     </span>
                   )}
                 </div>
@@ -3623,10 +3627,10 @@ export const KabadiwalaDashboard: React.FC = () => {
           )}
 
           {/* Live Open Pickups Map Visualizer */}
-          <div className="receipt-stub rounded-xl p-4 border-2 border-steel-300 shadow-sm space-y-3">
-            <div className="font-display font-bold text-steel-800 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span className="flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-copper-600" />
+          <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div className="font-display font-bold text-slate-800 dark:text-slate-200 text-sm sm:text-base flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>{t('livePickupsMapTitle', 'Live e-Waste Pickups Map')}</span>
               </span>
               <div className="flex items-center gap-2">
@@ -3634,30 +3638,30 @@ export const KabadiwalaDashboard: React.FC = () => {
                   type="button"
                   onClick={detectCollectorLocation}
                   disabled={isUpdatingLocation}
-                  className="px-2.5 py-1 bg-paper-200 hover:bg-copper-100 active:bg-copper-200 text-steel-800 text-xs font-mono font-bold rounded border border-steel-300 flex items-center gap-1 transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-mono font-bold rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-colors disabled:opacity-50"
                   title="Refresh live GPS position"
                 >
-                  <RefreshCw className={`w-3 h-3 text-copper-600 ${isUpdatingLocation ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3 h-3 text-emerald-600 dark:text-emerald-400 ${isUpdatingLocation ? 'animate-spin' : ''}`} />
                   <span>{isUpdatingLocation ? 'Locating...' : 'Update GPS'}</span>
                 </button>
-                <span className="text-xs font-mono text-copper-700 bg-paper-200 px-2.5 py-1 rounded border border-steel-300 font-bold">
+                <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 font-bold">
                   {nearbyPickups.length} Nearby Requests
                 </span>
               </div>
             </div>
 
             {/* Collector Base Location Live Breadcrumb */}
-            <div className="text-[11px] font-mono text-steel-700 bg-paper-200/80 p-2 rounded border border-steel-300 flex items-center justify-between">
-              <span className="flex items-center gap-1.5 truncate">
-                <span className="w-2 h-2 rounded-full bg-forest-600 animate-pulse shrink-0" />
-                <span className="truncate">Your Live Base: <strong>{collectorLocationName}</strong></span>
+            <div className="text-[11px] font-mono text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <span className="flex items-center gap-2 truncate">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="truncate">Your Live Base: <strong className="text-slate-900 dark:text-white">{collectorLocationName}</strong></span>
               </span>
-              <span className="text-copper-700 font-bold shrink-0 ml-2">
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0 ml-2">
                 {collectorCoords[0].toFixed(4)}°, {collectorCoords[1].toFixed(4)}°
               </span>
             </div>
 
-            <div className="h-60 sm:h-72 rounded-lg overflow-hidden border border-steel-300">
+            <div className="h-60 sm:h-72 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
               <LeafletMap
                 center={collectorCoords}
                 zoom={13}
@@ -3673,89 +3677,118 @@ export const KabadiwalaDashboard: React.FC = () => {
             {nearbyPickups.map(pickup => (
               <div
                 key={pickup.id}
-                className="receipt-stub rounded-lg p-5 border-2 border-steel-300 shadow-sm flex flex-col justify-between space-y-3 hover:border-copper-500 transition-colors"
+                className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all flex flex-col justify-between space-y-3.5"
               >
                 <div>
-                  <div className="flex items-center justify-between border-b border-steel-200 pb-2 mb-2">
-                    <span className="text-xs font-bold text-copper-700">Ref #{pickup.id.slice(0, 8)}</span>
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-2.5">
+                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700">
+                      Ref #{pickup.id.slice(0, 8)}
+                    </span>
                     <div className="flex items-center gap-2">
                       {pickup.distanceKm !== undefined && (
-                        <span className="text-[10px] text-forest-700 font-bold bg-forest-50 px-1.5 py-0.5 rounded border border-forest-300">
+                        <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                           📍 {pickup.distanceKm} km away
                         </span>
                       )}
-                      <span className="text-[10px] text-steel-500 font-medium">{pickup.scheduledAt.slice(11, 16)}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-mono font-medium">{pickup.scheduledAt.slice(11, 16)}</span>
                     </div>
                   </div>
 
-                  <h4 className="font-bold text-steel-900 text-sm">
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm leading-snug line-clamp-2">
                     {pickup.address}
                   </h4>
 
-                  <div className="mt-2 space-y-1 text-xs text-steel-600">
-                    <p>{t('citizenName')}: <strong>{pickup.citizen?.name || 'Ramesh Sharma'}</strong></p>
-                    <p>{t('totalItems', 'Total Items')}: <strong>{pickup.totalItems || pickup.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({pickup.items?.length || 1} {t('items', 'types')})</strong></p>
-                    <p>{t('itemsDeclared')}: <strong>{pickup.items.map(i => `${i.quantity ? `${i.quantity} ${t('pieces', 'pcs')} • ` : ''}${preserveEnglishItemName(i.category)} (~${i.estWeightKg}kg)`).join(', ')}</strong></p>
-                  </div>
-                </div>
+                  <div className="mt-2.5 space-y-2 text-xs">
+                    <p className="text-slate-600 dark:text-slate-400">
+                      {t('citizenName')}: <strong className="text-slate-800 dark:text-slate-200">{pickup.citizen?.name || 'Ramesh Sharma'}</strong>
+                    </p>
+                    <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                      <span className="flex items-center gap-1 font-semibold">
+                        <Package className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{t('totalItems', 'Total Items')}:</span>
+                      </span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-[11px] border border-slate-200/60 dark:border-slate-700/60">
+                        {pickup.totalItems || pickup.items?.reduce((s, it) => s + (it.quantity || 1), 0) || 1} {t('pieces', 'pcs')} ({pickup.items?.length || 1} {t('items', 'types')})
+                      </span>
+                    </div>
 
-                <div className="pt-2 border-t border-steel-200 flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-bold text-copper-700 text-sm">
-                    {t('estimatedPayout')}: ₹{pickup.totalAmount || 620}
-                  </span>
-                    <div className="flex items-center gap-2">
-                      {(() => {
-                        const unread = storage.getUnreadChatCountForContext('PICKUP', pickup.id, user?.id);
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => openCollectorPickupChat(pickup)}
-                            className={`px-2.5 py-1.5 text-xs font-bold rounded border flex items-center gap-1 transition-colors ${
-                              unread > 0
-                                ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
-                                : 'bg-paper-200 hover:bg-paper-300 text-steel-800 border-steel-400'
-                            }`}
-                            title="Chat with Citizen"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5 text-copper-600" />
-                            <span>{t('chat', 'Chat')}</span>
-                            {unread > 0 && (
-                              <span className="flex items-center gap-1 ml-0.5">
-                                <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
-                                </span>
-                                <span className="text-[10px] font-extrabold text-rose-700 dark:text-rose-300 font-mono">
-                                  ({unread})
-                                </span>
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })()}
-                      <a
-                        href={getDirectionsUrl(pickup.latitude, pickup.longitude, collectorCoords[0], collectorCoords[1])}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2.5 py-1.5 bg-paper-200 hover:bg-paper-300 text-steel-800 text-xs font-bold rounded border border-steel-400 flex items-center gap-1 transition-colors"
-                        title="Open Google Maps Driving Directions"
-                      >
-                        <Navigation className="w-3.5 h-3.5 text-copper-600" />
-                        <span>Directions</span>
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => handleAcceptPickup(pickup)}
-                        className="btn-dhatu-primary px-4 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow-sm active:scale-98 transition-transform"
-                      >
-                        <Truck className="w-3.5 h-3.5" />
-                        <span>{t('acceptPickup')}</span>
-                      </button>
+                    {/* Structured Item Chips */}
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {pickup.items.map((i, idx) => (
+                        <div
+                          key={idx}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs"
+                        >
+                          <span className="font-medium text-slate-800 dark:text-slate-200">{preserveEnglishItemName(i.category)}</span>
+                          <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/60">
+                            {i.quantity ? `${i.quantity} ${t('pieces', 'pcs')} • ` : ''}~{i.estWeightKg}kg
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block">{t('estimatedPayout')}:</span>
+                    <span className="font-black text-emerald-600 dark:text-emerald-400 text-base font-mono">
+                      ₹{pickup.totalAmount || 620}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const unread = storage.getUnreadChatCountForContext('PICKUP', pickup.id, user?.id);
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => openCollectorPickupChat(pickup)}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-xl border flex items-center gap-1.5 transition-colors shadow-2xs ${
+                            unread > 0
+                              ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700'
+                          }`}
+                          title="Chat with Citizen"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                          <span>{t('chat', 'Chat')}</span>
+                          {unread > 0 && (
+                            <span className="flex items-center gap-1 ml-0.5">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                              </span>
+                              <span className="text-[10px] font-extrabold text-rose-700 dark:text-rose-300 font-mono">
+                                ({unread})
+                              </span>
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })()}
+                    <a
+                      href={getDirectionsUrl(pickup.latitude, pickup.longitude, collectorCoords[0], collectorCoords[1])}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs"
+                      title="Open Google Maps Driving Directions"
+                    >
+                      <Navigation className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span>Directions</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleAcceptPickup(pickup)}
+                      className="btn-primary-m3 px-4 py-1.5 text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-98 transition-transform"
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>{t('acceptPickup')}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
           </div>
         )}
 
