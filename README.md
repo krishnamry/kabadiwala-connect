@@ -2,11 +2,11 @@
 > **Smart India Hackathon (SIH 2026)** — Transforming India's informal scrap collection ecosystem into a digitized, traceable, and legally compliant circular economy.
 
 ### 📱 Android APK Download
-[![Download APK](https://img.shields.io/badge/Download%20APK-v1.0.6%20Latest-emerald?style=for-the-badge&logo=android&logoColor=white)](https://github.com/krishnamry/kabadiwala-connect/releases/download/v1.0.6/KabadiwalaConnect.apk)
-[![Releases](https://img.shields.io/badge/GitHub-Releases%20(v1.0.6)-blue?style=for-the-badge&logo=github)](https://github.com/krishnamry/kabadiwala-connect/releases)
+[![Download APK](https://img.shields.io/badge/Download%20APK-v1.0.7%20Latest-emerald?style=for-the-badge&logo=android&logoColor=white)](https://github.com/krishnamry/kabadiwala-connect/releases/download/v1.0.7/KabadiwalaConnect-v1.0.7.apk)
+[![Releases](https://img.shields.io/badge/GitHub-Releases%20(v1.0.7)-blue?style=for-the-badge&logo=github)](https://github.com/krishnamry/kabadiwala-connect/releases)
 
-> 📦 **Direct Download:** [**KabadiwalaConnect.apk (v1.0.6)**](https://github.com/krishnamry/kabadiwala-connect/releases/download/v1.0.6/KabadiwalaConnect.apk) *(10.28 MB)*  
-> 📁 **Repository Path:** [`releases/KabadiwalaConnect.apk`](./releases/KabadiwalaConnect.apk) or [`KabadiwalaConnect.apk`](./KabadiwalaConnect.apk)
+> 📦 **Direct Download:** [**KabadiwalaConnect-v1.0.7.apk**](https://github.com/krishnamry/kabadiwala-connect/releases/download/v1.0.7/KabadiwalaConnect-v1.0.7.apk) *(51.9 MB)*  
+> 📁 **Repository Path:** [`releases/KabadiwalaConnect-v1.0.7.apk`](./releases/KabadiwalaConnect-v1.0.7.apk), [`releases/KabadiwalaConnect.apk`](./releases/KabadiwalaConnect.apk) or [`KabadiwalaConnect.apk`](./KabadiwalaConnect.apk)
 
 ---
 

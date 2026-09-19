@@ -343,7 +343,7 @@ export const SARVAM_AUDIO_CATALOG: Record<SarvamAudioKey, Record<'hi' | 'mr' | '
     },
     "en": {
       "url": "/audio/sarvam/en/kyc_verified_celebration.wav",
-      "text": "Congratulations! Your Aadhaar KYC is verified. You have earned the certified CPCB Green Badge and your daily trading limit is raised to 50,000 Rupees.",
+      "text": "Congratulations! Your Aadhaar KYC is verified. You have earned the certified CPCB Green Badge and your daily transaction limit is raised to 50,000 Rupees.",
       "available": false
     }
   },
@@ -360,7 +360,7 @@ export const SARVAM_AUDIO_CATALOG: Record<SarvamAudioKey, Record<'hi' | 'mr' | '
     },
     "en": {
       "url": "/audio/sarvam/en/kyc_walkthrough.wav",
-      "text": "Without Aadhaar verification, your daily trading limit is 5,000 Rupees. Upload your Aadhaar photo to raise your daily limit to 50,000 Rupees and receive a certified CPCB Green Badge.",
+      "text": "Without Aadhaar verification, your daily transaction limit is 5,000 Rupees. Upload your Aadhaar photo to raise your daily limit to 50,000 Rupees and receive a certified CPCB Green Badge.",
       "available": true
     }
   },

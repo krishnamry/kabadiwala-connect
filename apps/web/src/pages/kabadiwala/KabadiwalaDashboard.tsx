@@ -438,9 +438,9 @@ export const KabadiwalaDashboard: React.FC = () => {
           labelHi: 'आधार व पहचान सत्यापन',
           labelMr: 'आधार व ओळख पडताळणी',
           labelEn: 'KYC Verification',
-          text: 'Without Aadhaar verification, your daily trading limit is 5,000 Rupees. Upload your Aadhaar photo to raise your daily limit to 50,000 Rupees and receive a certified CPCB Green Badge.',
-          hindiText: 'आधार सत्यापन के बिना आपकी दैनिक व्यापार सीमा 5,000 रुपये है। अपनी सीमा 50,000 रुपये तक बढ़ाने और सीपीसीबी प्रमाणित ग्रीन बैज पाने के लिए अपने आधार की फोटो अपलोड करें।',
-          marathiText: 'आधार पडताळणीशिवाय आपकी दैनिक व्यापार मर्यादा 5,000 रुपये आहे. आपली मर्यादा 50,000 रुपयांपर्यंत वाढवण्यासाठी आणि सीपीसीबी प्रमाणित ग्रीन बॅज मिळवण्यासाठी आधारचा फोटो अपलोड करा.'
+          text: 'Without Aadhaar verification, your daily transaction limit is 5,000 Rupees. Upload your Aadhaar photo to raise your daily limit to 50,000 Rupees and receive a certified CPCB Green Badge.',
+          hindiText: 'आधार सत्यापन के बिना आपकी दैनिक लेनदेन सीमा 5,000 रुपये है। अपनी सीमा 50,000 रुपये तक बढ़ाने और सीपीसीबी प्रमाणित ग्रीन बैज पाने के लिए अपने आधार की फोटो अपलोड करें।',
+          marathiText: 'आधार पडताळणीशिवाय आपली दैनिक व्यवहार मर्यादा 5,000 रुपये आहे. आपली मर्यादा 50,000 रुपयांपर्यंत वाढवण्यासाठी आणि सीपीसीबी प्रमाणित ग्रीन बॅज मिळवण्यासाठी आधारचा फोटो अपलोड करा.'
         };
       case 'safety':
         return {

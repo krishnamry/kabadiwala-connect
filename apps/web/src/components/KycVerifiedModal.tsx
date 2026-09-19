@@ -100,7 +100,7 @@ export const KycVerifiedModal: React.FC = () => {
           onClick={handleAcknowledge}
           className="w-full py-3.5 px-5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-display font-black shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2 transition-all active:scale-98"
         >
-          <span>{language === 'hi' ? 'शुरू करें' : language === 'mr' ? 'सुरू करा' : 'Start Trading Now'}</span>
+          <span>{language === 'hi' ? 'डैशबोर्ड पर जाएं' : language === 'mr' ? 'डॅशबोर्डवर जा' : 'Continue to Dashboard'}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
