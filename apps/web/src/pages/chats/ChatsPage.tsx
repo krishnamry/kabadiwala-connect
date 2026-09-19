@@ -191,21 +191,29 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
     // Contextual automated mock reply after 1.5s
     setTimeout(() => {
       let mockReply = '';
-      if (content.toLowerCase().includes('scale') || content.toLowerCase().includes('वजन')) {
+      if (content.toLowerCase().includes('scale') || content.toLowerCase().includes('वजन') || content.toLowerCase().includes('काटा')) {
         mockReply = language === 'hi'
           ? 'नमस्ते! मेरा डिजिटल तराजू पूरी तरह से सीपीसीबी सत्यापित और रीसेट है।'
+          : language === 'mr'
+          ? 'नमस्कार! माझे डिजिटल वजन काटे पूर्णपणे सीपीसीबी प्रमाणित आणि कॅलिब्रेटेड आहेत.'
           : 'Understood! Digital scale is fully calibrated to 10g precision.';
-      } else if (content.toLowerCase().includes('arrive') || content.toLowerCase().includes('पहुंच')) {
+      } else if (content.toLowerCase().includes('arrive') || content.toLowerCase().includes('पहुंच') || content.toLowerCase().includes('येत')) {
         mockReply = language === 'hi'
           ? 'जी, 5-7 मिनट में पहुंच रहा हूँ। कृपया सामग्री तैयार रखें।'
+          : language === 'mr'
+          ? 'होय, ५-७ मिनिटांत पोहोचत आहे. कृपया साहित्य तयार ठेवा.'
           : 'Yes, arriving in 5-7 minutes. Please keep the sorted scrap handy.';
-      } else if (content.toLowerCase().includes('price') || content.toLowerCase().includes('रेट')) {
+      } else if (content.toLowerCase().includes('price') || content.toLowerCase().includes('रेट') || content.toLowerCase().includes('दर')) {
         mockReply = language === 'hi'
           ? 'आज का आधिकारिक डीएचएटीयू दर मान्य है। पारदर्शी वजन पर तत्काल भुगतान होगा।'
+          : language === 'mr'
+          ? 'आजचे अधिकृत धातू दर लागू राहतील. पारदर्शक वजनानुसार लगेच पैसे मिळतील.'
           : 'Official verified Dhatu exchange rates will be applied with zero deduction.';
       } else {
         mockReply = language === 'hi'
           ? 'संदेश प्राप्त हुआ। मैं शीघ्र ही अपडेट करता हूँ।'
+          : language === 'mr'
+          ? 'संदेश मिळाला. मी लगेच माहिती देतो.'
           : 'Message acknowledged. Coordinating doorstep transfer now.';
       }
 
@@ -317,23 +325,23 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
   const quickReplies =
     user?.role === 'CITIZEN'
       ? [
-          language === 'hi' ? 'सामग्री तैयार है, आ जाइए' : 'Scrap is ready at door',
-          language === 'hi' ? 'कृपया सटीक वजन दिखाएं' : 'Show digital scale tare',
-          language === 'hi' ? 'यूपीआई भुगतान क्यूआर भेजें' : 'Ready for UPI payment',
-          language === 'hi' ? 'सत्यापन ओटीपी भेज रहा हूँ' : 'Sharing verification OTP'
+          language === 'hi' ? 'सामग्री तैयार है, आ जाइए' : language === 'mr' ? 'कचरा/साहित्य तयार आहे, या' : 'Scrap is ready at door',
+          language === 'hi' ? 'कृपया सटीक वजन दिखाएं' : language === 'mr' ? 'कृपया अचूक वजन दाखवा' : 'Show digital scale tare',
+          language === 'hi' ? 'यूपीआई भुगतान क्यूआर भेजें' : language === 'mr' ? 'यूपीआय पेमेंट क्यूआर पाठवा' : 'Ready for UPI payment',
+          language === 'hi' ? 'सत्यापन ओटीपी भेज रहा हूँ' : language === 'mr' ? 'पडताळणी ओटीपी पाठवत आहे' : 'Sharing verification OTP'
         ]
       : user?.role === 'KABADIWALA'
       ? [
-          language === 'hi' ? '5 मिनट में दरवाजे पर' : 'Arriving in 5 minutes',
-          language === 'hi' ? 'वजन शून्य कैलिब्रेटेड है' : 'Scale zero calibrated',
-          language === 'hi' ? 'तत्काल यूपीआई भुगतान प्रेषित' : 'Sent instant UPI transfer',
-          language === 'hi' ? 'कृपया ओटीपी बताएं' : 'Please provide 4-digit OTP'
+          language === 'hi' ? '5 मिनट में दरवाजे पर' : language === 'mr' ? '५ मिनिटांत दाराशी पोहोचतो' : 'Arriving in 5 minutes',
+          language === 'hi' ? 'वजन शून्य कैलिब्रेटेड है' : language === 'mr' ? 'वजनकाटा शून्य प्रमाणित आहे' : 'Scale zero calibrated',
+          language === 'hi' ? 'तत्काल यूपीआई भुगतान प्रेषित' : language === 'mr' ? 'त्वरित यूपीआय पेमेंट केले' : 'Sent instant UPI transfer',
+          language === 'hi' ? 'कृपया ओटीपी बताएं' : language === 'mr' ? 'कृपया ४-अंकी ओटीपी सांगा' : 'Please provide 4-digit OTP'
         ]
       : [
-          'Gate pass verified for weighbridge',
-          'Moisture deduction zero verified',
-          'Escrow payout released',
-          'Dispatch truck scheduled'
+          language === 'hi' ? 'कांटे का गेट पास सत्यापित' : language === 'mr' ? 'वजन काट्याचा गेट पास प्रमाणित' : 'Gate pass verified for weighbridge',
+          language === 'hi' ? 'नमी कटौती शून्य सत्यापित' : language === 'mr' ? 'ओलावा कपात शून्य प्रमाणित' : 'Moisture deduction zero verified',
+          language === 'hi' ? 'एस्क्रो भुगतान जारी किया' : language === 'mr' ? 'एस्क्रो पेमेंट जारी केले' : 'Escrow payout released',
+          language === 'hi' ? 'डिस्पैच ट्रक निर्धारित' : language === 'mr' ? 'वाहतूक ट्रक नियोजित' : 'Dispatch truck scheduled'
         ];
 
   return (
@@ -377,6 +385,8 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                     {language === 'hi'
                       ? 'पिकअप और लॉट भागीदारों के साथ सीधा संपर्क'
+                      : language === 'mr'
+                      ? 'पिकअप आणि लॉट भागीदारांशी थेट संपर्क'
                       : 'Real-time contextual chats on pickups & lots'}
                   </p>
                 </div>
@@ -398,6 +408,8 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
                   placeholder={
                     language === 'hi'
                       ? 'भागीदार या पिकअप आईडी खोजें...'
+                      : language === 'mr'
+                      ? 'भागीदार किंवा पिकअप आयडी शोधा...'
                       : 'Search conversations by partner or ID...'
                   }
                   value={searchQuery}
@@ -463,7 +475,7 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
                       : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  {language === 'hi' ? 'घर-घर पिकअप' : 'Pickups'}
+                  {language === 'hi' ? 'घर-घर पिकअप' : language === 'mr' ? 'घरोघरी संकलन' : 'Pickups'}
                 </button>
 
                 <button
@@ -478,7 +490,7 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
                       : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  {language === 'hi' ? 'थोक लॉट व बोलियां' : 'Lots & Auctions'}
+                  {language === 'hi' ? 'थोक लॉट व बोलियां' : language === 'mr' ? 'लॉट व लिलाव' : 'Lots & Auctions'}
                 </button>
               </div>
             </div>
@@ -495,14 +507,20 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
                   {searchQuery
                     ? language === 'hi'
                       ? 'कोई बातचीत नहीं मिली'
+                      : language === 'mr'
+                      ? 'कोणतेही संभाषण आढळले नाही'
                       : 'No conversations match your search'
                     : language === 'hi'
                     ? 'कोई सक्रिय बातचीत नहीं है'
+                    : language === 'mr'
+                    ? 'कोणतेही सक्रिय संभाषण नाही'
                     : 'No conversations yet'}
                 </h3>
                 <p className="text-xs text-slate-500 max-w-xs mx-auto">
                   {language === 'hi'
                     ? 'जब आप किसी पिकअप या लॉट पर संदेश भेजेंगे, तो वह यहाँ दिखाई देगा।'
+                    : language === 'mr'
+                    ? 'जेव्हा तुम्ही कोणत्याही पिकअप किंवा लॉटवर संदेश पाठवाल, तेव्हा ते येथे दिसेल.'
                     : 'Start a chat from any active pickup or lot card to coordinate arrival, weighing, or dispatch.'}
                 </p>
               </div>
@@ -632,11 +650,13 @@ export const ChatsPage: React.FC<ChatsPageProps> = ({
               <div className="text-center py-16 space-y-2 text-slate-400">
                 <MessageSquare className="w-10 h-10 mx-auto opacity-30" />
                 <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  {language === 'hi' ? 'बातचीत शुरू करें' : 'Start the conversation'}
+                  {language === 'hi' ? 'बातचीत शुरू करें' : language === 'mr' ? 'संभाषण सुरू करा' : 'Start the conversation'}
                 </p>
                 <p className="text-[11px] max-w-xs mx-auto">
                   {language === 'hi'
                     ? 'पिकअप समय, वजन सत्यापन या मार्गदर्शक के बारे में संदेश भेजें।'
+                    : language === 'mr'
+                    ? 'पिकअप वेळ, वजन पडताळणी किंवा मार्गदर्शनाविषयी संदेश पाठवा.'
                     : 'Coordinate doorstep arrival, scrap sorting, digital scales or payments directly.'}
                 </p>
               </div>

@@ -599,6 +599,7 @@ export const KabadiwalaDashboard: React.FC = () => {
 
   // Active Handover Generator Ticket
   const [handoverLotCode, setHandoverLotCode] = useState('KC-LOT-9821');
+  const [isCopilotCollapsed, setIsCopilotCollapsed] = useState(false);
 
   // Load Pickups with real distance calculation
   const loadPickups = async (overrideCoords?: [number, number]) => {
@@ -1414,6 +1415,101 @@ export const KabadiwalaDashboard: React.FC = () => {
           <span>9. {t('tabSafety', 'Safety Guidance')}</span>
         </button>
       </div>
+
+      {/* CONTEXTUAL VOICE CO-PILOT (Material 3 Expressive Audio Assistant) */}
+      {(() => {
+        const copilot = getMobileCopilotConfig();
+        const label = language === 'hi' ? copilot.labelHi : language === 'mr' ? copilot.labelMr : copilot.labelEn;
+        
+        if (isCopilotCollapsed) {
+          return (
+            <div className="flex items-center justify-between px-2 py-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(15);
+                  setIsCopilotCollapsed(false);
+                }}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200/80 dark:border-emerald-800/60 shadow-2xs transition-all active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>{language === 'hi' ? 'वॉइस को-पायलट' : language === 'mr' ? 'व्हॉइस को-पायलट' : 'Voice Co-Pilot'}: <strong className="font-extrabold">{label}</strong></span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold underline">({language === 'hi' ? 'दिखाएं' : language === 'mr' ? 'दाखवा' : 'Show'})</span>
+              </button>
+
+              <VoiceAssistButton
+                audioKey={copilot.key}
+                label={language === 'hi' ? 'सुनें' : language === 'mr' ? 'ऐका' : 'Listen'}
+                text={copilot.text}
+                hindiText={copilot.hindiText}
+                marathiText={copilot.marathiText}
+                size="sm"
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="bg-gradient-to-r from-emerald-50/95 via-teal-50/40 to-emerald-50/70 dark:from-slate-800/90 dark:via-emerald-950/30 dark:to-slate-800/80 border border-emerald-200/80 dark:border-emerald-800/50 rounded-[24px] p-3.5 sm:p-4 shadow-m3-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-all animate-fade-in relative overflow-hidden">
+            {/* Ambient subtle decorative glow */}
+            <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1 z-10">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-700 dark:bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5 sm:mt-0">
+                <Sparkles className="w-5 h-5 text-emerald-100" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase flex items-center gap-1.5 border border-emerald-300/60 dark:border-emerald-700/60">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {language === 'hi' ? 'वॉइस को-पायलट' : language === 'mr' ? 'व्हॉइस को-पायलट' : 'Voice Co-Pilot'}
+                  </span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden xs:inline">
+                    {language === 'hi' ? 'स्पोकन गाइड' : language === 'mr' ? 'ऑडिओ मार्गदर्शक' : 'Audio Guide'}
+                  </span>
+                </div>
+
+                <h3 className="text-sm sm:text-base font-display font-bold text-slate-900 dark:text-white truncate">
+                  {label}
+                </h3>
+                
+                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 mt-0.5 font-normal">
+                  {language === 'hi' 
+                    ? (copilot.hindiText || copilot.text) 
+                    : language === 'mr' 
+                    ? (copilot.marathiText || copilot.text) 
+                    : copilot.text}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 shrink-0 z-10">
+              <VoiceAssistButton
+                audioKey={copilot.key}
+                label={language === 'hi' ? 'निर्देश सुनें' : language === 'mr' ? 'मार्गदर्शक ऐका' : 'Listen Guide'}
+                text={copilot.text}
+                hindiText={copilot.hindiText}
+                marathiText={copilot.marathiText}
+                size="md"
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(15);
+                  setIsCopilotCollapsed(true);
+                }}
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                title={language === 'hi' ? 'छुपाएं' : language === 'mr' ? 'लपवा' : 'Minimize'}
+                aria-label="Minimize voice guide"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* TAB 1: DIGITAL LOTS (CREATOR & MY CREATED LOTS) */}
       {activeTab === 'lots' && (
@@ -3662,43 +3758,6 @@ export const KabadiwalaDashboard: React.FC = () => {
             </div>
           </div>
         )}
-
-      {/* MOBILE FLOATING VOICE CO-PILOT DOCK (Accessible high-contrast one-tap spoken guide) */}
-      {(() => {
-        const copilot = getMobileCopilotConfig();
-        const label = language === 'hi' ? copilot.labelHi : language === 'mr' ? copilot.labelMr : copilot.labelEn;
-        return (
-          <aside
-            aria-label="Spoken Voice Instructions"
-            className="lg:hidden fixed bottom-16 sm:bottom-20 left-3 right-3 z-30 max-w-md mx-auto animate-fade-in pointer-events-auto"
-          >
-            <div className="bg-slate-950/95 backdrop-blur-md border-2 border-amber-400 text-white rounded-2xl p-2.5 shadow-2xl flex items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 font-black text-xs shadow-sm">
-                  AI
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 block leading-tight">
-                    {language === 'hi' ? 'बोलता हुआ सहायक' : language === 'mr' ? 'बोलणारा मार्गदर्शक' : 'Voice Co-Pilot'}
-                  </span>
-                  <p className="text-xs font-bold text-white truncate leading-tight">
-                    {label}
-                  </p>
-                </div>
-              </div>
-              <div className="shrink-0">
-                <VoiceAssistButton
-                  audioKey={copilot.key}
-                  label={language === 'hi' ? 'निर्देश सुनें' : language === 'mr' ? 'मार्गदर्शक ऐका' : 'Listen'}
-                  text={copilot.text}
-                  size="sm"
-                  className="!bg-amber-400 !text-slate-950 hover:!bg-amber-300 font-black shadow-md border-0"
-                />
-              </div>
-            </div>
-          </aside>
-        );
-      })()}
 
       {/* MOBILE BOTTOM TAB BAR (Material 3 Expressive Navigation Bar) */}
       <nav

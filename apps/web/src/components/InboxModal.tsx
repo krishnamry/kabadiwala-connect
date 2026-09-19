@@ -201,7 +201,11 @@ export const InboxModal: React.FC<InboxModalProps> = ({
                 )}
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                {language === 'hi' ? 'पिकअप, लॉट, बोलियां एवं प्रमाणन अलर्ट' : 'Lifecycle events, bids, payouts & regulatory updates'}
+                {language === 'hi'
+                  ? 'पिकअप, लॉट, बोलियां एवं प्रमाणन अलर्ट'
+                  : language === 'mr'
+                  ? 'पिकअप, लॉट, लिलाव व केवायसी सतर्कता'
+                  : 'Lifecycle events, bids, payouts & regulatory updates'}
               </p>
             </div>
           </div>
@@ -299,7 +303,7 @@ export const InboxModal: React.FC<InboxModalProps> = ({
                 : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
             }`}
           >
-            {language === 'hi' ? 'पिकअप व लॉट्स' : 'Pickups & Lots'}
+            {language === 'hi' ? 'पिकअप व लॉट्स' : language === 'mr' ? 'पिकअप व लॉट्स' : 'Pickups & Lots'}
           </button>
 
           <button
@@ -314,7 +318,7 @@ export const InboxModal: React.FC<InboxModalProps> = ({
                 : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
             }`}
           >
-            {language === 'hi' ? 'केवाईसी व प्रमाणन' : 'KYC & Audit'}
+            {language === 'hi' ? 'केवाईसी व प्रमाणन' : language === 'mr' ? 'केवायसी व ऑडिट' : 'KYC & Audit'}
           </button>
         </div>
 
@@ -324,11 +328,17 @@ export const InboxModal: React.FC<InboxModalProps> = ({
             <div className="text-center py-20 px-4 space-y-2 text-slate-400">
               <Bell className="w-12 h-12 mx-auto opacity-30 text-slate-400" />
               <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                {language === 'hi' ? 'कोई नई सूचना नहीं है' : 'No notifications in this filter'}
+                {language === 'hi'
+                  ? 'कोई नई सूचना नहीं है'
+                  : language === 'mr'
+                  ? 'या फिल्टरमध्ये कोणतीही सूचना नाही'
+                  : 'No notifications in this filter'}
               </p>
               <p className="text-xs max-w-xs mx-auto">
                 {language === 'hi'
                   ? 'जब कोई पिकअप स्वीकृत होगा या लॉट पर बोली आएगी, सूचनाएं यहाँ प्राप्त होंगी।'
+                  : language === 'mr'
+                  ? 'जेव्हा पिकअप मंजूर होईल किंवा लॉटवर बोली येईल, तेव्हा सूचना येथे दिसतील.'
                   : 'Live milestones, bid approvals, weighbridge slips and payout alerts will appear here.'}
               </p>
             </div>
@@ -395,7 +405,13 @@ export const InboxModal: React.FC<InboxModalProps> = ({
         >
           <span className="flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{language === 'hi' ? 'सूचनाएं पढ़ने पर अपठित सूचक स्वतः हट जाता है।' : 'Reading an item clears its unread indicator automatically.'}</span>
+            <span>
+              {language === 'hi'
+                ? 'सूचनाएं पढ़ने पर अपठित सूचक स्वतः हट जाता है।'
+                : language === 'mr'
+                ? 'सूचना वाचल्यावर न वाचलेली खूण आपोआप निघून जाते.'
+                : 'Reading an item clears its unread indicator automatically.'}
+            </span>
           </span>
           <button
             type="button"

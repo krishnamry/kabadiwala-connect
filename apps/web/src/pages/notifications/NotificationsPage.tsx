@@ -278,7 +278,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
               }`}
             >
-              {language === 'hi' ? 'दैनिक कार्य' : 'Operations'}
+              {language === 'hi' ? 'दैनिक कार्य' : language === 'mr' ? 'दैनंदिन कामे' : 'Operations'}
             </button>
 
             <button
@@ -293,7 +293,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
               }`}
             >
-              {language === 'hi' ? 'केवाईसी व प्रमाणन' : 'KYC & System'}
+              {language === 'hi' ? 'केवाईसी व प्रमाणन' : language === 'mr' ? 'केवायसी व सिस्टीम' : 'KYC & System'}
             </button>
           </div>
         </div>
@@ -310,14 +310,20 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({
               {activeFilter === 'UNREAD'
                 ? language === 'hi'
                   ? 'कोई नई अपठित सूचना नहीं है'
+                  : language === 'mr'
+                  ? 'कोणतीही न वाचलेली सूचना नाही'
                   : 'No unread notifications'
                 : language === 'hi'
                 ? 'कोई सूचना मौजूद नहीं है'
+                : language === 'mr'
+                ? 'कोणतीही सूचना उपलब्ध नाही'
                 : 'No notifications found'}
             </h3>
             <p className="text-xs text-slate-500 max-w-xs mx-auto">
               {language === 'hi'
                 ? 'जब भी आपके लॉट, पिकअप, भुगतान या सत्यापन में कोई प्रगति होगी, आपको तुरंत सूचना मिलेगी।'
+                : language === 'mr'
+                ? 'तुमच्या लॉट, पिकअप, पेमेंट किंवा पडताळणीमध्ये प्रगती होताच तुम्हाला त्वरित सूचना मिळेल.'
                 : 'When new pickups are scheduled, bids arrive, or KYC verifications occur, you will receive real-time updates here.'}
             </p>
           </div>
@@ -372,10 +378,12 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({
                           type="button"
                           onClick={(e) => handleMarkSingleRead(e, notif.id)}
                           className="text-[11px] font-bold text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 p-1 rounded transition-colors"
-                          title="Mark as read"
+                          title={language === 'hi' ? 'पढ़ा हुआ चिन्हित करें' : language === 'mr' ? 'वाचले म्हणून खूण करा' : 'Mark as read'}
                         >
                           <Check className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">Mark read</span>
+                          <span className="hidden sm:inline">
+                            {language === 'hi' ? 'पढ़ा हुआ' : language === 'mr' ? 'वाचले' : 'Mark read'}
+                          </span>
                         </button>
                       )}
 
