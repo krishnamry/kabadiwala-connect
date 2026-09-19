@@ -290,32 +290,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onTabChange }) => {
               <Settings className="w-4 h-4 text-slate-700 dark:text-slate-200" />
             </button>
 
-            {/* Chat & Messages Button with Live Unread Badge */}
-            {user && (
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic(15);
-                  setProfileMenuOpen(false);
-                  setLangMenuOpen(false);
-                  onTabChange('chats');
-                }}
-                className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-2xs transition-all active:scale-95"
-                title={language === 'hi' ? 'बातचीत एवं संदेश' : 'Chats & Messages'}
-                aria-label="Chats and Messages"
-              >
-                <MessageSquare className="w-4 h-4 text-slate-700 dark:text-slate-200" />
-                {unreadChatCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-600 text-white text-[9px] font-extrabold items-center justify-center shadow-xs">
-                      {unreadChatCount > 9 ? '9+' : unreadChatCount}
-                    </span>
-                  </span>
-                )}
-              </button>
-            )}
-
             {/* Activity Inbox Bell Icon Button with Live Unread Badge */}
             {user && (
               <button
